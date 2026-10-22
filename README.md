@@ -16,6 +16,14 @@ npm run dev
 
 개발 서버는 명령 출력의 주소에서 연다. 수집한 원문은 `content/posts.json`에 있다.
 
+## 기록과 카테고리
+
+Second Brain 로고는 기존 홈 `#/`를 연다. 상단의 `기록`은 `#/records`를 연다.
+기록 화면은 사이드바·탭·섹션 보기를 제공한다. 보기 전환과 글 상세 왕복은 검색어·분류·표시 개수를 유지한다.
+
+`카테고리 관리`는 `#/categories`를 연다. 분류 추가·이름 변경·상위 분류 이동·순서 변경은 이 브라우저의 localStorage에만 저장한다.
+분류 설정은 원문의 `category`와 `parentId`를 바꾸지 않는다. `페이지 탐색`은 기존 원문 계층을 사용한다.
+
 ## 수집한 지식
 
 저장 위치는 `/Users/igyeongseob/Knowledge/SecondBrain/notion-blog`다.
@@ -99,7 +107,7 @@ Git에는 코드, 문서, `content/posts.json`과 웹용 첨부 파일을 보관
 ```text
 src/
 ├── app/                 # 화면 전환, hash 구독, 데이터 요청과 상태 수명
-├── pages/               # home, post, write 화면 조립
+├── pages/               # home, records, categories, post, write 화면 조립
 ├── features/
 │   ├── post-search/     # 검색 입력과 검색어 상태
 │   ├── post-category/   # 분류 선택과 분류 상태

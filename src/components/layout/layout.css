@@ -180,6 +180,18 @@
 @media (max-width: 1000px) {
   .site-header {
     padding: 22px 32px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .header-navigation {
+    order: 3;
+    flex-basis: 100%;
+    margin-left: 0;
+  }
+
+  .header-write {
+    margin-left: auto;
   }
 
   .site-footer {

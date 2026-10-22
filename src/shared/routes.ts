@@ -1,4 +1,6 @@
 export const HOME_HREF = "#/";
+export const RECORDS_HREF = "#/records";
+export const CATEGORIES_HREF = "#/categories";
 
 export function postHref(id: string, fragment?: string) {
   return "#/post/" + id + (fragment ? "#" + fragment : "");

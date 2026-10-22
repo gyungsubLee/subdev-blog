@@ -21,11 +21,13 @@ export default function PostPage({
   posts,
   onEdit,
   hash,
+  backHref = HOME_HREF,
 }: {
   post: Post;
   posts: Post[];
   onEdit: (post: Post) => void;
   hash: string;
+  backHref?: string;
 }) {
   const body = getBody(post);
   const ancestors: Post[] = [];
@@ -46,7 +48,7 @@ export default function PostPage({
   return (
     <main id="main-content" className="article-page" tabIndex={-1}>
       <div className="article-topline">
-        <a className="back-link" href={HOME_HREF}>
+        <a className="back-link" href={backHref}>
           <Arrow back /> 전체 글
         </a>
         <div className="article-actions">

@@ -1,16 +1,16 @@
-import { HOME_HREF } from "../../shared/routes";
+import { CATEGORIES_HREF, RECORDS_HREF } from "../../shared/routes";
 import Wordmark from "./Wordmark";
 import "./layout.css";
 
 type SiteHeaderProps = {
-  isHome: boolean;
+  activeHref?: string;
   onExplore: () => void;
   onAbout: () => void;
   onWrite: () => void;
 };
 
 export default function SiteHeader({
-  isHome,
+  activeHref,
   onExplore,
   onAbout,
   onWrite,
@@ -19,8 +19,17 @@ export default function SiteHeader({
     <header className="site-header">
       <Wordmark />
       <nav className="header-navigation" aria-label="주 메뉴">
-        <a href={HOME_HREF} aria-current={isHome ? "page" : undefined}>
+        <a
+          href={RECORDS_HREF}
+          aria-current={activeHref === RECORDS_HREF ? "page" : undefined}
+        >
           기록
+        </a>
+        <a
+          href={CATEGORIES_HREF}
+          aria-current={activeHref === CATEGORIES_HREF ? "page" : undefined}
+        >
+          카테고리 관리
         </a>
         <button type="button" onClick={onExplore}>
           페이지 탐색
