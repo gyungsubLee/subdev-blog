@@ -1,0 +1,132 @@
+name: Versioned build
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out selected commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check version and source
+        run: npm run check
+
+      - name: Read package version
+        id: version
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+
+          const { version } = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${version}\n`);
+          NODE
+
+      - name: Build site
+        run: npm run build
+
+      - name: Verify build identity
+        env:
+          PACKAGE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { execFileSync } from 'node:child_process';
+          import fs from 'node:fs';
+
+          const expected = {
+            version: process.env.PACKAGE_VERSION,
+            commit: process.env.GITHUB_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            runNumber: process.env.GITHUB_RUN_NUMBER,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            workflow: process.env.GITHUB_WORKFLOW,
+          };
+          const selectedCommit = execFileSync('git', ['rev-parse', 'HEAD'], {
+            encoding: 'utf8',
+          }).trim();
+          assert.equal(selectedCommit, expected.commit, 'Checkout differs from selected commit');
+
+          const actual = JSON.parse(fs.readFileSync('dist/build-info.json', 'utf8'));
+          for (const [field, value] of Object.entries(expected)) {
+            assert.equal(actual[field], value, `Build identity mismatch: ${field}`);
+          }
+          assert(fs.statSync('dist/index.html').size > 0, 'Built site entry is empty');
+          console.log(JSON.stringify(actual, null, 2));
+          NODE
+
+      - name: Upload versioned site
+        id: artifact
+        if: github.ref_type == 'tag'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: second-brain-v${{ steps.version.outputs.version }}-${{ github.sha }}-run${{ github.run_id }}-attempt${{ github.run_attempt }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+
+      - name: Write build summary
+        env:
+          PACKAGE_VERSION: ${{ steps.version.outputs.version }}
+          ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          ARTIFACT_DIGEST: ${{ steps.artifact.outputs.artifact-digest }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+
+          const version = process.env.PACKAGE_VERSION;
+          const changelog = fs.readFileSync('CHANGELOG.md', 'utf8').split(/\r?\n/);
+          const start = changelog.findIndex(line =>
+            line === `## v${version}` || line.startsWith(`## v${version} `),
+          );
+          assert(start >= 0, `CHANGELOG.md has no v${version} section`);
+          const end = changelog.findIndex((line, index) => index > start && /^## /.test(line));
+          const notes = changelog.slice(start + 1, end < 0 ? undefined : end).join('\n').trim();
+          assert(notes.length > 0, 'Changelog section is empty');
+
+          const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}/attempts/${process.env.GITHUB_RUN_ATTEMPT}`;
+          const artifact = process.env.ARTIFACT_URL
+            ? [
+                `- Artifact: [dist](${process.env.ARTIFACT_URL})`,
+                `- Artifact SHA-256: \`${process.env.ARTIFACT_DIGEST}\``,
+                '- Retention: 7 days',
+              ]
+            : ['- 태그 빌드에서 산출물 업로드'];
+          const summary = [
+            `## v${version}`,
+            '',
+            `- Commit: \`${process.env.GITHUB_SHA}\``,
+            `- Workflow: ${process.env.GITHUB_WORKFLOW}`,
+            `- Run: [${process.env.GITHUB_RUN_NUMBER} (${process.env.GITHUB_RUN_ID}), attempt ${process.env.GITHUB_RUN_ATTEMPT}](${runUrl})`,
+            ...artifact,
+            '- Checks: npm ci, npm run check, npm run build, build identity verification',
+            '',
+            notes,
+            '',
+          ].join('\n');
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
+          NODE

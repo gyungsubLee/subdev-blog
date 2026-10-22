@@ -1,0 +1,44 @@
+{
+  "name": "second-brain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "prebuild": "npm run check:version && node scripts/prepare-site.mjs",
+    "build": "tsc -b && vite build",
+    "check": "npm run check:version && tsc -b && node --test tests/*.test.mjs",
+    "preview": "vite preview --host 127.0.0.1",
+    "export": "node scripts/export-notion.mjs",
+    "import:md": "node scripts/import-markdown.mjs",
+    "predev": "node scripts/prepare-site.mjs",
+    "check:export": "node tests/export-check.mjs",
+    "check:assets": "node tests/export-web-assets.mjs",
+    "prepare:assets": "node scripts/prepare-web-assets.mjs",
+    "check:version": "node scripts/check-version.mjs"
+  },
+  "dependencies": {
+    "@blocknote/core": "0.56.0",
+    "@blocknote/mantine": "0.56.0",
+    "@blocknote/react": "0.56.0",
+    "@mantine/core": "^8.3.11",
+    "@mantine/hooks": "^8.3.11",
+    "@shikijs/langs": "^4.5.0",
+    "@shikijs/themes": "^4.5.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-markdown": "^10.1.0",
+    "rehype-raw": "^7.0.0",
+    "rehype-sanitize": "^6.0.0",
+    "remark-gfm": "^4.0.1",
+    "shiki": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "jsdom": "^26.1.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.0"
+  }
+}

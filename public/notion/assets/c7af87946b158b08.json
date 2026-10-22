@@ -1,0 +1,720 @@
+{
+  "name": "001-YoutubeShorts",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "64f1f740-96a2-48b4-a51c-1ca3bd7832c3",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appFp1Y62xxe4F5GS",
+          "mode": "list",
+          "cachedResultName": "SHORTS",
+          "cachedResultUrl": "https://airtable.com/appFp1Y62xxe4F5GS"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblAcqtm3Oy7ypRxs",
+          "mode": "list",
+          "cachedResultName": "키워드",
+          "cachedResultUrl": "https://airtable.com/appFp1Y62xxe4F5GS/tblAcqtm3Oy7ypRxs"
+        },
+        "filterByFormula": "{reserved}=\"reserve\"",
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        144,
+        0
+      ],
+      "id": "fa09e944-1018-4473-b5e0-637856c7b32a",
+      "name": "Get Reserved",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "31QF0d5eTUonxBpl",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appFp1Y62xxe4F5GS",
+          "mode": "list",
+          "cachedResultName": "SHORTS",
+          "cachedResultUrl": "https://airtable.com/appFp1Y62xxe4F5GS"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblp35dRFRtHJVbkl",
+          "mode": "list",
+          "cachedResultName": "프롬프트",
+          "cachedResultUrl": "https://airtable.com/appFp1Y62xxe4F5GS/tblp35dRFRtHJVbkl"
+        },
+        "filterByFormula": "={category}=\"{{ $json.category }}\"",
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        288,
+        0
+      ],
+      "id": "6b5aad56-0909-4d84-b530-8c5ae364e5d6",
+      "name": "Get Prompt",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "31QF0d5eTUonxBpl",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=당신은 전 세계 수십억 뷰를 기록한 유튜브 쇼츠 콘텐츠 전략가 **'쇼츠 마에스트로'**입니다. 당신의 임무는 단순한 정보 조각을 captivating한 20~40초 내외의 영상 스크립트로 재창조하는 것입니다. 당신의 스크립트는 시청자의 시간을 1초도 낭비하지 않으며, 강렬한 몰입감과 명확한 메시지를 통해 공유와 댓글을 폭발적으로 유도해야 합니다. 또한 당신의 데이터는 오래전 데이터이므로 무조건 툴을 먼저 사용한 후 응답하세요.\n\n이제 주어진 카테고리와 주제를 분석하여, 아래의 제작 원칙과 구조에 따라 바이럴 잠재력을 극대화한 유튜브 쇼츠 스크립트 5개를 JSON 배열 형식으로 창작하십시오.\n\n[콘텐츠 제작 핵심 원칙]\n1. 3초의 법칙 (The 3-Second Rule): Intro는 시청자가 스크롤을 멈추게 할 단 하나의 질문 또는 충격적인 사실이어야 합니다. 궁금해서 끝까지 볼 수밖에 없게 만드십시오.\n2. 보여주기, 말하지 않기 (Show, Don't Tell): '설명'을 '묘사'로, '주장'을 '스토리'로 치환하십시오. 시청자가 스스로 결론에 도달하게끔 장면을 그리듯 서술해야 합니다.\n3. 하나의 영상, 하나의 메시지 (One Video, One Message): 모든 Base 스토리는 단 하나의 핵심 메시지 또는 교훈으로 수렴해야 합니다. 군더더기 정보는 과감히 제거하십시오.\n4. 감성적 연결고리 (Emotional Hook): 시청자가 놀라움, 감동, 공감, 분노 등 특정 감정을 느끼도록 스토리를 설계하십시오. 감성적 동요는 콘텐츠 소비의 가장 강력한 동기입니다.\n5. 마지막 인상 (The Lasting Impression): CTA는 단순한 행동 유도가 아닙니다. 영상의 여운을 곱씹게 만드는 강력한 한마디 혹은 성찰적 질문이어야 합니다.\n\n---------------------------------------\n\n[현재 카테고리]\n{{ $json.category }}\n\n[주제]\n{{ $('Get Reserved').item.json.keyword }}\n\n[주요 참고]\n{{ $('Get Reserved').item.json.reference }}\n\n---------------------------------------\n\n[최종 목표: JSON 배열 스크립트 5개 창작]\n- 주어진 카테고리와 주제를 기반으로, 위의 핵심 원칙을 완벽하게 적용한 쇼츠 스크립트 5개를 작성하십시오.\n- 각 스크립트는 아래 JSON 형식을 따르는 하나의 오브젝트이며, 전체는 반드시 JSON 배열로 출력되어야 합니다.\n\n[\n  {\n    \"title\": \"30-50자 (흥미와 호기심을 유발하는 제목)\",\n    \"description\": \"120-160자 (주요 해시태그와 후킹 요소 포함)\",\n    \"tags\": \"#해시태그1, #해시태그2, #해시태그3....\",\n    \"Intro\": \"20~26글자\",\n    \"Base\": \"180~230글자\",\n    \"CTA\": \"20~30글자\"\n  }\n]\n\n---------------------------------------\n\n[카테고리별 심층 지침]\n{{ $json.prompt }}\n\n---------------------------------------\n\n[예시 샘플]\n{{ $json.output }}\n\n---------------------------------------\n\n[절대 준수 규칙: Zero Tolerance Policy]\n- *** 툴 사용 규칙을 따르세요 ***\n- Research Agent Tool 툴을 사용하여 자료를 수집하세요.\n- 특수문자 금지: (), <>, [] 등 괄호류 사용 불가.\n- 내용에 쌍따옴표 절대 사용금지(JSON 오류!!!!)\n- 시각적 요소 금지: 이모지, 이모티콘 사용 불가.\n- 진부한 도입부 금지: \"~을 소개합니다\", \"~에 대해 알아보겠습니다\" 등 설명조 문장 절대 사용 금지.\n- 외부 콘텐츠 언급 금지: \"자세한 내용은...\", \"다음 편에서 계속...\" 등 시청 흐름을 끊는 외부 참조 문구 절대 사용 금지.\n- 아이디어 재활용 금지: 5개의 아이디어는 제목, 스토리, CTA의 메시지가 명확히 차별화되어야 합니다.\n- ***반드시 주어진 출력형식에 맞게 JSON 내용만 출력하고 그 어떤 메타 정보, 추가 설명은 출력하지 않습니다.***",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        464,
+        0
+      ],
+      "id": "342732a1-7b8f-4922-ae70-1993bb226a00",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[\n  {\n    \"title\": \"30-50자 (흥미와 호기심을 유발하는 제목)\",\n    \"description\": \"120-160자 (주요 해시태그와 후킹 요소 포함)\",\n    \"tags\": \"#해시태그1, #해시태그2, #해시태그3....\",\n    \"Intro\": \"20~26글자\",\n    \"Base\": \"180~230글자\",\n    \"CTA\": \"20~30글자\"\n  }\n]"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        800,
+        192
+      ],
+      "id": "8a63222e-41c2-4325-8cd2-fc71f5de29b1",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        352,
+        176
+      ],
+      "id": "ba753cb2-fd63-4581-b1af-80eb796d3b1f",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GQwQAPNU55o1HIJE",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "리서치 도구",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=당신은 전문 리서처 입니다. 주어진 내용에 대한 자료를 수집하고 교차 검증을 통해 수집된 데이터를 정리하세요.\n------------\n카테고리:\n{{ $('Get Prompt').item.json.category }}\n------------\n카테고리에 따라 툴 사용을 결정합니다.\n역사: Perplexity, Wiki, Search Web\n과학: Perplexity, Wiki, Search Web\n한자: Perplexity, Search Web\n이야기: Perplexity, Search Web"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        192
+      ],
+      "id": "f440ce10-063c-4939-b559-9eb3b5eb9cd9",
+      "name": "Research Agent Tool"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-20250514",
+          "cachedResultName": "Claude 4 Sonnet"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        464,
+        368
+      ],
+      "id": "a2537da7-178e-40cc-91ed-42f2e5822359",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "umFQvLnY1c0H8H4n",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "sonar-pro",
+        "messages": {
+          "message": [
+            {
+              "content": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message0_Text', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.perplexityTool",
+      "typeVersion": 1,
+      "position": [
+        608,
+        384
+      ],
+      "id": "00f8b084-b327-4b94-866f-8db467a14896",
+      "name": "Perplexity",
+      "credentials": {
+        "perplexityApi": {
+          "id": "sgBKLus4gPpLKfyS",
+          "name": "Perplexity account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        720,
+        384
+      ],
+      "id": "6e57bbc4-0189-4c1f-ab8b-83c05447111c",
+      "name": "Wiki"
+    },
+    {
+      "parameters": {
+        "toolDescription": "검색 도구",
+        "method": "POST",
+        "url": "https://api.blogagent.kr/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        848,
+        384
+      ],
+      "id": "4031a7ae-7835-47eb-9807-656c589cc07b",
+      "name": "Search Web",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "eDWpokiVVp9P8pkU",
+          "name": "Search API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        816,
+        0
+      ],
+      "id": "08193973-dc06-4adc-8347-f8f3014702c4",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "ba406ef5-eb42-4757-b8a3-f172a588ef0a",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "intro = _input.item.json.Intro\nbase = _input.item.json.Base\ncta = _input.item.json.CTA\ntotal_len = len(intro) + len(base) + len(cta)\n\nreturn [{\n  \"length\": total_len\n}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        96
+      ],
+      "id": "c22b5b83-464b-40a6-afcf-d1ec285dcbf1",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appFp1Y62xxe4F5GS",
+          "mode": "list",
+          "cachedResultName": "SHORTS",
+          "cachedResultUrl": "https://airtable.com/appFp1Y62xxe4F5GS"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblYl7ZMKvdyyVtyo",
+          "mode": "list",
+          "cachedResultName": "작업",
+          "cachedResultUrl": "https://airtable.com/appFp1Y62xxe4F5GS/tblYl7ZMKvdyyVtyo"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $('Loop Over Items').item.json.title }}",
+            "status": "wait",
+            "keyword": "={{ $('Get Reserved').item.json.keyword }}",
+            "length": "={{ $json.length }}",
+            "Intro": "={{ $('Loop Over Items').item.json.Intro }}",
+            "base": "={{ $('Loop Over Items').item.json.Base }}",
+            "cta": "={{ $('Loop Over Items').item.json.CTA }}",
+            "tags": "={{ $('Loop Over Items').item.json.tags }}",
+            "category": "={{ $('Get Reserved').item.json.category }}",
+            "description": "={{ $('Loop Over Items').item.json.description }}",
+            "image_model": "={{ $('Get Reserved').item.json.image_model }}"
+          },
+          "matchingColumns": [
+            "title"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "wait",
+                  "value": "wait"
+                },
+                {
+                  "name": "reserve",
+                  "value": "reserve"
+                },
+                {
+                  "name": "processing",
+                  "value": "processing"
+                },
+                {
+                  "name": "complete",
+                  "value": "complete"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "keyword",
+              "displayName": "keyword",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "length",
+              "displayName": "length",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Intro",
+              "displayName": "Intro",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "base",
+              "displayName": "base",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "cta",
+              "displayName": "cta",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "tags",
+              "displayName": "tags",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "역사",
+                  "value": "역사"
+                },
+                {
+                  "name": "과학",
+                  "value": "과학"
+                },
+                {
+                  "name": "한자",
+                  "value": "한자"
+                },
+                {
+                  "name": "이야기",
+                  "value": "이야기"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "image_model",
+              "displayName": "image_model",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "audio_file",
+              "displayName": "audio_file",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "audio_alignment",
+              "displayName": "audio_alignment",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1392,
+        96
+      ],
+      "id": "612d291b-bd2d-45e9-aead-acdab293faa5",
+      "name": "Create or update a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "31QF0d5eTUonxBpl",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Reserved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Reserved": {
+      "main": [
+        [
+          {
+            "node": "Get Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Agent Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Agent Tool",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perplexity": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent Tool",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wiki": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent Tool",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Web": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent Tool",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f1a94291-9668-4513-b017-b1e8d78f5b43",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "CCdfcUWBaJdZwEHU",
+  "tags": []
+}

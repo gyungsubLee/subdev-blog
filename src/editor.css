@@ -1,0 +1,315 @@
+.editor-page {
+  min-height: 100vh;
+  background: #faf9f5;
+  color: #292820;
+}
+.editor-page button,
+.editor-file {
+  font: inherit;
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+.editor-page button:focus-visible,
+.editor-file:focus-within,
+.editor-page input:focus-visible {
+  outline: 2px solid #bd5b3e;
+  outline-offset: 4px;
+}
+.editor-header {
+  height: 72px;
+  padding: 0 4vw;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  border-bottom: 1px solid #e5e2d8;
+}
+.editor-back {
+  padding: 8px 0;
+  font-size: 14px !important;
+  white-space: nowrap;
+}
+.editor-breadcrumb {
+  color: #706b61;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.editor-breadcrumb span {
+  margin: 0 12px;
+  color: #c3bfb3;
+}
+.editor-help {
+  margin-left: auto;
+  white-space: nowrap;
+  font-size: 13px !important;
+}
+.editor-actions {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  min-height: 60px;
+  padding: 12px 4vw;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #faf9f5ee;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #e5e2d8;
+  font-size: 12px;
+}
+.editor-actions > span {
+  margin-right: auto;
+  color: #706b61;
+}
+.editor-actions button,
+.editor-file {
+  padding: 8px 10px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.editor-actions button:hover,
+.editor-file:hover {
+  background: #eeece5;
+}
+.editor-actions .editor-save {
+  background: #292820;
+  color: #faf9f5;
+  padding: 10px 16px;
+}
+.editor-actions .editor-save:hover {
+  background: #4a473e;
+}
+.editor-file input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+}
+.editor-main {
+  max-width: 860px;
+  padding: 68px 36px 100px;
+  margin: 0 auto;
+}
+.editor-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: #9c644e;
+  margin-bottom: 24px;
+}
+.editor-category {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 12px;
+  color: #706b61;
+}
+.editor-category input {
+  width: 160px;
+  border: 0;
+  background: #efede5;
+  border-radius: 3px;
+  padding: 7px 10px;
+  font: inherit;
+  color: #5a584e;
+}
+.editor-title {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  outline: none;
+  font-family: Georgia, "Noto Serif KR", serif;
+  font-size: clamp(32px, 5vw, 50px);
+  font-weight: 500;
+  line-height: 1.4;
+  color: #292820;
+  padding: 24px 0 8px;
+}
+.editor-title::placeholder {
+  color: #77756c;
+}
+.editor-tip {
+  font-size: 12px;
+  color: #706b61;
+  margin-bottom: 36px;
+}
+.editor-canvas {
+  min-height: 380px;
+  margin: 0 -54px;
+}
+.editor-canvas .bn-container {
+  --bn-colors-editor-background: #faf9f5;
+  --bn-colors-editor-text: #292820;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Noto Sans KR",
+    sans-serif;
+}
+.editor-canvas .bn-editor {
+  padding: 0 54px;
+  font-size: 16px;
+  line-height: 1.8;
+}
+.editor-canvas .bn-block-content[data-content-type="heading"] {
+  padding-top: 20px;
+}
+.editor-note {
+  padding-top: 34px;
+  margin-top: 36px;
+  border-top: 1px solid #e5e2d8;
+  font-size: 12px;
+  color: #706b61;
+  line-height: 1.9;
+}
+.editor-error {
+  padding: 12px 4vw;
+  margin: 0;
+  background: #f8e8e0;
+  color: #8a3520;
+  font-size: 13px;
+}
+.editor-shortcuts {
+  position: fixed;
+  top: 145px;
+  right: 4vw;
+  z-index: 40;
+  width: min(440px, 92vw);
+  padding: 25px;
+  background: #fffefb;
+  border: 1px solid #ddd8ca;
+  border-radius: 12px;
+  box-shadow: 0 16px 70px #2928201a;
+  font-size: 12px;
+}
+.editor-shortcuts-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+}
+.editor-shortcuts-heading button {
+  font-size: 24px;
+}
+.editor-shortcuts dl {
+  margin: 20px 0;
+}
+.editor-shortcuts dl > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  padding: 8px 0;
+  border-top: 1px solid #efede6;
+}
+.editor-shortcuts dd {
+  margin: 0;
+  color: #747168;
+}
+.editor-shortcuts a {
+  color: #9b5139;
+}
+.notion-code {
+  width: 100%;
+  background: #efede6;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.notion-code-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-bottom: 1px solid #e2ded3;
+  font-size: 11px;
+}
+.notion-code-tools > div {
+  margin-right: auto;
+}
+.notion-code-tools select {
+  background: transparent;
+  border: 0;
+  color: #686154;
+  font-size: 11px;
+  max-width: 180px;
+}
+.notion-code-tools button {
+  padding: 3px 6px;
+  color: #686154;
+}
+.notion-code-tools button[aria-pressed="true"] {
+  color: #a75236;
+  background: #e1d9c9;
+  border-radius: 3px;
+}
+.notion-code pre {
+  overflow: auto;
+  padding: 14px 18px;
+  margin: 0;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 13px;
+}
+.notion-code[data-wrap="true"] pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.notion-code-caption {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid #e2ded3;
+  padding: 8px 14px;
+  font-size: 11px;
+  color: #686154;
+}
+.app-state {
+  max-width: 800px;
+  padding: 15vh 30px;
+  margin: auto;
+  font-family: inherit;
+}
+.app-warning {
+  padding: 14px 4vw;
+  background: #f4e4d8;
+  font-size: 13px;
+  color: #763d29;
+}
+@media (max-width: 680px) {
+  .editor-header {
+    padding: 0 20px;
+    gap: 16px;
+    height: 60px;
+  }
+  .editor-actions {
+    gap: 5px;
+    flex-wrap: wrap;
+    padding: 10px 16px;
+    font-size: 11px;
+  }
+  .editor-actions > span {
+    width: 100%;
+    font-size: 11px;
+  }
+  .editor-actions button,
+  .editor-file {
+    padding: 7px;
+  }
+  .editor-main {
+    padding: 40px 26px 80px;
+  }
+  .editor-canvas {
+    margin: 0 -22px;
+  }
+  .editor-canvas .bn-editor {
+    padding: 0 22px;
+  }
+  .editor-shortcuts {
+    top: 155px;
+  }
+}
