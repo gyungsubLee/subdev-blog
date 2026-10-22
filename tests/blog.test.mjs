@@ -84,6 +84,38 @@ test("home marks browser drafts and has a labelled search", () => {
   assert.match(html, /type="search"/);
 });
 
+test("header separates records and category routes while the wordmark opens home", () => {
+  for (const [hash, pageClass, currentHref] of [
+    ["#/", ".blog-intro", null],
+    ["#/records", ".records-page", "#/records"],
+    ["#/categories", ".categories-page", "#/categories"],
+  ]) {
+    const dom = new JSDOM(render([base], hash));
+    const document = dom.window.document;
+    assert.ok(document.querySelector(pageClass), "expected page at " + hash);
+    assert.equal(document.querySelector(".wordmark").getAttribute("href"), "#/");
+    assert.deepEqual(
+      [...document.querySelectorAll(".header-navigation a")].map((link) => [
+        link.textContent.trim(), link.getAttribute("href"),
+      ]),
+      [["기록", "#/records"], ["카테고리 관리", "#/categories"]],
+    );
+    assert.equal(
+      document.querySelector('.header-navigation [aria-current="page"]')?.getAttribute("href") ?? null,
+      currentHref,
+    );
+    assert.ok(!document.querySelector(".header-navigation").textContent.includes("메인"));
+    if (hash !== "#/") assert.equal(document.querySelector(".blog-intro"), null);
+    dom.window.close();
+  }
+});
+
+test("direct article entry returns to home", () => {
+  const dom = new JSDOM(render([base], "#/post/parent"));
+  assert.equal(dom.window.document.querySelector(".back-link").getAttribute("href"), "#/");
+  dom.window.close();
+});
+
 test("block and heading anchors stay on the current article route", async () => {
   const dom = new JSDOM(
     '<!doctype html><html><body><div id="root"></div></body></html>',

@@ -57,6 +57,21 @@ test("App loads summaries then the selected body and handles an invalid index", 
     assert.match(document.querySelector(".app-state").textContent, /불러오는 중/);
     await respond("/content/index.json", [post]);
     assert.equal(document.querySelectorAll(".post-card").length, 1);
+    for (const [selector, pageClass] of [
+      ['.header-navigation a[href="#/records"]', ".records-page"],
+      ['.header-navigation a[href="#/categories"]', ".categories-page"],
+      ['.wordmark', ".blog-intro"],
+    ]) {
+      const link = document.querySelector(selector);
+      assert.ok(link, "expected navigation link: " + selector);
+      await act(async () => {
+        const changed = once(dom.window, "hashchange");
+        link.click();
+        await changed;
+      });
+      assert.ok(document.querySelector(pageClass));
+      assert.deepEqual(requests.map(({ url }) => url), ["/content/index.json"]);
+    }
     await act(async () => {
       const changed = once(dom.window, "hashchange");
       dom.window.location.hash = "#/post/parent";
