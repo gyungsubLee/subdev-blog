@@ -42,6 +42,209 @@ async function submit() {
   await act(async () => document.querySelector("form").dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true })));
 }
 
+const dragGroups = [
+  { id: "group:backend", name: "백엔드", categories: [
+    { id: "spring", source: "Spring ( Java )", name: "Spring ( Java )" },
+    { id: "nest", source: "Nest.js", name: "Nest.js" },
+    { id: "go", source: "Golang", name: "Golang" },
+  ] },
+  { id: "group:frontend", name: "프론트엔드", categories: [
+    { id: "react", source: "리액트", name: "리액트" },
+    { id: "next", source: "Next.js", name: "Next.js" },
+  ] },
+  { id: "group:learning-tools", name: "학습·도구", categories: [] },
+];
+function seedDragGroups() {
+  dom.window.localStorage.setItem(KEY, JSON.stringify({ version: 1, groups: dragGroups }));
+}
+const categoryRow = (source) => [...document.querySelectorAll("[data-category-source]")]
+  .find((row) => row.dataset.categorySource === source);
+const groupRow = (name) => [...document.querySelectorAll(".category-manager-group")]
+  .find((row) => row.querySelector(".category-row-select > span:last-child").textContent === name);
+const dropHint = () => document.querySelector('[role="status"]').textContent;
+const groupSources = (name) => current.groups.find((group) => group.name === name).categories.map((item) => item.source);
+async function drag(element, type, { clientY = 110, relatedTarget = null } = {}) {
+  assert.ok(element);
+  // jsdom has no layout or DataTransfer; keep the real React handlers and catalog.
+  element.getBoundingClientRect = () => new dom.window.DOMRect(0, 100, 200, 40);
+  const event = new dom.window.MouseEvent(type, { bubbles: true, cancelable: true, clientY, relatedTarget });
+  Object.defineProperty(event, "dataTransfer", { value: { setData() {} } });
+  await act(async () => { element.dispatchEvent(event); });
+  return event;
+}
+
+for (const scenario of [
+  { source: "Spring ( Java )", target: "Golang", position: "after", clientY: 130, expected: ["Nest.js", "Golang", "Spring ( Java )"] },
+  { source: "Spring ( Java )", target: "Golang", position: "before", clientY: 110, expected: ["Nest.js", "Spring ( Java )", "Golang"] },
+  { source: "Golang", target: "Spring ( Java )", position: "before", clientY: 110, expected: ["Golang", "Spring ( Java )", "Nest.js"] },
+]) {
+  test(`category ${scenario.position} preview matches the saved order for ${scenario.source}`, async () => {
+    seedDragGroups();
+    const root = await mount();
+    try {
+      const source = categoryRow(scenario.source);
+      const target = categoryRow(scenario.target);
+      await drag(source, "dragstart");
+      await drag(target, "dragover", scenario);
+      assert.equal(target.dataset.dropPosition, scenario.position);
+      assert.equal(source.dataset.dragging, "true");
+      assert.ok(dropHint().includes(`백엔드 · ${scenario.target} ${scenario.position === "before" ? "앞" : "뒤"}`));
+      await drag(target, "drop", scenario);
+      assert.deepEqual(groupSources("백엔드"), scenario.expected);
+      assert.equal(document.querySelector("[data-drop-position]"), null);
+      assert.equal(document.querySelector('[data-dragging="true"]'), null);
+    } finally { await act(async () => root.unmount()); }
+  });
+}
+
+for (const scenario of [
+  { position: "before", clientY: 110, expected: ["리액트", "Spring ( Java )", "Next.js"] },
+  { position: "after", clientY: 130, expected: ["리액트", "Next.js", "Spring ( Java )"] },
+]) {
+  test(`cross-parent ${scenario.position} preview preserves IDs and original sources`, async () => {
+    seedDragGroups();
+    const root = await mount();
+    try {
+      await click(groupRow("프론트엔드").querySelector("button"));
+      const target = categoryRow("Next.js");
+      await drag(categoryRow("Spring ( Java )"), "dragstart");
+      await drag(target, "dragover", scenario);
+      assert.equal(target.dataset.dropPosition, scenario.position);
+      assert.ok(dropHint().includes("프론트엔드 · Next.js"));
+      await drag(target, "drop", scenario);
+      assert.deepEqual(groupSources("프론트엔드"), scenario.expected);
+      assert.deepEqual(groupSources("백엔드"), ["Nest.js", "Golang"]);
+      assert.equal(document.getElementById("category-parent").value, "group:frontend");
+      assert.deepEqual(current.groups.flatMap((group) => group.categories).sort((a, b) => a.id.localeCompare(b.id)),
+        dragGroups.flatMap((group) => group.categories).sort((a, b) => a.id.localeCompare(b.id)));
+      assert.equal(posts[0].parentId, "original-parent");
+    } finally { await act(async () => root.unmount()); }
+  });
+}
+
+for (const expanded of [false, true]) {
+  test(`group header previews append after the ${expanded ? "expanded children" : "collapsed header"}`, async () => {
+    seedDragGroups();
+    const root = await mount();
+    try {
+      const target = groupRow("프론트엔드");
+      if (expanded) await click(target.querySelector("button"));
+      await drag(categoryRow("Spring ( Java )"), "dragstart");
+      await drag(target, "dragover");
+      assert.equal(target.dataset.dropTarget, "true");
+      assert.equal(target.parentElement.dataset.dropPosition, "append");
+      assert.equal(target.parentElement.lastElementChild.tagName, expanded ? "UL" : "DIV");
+      assert.equal(dropHint(), "프론트엔드 맨 끝으로 이동");
+      await drag(target, "drop");
+      assert.deepEqual(groupSources("프론트엔드"), ["리액트", "Next.js", "Spring ( Java )"]);
+      assert.equal(document.querySelector("[data-drop-position]"), null);
+      assert.equal(document.querySelector('[data-drop-target="true"]'), null);
+    } finally { await act(async () => root.unmount()); }
+  });
+}
+
+for (const scenario of [
+  { source: "학습·도구", target: "백엔드", position: "before", clientY: 110, expected: ["학습·도구", "백엔드", "프론트엔드"] },
+  { source: "백엔드", target: "프론트엔드", position: "after", clientY: 130, expected: ["프론트엔드", "백엔드", "학습·도구"] },
+]) {
+  test(`group ${scenario.position} preview marks the whole group boundary`, async () => {
+    seedDragGroups();
+    const root = await mount();
+    try {
+      const target = groupRow(scenario.target);
+      if (target.querySelector("button").getAttribute("aria-expanded") === "false") await click(target.querySelector("button"));
+      await drag(groupRow(scenario.source), "dragstart");
+      await drag(target, "dragover", scenario);
+      assert.equal(target.parentElement.dataset.dropPosition, scenario.position);
+      assert.equal(target.dataset.dropPosition, undefined);
+      assert.equal(target.parentElement.lastElementChild.tagName, "UL");
+      assert.ok(dropHint().includes(`${scenario.target} ${scenario.position === "before" ? "앞" : "뒤"}`));
+      await drag(target, "drop", scenario);
+      assert.deepEqual(current.groups.map((group) => group.name), scenario.expected);
+    } finally { await act(async () => root.unmount()); }
+  });
+}
+
+test("drag feedback follows the target and clears on leave, self, background and cancellation", async () => {
+  seedDragGroups();
+  const root = await mount();
+  try {
+    const source = categoryRow("Spring ( Java )");
+    const first = categoryRow("Nest.js");
+    const second = categoryRow("Golang");
+    await drag(source, "dragstart");
+    await drag(first, "dragover");
+    assert.equal(first.dataset.dropPosition, "before");
+    await drag(first, "dragleave", { relatedTarget: first.querySelector("button") });
+    assert.equal(first.dataset.dropPosition, "before");
+    await drag(second, "dragover", { clientY: 130 });
+    assert.equal(first.dataset.dropPosition, undefined);
+    assert.equal(second.dataset.dropPosition, "after");
+    await drag(second, "dragleave", { relatedTarget: document.body });
+    assert.equal(document.querySelector("[data-drop-position]"), null);
+    assert.equal(dropHint(), "");
+    await drag(first, "dragover");
+    await drag(source, "dragover");
+    assert.equal(document.querySelector("[data-drop-position]"), null);
+    await drag(first, "dragover");
+    await drag(document.querySelector(".category-tree-tools"), "dragover");
+    assert.equal(document.querySelector("[data-drop-position]"), null);
+    await drag(first, "dragover");
+    await drag(source, "dragend");
+    assert.equal(document.querySelector("[data-drop-position]"), null);
+    assert.equal(document.querySelector('[data-dragging="true"]'), null);
+    assert.equal(dropHint(), "");
+    const external = await drag(first, "dragover");
+    assert.equal(external.defaultPrevented, false);
+    assert.equal(document.querySelector("[data-drop-position]"), null);
+    assert.equal(dropHint(), "");
+  } finally { await act(async () => root.unmount()); }
+});
+
+test("a group dragged onto a category has no destination and cannot change the catalog", async () => {
+  seedDragGroups();
+  const root = await mount();
+  try {
+    const before = current.groups;
+    await drag(groupRow("학습·도구"), "dragstart");
+    await drag(groupRow("백엔드"), "dragover");
+    assert.ok(document.querySelector("[data-drop-position]"));
+    const target = categoryRow("Nest.js");
+    const unsupported = await drag(target, "dragover");
+    assert.equal(unsupported.defaultPrevented, false);
+    assert.equal(document.querySelector("[data-drop-position]"), null);
+    assert.equal(dropHint(), "");
+    await drag(target, "drop");
+    assert.equal(current.groups, before);
+    assert.equal(document.querySelector('[data-dragging="true"]'), null);
+  } finally { await act(async () => root.unmount()); }
+});
+
+test("a failed drop clears its destination while keeping the saved order and storage error", async () => {
+  seedDragGroups();
+  const root = await mount();
+  const original = dom.window.Storage.prototype.setItem;
+  try {
+    const before = current.groups;
+    const saved = dom.window.localStorage.getItem(KEY);
+    const target = categoryRow("Golang");
+    await drag(categoryRow("Spring ( Java )"), "dragstart");
+    await drag(target, "dragover", { clientY: 130 });
+    assert.equal(target.dataset.dropPosition, "after");
+    dom.window.Storage.prototype.setItem = () => { throw new dom.window.DOMException("full", "QuotaExceededError"); };
+    await drag(target, "drop", { clientY: 130 });
+    assert.equal(current.groups, before);
+    assert.equal(dom.window.localStorage.getItem(KEY), saved);
+    assert.ok(document.querySelector('[role="alert"]').textContent.includes("저장하지 못했습니다"));
+    assert.equal(document.querySelector("[data-drop-position]"), null);
+    assert.equal(document.querySelector('[data-dragging="true"]'), null);
+    assert.equal(dropHint(), "");
+  } finally {
+    dom.window.Storage.prototype.setItem = original;
+    await act(async () => root.unmount());
+  }
+});
+
 test("manager renames, moves and reorders by stable source, then persists new empty categories", async () => {
   dom.window.localStorage.clear();
   let root = await mount();

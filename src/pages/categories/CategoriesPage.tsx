@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type DragEvent, type FormEvent } from "react";
 import Arrow from "../../components/icons/Arrow";
 import {
   normalizeCategoryName,
@@ -11,6 +11,13 @@ import { postHref } from "../../shared/routes";
 import "./CategoriesPage.css";
 
 type CategoriesPageProps = { posts: Post[]; catalog: CategoryCatalog };
+type DraggedItem = { kind: "group" | "category"; id: string };
+type DropTarget = {
+  targetId: string;
+  position: "before" | "after" | "append";
+  index: number;
+  hint: string;
+} & ({ kind: "group" } | { kind: "category"; groupId: string });
 
 export default function CategoriesPage({ posts, catalog }: CategoriesPageProps) {
   const { groups } = catalog;
@@ -22,7 +29,9 @@ export default function CategoriesPage({ posts, catalog }: CategoriesPageProps) 
     "group:backend", "group:learning-tools", "group:unclassified",
   ]));
   const [notice, setNotice] = useState("");
-  const dragged = useRef<{ kind: "group" | "category"; id: string } | null>(null);
+  const dragged = useRef<DraggedItem | null>(null);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dropTarget, setDropTarget] = useState<DropTarget | null>(null);
   const selectedGroup = groups.find((group) => group.categories.some((item) => item.id === selectedId));
   const selected = selectedGroup?.categories.find((item) => item.id === selectedId);
   const counts = new Map<string, number>();
@@ -52,6 +61,96 @@ export default function CategoriesPage({ posts, catalog }: CategoriesPageProps) 
     const next = groups.filter((item) => item.id !== id);
     next.splice(targetIndex, 0, group);
     save(next);
+  }
+
+  function startDrag(event: DragEvent<HTMLElement>, item: DraggedItem) {
+    dragged.current = item;
+    setDraggedId(item.id);
+    setDropTarget(null);
+    setNotice("");
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", item.id);
+  }
+
+  function clearDrag() {
+    dragged.current = null;
+    setDraggedId(null);
+    setDropTarget(null);
+  }
+
+  function getDropTarget(event: DragEvent<HTMLElement>, target: DraggedItem): DropTarget | null {
+    const source = dragged.current;
+    if (!source || source.id === target.id) return null;
+
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const position = event.clientY < bounds.top + bounds.height / 2 ? "before" : "after";
+    const offset = position === "after" ? 1 : 0;
+    const direction = position === "before" ? "앞" : "뒤";
+    if (source.kind === "group") {
+      if (target.kind !== "group") return null;
+      const remaining = groups.filter((group) => group.id !== source.id);
+      const index = remaining.findIndex((group) => group.id === target.id);
+      if (index < 0) return null;
+      return {
+        kind: "group",
+        targetId: target.id,
+        position,
+        index: index + offset,
+        hint: `${remaining[index].name} ${direction}로 이동`,
+      };
+    }
+
+    const group = groups.find((group) => target.kind === "group"
+      ? group.id === target.id
+      : group.categories.some((item) => item.id === target.id));
+    if (!group) return null;
+    const categories = group.categories.filter((item) => item.id !== source.id);
+    if (target.kind === "group") {
+      return {
+        kind: "category",
+        groupId: group.id,
+        targetId: group.id,
+        position: "append",
+        index: categories.length,
+        hint: `${group.name} 맨 끝으로 이동`,
+      };
+    }
+    const index = categories.findIndex((item) => item.id === target.id);
+    if (index < 0) return null;
+    return {
+      kind: "category",
+      groupId: group.id,
+      targetId: target.id,
+      position,
+      index: index + offset,
+      hint: `${group.name} · ${categories[index].name} ${direction}로 이동`,
+    };
+  }
+
+  function previewDrop(event: DragEvent<HTMLElement>, target: DraggedItem) {
+    event.stopPropagation();
+    const next = getDropTarget(event, target);
+    setDropTarget(next);
+    if (next) event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = next ? "move" : "none";
+  }
+
+  function leaveDropTarget(event: DragEvent<HTMLElement>) {
+    const nextTarget = event.relatedTarget;
+    if (!(nextTarget instanceof window.Node) || !event.currentTarget.contains(nextTarget)) {
+      setDropTarget(null);
+    }
+  }
+
+  function drop(event: DragEvent<HTMLElement>, target: DraggedItem) {
+    event.preventDefault();
+    event.stopPropagation();
+    const source = dragged.current;
+    const destination = getDropTarget(event, target);
+    clearDrag();
+    if (!source || !destination) return;
+    if (destination.kind === "group") moveGroup(source.id, destination.index);
+    else moveCategory(source.id, destination.groupId, destination.index);
   }
 
   function toggleGroup(id: string) {
@@ -86,9 +185,15 @@ export default function CategoriesPage({ posts, catalog }: CategoriesPageProps) 
         분류 설정은 이 브라우저에만 저장합니다. 원문과 페이지 계층은 바꾸지 않습니다.
       </p>
       {catalog.error ? <p className="category-error" role="alert">{catalog.error}</p> : null}
-      <p className="category-save-status" role="status">{notice}</p>
+      <p className="category-save-status" role="status">{dropTarget?.hint ?? notice}</p>
       <div className="category-manager-layout">
-        <section className="category-tree-panel" aria-label="분류 목록">
+        <section
+          className="category-tree-panel"
+          aria-label="분류 목록"
+          onDragOver={() => setDropTarget(null)}
+          onDragLeave={leaveDropTarget}
+          onDrop={clearDrag}
+        >
           <div className="category-tree-tools">
             <button
               type="button"
@@ -115,23 +220,23 @@ export default function CategoriesPage({ posts, catalog }: CategoriesPageProps) 
           </div>
           <ul className="category-manager-tree">
             {groups.map((group, groupIndex) => (
-              <li key={group.id}>
+              <li
+                key={group.id}
+                className="category-manager-group-container"
+                data-drop-position={dropTarget?.targetId === group.id ? dropTarget.position : undefined}
+              >
                 <div
                   className="category-manager-row category-manager-group"
+                  data-dragging={draggedId === group.id || undefined}
+                  data-drop-target={(
+                    dropTarget?.position === "append" && dropTarget.targetId === group.id
+                  ) || undefined}
                   draggable
-                  onDragStart={(event) => {
-                    dragged.current = { kind: "group", id: group.id };
-                    event.dataTransfer.setData("text/plain", group.id);
-                  }}
-                  onDragEnd={() => { dragged.current = null; }}
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={(event) => {
-                    event.preventDefault();
-                    const item = dragged.current;
-                    if (item?.kind === "group") moveGroup(item.id, groupIndex);
-                    if (item?.kind === "category") moveCategory(item.id, group.id, group.categories.length);
-                    dragged.current = null;
-                  }}
+                  onDragStart={(event) => startDrag(event, { kind: "group", id: group.id })}
+                  onDragEnd={clearDrag}
+                  onDragOver={(event) => previewDrop(event, { kind: "group", id: group.id })}
+                  onDragLeave={leaveDropTarget}
+                  onDrop={(event) => drop(event, { kind: "group", id: group.id })}
                 >
                   <button
                     type="button"
@@ -167,22 +272,14 @@ export default function CategoriesPage({ posts, catalog }: CategoriesPageProps) 
                         className="category-manager-row category-manager-item"
                         data-category-source={item.source}
                         data-selected={!adding && selectedId === item.id}
+                        data-dragging={draggedId === item.id || undefined}
+                        data-drop-position={dropTarget?.targetId === item.id ? dropTarget.position : undefined}
                         draggable
-                        onDragStart={(event) => {
-                          dragged.current = { kind: "category", id: item.id };
-                          event.dataTransfer.setData("text/plain", item.id);
-                        }}
-                        onDragEnd={() => { dragged.current = null; }}
-                        onDragOver={(event) => event.preventDefault()}
-                        onDrop={(event) => {
-                          event.preventDefault();
-                          const draggedItem = dragged.current;
-                          if (draggedItem?.kind === "category" && draggedItem.id !== item.id) {
-                            const index = group.categories.filter((category) => category.id !== draggedItem.id).findIndex((category) => category.id === item.id);
-                            moveCategory(draggedItem.id, group.id, index);
-                          }
-                          dragged.current = null;
-                        }}
+                        onDragStart={(event) => startDrag(event, { kind: "category", id: item.id })}
+                        onDragEnd={clearDrag}
+                        onDragOver={(event) => previewDrop(event, { kind: "category", id: item.id })}
+                        onDragLeave={leaveDropTarget}
+                        onDrop={(event) => drop(event, { kind: "category", id: item.id })}
                       >
                         <button
                           type="button"
