@@ -1,0 +1,54 @@
+.page-tree,
+.page-tree ul {
+  list-style: none;
+  padding: 0;
+}
+
+.page-tree {
+  margin-bottom: 0;
+}
+
+.page-tree ul {
+  margin: 3px 0 3px 9px;
+  border-left: 1px solid var(--line);
+  padding-left: 16px;
+}
+
+.page-tree a {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-radius: 4px;
+  padding: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.page-tree a:hover {
+  background: #eae7dd;
+}
+
+.page-tree a > span {
+  color: var(--muted);
+}
+
+.page-tree small {
+  margin-left: auto;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.page-tree summary {
+  cursor: pointer;
+}
+
+.page-tree summary::marker {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.page-tree summary a {
+  display: inline-flex;
+  width: calc(100% - 24px);
+  vertical-align: middle;
+}

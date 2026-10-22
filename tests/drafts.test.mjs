@@ -1,11 +1,11 @@
+import { markdownDocument } from "../src/shared/document.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
   readDrafts,
   saveDraft,
-  markdownDocument,
   DRAFT_KEY,
-} from "../src/drafts.mjs";
+} from "../src/shared/drafts.mjs";
 
 function storage(raw = null) {
   return {

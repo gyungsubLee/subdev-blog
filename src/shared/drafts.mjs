@@ -33,34 +33,3 @@ export function saveDraft(storage, draft) {
   storage.setItem(DRAFT_KEY, JSON.stringify(next));
   return next;
 }
-
-export function downloadFile(
-  name,
-  contents,
-  mime = "text/markdown;charset=utf-8",
-) {
-  const link = document.createElement("a");
-  const url = URL.createObjectURL(new Blob([contents], { type: mime }));
-  link.href = url;
-  link.download = name.replace(/[\\/:*?"<>|]/g, "-");
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-export function markdownDocument(draft) {
-  return [
-    "---",
-    "id: " + JSON.stringify(draft.id.replace(/^draft-/, "")),
-    ...(draft.sourceId ? ["source_id: " + JSON.stringify(draft.sourceId)] : []),
-    "title: " + JSON.stringify(draft.title),
-    "category: " + JSON.stringify(draft.category),
-    "created: " + JSON.stringify(draft.createdAt),
-    "updated: " + JSON.stringify(draft.updatedAt),
-    "---",
-    "",
-    "# " + draft.title,
-    "",
-    draft.markdown,
-    "",
-  ].join("\n");
-}

@@ -1,0 +1,13 @@
+.app-state {
+  max-width: 800px;
+  padding: 15vh 30px;
+  margin: auto;
+  font-family: inherit;
+}
+
+.app-warning {
+  padding: 14px 4vw;
+  background: #f4e4d8;
+  font-size: 13px;
+  color: #763d29;
+}

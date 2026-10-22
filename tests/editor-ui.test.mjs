@@ -1,10 +1,7 @@
+import { loadComponent } from "./support/load-component.mjs";
 import assert from "node:assert/strict";
-import { mkdir, unlink, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
-import { pathToFileURL } from "node:url";
 import test from "node:test";
 import { JSDOM } from "jsdom";
-import { build } from "esbuild";
 
 // JSDOM covers React/editor integration, not browser layout or hardware input.
 // Layout-only observer and rectangle shims keep floating UI from measuring a real screen.
@@ -98,35 +95,7 @@ dom.window.addEventListener("error", (event) => {
 
 const { default: React, act } = await import("react");
 const { createRoot } = await import("react-dom/client");
-const result = await build({
-  entryPoints: [resolve("src/Editor.tsx")],
-  bundle: true,
-  packages: "external",
-  platform: "node",
-  format: "esm",
-  write: false,
-  jsx: "automatic",
-  plugins: [
-    {
-      name: "omit-test-css",
-      setup(api) {
-        api.onResolve({ filter: /\.css$/ }, (args) => ({
-          path: args.path,
-          namespace: "empty-css",
-        }));
-        api.onLoad({ filter: /.*/, namespace: "empty-css" }, () => ({
-          contents: "",
-          loader: "js",
-        }));
-      },
-    },
-  ],
-});
-await mkdir(resolve(".tmp"), { recursive: true });
-const modulePath = resolve(".tmp/editor-ui-check-" + process.pid + ".mjs");
-await writeFile(modulePath, result.outputFiles[0].text);
-const { default: Editor } = await import(pathToFileURL(modulePath).href);
-await unlink(modulePath);
+const { default: Editor } = await loadComponent("src/pages/write/WritePage.tsx");
 
 test("real React editor mounts, saves, imports, exports, and opens the slash menu", async (t) => {
   const saved = [];

@@ -1,0 +1,2 @@
+export const FEATURED_MIN_BODY_LENGTH = 300;
+export const SECONDARY_POST_COUNT = 2;

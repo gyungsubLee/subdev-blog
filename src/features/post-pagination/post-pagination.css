@@ -1,0 +1,19 @@
+.result-count {
+  margin-top: 19px !important;
+  margin-bottom: 30px !important;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.load-more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-top: 50px;
+}
+
+.load-more > span {
+  color: var(--muted);
+  font-size: 11px;
+}

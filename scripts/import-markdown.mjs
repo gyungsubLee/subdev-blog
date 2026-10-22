@@ -3,7 +3,7 @@ import { readFile, mkdir, writeFile, rename } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
-import { parseMarkdownDocument } from "../src/import-document.mjs";
+import { parseMarkdownDocument } from "../src/shared/document.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const input = process.argv[2];

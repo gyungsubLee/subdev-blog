@@ -1,46 +1,12 @@
-import {
-  Component,
-  lazy,
-  Suspense,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
-import Blog from "./Blog";
-import { readDrafts } from "./drafts.mjs";
-import type { Post } from "./types";
+import { useEffect, useState } from "react";
+import { readDrafts } from "../shared/drafts.mjs";
+import type { Post } from "../shared/post";
 
-const Editor = lazy(() => import("./Editor"));
-
-class ErrorBoundary extends Component<
-  { children: ReactNode },
-  { error: string }
-> {
-  state = { error: "" };
-  static getDerivedStateFromError(error: Error) {
-    return { error: error.message };
-  }
-  render() {
-    if (this.state.error) {
-      return (
-        <main className="app-state">
-          <h1>화면을 열지 못했습니다.</h1>
-          <p>{this.state.error}</p>
-          <a href="/">다시 열기</a>
-        </main>
-      );
-    }
-    return this.props.children;
-  }
-}
-
-export default function App() {
+export function usePosts(postId: string | undefined) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [drafts, setDrafts] = useState<Post[]>([]);
   const [error, setError] = useState("");
   const [loaded, setLoaded] = useState(false);
-  const [route, setRoute] = useState(window.location.hash);
-  const [editing, setEditing] = useState<Post | null | undefined>(undefined);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -79,16 +45,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const close = () => {
-      setRoute(window.location.hash);
-      window.scrollTo(0, 0);
-    };
-    window.addEventListener("hashchange", close);
-    return () => window.removeEventListener("hashchange", close);
-  }, []);
-
-  useEffect(() => {
-    const id = route.match(/^#\/post\/([^/?#]+)/)?.[1];
+    const id = postId;
     const post = posts.find((item) => item.id === id);
     if (!post || post.bodyLoaded !== false) return;
     const controller = new AbortController();
@@ -115,40 +72,7 @@ export default function App() {
         if (reason.name !== "AbortError") setError(reason.message);
       });
     return () => controller.abort();
-  }, [route, posts]);
+  }, [postId, posts]);
 
-  function edit(post: Post | null) {
-    setEditing(post);
-    window.scrollTo(0, 0);
-  }
-
-  return (
-    <ErrorBoundary>
-      {error ? (
-        <div className="app-warning" role="alert">
-          {error}
-        </div>
-      ) : null}
-      {editing !== undefined ? (
-        <Suspense
-          fallback={<main className="app-state">편집기를 여는 중입니다.</main>}
-        >
-          <Editor
-            key={editing?.id ?? "new"}
-            post={editing}
-            onClose={() => setEditing(undefined)}
-            onSaved={(next) => setDrafts(next)}
-          />
-        </Suspense>
-      ) : loaded ? (
-        <Blog
-          posts={[...drafts, ...posts]}
-          onWrite={() => edit(null)}
-          onEdit={edit}
-        />
-      ) : (
-        <main className="app-state">기록을 불러오는 중입니다.</main>
-      )}
-    </ErrorBoundary>
-  );
+  return { posts, drafts, error, loaded, setDrafts };
 }

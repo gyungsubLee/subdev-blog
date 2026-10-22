@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import {
   parseBlockBackup,
   parseMarkdownDocument,
-} from "../src/import-document.mjs";
-import { markdownDocument } from "../src/drafts.mjs";
+} from "../src/shared/document.mjs";
+import { markdownDocument } from "../src/shared/document.mjs";
 
 test("exported Markdown restores title, category, IDs and body without a duplicate H1", () => {
   const draft = {

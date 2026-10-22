@@ -1,31 +1,13 @@
+import { loadComponent } from "./support/load-component.mjs";
 import assert from "node:assert/strict";
-import { readFile, writeFile, mkdir, unlink } from "node:fs/promises";
-import { pathToFileURL } from "node:url";
-import { resolve } from "node:path";
 import { test } from "node:test";
 import { once } from "node:events";
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { JSDOM } from "jsdom";
 import { renderToStaticMarkup } from "react-dom/server";
-import ts from "typescript";
 
-const source = await readFile(
-  new URL("../src/Blog.tsx", import.meta.url),
-  "utf8",
-);
-const compiled = ts.transpileModule(source, {
-  compilerOptions: {
-    jsx: ts.JsxEmit.ReactJSX,
-    module: ts.ModuleKind.ESNext,
-    target: ts.ScriptTarget.ES2022,
-  },
-}).outputText;
-await mkdir(resolve(".tmp"), { recursive: true });
-const modulePath = resolve(".tmp/blog-check-" + process.pid + ".mjs");
-await writeFile(modulePath, compiled);
-const { default: Blog } = await import(pathToFileURL(modulePath).href);
-await unlink(modulePath);
+const { default: Blog } = await loadComponent("tests/support/BlogHarness.tsx");
 
 const base = {
   id: "parent",

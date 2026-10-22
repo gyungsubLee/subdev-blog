@@ -1,0 +1,63 @@
+.site-dialog {
+  width: min(680px, calc(100% - 32px));
+  max-height: 80vh;
+  overflow-y: auto;
+  border: 1px solid #c8c2b3;
+  border-radius: 12px;
+  padding: 28px;
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: 0 20px 100px #29282030;
+}
+
+.site-dialog::backdrop {
+  background: #29282070;
+  backdrop-filter: blur(3px);
+}
+
+.dialog-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.dialog-topline h2 {
+  font-family: var(--display);
+  font-size: 27px;
+  font-weight: 500;
+}
+
+.dialog-topline button {
+  width: 35px;
+  height: 35px;
+  border: 0;
+  border-radius: 5px;
+  color: var(--muted);
+  background: #eae6db;
+  font-size: 25px;
+}
+
+.dialog-description {
+  margin: 18px 0 25px !important;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.about-copy p {
+  margin: 20px 0;
+  font-size: 14px;
+  line-height: 1.9;
+  word-break: keep-all;
+}
+
+.about-copy .dark-button {
+  margin-top: 15px;
+}
+
+@media (max-width: 720px) {
+  .site-dialog {
+    padding: 23px;
+  }
+}

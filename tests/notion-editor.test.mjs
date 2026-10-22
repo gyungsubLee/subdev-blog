@@ -27,7 +27,7 @@ dom.window.addEventListener('error', (event) => {
 });
 
 const { BlockNoteEditor } = await import('@blocknote/core');
-const { notionExtension } = await import('../src/notion-extension.ts');
+const { notionExtension } = await import('../src/features/post-editor/notion-extension.ts');
 
 function createEditor(t, initialContent = [{ type: 'paragraph' }], schema) {
   const editor = BlockNoteEditor.create({
@@ -191,7 +191,7 @@ test('native Cmd/Ctrl+Shift+Arrow moves the current block', (t) => {
 });
 
 test('custom code blocks retain language, caption and wrapping in JSON', async (t) => {
-  const { editorSchema } = await import('../src/code-block.ts');
+  const { editorSchema } = await import('../src/features/post-editor/code-block.ts');
   const editor = createEditor(t, [{
     type: 'codeBlock',
     props: { language: 'typescript', caption: 'A typed example', wrap: true },
@@ -230,7 +230,7 @@ test('Mac Option digit symbols still use the Notion shortcut mapping', (t) => {
 });
 
 test('typing a code caption updates saved props before blur and keeps the focused input', async (t) => {
-  const { editorSchema } = await import('../src/code-block.ts');
+  const { editorSchema } = await import('../src/features/post-editor/code-block.ts');
   const editor = createEditor(t, [{
     type: 'codeBlock',
     props: { caption: 'Before', language: 'javascript' },
@@ -257,7 +257,7 @@ test('typing a code caption updates saved props before blur and keeps the focuse
 });
 
 test('the same wrap button toggles code wrapping on and off', async (t) => {
-  const { editorSchema } = await import('../src/code-block.ts');
+  const { editorSchema } = await import('../src/features/post-editor/code-block.ts');
   const editor = createEditor(t, [{ type: 'codeBlock', content: 'one long line' }], editorSchema);
   const code = editor.prosemirrorView.dom.querySelector('.notion-code');
   const wrap = [...code.querySelectorAll('button')].find((button) => button.textContent === '줄바꿈');
@@ -274,7 +274,7 @@ test('the same wrap button toggles code wrapping on and off', async (t) => {
 });
 
 test('undo synchronizes the native language picker with persisted code props', async (t) => {
-  const { editorSchema } = await import('../src/code-block.ts');
+  const { editorSchema } = await import('../src/features/post-editor/code-block.ts');
   const editor = createEditor(t, [{
     type: 'codeBlock', props: { language: 'javascript' }, content: 'print(1)',
   }], editorSchema);

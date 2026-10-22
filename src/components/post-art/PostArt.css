@@ -1,0 +1,73 @@
+.post-art {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  background: #e6e4d8;
+}
+
+.post-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 400ms ease;
+}
+
+.featured-card:hover .post-art img,
+.post-card:hover .post-art img {
+  transform: scale(1.035);
+}
+
+.notebook-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.art-page {
+  fill: #f4f1e5;
+  stroke: #727568;
+  stroke-width: 1.4px;
+}
+
+.art-branch {
+  stroke: #7f8573;
+  stroke-width: 1.5px;
+}
+
+.art-rule {
+  stroke: #a7a89c;
+  stroke-width: 2px;
+  stroke-linecap: round;
+}
+
+.art-dot,
+.art-spark {
+  fill: #bd6247;
+}
+
+.post-art-1 {
+  background: #e4d4c4;
+}
+
+.post-art-1 .notebook-art {
+  transform: rotate(8deg) scale(0.9);
+}
+
+.post-art-1 .art-branch,
+.post-art-1 .art-page {
+  stroke: #96755e;
+}
+
+.post-art-2 {
+  background: #d9dee3;
+}
+
+.post-art-2 .notebook-art {
+  transform: rotate(-5deg) scale(0.95);
+}
+
+.post-art-2 .art-branch,
+.post-art-2 .art-page {
+  stroke: #6f7b85;
+}

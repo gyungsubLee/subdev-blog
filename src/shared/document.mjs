@@ -65,3 +65,21 @@ export function parseMarkdownDocument(text) {
     markdown,
   };
 }
+
+export function markdownDocument(draft) {
+  return [
+    "---",
+    "id: " + JSON.stringify(draft.id.replace(/^draft-/, "")),
+    ...(draft.sourceId ? ["source_id: " + JSON.stringify(draft.sourceId)] : []),
+    "title: " + JSON.stringify(draft.title),
+    "category: " + JSON.stringify(draft.category),
+    "created: " + JSON.stringify(draft.createdAt),
+    "updated: " + JSON.stringify(draft.updatedAt),
+    "---",
+    "",
+    "# " + draft.title,
+    "",
+    draft.markdown,
+    "",
+  ].join("\n");
+}
