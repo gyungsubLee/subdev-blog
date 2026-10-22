@@ -105,11 +105,19 @@ export function reconcileCategoryGroups(
   const missing = [...new Set(posts.map((post) => post.category))].filter((source) => !sources.has(source));
   if (!missing.length) return groups;
 
-  const unknown = missing.map((source) => ({
-    id: "source:" + source,
-    source,
-    name: source || "이름 없는 분류",
-  }));
+  const names = new Set(groups.flatMap((group) =>
+    group.categories.map((item) => item.name.toLocaleLowerCase())));
+  const unknown = missing.map((source) => {
+    const baseName = normalizeCategoryName(source).slice(0, 100).trimEnd() || "이름 없는 분류";
+    let name = baseName;
+    let number = 2;
+    while (names.has(name.toLocaleLowerCase())) {
+      const suffix = ` (${number++})`;
+      name = baseName.slice(0, 100 - suffix.length).trimEnd() + suffix;
+    }
+    names.add(name.toLocaleLowerCase());
+    return { id: "source:" + source, source, name };
+  });
   const unclassified = groups.find((group) => group.id === UNCLASSIFIED_ID);
   if (!unclassified) {
     return [...groups, { id: UNCLASSIFIED_ID, name: "미분류", categories: unknown }];

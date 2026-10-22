@@ -146,3 +146,33 @@ test("dragging the selected category updates its parent without losing an unfini
     assert.equal(current.groups.find((group) => group.id === frontendId).categories.at(-1).name, "편집 중인 이름");
   } finally { await act(async () => root.unmount()); }
 });
+
+test("unusual draft sources and an alias collision still allow unrelated catalog saves", async () => {
+  dom.window.localStorage.clear();
+  dom.window.localStorage.setItem(KEY, JSON.stringify({ version: 1, groups: [{
+    id: "saved-parent", name: "백엔드", categories: [
+      { id: "saved-spring", source: "Spring ( Java )", name: "새 초안" },
+    ],
+  }] }));
+  const originalLength = posts.length;
+  const sources = ["새   초안", "가".repeat(101), "spring ( java )", "새 초안"];
+  posts.push(...sources.map((category, index) => ({
+    ...posts[0], id: "new-draft-" + index, title: "새 초안 " + index, category,
+  })));
+  const root = await mount();
+  try {
+    let saved;
+    await act(async () => { saved = current.save([...current.groups].reverse()); });
+    assert.equal(saved, true);
+    assert.equal(current.error, "");
+    const persisted = JSON.parse(dom.window.localStorage.getItem(KEY));
+    assert.equal(persisted.groups[0].name, "미분류");
+    assert.deepEqual(persisted.groups[0].categories.map((item) => item.source), sources);
+    assert.deepEqual(persisted.groups[1].categories, [
+      { id: "saved-spring", source: "Spring ( Java )", name: "새 초안" },
+    ]);
+  } finally {
+    await act(async () => root.unmount());
+    posts.splice(originalLength);
+  }
+});
