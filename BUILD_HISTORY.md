@@ -13,6 +13,7 @@ Git 태그, 소스 커밋, 빌드 실행과 내려받는 파일을 아래 기록
 | 태그 객체 SHA | `cf2cec40fb05c85910017b0a779efcc755e7e8dd` |
 | 실제 소스 커밋 | [c1af4994464d0cc5c7b4a2d2f5d00813e107f8ac](https://github.com/gyungsubLee/subdev-blog/commit/c1af4994464d0cc5c7b4a2d2f5d00813e107f8ac) |
 | 공개 릴리스 | [v0.1.0](https://github.com/gyungsubLee/subdev-blog/releases/tag/v0.1.0), 제목도 `v0.1.0` |
+| Vercel 배포 | [배포한 블로그](https://notion2md-blog-6mrigosj8-gyungsublees-projects.vercel.app/) |
 | 워크플로 | `Versioned build`, `.github/workflows/build.yml` |
 | 채택한 빌드 | #2, 실행 `39777303217`, 시도 `2`, 태그 push |
 | 빌드 작업 시각 | 2026-10-22 21:22:32 시작, 21:23:13 완료 |
