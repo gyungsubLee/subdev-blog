@@ -3,6 +3,7 @@ import { readFile, writeFile, mkdir, unlink } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { resolve } from "node:path";
 import { test } from "node:test";
+import { once } from "node:events";
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { JSDOM } from "jsdom";
@@ -289,20 +290,24 @@ test("large page tree only mounts expanded branches and keeps title links", asyn
       .querySelector('.page-tree a[href="#/post/p1"]')
       .closest("details");
     await act(async () => {
+      const toggled = once(branch, "toggle");
       branch.querySelector("summary").click();
-      await new Promise((resolve) => dom.window.setTimeout(resolve, 10));
+      await toggled;
     });
     assert.equal(document.querySelectorAll(".page-tree li").length, 11);
     assert.equal(branch.open, true);
     await act(async () => {
+      const toggled = once(branch, "toggle");
       branch.querySelector("summary").click();
-      await new Promise((resolve) => dom.window.setTimeout(resolve, 10));
+      await toggled;
     });
     assert.equal(document.querySelectorAll(".page-tree li").length, 6);
     assert.equal(branch.open, false);
     await act(async () => {
+      // The URL changes before JSDOM dispatches the event that updates React.
+      const navigated = once(dom.window, "hashchange");
       branch.querySelector('a[href="#/post/p1"]').click();
-      await new Promise((resolve) => dom.window.setTimeout(resolve, 10));
+      await navigated;
     });
     assert.equal(dom.window.location.hash, "#/post/p1");
     assert.equal(
