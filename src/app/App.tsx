@@ -32,7 +32,6 @@ export default function App() {
           <WritePage
             key={editing?.id ?? "new"}
             post={editing}
-            categories={categories}
             onClose={() => setEditing(undefined)}
             onSaved={setDrafts}
           />

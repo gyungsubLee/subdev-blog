@@ -22,9 +22,7 @@
 
 .editor-page button:focus-visible,
 .editor-file:focus-within,
-.editor-page input:focus-visible,
-.editor-page textarea:focus-visible,
-.editor-page select:focus-visible {
+.editor-page input:focus-visible {
   outline: 2px solid #bd5b3e;
   outline-offset: 4px;
 }
@@ -134,8 +132,7 @@
   color: var(--editor-muted);
 }
 
-.editor-category input,
-.editor-category select {
+.editor-category input {
   width: 160px;
   border: 0;
   background: #efede5;
@@ -360,17 +357,4 @@
   .editor-shortcuts {
     top: 155px;
   }
-}
-
-.editor-markdown {
-  box-sizing: border-box;
-  display: block;
-  width: 100%;
-  min-height: 380px;
-  padding: 20px;
-  resize: vertical;
-  border: 1px solid var(--editor-line);
-  background: var(--editor-paper);
-  color: var(--editor-ink);
-  font: 14px/1.7 monospace;
 }
