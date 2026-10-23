@@ -5,16 +5,18 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
+import "../../styles/notebook.css";
 import type { Post } from "../../shared/post";
 import MarkdownCodeBlock from "./MarkdownCodeBlock";
 import { pageLink, scrollToFragment } from "./page-links";
 
 const markdownSchema = {
   ...defaultSchema,
-  tagNames: [...(defaultSchema.tagNames || []), "u"],
+  tagNames: [...(defaultSchema.tagNames || []), "u", "section"],
   attributes: {
     ...defaultSchema.attributes,
     code: [["className", /^language-./, "math-inline", "math-display"]],
+    section: [["dataIvoryNotebook", "true"]],
   },
   protocols: { ...defaultSchema.protocols, src: ["http", "https", "data"] },
 };
@@ -47,6 +49,19 @@ export default function MarkdownContent({
           : defaultUrlTransform(url)
       }
       components={{
+        section: ({ node, children }) =>
+          node?.properties.dataIvoryNotebook === "true" ? (
+            <section className="ivory-notebook" data-ivory-notebook="true">
+              <span className="notebook-holes" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </span>
+              <div className="ivory-notebook-content">{children}</div>
+            </section>
+          ) : (
+            <section>{children}</section>
+          ),
         blockquote: ({ node, children, ...props }) => {
           let firstParagraph = "";
           let hasNestedQuote = false;

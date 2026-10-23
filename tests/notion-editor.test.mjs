@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { JSDOM } from 'jsdom';
+import { loadComponent } from './support/load-component.mjs';
 
 const dom = new JSDOM('<!doctype html><html><body></body></html>', {
   url: 'http://localhost',
@@ -191,7 +192,7 @@ test('native Cmd/Ctrl+Shift+Arrow moves the current block', (t) => {
 });
 
 test('custom code blocks retain language, caption and wrapping in JSON', async (t) => {
-  const { editorSchema } = await import('../src/features/post-editor/code-block.ts');
+  const { editorSchema } = await loadComponent('src/features/post-editor/code-block.ts');
   const editor = createEditor(t, [{
     type: 'codeBlock',
     props: { language: 'typescript', caption: 'A typed example', wrap: true },
@@ -230,7 +231,7 @@ test('Mac Option digit symbols still use the Notion shortcut mapping', (t) => {
 });
 
 test('typing a code caption updates saved props before blur and keeps the focused input', async (t) => {
-  const { editorSchema } = await import('../src/features/post-editor/code-block.ts');
+  const { editorSchema } = await loadComponent('src/features/post-editor/code-block.ts');
   const editor = createEditor(t, [{
     type: 'codeBlock',
     props: { caption: 'Before', language: 'javascript' },
@@ -257,7 +258,7 @@ test('typing a code caption updates saved props before blur and keeps the focuse
 });
 
 test('the same wrap button toggles code wrapping on and off', async (t) => {
-  const { editorSchema } = await import('../src/features/post-editor/code-block.ts');
+  const { editorSchema } = await loadComponent('src/features/post-editor/code-block.ts');
   const editor = createEditor(t, [{ type: 'codeBlock', content: 'one long line' }], editorSchema);
   const code = editor.prosemirrorView.dom.querySelector('.notion-code');
   const wrap = [...code.querySelectorAll('button')].find((button) => button.textContent === '줄바꿈');
@@ -274,7 +275,7 @@ test('the same wrap button toggles code wrapping on and off', async (t) => {
 });
 
 test('undo synchronizes the native language picker with persisted code props', async (t) => {
-  const { editorSchema } = await import('../src/features/post-editor/code-block.ts');
+  const { editorSchema } = await loadComponent('src/features/post-editor/code-block.ts');
   const editor = createEditor(t, [{
     type: 'codeBlock', props: { language: 'javascript' }, content: 'print(1)',
   }], editorSchema);

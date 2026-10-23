@@ -1,0 +1,179 @@
+@font-face {
+  font-family: "Hi Melody";
+  src: url("../assets/fonts/HiMelody-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+.notebook-writing .editor-main {
+  max-width: 980px;
+  padding-top: 46px;
+}
+
+.notebook-writing .editor-tip {
+  margin: 12px 0 34px;
+  line-height: 1.9;
+}
+
+.ivory-notebook {
+  --note-paper: #fcfaf1;
+  position: relative;
+  width: 100%;
+  margin: 14px 0;
+  padding: 25px 28px 25px 92px;
+  border: 1px solid #e2decf;
+  border-radius: 3px;
+  background-color: var(--note-paper);
+  background-image: linear-gradient(
+    to bottom,
+    transparent 35px,
+    #d9dbcf 35px,
+    #d9dbcf 36px
+  );
+  background-size: 100% 36px;
+  background-position: 0 25px;
+  box-shadow: 0 3px 10px #514b3107;
+  font-family: "Hi Melody", "Apple SD Gothic Neo", cursive;
+  font-size: 25px;
+  line-height: 36px;
+}
+
+.ivory-notebook::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 68px;
+  width: 1px;
+  background: #d5a594;
+  pointer-events: none;
+}
+
+.ivory-notebook .notebook-holes {
+  position: absolute;
+  top: 38px;
+  bottom: 38px;
+  left: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.ivory-notebook .notebook-holes i {
+  display: block;
+  width: 11px;
+  height: 11px;
+  border: 1px solid #d5d0bf;
+  border-radius: 50%;
+  background: #faf9f5;
+  box-shadow: inset 0 1px 2px #8b7b3b15;
+}
+
+.ivory-notebook-content {
+  min-width: 0;
+}
+
+.ivory-notebook .bn-block-outer {
+  padding: 0;
+}
+
+.editor-canvas .ivory-notebook .bn-block-content {
+  padding-top: 0;
+  padding-bottom: 0;
+  font-family: "Hi Melody", "Apple SD Gothic Neo", cursive;
+  font-size: 25px;
+  line-height: 36px;
+}
+
+.ivory-notebook .bn-block-content:not([data-content-type="codeBlock"]) .bn-inline-content code,
+.article-prose .ivory-notebook :not(pre) > code {
+  font-family: inherit;
+}
+
+.editor-canvas .ivory-notebook .bn-block-content[data-content-type="heading"],
+.article-prose .ivory-notebook :is(h1, h2, h3, h4) {
+  padding-top: 0;
+  font-size: 32px;
+  line-height: 36px;
+}
+
+.editor-canvas .ivory-notebook .bn-block-content[data-content-type="heading"][data-level="3"],
+.article-prose .ivory-notebook h3 {
+  font-size: 30px;
+}
+
+.editor-canvas .ivory-notebook .bn-block-content[data-content-type="image"],
+.article-prose .ivory-notebook figure:not(.article-code) {
+  background: var(--note-paper);
+  padding: 12px 0;
+}
+
+.ivory-notebook .bn-block-content[data-content-type="image"] img,
+.article-prose .ivory-notebook img {
+  mix-blend-mode: multiply;
+}
+
+.editor-canvas .ivory-notebook .notion-code,
+.editor-canvas .ivory-notebook .notion-code .bn-inline-content {
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.ivory-notebook .notion-code-tools,
+.ivory-notebook .notion-code-caption {
+  font-family: -apple-system, "Apple SD Gothic Neo", sans-serif;
+}
+
+.article-prose .ivory-notebook :is(p, ul, ol, li, blockquote) {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.article-prose .ivory-notebook img {
+  margin: 0 auto;
+}
+
+.article-prose .ivory-notebook table {
+  font-size: inherit;
+}
+
+@media (max-width: 720px) {
+  .notebook-writing .editor-main {
+    padding: 34px 24px 80px;
+  }
+
+  .notebook-writing .editor-canvas {
+    margin: 0 -32px;
+  }
+
+  .notebook-writing .editor-canvas .bn-editor {
+    padding: 0 32px;
+  }
+
+  .ivory-notebook {
+    padding: 22px 14px 22px 52px;
+    font-size: 23px;
+  }
+
+  .ivory-notebook::before {
+    left: 37px;
+  }
+
+  .ivory-notebook .notebook-holes {
+    top: 32px;
+    bottom: 32px;
+    left: 12px;
+  }
+
+  .ivory-notebook .notebook-holes i {
+    width: 9px;
+    height: 9px;
+  }
+
+  .editor-canvas .ivory-notebook .bn-block-content {
+    font-size: 23px;
+  }
+}

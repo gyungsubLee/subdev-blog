@@ -289,7 +289,7 @@ test("real React editor mounts, saves, imports, exports, and opens the slash men
   );
 
   await t.test(
-    "slash input opens the real React suggestion controller",
+    "slash menu inserts a notebook whose text and formatting survive save and reopen",
     async () => {
       await importText("empty.md", "");
       const editable = document.querySelector(
@@ -318,6 +318,67 @@ test("real React editor mounts, saves, imports, exports, and opens the slash men
         document.body.textContent.includes("제목") ||
           document.body.textContent.includes("Heading"),
       );
+      const notebookItem = [...document.querySelectorAll('[role="option"]')].find(
+        (item) => item.textContent.includes("아이보리 줄노트"),
+      );
+      assert.ok(notebookItem, "the native slash menu offers the notebook");
+      await act(async () => notebookItem.click());
+      assert.ok(document.querySelector('.ivory-notebook-content .bn-block-content'));
+      assert.equal(document.querySelectorAll('.notebook-holes i').length, 3);
+
+      function typeText(text) {
+        for (const character of text) {
+          const { from, to } = view.state.selection;
+          const handled = view.someProp("handleTextInput", (handler) =>
+            handler(view, from, to, character, () => view.state.tr.insertText(character)),
+          );
+          if (!handled) view.dispatch(view.state.tr.insertText(character, from, to));
+        }
+      }
+      function enter() {
+        view.someProp("handleKeyDown", (handler) => handler(view, new KeyboardEvent("keydown", {
+          key: "Enter", keyCode: 13, bubbles: true, cancelable: true,
+        })));
+      }
+      await act(async () => {
+        const start = view.state.selection.from;
+        typeText("한글 English recall, precision");
+        view.dispatch(view.state.tr.addMark(start + 11, start + 17, view.state.schema.marks.code.create()));
+        enter();
+        typeText("## ");
+        typeText("같은 노트의 제목");
+        enter();
+        typeText("- ");
+        typeText("같은 노트의 목록");
+      });
+      const saveButton = [...document.querySelectorAll('button')].find(
+        (button) => button.textContent === "초안 저장",
+      );
+      await act(async () => saveButton.click());
+      assert.equal(errors.length, 0, errors.map(String).join("\n"));
+      const draft = saved.at(-1)[0];
+      const notebook = draft.blocks.find((block) => block.type === "notebook");
+      assert.deepEqual(notebook.children.map((block) => block.type), [
+        "paragraph", "heading", "bulletListItem",
+      ]);
+      assert.ok(notebook.children[0].content.some(
+        (part) => part.text === "recall" && part.styles.code,
+      ));
+      assert.ok(draft.markdown.includes("한글 English"));
+      assert.ok(draft.excerpt.includes("한글 English"));
+
+      await act(async () => root.render(React.createElement(Editor, {
+        key: "reopened-notebook",
+        post: draft,
+        onClose() {},
+        onSaved(drafts) { saved.push(drafts); },
+      })));
+      assert.ok(document.querySelector('.ivory-notebook-content').textContent.includes("한글 English"));
+      assert.equal(document.querySelector('.ivory-notebook code').textContent, "recall");
+      await act(async () => document.querySelector('.editor-save').click());
+      const reopened = saved.at(-1)[0].blocks.find((block) => block.type === "notebook");
+      assert.deepEqual(reopened, notebook);
+
     },
   );
 });

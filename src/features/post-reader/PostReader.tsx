@@ -61,12 +61,14 @@ export default function PostReader({
     const marker = line.match(/^\s*(\x60{3}|~~~)/)?.[1];
     if (marker) fence = fence ? "" : marker;
     if (fence) return;
-    const heading = line.match(/^(#{1,3})\s+(.+)$/);
+    const markdownHeading = line.match(/^(#{1,3})\s+(.+)$/);
+    const heading =
+      markdownHeading ?? line.match(/^\s*<h([1-3])\b[^>]*>(.*?)<\/h\1>/i);
     if (heading)
       headings.push({
         title: headingText(heading[2]),
         line: index + 1,
-        level: heading[1].length,
+        level: markdownHeading ? heading[1].length : Number(heading[1]),
       });
   });
   const scrollBehavior = () =>

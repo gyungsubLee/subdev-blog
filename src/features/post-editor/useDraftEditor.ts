@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
-import type { PartialBlock } from "@blocknote/core";
+import type { Block, PartialBlock } from "@blocknote/core";
 import { ko } from "@blocknote/core/locales";
 import { readDrafts, saveDraft } from "../../shared/drafts.mjs";
 import {
@@ -12,6 +12,7 @@ import { downloadFile } from "../../shared/download-file.mjs";
 import type { Post } from "../../shared/post";
 import { editorSchema } from "./code-block";
 import { editorConfig } from "./config";
+import { serializeEditorMarkdown } from "./document-markdown";
 import { notionExtension } from "./notion-extension";
 import { syntaxHighlighting } from "./syntax-highlighting";
 
@@ -34,6 +35,20 @@ function initialDraft(post: Post | null): Draft | null {
     (draft: Draft) => draft.id === post.id,
   );
   return saved ?? null;
+}
+
+function draftText(blocks: Block<typeof editorSchema.blockSchema>[]): string {
+  return blocks
+    .map((block) => {
+      const content =
+        "content" in block && Array.isArray(block.content)
+          ? block.content.map((part) => ("text" in part ? part.text : "")).join("")
+          : "";
+      const children = draftText(block.children ?? []);
+      return [content, children].filter(Boolean).join(" ");
+    })
+    .filter(Boolean)
+    .join(" ");
 }
 
 export function useDraftEditor({ post, onClose, onSaved }: DraftEditorProps) {
@@ -83,19 +98,10 @@ export function useDraftEditor({ post, onClose, onSaved }: DraftEditorProps) {
       category: latest.current.category.trim() || editorConfig.defaultCategory,
       createdAt,
       updatedAt: now,
-      markdown: editor.blocksToMarkdownLossy(editor.document),
+      markdown: serializeEditorMarkdown(editor),
       path: "",
       url: "",
-      excerpt: editor.document
-        .map((block) =>
-          "content" in block && Array.isArray(block.content)
-            ? block.content
-                .map((part) => ("text" in part ? part.text : ""))
-                .join("")
-            : "",
-        )
-        .join(" ")
-        .slice(0, 180),
+      excerpt: draftText(editor.document).slice(0, 180),
       draft: true,
       blocks: editor.document,
       editorVersion: 1,

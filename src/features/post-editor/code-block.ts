@@ -4,6 +4,7 @@ import {
   createCodeBlockSpec,
   type BlockImplementation,
 } from "@blocknote/core";
+import { notebookBlockSpec } from "./notebook-block";
 
 export const languages = {
   text: { name: "Plain text" },
@@ -167,5 +168,5 @@ export const codeBlockSpec = createBlockSpec<
 )();
 
 export const editorSchema = BlockNoteSchema.create().extend({
-  blockSpecs: { codeBlock: codeBlockSpec },
+  blockSpecs: { codeBlock: codeBlockSpec, notebook: notebookBlockSpec },
 });
