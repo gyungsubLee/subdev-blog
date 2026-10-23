@@ -34,7 +34,8 @@
     "rehype-sanitize": "^6.0.0",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
-    "shiki": "^4.5.0"
+    "shiki": "^4.5.0",
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",
