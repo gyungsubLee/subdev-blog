@@ -349,10 +349,13 @@ export function toPublicPosts(snapshot) {
       revision: entry.revision,
       bodyLoaded: true,
     };
-  }).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt) || a.id.localeCompare(b.id));
+  }).sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt) || a.id.localeCompare(b.id));
 }
 
-/** Validate all inputs in staging before publishing assets and replacing canonical Markdown. */
+/**
+ * Validate before publication. A committed save may return cleanupWarnings;
+ * rejected publication preserves its cause and retains recovery files if restoration fails.
+ */
 export async function writeContentDocument(
   root, document, assets, { expectedRevision } = {},
 ) {
@@ -379,6 +382,12 @@ export async function writeContentDocument(
   let publishedMarkdown;
   let renamedOriginal;
   let previous;
+  let backup;
+  let sameFilesystemPath = false;
+  let result;
+  let failure;
+  let retainStage = false;
+  const cleanupErrors = [];
   try {
     const snapshot = await readContent(directory);
     previous = snapshot.documents.get(metadata.id);
@@ -428,8 +437,11 @@ export async function writeContentDocument(
       await writeFile(path.join(stage, "assets", asset.name), asset.bytes, { flag: "wx" });
     if (previous) {
       await regularPath(previous.absolutePath);
-      if (hash(await readFile(previous.absolutePath)) !== expectedRevision)
+      const originalBytes = await readFile(previous.absolutePath);
+      if (hash(originalBytes) !== expectedRevision)
         throw new Error("The source revision changed before save.");
+      backup = path.join(stage, "original.tmp");
+      await writeFile(backup, originalBytes, { flag: "wx", mode: 0o600 });
     } else {
       await mkdir(folder);
       createdFolder = true;
@@ -440,7 +452,7 @@ export async function writeContentDocument(
       await link(path.join(stage, "assets", asset.name), target);
       publishedAssets.push(target);
     }
-    let sameFilesystemPath = previous?.absolutePath === absolutePath;
+    sameFilesystemPath = previous?.absolutePath === absolutePath;
     if (previous && !sameFilesystemPath) {
       try {
         const target = await lstat(absolutePath);
@@ -460,17 +472,60 @@ export async function writeContentDocument(
     await rename(path.join(stage, "document.tmp"), absolutePath);
     publishedMarkdown = absolutePath;
     if (previous && !sameFilesystemPath) await rm(previous.absolutePath);
-    return { id: metadata.id, filename, revision: candidate.revision };
+    result = { id: metadata.id, filename, revision: candidate.revision };
   } catch (error) {
-    if (renamedOriginal && !publishedMarkdown)
-      await rename(renamedOriginal, previous.absolutePath);
-    if (publishedMarkdown && previous?.absolutePath !== publishedMarkdown)
-      await rm(publishedMarkdown, { force: true });
-    for (const asset of publishedAssets) await rm(asset, { force: true });
-    if (createdFolder) await rm(folder, { recursive: true, force: true });
-    throw error;
+    const restore = [];
+    if (renamedOriginal)
+      restore.push(() => rename(renamedOriginal, previous.absolutePath));
+    if (publishedMarkdown && previous)
+      restore.push(() => rename(backup, previous.absolutePath));
+    if (publishedMarkdown && !sameFilesystemPath)
+      restore.push(() => rm(publishedMarkdown, { force: true }));
+    for (const asset of publishedAssets)
+      restore.push(() => rm(asset, { force: true }));
+    if (createdFolder)
+      restore.push(() => rm(folder, { recursive: true, force: true }));
+
+    const restorationErrors = [];
+    for (const operation of restore) {
+      try {
+        await operation();
+      } catch (restoreError) {
+        restorationErrors.push(restoreError);
+      }
+    }
+    failure = error;
+    if (restorationErrors.length) {
+      retainStage = true;
+      failure = new AggregateError(
+        [error, ...restorationErrors],
+        "Content publication failed and restoration is incomplete. Recovery files: " + stage,
+        { cause: error },
+      );
+    }
   } finally {
-    if (stage) await rm(stage, { recursive: true, force: true });
-    await rm(lock, { recursive: true, force: true });
+    const cleanupTargets = [lock];
+    if (stage && !retainStage) cleanupTargets.unshift(stage);
+    for (const target of cleanupTargets) {
+      try {
+        await rm(target, { recursive: true, force: true });
+      } catch (error) {
+        cleanupErrors.push({ target, error });
+      }
+    }
   }
+  if (failure) {
+    if (cleanupErrors.length)
+      throw new AggregateError(
+        [failure, ...cleanupErrors.map(({ error }) => error)],
+        "Content publication failed and cleanup is incomplete.",
+        { cause: failure },
+      );
+    throw failure;
+  }
+  if (cleanupErrors.length)
+    result.cleanupWarnings = cleanupErrors.map(
+      ({ target, error }) => "Cleanup failed for " + target + ": " + error.message,
+    );
+  return result;
 }

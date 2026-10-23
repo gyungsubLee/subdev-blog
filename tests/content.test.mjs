@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import fsPromises from "node:fs/promises";
+import { syncBuiltinESMExports } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -215,4 +217,99 @@ test("keeps the original source URL in the reader's source link", async (t) => {
   const posts = toPublicPosts(await readContent(root));
   assert.equal(posts.find((post) => post.id === parentId).url, "https://example.notion.site/original");
   assert.equal(posts.find((post) => post.id === inheritedChildId).url, "");
+});
+
+
+test("orders mixed-offset timestamps chronologically and retains the original strings", async (t) => {
+  const root = await fixture(t, [
+    document(parentId, { updated: "2025-01-02T00:30:00+09:00" }),
+    document(inheritedChildId, { updated: "2025-01-01T20:00:00Z" }),
+    document(explicitChildId, { updated: "2025-01-01T20:00:00.000Z" }),
+  ]);
+  const posts = toPublicPosts(await readContent(root));
+  assert.deepEqual(posts.map((post) => post.id), [inheritedChildId, explicitChildId, parentId]);
+  assert.equal(posts[2].updatedAt, "2025-01-02T00:30:00+09:00");
+});
+
+test("returns a committed save with a cleanup warning and still releases its lock", async (t) => {
+  const root = await fixture(t, [document()]);
+  const original = (await readContent(root)).documents.get(parentId);
+  const realRm = fsPromises.rm;
+  t.mock.method(fsPromises, "rm", async (filename, options) => {
+    if (String(filename).includes(".content-stage-")) {
+      const error = new Error("Injected stage cleanup denial");
+      error.code = "EACCES";
+      throw error;
+    }
+    return realRm(filename, options);
+  });
+  syncBuiltinESMExports();
+  let result;
+  try {
+    result = await writeContentDocument(root, { metadata: original.metadata, markdown: "Committed new body" }, [], { expectedRevision: original.revision });
+  } finally {
+    t.mock.restoreAll();
+    syncBuiltinESMExports();
+  }
+  assert.equal((await readContent(root)).documents.get(parentId).markdown, "Committed new body");
+  assert.ok(result.cleanupWarnings.some((warning) => warning.includes("Injected stage cleanup denial")));
+  assert.equal((await readdir(root)).includes(".content-write-lock"), false);
+  const saved = (await readContent(root)).documents.get(parentId);
+  await writeContentDocument(root, { metadata: saved.metadata, markdown: "Next save" }, [], { expectedRevision: saved.revision });
+});
+
+test("publication failure restores old Markdown and removes newly published attachments", async (t) => {
+  const root = await fixture(t, [document()]);
+  const original = (await readContent(root)).documents.get(parentId);
+  const bytes = await readFile(original.absolutePath);
+  const realRm = fsPromises.rm;
+  const failure = Object.assign(new Error("Injected old-document removal denial"), { code: "EACCES" });
+  t.mock.method(fsPromises, "rm", async (filename, options) => {
+    if (filename === original.absolutePath) throw failure;
+    return realRm(filename, options);
+  });
+  syncBuiltinESMExports();
+  try {
+    await assert.rejects(writeContentDocument(root, { metadata: { ...original.metadata, title: "Renamed" }, markdown: "![new](./new.png)" }, [{ name: "new.png", bytes: Buffer.from("new") }], { expectedRevision: original.revision }), (error) => error === failure);
+  } finally {
+    t.mock.restoreAll();
+    syncBuiltinESMExports();
+  }
+  assert.deepEqual(await readFile(original.absolutePath), bytes);
+  assert.deepEqual(await readdir(path.dirname(original.absolutePath)), ["Title.md"]);
+  assert.equal((await readdir(root)).includes(".content-write-lock"), false);
+});
+
+test("retains recovery bytes and the publication cause when rollback cannot restore", async (t) => {
+  const root = await fixture(t, [document()]);
+  const original = (await readContent(root)).documents.get(parentId);
+  const bytes = await readFile(original.absolutePath);
+  const realRm = fsPromises.rm;
+  const realRename = fsPromises.rename;
+  const publicationError = new Error("Injected publication failure");
+  const restorationError = new Error("Injected restoration failure");
+  t.mock.method(fsPromises, "rm", async (filename, options) => {
+    if (filename === original.absolutePath) throw publicationError;
+    return realRm(filename, options);
+  });
+  t.mock.method(fsPromises, "rename", async (from, to) => {
+    if (path.basename(from) === "original.tmp") throw restorationError;
+    return realRename(from, to);
+  });
+  syncBuiltinESMExports();
+  try {
+    await assert.rejects(writeContentDocument(root, { metadata: { ...original.metadata, title: "Renamed" }, markdown: "New body" }, [], { expectedRevision: original.revision }), (error) => {
+      assert.equal(error.cause, publicationError);
+      assert.ok(error.errors.includes(restorationError));
+      return true;
+    });
+  } finally {
+    t.mock.restoreAll();
+    syncBuiltinESMExports();
+  }
+  assert.deepEqual(await readFile(original.absolutePath), bytes);
+  const recovery = (await readdir(root)).find((name) => name.startsWith(".content-stage-"));
+  assert.ok(recovery);
+  assert.deepEqual(await readFile(path.join(root, recovery, "original.tmp")), bytes);
+  assert.equal((await readdir(root)).includes(".content-write-lock"), false);
 });

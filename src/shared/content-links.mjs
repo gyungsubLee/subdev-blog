@@ -1,7 +1,38 @@
 import { parse, postprocess, preprocess } from "micromark";
 import { decodeString } from "micromark-util-decode-string";
 import { parseFragment } from "parse5";
-import { decodeHTMLAttribute } from "entities";
+import { DecodingMode, EntityDecoder, htmlDecodeTree } from "entities/decode";
+
+function decodeAttributeSource(source) {
+  let value = "";
+  let cursor = 0;
+  const starts = [];
+  const ends = [];
+  const decoder = new EntityDecoder(htmlDecodeTree, (codePoint, consumed) => {
+    const decoded = String.fromCodePoint(codePoint);
+    value += decoded;
+    for (let index = 0; index < decoded.length; index++) {
+      starts.push(cursor);
+      ends.push(cursor + consumed);
+    }
+  });
+  while (cursor < source.length) {
+    if (source[cursor] === "&") {
+      decoder.startEntity(DecodingMode.Attribute);
+      let consumed = decoder.write(source, cursor + 1);
+      if (consumed < 0) consumed = decoder.end();
+      if (consumed > 0) {
+        cursor += consumed;
+        continue;
+      }
+    }
+    value += source[cursor];
+    starts.push(cursor);
+    ends.push(cursor + 1);
+    cursor++;
+  }
+  return { value, starts, ends };
+}
 
 /** Rewrite destination source ranges, retaining all other Markdown/HTML bytes. */
 export function rewriteContentLinks(markdown, resolve) {
@@ -9,18 +40,21 @@ export function rewriteContentLinks(markdown, resolve) {
     parse().document().write(preprocess()(markdown, undefined, true)),
   );
   const protectedRanges = [];
+  const htmlRanges = [];
   for (const [event, token] of events) {
     if (event !== "enter") continue;
     const range = [token.start.offset, token.end.offset];
     if (["codeFenced", "codeIndented", "codeText"].includes(token.type))
       protectedRanges.push(range);
+    if (["htmlFlow", "htmlText"].includes(token.type)) htmlRanges.push(range);
   }
   const inside = (offset, ranges) =>
     ranges.some(([start, end]) => offset >= start && offset < end);
-  let htmlSource = markdown;
-  for (const [start, end] of protectedRanges)
+  // Retain HTML tokens in one positional document so inline code/pre pairs still nest.
+  let htmlSource = markdown.replace(/[^\r\n]/g, " ");
+  for (const [start, end] of htmlRanges)
     htmlSource = htmlSource.slice(0, start) +
-      htmlSource.slice(start, end).replace(/[^\r\n]/g, " ") +
+      markdown.slice(start, end) +
       htmlSource.slice(end);
 
   const replacements = [];
@@ -46,7 +80,6 @@ export function rewriteContentLinks(markdown, resolve) {
         const quote = prefix[1];
         const start = attrLocation.startOffset + prefix[0].length;
         const end = attrLocation.endOffset - (quote ? 1 : 0);
-        const value = markdown.slice(start, end);
         const context = {
           kind: attr.name === "href" ? "link" : "image",
           attribute: attr.name,
@@ -69,6 +102,7 @@ export function rewriteContentLinks(markdown, resolve) {
           continue;
         }
         // Follow srcset URL/descriptor boundaries; commas inside data URLs are URL bytes.
+        const { value, starts, ends } = decodeAttributeSource(markdown.slice(start, end));
         let cursor = 0;
         while (cursor < value.length) {
           while (/[\s,]/.test(value[cursor] ?? "") && cursor < value.length) cursor++;
@@ -78,8 +112,8 @@ export function rewriteContentLinks(markdown, resolve) {
           while (value[urlEnd - 1] === ",") urlEnd--;
           if (urlEnd > urlStart)
             replace(
-              start + urlStart, start + urlEnd,
-              decodeHTMLAttribute(value.slice(urlStart, urlEnd)), context, encode,
+              start + starts[urlStart], start + ends[urlEnd - 1],
+              value.slice(urlStart, urlEnd), context, encode,
             );
           if (urlEnd !== cursor) continue;
           let parentheses = 0;
