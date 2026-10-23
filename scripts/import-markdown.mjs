@@ -4,8 +4,10 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { parseMarkdownDocument } from "../src/shared/document.mjs";
+import { assertLegacyContentWritable } from "./content.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+await assertLegacyContentWritable(root);
 const input = process.argv[2];
 if (!input)
   throw new Error("Usage: npm run import:md -- /absolute/path/article.md");

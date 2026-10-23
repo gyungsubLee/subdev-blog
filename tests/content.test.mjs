@@ -407,7 +407,7 @@ async function legacyProject(t) {
   const root = await realpath(await mkdtemp(path.join(os.tmpdir(), "legacy-content-cli-")));
   t.after(() => rm(root, { recursive: true, force: true }));
   await mkdir(path.join(root, "scripts"));
-  for (const filename of ["content.mjs", "export-notion.mjs", "repair-markdown.mjs", "prepare-web-assets.mjs"])
+  for (const filename of ["content.mjs", "export-notion.mjs", "repair-markdown.mjs", "prepare-web-assets.mjs", "import-markdown.mjs"])
     await cp(path.resolve("scripts", filename), path.join(root, "scripts", filename));
   await cp(path.resolve("src/shared"), path.join(root, "src/shared"), { recursive: true });
   await symlink(path.resolve("node_modules"), path.join(root, "node_modules"));
@@ -418,10 +418,11 @@ async function legacyProject(t) {
     ["manifest.json", { assetDetails: [], archivePath: path.join(root, "archive") }],
   ]) await writeFile(path.join(root, "content", filename), JSON.stringify(value));
   await writeFile(path.join(root, "public/notion/asset-map.json"), "PREVIOUS_PUBLIC_BYTES");
+  await writeFile(path.join(root, "input.md"), `---\nid: ${parentId}\ntitle: Legacy import\ncategory: 개발\ncreated: 2025-01-01\n---\n# Legacy import\n\nPreserved body.\n`);
   return root;
 }
 
-for (const script of ["export-notion.mjs", "repair-markdown.mjs", "prepare-web-assets.mjs"]) {
+for (const script of ["export-notion.mjs", "repair-markdown.mjs", "prepare-web-assets.mjs", "import-markdown.mjs"]) {
   test(`${script} refuses direct legacy writes for selected and uninitialized canonical content`, async (t) => {
     const project = await legacyProject(t);
     const canonical = await fixture(t, [document()]);
@@ -450,6 +451,7 @@ for (const script of ["export-notion.mjs", "repair-markdown.mjs", "prepare-web-a
       const result = spawnSync(process.execPath, [
         "--permission", "--allow-fs-read=*", `--allow-fs-write=${project}`,
         path.join(project, "scripts", script),
+        ...(script === "import-markdown.mjs" ? [path.join(project, "input.md")] : []),
       ], { cwd: project, env, encoding: "utf8", timeout: 10_000 });
       assert.notEqual(result.status, 0, script + ": " + mode);
       assert.match(result.stderr, /Legacy content writes are disabled/, script + ": " + mode);
@@ -458,9 +460,28 @@ for (const script of ["export-notion.mjs", "repair-markdown.mjs", "prepare-web-a
       if (!["uninitialized", "missing"].includes(mode))
         assert.equal(await readFile(legacyFilename, "utf8"), "[]");
       assert.equal((await readdir(path.join(project, "content"))).includes("raw"), false);
+      assert.equal((await readdir(path.join(project, "content"))).includes("written"), false);
+      assert.doesNotMatch(result.stdout, /Imported:|deploy to Vercel/);
     }
   });
 }
+
+test("import-markdown.mjs retains its legacy backup-checkout behavior", async (t) => {
+  const project = await legacyProject(t);
+  const env = { ...process.env };
+  delete env.CONTENT_ROOT;
+  const result = spawnSync(process.execPath, [
+    "--permission", "--allow-fs-read=*", `--allow-fs-write=${project}`,
+    path.join(project, "scripts/import-markdown.mjs"), path.join(project, "input.md"),
+  ], { cwd: project, env, encoding: "utf8", timeout: 10_000 });
+  assert.equal(result.status, 0, result.stderr);
+  const imported = JSON.parse(await readFile(path.join(project, "content/written", parentId + ".json"), "utf8"));
+  assert.equal(imported.id, parentId);
+  assert.equal(imported.title, "Legacy import");
+  assert.equal(imported.markdown.trim(), "Preserved body.");
+  assert.equal(await readFile(path.join(project, "content/posts.json"), "utf8"), "[]");
+  assert.equal(await readFile(path.join(project, "public/notion/asset-map.json"), "utf8"), "PREVIOUS_PUBLIC_BYTES");
+});
 
 test("legacy modules remain importable without reading or writing content", async (t) => {
   const project = await legacyProject(t);
