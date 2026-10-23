@@ -5,6 +5,36 @@ import MarkdownContent from "./MarkdownContent";
 import { scrollToFragment } from "./page-links";
 import "./post-reader.css";
 
+function headingText(source: string) {
+  const namedEntities: Record<string, string> = {
+    amp: "&",
+    lt: "<",
+    gt: ">",
+    quot: '"',
+    apos: "'",
+    nbsp: "\u00a0",
+  };
+  return source
+    .replace(/<[^>]+>/g, "")
+    .replace(/[*_\x60]/g, "")
+    .replace(
+      /&(#(?:x[\da-f]+|\d+)|amp|lt|gt|quot|apos|nbsp);/gi,
+      (entity, name: string) => {
+        if (!name.startsWith("#")) return namedEntities[name.toLowerCase()];
+        const hex = name[1].toLowerCase() === "x";
+        const codePoint = Number.parseInt(name.slice(hex ? 2 : 1), hex ? 16 : 10);
+        if (
+          codePoint <= 0 ||
+          codePoint > 0x10ffff ||
+          (codePoint >= 0xd800 && codePoint <= 0xdfff)
+        ) {
+          return entity;
+        }
+        return String.fromCodePoint(codePoint);
+      },
+    );
+}
+
 export default function PostReader({
   post,
   posts,
@@ -34,7 +64,7 @@ export default function PostReader({
     const heading = line.match(/^(#{1,3})\s+(.+)$/);
     if (heading)
       headings.push({
-        title: heading[2].replace(/[*_\x60]/g, ""),
+        title: headingText(heading[2]),
         line: index + 1,
         level: heading[1].length,
       });

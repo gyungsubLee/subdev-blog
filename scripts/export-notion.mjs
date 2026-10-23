@@ -288,26 +288,43 @@ function rewriteUrl(url, fromPage) {
   return candidate;
 }
 
+// Entities keep source punctuation literal in both Markdown and raw HTML containers.
+function inlineText(value) {
+  return String(value).replace(/[&<>"'\\`*_[\]~#!|+.:@$\-]/g, character => '&#' + character.charCodeAt(0) + ';');
+}
+
+function inlineLink(text, url) {
+  const destination = String(url ?? '');
+  const scheme = destination.replace(/[\x00-\x20\x7f]/g, '').match(/^([a-z][a-z\d+.-]*):/i)?.[1].toLowerCase();
+  if (scheme && !['http', 'https', 'mailto', 'tel', 'ftp', 'irc', 'ircs', 'xmpp'].includes(scheme)) return text;
+  return '<a href="' + destination.replace(/[&<>"']/g, character => '&#' + character.charCodeAt(0) + ';') + '">' + text + '</a>';
+}
+
 export function richText(value, link = value => value) {
-  return (value ?? []).map(([text, annotations = []]) => {
-    let result = text;
-    const inlineCode = annotations.some(annotation => annotation[0] === 'c');
-    if (!inlineCode) result = result.replace(/[\\*_[\]\x60]/g, '\\$&').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-    if (inlineCode) {
-      const fence = result.includes('`') ? '``' : '`';
-      result = fence + (result.startsWith('`') ? ' ' : '') + result + (result.endsWith('`') ? ' ' : '') + fence;
-    }
+  const runs = [];
+  let previousSimpleCode = false;
+  for (const [text, annotations = []] of value ?? []) {
+    const simpleCode = annotations.some(([type]) => type === 'c') &&
+      annotations.every(([type]) => type === 'c' || type === 'h');
+    if (simpleCode && previousSimpleCode) runs.at(-1)[0] += text;
+    else runs.push([text, annotations]);
+    previousSimpleCode = simpleCode;
+  }
+  return runs.map(([text, annotations]) => {
+    let result = inlineText(text).replace(/\r\n?|\n/g, '<br>');
+    if (annotations.some(annotation => annotation[0] === 'c')) result = '<code>' + result + '</code>';
     for (const [type, target] of annotations) {
-      if (type === 'b') result = '**' + result + '**';
-      if (type === 'i') result = '_' + result + '_';
-      if (type === 's') result = '~~' + result + '~~';
+      if (type === 'b') result = '<strong>' + result + '</strong>';
+      if (type === 'i') result = '<em>' + result + '</em>';
+      if (type === 's') result = '<del>' + result + '</del>';
       if (type === '_') result = '<u>' + result + '</u>';
-      if (type === 'a') result = '[' + result + '](' + link(target) + ')';
-      if (type === 'p') result = '[' + (result === '‣' ? '페이지' : result) + '](' + link(notionUrl(target)) + ')';
-      if (type === 'e') result = '$' + target + '$';
-      if (type === 'd') result = target?.start_date ?? result;
-      if (type === 'u') result = '@' + target;
-      if (type === 'ce') result = result === '‣' ? '' : result;
+      if (type === 'a') result = inlineLink(result, link(target));
+      if (type === 'p') result = inlineLink(text === '‣' ? '페이지' : result, link(notionUrl(target)));
+      // Keep formula line feeds as text even inside Markdown table cells.
+      if (type === 'e') result = '<code class="language-math">' + inlineText(target).replace(/\r\n?|\n/g, '&#10;') + '</code>';
+      if (type === 'd') result = inlineText(target?.start_date ?? text);
+      if (type === 'u') result = '@' + inlineText(target);
+      if (type === 'ce') result = text === '‣' ? '' : result;
     }
     return result;
   }).join('');
@@ -350,7 +367,7 @@ function renderBlock(id, page, stack = new Set()) {
     }
     case 'quote': return (text + suffix(nested())).split('\n').map(line => '> ' + line).join('\n');
     case 'callout': return '> ' + (block.format?.page_icon && !block.format.page_icon.includes(':') ? block.format.page_icon + ' ' : '') + (text + suffix(nested())).split('\n').join('\n> ');
-    case 'toggle': return '<details>\n<summary>' + text.replaceAll('<', '&lt;').replaceAll('>', '&gt;') + '</summary>\n\n' + nested() + '\n\n</details>';
+    case 'toggle': return '<details>\n<summary>' + text + '</summary>\n\n' + nested() + '\n\n</details>';
     case 'divider': return '---';
     case 'code': {
       const code = plain(block.properties?.title);
@@ -402,7 +419,7 @@ function renderBlock(id, page, stack = new Set()) {
     case 'table': {
       const rows = children(block).map(rowId => blocks.get(rowId)).filter(Boolean);
       const columns = block.format?.table_block_column_order ?? Object.keys(rows[0]?.properties ?? {});
-      const rendered = rows.map(row => '| ' + columns.map(column => richText(row.properties?.[column], url => rewriteUrl(url, page)).replaceAll('|', '\\|').replaceAll('\n', '<br>')).join(' | ') + ' |');
+      const rendered = rows.map(row => '| ' + columns.map(column => richText(row.properties?.[column], url => rewriteUrl(url, page)).replaceAll('|', '\\|')).join(' | ') + ' |');
       if (!rendered.length) return '';
       const separator = '| ' + columns.map(() => '---').join(' | ') + ' |';
       if (block.format?.table_block_column_header) rendered.splice(1, 0, separator);
@@ -634,7 +651,55 @@ export async function writeMarkdown(relativePath, content, directory = archive) 
 }
 
 export function webMarkdown(markdown) {
-  return markdown.replace(/(\]\()(?:\.\.\/)+(assets\/[^)\s]+)(\))/g, '$1/notion/$2$3');
+  // Protect code examples before rewriting only link destinations and HTML attributes.
+  const code = /<(code|pre)\b[^>]*>[\s\S]*?<\/\1\s*>|^ {0,3}(`{3,}|~{3,})[^\n]*\n[\s\S]*?^ {0,3}\2[ \t]*$|(`+)(?!`)[\s\S]*?(?<!`)\3(?!`)/gm;
+  const normalize = text => text
+    .replace(/(\]\()(?:\.\.\/|\.\/)*(assets\/[^)\s]+)(\))/g, '$1/notion/$2$3')
+    .replace(/(\b(?:src|href)\s*=\s*["'])(?:\.\.\/|\.\/)*(assets\/[^"']+)(["'])/gi, '$1/notion/$2$3');
+  let result = '';
+  let cursor = 0;
+  for (const match of markdown.matchAll(code)) {
+    result += normalize(markdown.slice(cursor, match.index)) + match[0];
+    cursor = match.index + match[0].length;
+  }
+  return result + normalize(markdown.slice(cursor));
+}
+
+function markdownExcerpt(markdown) {
+  return markdown.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '')
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/#(?!\d+;)|[*`_>]/g, '')
+    .replace(/&#(\d+);/g, (entity, code) => {
+      const codePoint = Number(code);
+      if (codePoint === 0 || codePoint > 0x10ffff || (codePoint >= 0xd800 && codePoint <= 0xdfff)) return entity;
+      return String.fromCodePoint(codePoint);
+    })
+    .replace(/\s+/g, ' ').trim().slice(0, 180);
+}
+
+export function renderArchivedPosts(sourceRecords, existingPosts, manifest) {
+  blocks.clear();
+  pages.clear();
+  assetMap.clear();
+  collectionRows.clear();
+  exportedBlockIds.clear();
+  externalEmbeds.length = 0;
+  warnings.clear();
+  for (const table of Object.keys(records)) delete records[table];
+  merge(sourceRecords);
+  for (const post of existingPosts) pages.set(post.id, { ...post });
+  for (const id of blocks.keys()) exportedBlockIds.add(id);
+  for (const { id, rowIds } of manifest.collectionRows ?? []) collectionRows.set(id, rowIds);
+  gatherAssets();
+  const assetsBySource = new Map((manifest.assetDetails ?? []).map(asset => [asset.source, asset]));
+  for (const asset of assetMap.values()) Object.assign(asset, assetsBySource.get(asset.source));
+  return existingPosts.map(post => {
+    const block = blocks.get(post.id);
+    if (!block) throw new Error('Archived page record is missing: ' + post.id);
+    const markdown = renderChildren(block, pages.get(post.id)).trim() + '\n';
+    return { ...post, markdown: webMarkdown(markdown), excerpt: markdownExcerpt(markdown) };
+  });
 }
 
 async function main() {
@@ -660,7 +725,7 @@ async function main() {
   for (const page of pages.values()) {
     const block = blocks.get(page.id);
     page.markdown = renderChildren(block, page).trim() + '\n';
-    page.excerpt = page.markdown.replace(/<[^>]+>/g, '').replace(/!\[[^\]]*\]\([^)]+\)/g, '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/[#*`_>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 180);
+    page.excerpt = markdownExcerpt(page.markdown);
     const coverAsset = assetMap.get(block.format?.page_cover + '|' + block.id);
     page.cover = coverAsset?.path ? '/notion/' + coverAsset.path : null;
     let iconSource = block.format?.page_icon;

@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { richText, relativePageLink, webMarkdown, validateAssetUrl, writeMarkdown, ROOT_ID } from '../scripts/export-notion.mjs';
+import { richText, relativePageLink, webMarkdown, validateAssetUrl, writeMarkdown, renderArchivedPosts, ROOT_ID } from '../scripts/export-notion.mjs';
 
-assert.equal(richText([['strong', [['b']]], [' ', []], ['link', [['a', 'https://example.com']]]]), '**strong** [link](https://example.com)');
-assert.equal(richText([['a`b', [['c']]]]), '``a`b``');
-assert.equal(richText([['reference', [['p', ROOT_ID]]]], url => url.replace('https://beautiful-college-c84.notion.site', 'local:')), '[reference](local:/' + ROOT_ID.replaceAll('-', '') + ')');
+assert.equal(richText([['strong', [['b']]], [' ', []], ['link', [['a', 'https://example.com']]]]), '<strong>strong</strong> <a href="https://example.com">link</a>');
+assert.equal(richText([['a`b', [['c']]]]), '<code>a&#96;b</code>');
+assert.equal(richText([['reference', [['p', ROOT_ID]]]], url => url.replace('https://beautiful-college-c84.notion.site', 'https://local.example')), '<a href="https://local.example/' + ROOT_ID.replaceAll('-', '') + '">reference</a>');
 assert.equal(relativePageLink('Main/부모/index.md', 'Main/자식 (제목)/index.md'), '../%EC%9E%90%EC%8B%9D%20%28%EC%A0%9C%EB%AA%A9%29/index.md');
 assert.equal(webMarkdown('![a](../../assets/a.png)'), '![a](/notion/assets/a.png)');
 assert.equal(relativePageLink('Main/index.md', 'Main/index.md', 'aa-bb'), 'index.md#aabb');
@@ -31,10 +31,18 @@ try {
 
 const posts = JSON.parse(await fs.readFile(new URL('../content/posts.json', import.meta.url), 'utf8'));
 const manifest = JSON.parse(await fs.readFile(new URL('../content/manifest.json', import.meta.url), 'utf8'));
+const archiveManifest = JSON.parse(await fs.readFile(path.join(manifest.archivePath, 'manifest.json'), 'utf8'));
+const archiveAssets = new Map(archiveManifest.assetDetails.map(asset => [asset.source, asset]));
 assert(posts.length > 0, 'Export contains no pages');
 assert.equal(posts.length, manifest.pageCount);
 assert.equal(new Set(posts.map(post => post.id)).size, posts.length);
 assert(posts.some(post => post.id === ROOT_ID));
+const records = JSON.parse(await fs.readFile(new URL('../content/records.json', import.meta.url), 'utf8'));
+const regenerated = renderArchivedPosts(records, posts, manifest);
+for (const [index, post] of regenerated.entries()) {
+  assert.equal(post.markdown, posts[index].markdown, 'Saved records reproduce body: ' + post.id);
+  assert.equal(post.excerpt, posts[index].excerpt, 'Saved records reproduce excerpt: ' + post.id);
+}
 const ids = new Set(posts.map(post => post.id));
 let checkedLinks = 0;
 const brokenLinks = [];
@@ -43,7 +51,7 @@ for (const post of posts) {
   const filename = path.join(manifest.archivePath, post.path);
   const stored = await fs.readFile(filename, 'utf8');
   assert(stored.includes('notion_id: "' + post.id + '"'));
-  assert(webMarkdown(stored).endsWith(post.markdown));
+  // The archive preserves the original export; web bodies are regenerated from records.
   const body = stored.replace(/^```[^\n]*\n[\s\S]*?^```\s*$/gm, '');
   for (const match of body.matchAll(/\]\(([^)\s]+)\)/g)) {
     const target = match[1].split('#')[0];
@@ -56,7 +64,9 @@ for (const post of posts) {
 }
 assert.deepEqual(brokenLinks, [], 'Broken local Markdown links');
 for (const asset of manifest.assetDetails.filter(asset => asset.path)) {
-  const stat = await fs.stat(path.join(manifest.archivePath, asset.path));
+  const archived = archiveAssets.get(asset.source) ?? asset;
+  assert.equal(archived.bytes, asset.bytes, 'Archived asset metadata changed: ' + asset.source);
+  const stat = await fs.stat(path.join(manifest.archivePath, archived.path));
   assert(stat.size > 0, 'Empty asset: ' + asset.path);
 }
 console.log(JSON.stringify({ pages: posts.length, localLinks: checkedLinks, assets: manifest.assets, unavailableBlocks: manifest.unavailable.length, warningCount: manifest.warnings.length, warningSummary: manifest.warnings.reduce((summary, warning) => { const kind = warning.split(':')[0]; summary[kind] = (summary[kind] ?? 0) + 1; return summary; }, {}) }, null, 2));

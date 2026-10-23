@@ -1,13 +1,21 @@
 import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 import type { Post } from "../../shared/post";
 import MarkdownCodeBlock from "./MarkdownCodeBlock";
 import { pageLink, scrollToFragment } from "./page-links";
 
 const markdownSchema = {
   ...defaultSchema,
+  tagNames: [...(defaultSchema.tagNames || []), "u"],
+  attributes: {
+    ...defaultSchema.attributes,
+    code: [["className", /^language-./, "math-inline", "math-display"]],
+  },
   protocols: { ...defaultSchema.protocols, src: ["http", "https", "data"] },
 };
 
@@ -22,8 +30,13 @@ export default function MarkdownContent({
 }) {
   return (
     <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      rehypePlugins={[rehypeRaw, [rehypeSanitize, markdownSchema]]}
+      remarkPlugins={[remarkGfm, remarkMath]}
+      rehypePlugins={[
+        rehypeRaw,
+        // Sanitize authored HTML before KaTeX generates MathML and inline styles.
+        [rehypeSanitize, markdownSchema],
+        [rehypeKatex, { trust: false, strict: "error" }],
+      ]}
       urlTransform={(url, key, node) =>
         key === "src" &&
         node.tagName === "img" &&

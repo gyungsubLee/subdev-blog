@@ -194,6 +194,12 @@
   font-family: monospace;
 }
 
+.article-prose .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 3px 0;
+}
+
 .article-prose .article-code {
   overflow: hidden;
   margin-left: 0;

@@ -4,8 +4,9 @@
 
 공개 Notion 블로그를 Markdown으로 보관하고 웹에서 읽고 쓰는 예시다. 배포 대상은 Vercel이다. 사용자 승인에 따라 프로젝트의 현재·향후 모든 배포에서 인증 보호를 해제했다.
 
-[배포한 블로그](https://notion2md-blog-6mrigosj8-gyungsublees-projects.vercel.app)는 로그인 없이 공개하도록 설정했다.
+[배포한 블로그](https://notion2md-blog-ehkytcr6k-gyungsublees-projects.vercel.app)는 로그인 없이 공개하도록 설정했다.
 수집 결과와 검증 범위는 [수집·배포 기록](docs/MIGRATION.md)에 있다.
+기존 글의 서식 수정과 실행한 검사는 [Markdown 표시 수정 기록](docs/markdown-rendering-repair.md)에 있다.
 
 ## 로컬 실행
 
@@ -131,7 +132,7 @@ CSS는 소유 페이지·기능·컴포넌트 옆에 둔다. 기능별 수치는
 - 목록 요약을 먼저 받고 선택한 글의 본문을 따로 받는다.
 - BlockNote를 필요할 때 불러와 편집기를 연다.
 - 입력 규칙과 키맵은 Notion 문서를 기준으로 보완했다.
-- Markdown의 HTML은 sanitize를 통과한 뒤 표시한다.
+- Markdown의 HTML은 sanitize를 통과한 뒤 표시한다. 수식은 KaTeX로 표시한다.
 - 초안이 손상됐거나 저장에 실패하면 기존 데이터를 덮어쓰지 않는다.
 
 [디자인 근거](docs/design-reference.md)는 Claude 공식 블로그의 정보 구조와 화면 검증 제한을 기록한다.
