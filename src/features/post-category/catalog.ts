@@ -1,9 +1,25 @@
 import type { Post } from "../../shared/post";
 
-export type CategoryItem = { id: string; source: string; name: string };
+import type { CategoryNode } from "./hierarchy";
+
+export type CategoryItem = {
+  id: string;
+  source: string;
+  name: string;
+  sources?: string[];
+  descendantSources?: string[];
+  depth?: number;
+};
 export type CategoryGroup = { id: string; name: string; categories: CategoryItem[] };
 export type CategoryCatalog = {
   groups: CategoryGroup[];
+  nodes: CategoryNode[];
+  saveNodes: (nodes: CategoryNode[]) => boolean;
+  draftNodes: CategoryNode[];
+  stage: (nodes: CategoryNode[]) => void;
+  undo: () => void;
+  canUndo: boolean;
+  dirty: boolean;
   error: string;
   save: (groups: CategoryGroup[]) => boolean;
 };

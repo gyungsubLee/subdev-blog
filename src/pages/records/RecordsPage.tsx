@@ -1,3 +1,4 @@
+import { categoryMatches } from "../../features/post-category/hierarchy";
 import RecordViewIcon from "../../components/icons/RecordViewIcon";
 import { site } from "../../config/site";
 import type {
@@ -39,7 +40,11 @@ export default function RecordsPage({
   const category = group?.categories.find((item) => item.id === browser.categoryId);
   const names = new Map(
     groups.flatMap((item) =>
-      item.categories.map((category) => [category.source, category.name]),
+      item.categories.flatMap((category) =>
+        (category.sources ?? [category.source]).map(
+          (source) => [source, category.name] as const,
+        ),
+      ),
     ),
   );
   const visiblePosts = browser.filteredPosts.slice(0, browser.limit);
@@ -47,7 +52,7 @@ export default function RecordsPage({
 
   function groupPosts(items: Post[], group: CategoryGroup) {
     return items.filter((post) =>
-      group.categories.some((category) => category.source === post.category),
+      group.categories.some((category) => categoryMatches(category, post.category)),
     );
   }
 
@@ -70,6 +75,11 @@ export default function RecordsPage({
       <button
         key={category.id}
         type="button"
+        style={
+          browser.view === "sidebar"
+            ? { paddingLeft: 12 + (category.depth ?? 0) * 16 }
+            : undefined
+        }
         aria-label={category.name}
         aria-pressed={browser.categoryId === category.id}
         onClick={() => browser.selectCategory(category.id)}
@@ -77,7 +87,9 @@ export default function RecordsPage({
         <span>{category.name}</span>
         {browser.view === "sidebar" ? (
           <span className="records-count">
-            {posts.filter((post) => post.category === category.source).length.toLocaleString()}
+            {posts
+              .filter((post) => categoryMatches(category, post.category))
+              .length.toLocaleString()}
           </span>
         ) : null}
       </button>

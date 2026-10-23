@@ -1,439 +1,567 @@
-import { useEffect, useRef, useState, type DragEvent, type FormEvent } from "react";
-import Arrow from "../../components/icons/Arrow";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 import {
   normalizeCategoryName,
   type CategoryCatalog,
-  type CategoryGroup,
-  type CategoryItem,
 } from "../../features/post-category/catalog";
+import {
+  MAX_CATEGORIES,
+  UNCLASSIFIED_CATEGORY_ID,
+  moveCategoryNode,
+  removeCategoryNode,
+  type CategoryNode,
+  type CategoryDrop,
+} from "../../features/post-category/hierarchy";
 import type { Post } from "../../shared/post";
-import { postHref } from "../../shared/routes";
+import { useCategoryDrag } from "./useCategoryDrag";
 import "./CategoriesPage.css";
 
-type CategoriesPageProps = { posts: Post[]; catalog: CategoryCatalog };
-type DraggedItem = { kind: "group" | "category"; id: string };
-type DropTarget = {
-  targetId: string;
-  position: "before" | "after" | "append";
-  index: number;
-  hint: string;
-} & ({ kind: "group" } | { kind: "category"; groupId: string });
+type Editing = {
+  mode: "add" | "edit";
+  id: string | null;
+  parentId: string | null;
+  name: string;
+};
+type Props = { posts: Post[]; catalog: CategoryCatalog };
 
-export default function CategoriesPage({ posts, catalog }: CategoriesPageProps) {
-  const { groups } = catalog;
-  const [selectedId, setSelectedId] = useState<string | null>(() =>
-    groups.flatMap((group) => group.categories).find((item) => item.source === "Spring ( Java )")?.id
-      ?? groups[0]?.categories[0]?.id ?? null);
-  const [adding, setAdding] = useState(false);
-  const [expanded, setExpanded] = useState(() => new Set([
-    "group:backend", "group:learning-tools", "group:unclassified",
-  ]));
+export default function CategoriesPage({ posts, catalog }: Props) {
+  const nodes = catalog.draftNodes;
+  const byId = new Map(nodes.map((node) => [node.id, node]));
+  const [selectedId, setSelectedId] = useState<string | null>(
+    () =>
+      nodes.find((node) => node.name === "기술 면접 준비")?.id ??
+      nodes[0]?.id ??
+      null,
+  );
+  const [expanded, setExpanded] = useState(() => new Set(["group:cs"]));
+  const [editing, setEditing] = useState<Editing | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
-  const dragged = useRef<DraggedItem | null>(null);
-  const [draggedId, setDraggedId] = useState<string | null>(null);
-  const [dropTarget, setDropTarget] = useState<DropTarget | null>(null);
-  const selectedGroup = groups.find((group) => group.categories.some((item) => item.id === selectedId));
-  const selected = selectedGroup?.categories.find((item) => item.id === selectedId);
+  const dialog = useRef<HTMLDialogElement>(null);
+  const children = (parentId: string | null) =>
+    nodes.filter((node) => node.parentId === parentId);
+  const directCounts = new Map<string, number>();
+  for (const post of posts)
+    directCounts.set(post.category, (directCounts.get(post.category) ?? 0) + 1);
   const counts = new Map<string, number>();
-  for (const post of posts) counts.set(post.category, (counts.get(post.category) ?? 0) + 1);
-
-  function save(next: CategoryGroup[]) {
-    setNotice("");
-    if (!catalog.save(next)) return false;
-    setNotice("분류 설정을 저장했습니다.");
-    return true;
-  }
-
-  function moveCategory(id: string, targetGroupId: string, targetIndex: number) {
-    const item = groups.flatMap((group) => group.categories).find((category) => category.id === id);
-    if (!item) return;
-    const next = groups.map((group) => {
-      const categories = group.categories.filter((category) => category.id !== id);
-      if (group.id === targetGroupId) categories.splice(targetIndex, 0, item);
-      return { ...group, categories };
-    });
-    if (save(next)) setExpanded((previous) => new Set([...previous, targetGroupId]));
-  }
-
-  function moveGroup(id: string, targetIndex: number) {
-    const group = groups.find((item) => item.id === id);
-    if (!group) return;
-    const next = groups.filter((item) => item.id !== id);
-    next.splice(targetIndex, 0, group);
-    save(next);
-  }
-
-  function startDrag(event: DragEvent<HTMLElement>, item: DraggedItem) {
-    dragged.current = item;
-    setDraggedId(item.id);
-    setDropTarget(null);
-    setNotice("");
-    event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("text/plain", item.id);
-  }
-
-  function clearDrag() {
-    dragged.current = null;
-    setDraggedId(null);
-    setDropTarget(null);
-  }
-
-  function getDropTarget(event: DragEvent<HTMLElement>, target: DraggedItem): DropTarget | null {
-    const source = dragged.current;
-    if (!source || source.id === target.id) return null;
-
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const position = event.clientY < bounds.top + bounds.height / 2 ? "before" : "after";
-    const offset = position === "after" ? 1 : 0;
-    const direction = position === "before" ? "앞" : "뒤";
-    if (source.kind === "group") {
-      if (target.kind !== "group") return null;
-      const remaining = groups.filter((group) => group.id !== source.id);
-      const index = remaining.findIndex((group) => group.id === target.id);
-      if (index < 0) return null;
-      return {
-        kind: "group",
-        targetId: target.id,
-        position,
-        index: index + offset,
-        hint: `${remaining[index].name} ${direction}로 이동`,
-      };
-    }
-
-    const group = groups.find((group) => target.kind === "group"
-      ? group.id === target.id
-      : group.categories.some((item) => item.id === target.id));
-    if (!group) return null;
-    const categories = group.categories.filter((item) => item.id !== source.id);
-    if (target.kind === "group") {
-      return {
-        kind: "category",
-        groupId: group.id,
-        targetId: group.id,
-        position: "append",
-        index: categories.length,
-        hint: `${group.name} 맨 끝으로 이동`,
-      };
-    }
-    const index = categories.findIndex((item) => item.id === target.id);
-    if (index < 0) return null;
-    return {
-      kind: "category",
-      groupId: group.id,
-      targetId: target.id,
-      position,
-      index: index + offset,
-      hint: `${group.name} · ${categories[index].name} ${direction}로 이동`,
-    };
-  }
-
-  function previewDrop(event: DragEvent<HTMLElement>, target: DraggedItem) {
-    event.stopPropagation();
-    const next = getDropTarget(event, target);
-    setDropTarget(next);
-    if (next) event.preventDefault();
-    if (event.dataTransfer) event.dataTransfer.dropEffect = next ? "move" : "none";
-  }
-
-  function leaveDropTarget(event: DragEvent<HTMLElement>) {
-    const nextTarget = event.relatedTarget;
-    if (!(nextTarget instanceof window.Node) || !event.currentTarget.contains(nextTarget)) {
-      setDropTarget(null);
+  for (const node of nodes) {
+    const count = node.sources.reduce(
+      (total, source) => total + (directCounts.get(source) ?? 0),
+      0,
+    );
+    let ancestor: CategoryNode | undefined = node;
+    while (ancestor) {
+      counts.set(ancestor.id, (counts.get(ancestor.id) ?? 0) + count);
+      ancestor =
+        ancestor.parentId === null ? undefined : byId.get(ancestor.parentId);
     }
   }
 
-  function drop(event: DragEvent<HTMLElement>, target: DraggedItem) {
-    event.preventDefault();
-    event.stopPropagation();
-    const source = dragged.current;
-    const destination = getDropTarget(event, target);
-    clearDrag();
-    if (!source || !destination) return;
-    if (destination.kind === "group") moveGroup(source.id, destination.index);
-    else moveCategory(source.id, destination.groupId, destination.index);
-  }
+  useEffect(() => {
+    if (deletingId !== null && dialog.current && !dialog.current.open)
+      dialog.current.showModal();
+  }, [deletingId]);
 
-  function toggleGroup(id: string) {
+  function reveal(parentId: string | null) {
     setExpanded((previous) => {
       const next = new Set(previous);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      let parent = parentId === null ? undefined : byId.get(parentId);
+      while (parent) {
+        next.add(parent.id);
+        parent =
+          parent.parentId === null ? undefined : byId.get(parent.parentId);
+      }
       return next;
+    });
+  }
+  function stage(next: CategoryNode[], message: string) {
+    catalog.stage(next);
+    setEditing(null);
+    setNotice(message);
+  }
+  function move(
+    id: string,
+    destination: Pick<CategoryDrop, "parentId" | "beforeId">,
+  ) {
+    try {
+      const next = moveCategoryNode(
+        nodes,
+        id,
+        destination.parentId,
+        destination.beforeId,
+      );
+      setSelectedId(id);
+      reveal(destination.parentId);
+      stage(
+        next,
+        "끌어서 순서와 깊이를 변경했습니다. 하위 분류도 함께 이동합니다.",
+      );
+    } catch (error) {
+      setNotice(
+        error instanceof Error ? error.message : "분류를 옮기지 못했습니다.",
+      );
+    }
+  }
+  const drag = useCategoryDrag(nodes, editing !== null, move);
+
+  function startEditing(mode: Editing["mode"], node?: CategoryNode) {
+    if (editing) {
+      setNotice("열려 있는 편집을 확인하거나 취소하십시오.");
+      return;
+    }
+    if (mode === "add" && nodes.length >= MAX_CATEGORIES) {
+      setNotice("분류는 500개까지 추가할 수 있습니다.");
+      return;
+    }
+    const parentId = mode === "add" ? (node?.id ?? null) : node!.parentId;
+    if (node && mode === "edit") setSelectedId(node.id);
+    reveal(parentId);
+    setEditing({
+      mode,
+      id: mode === "edit" ? node!.id : null,
+      parentId,
+      name: mode === "edit" ? node!.name : "",
+    });
+    setNotice("");
+  }
+  function saveEdit(name: string): string | null {
+    if (!editing) return null;
+    if (
+      nodes.some(
+        (node) =>
+          node.id !== editing.id &&
+          node.name.toLocaleLowerCase() === name.toLocaleLowerCase(),
+      )
+    ) {
+      return "같은 이름의 카테고리가 있습니다.";
+    }
+    if (editing.mode === "edit") {
+      stage(
+        nodes.map((node) =>
+          node.id === editing.id ? { ...node, name } : node,
+        ),
+        "카테고리 이름을 변경했습니다.",
+      );
+      return null;
+    }
+    if (nodes.length >= MAX_CATEGORIES)
+      return "분류는 500개까지 추가할 수 있습니다.";
+    const node: CategoryNode = {
+      id: crypto.randomUUID(),
+      name,
+      parentId: editing.parentId,
+      sources: [],
+    };
+    const firstChild = children(editing.parentId)[0];
+    const next = [...nodes];
+    next.splice(
+      firstChild
+        ? next.findIndex((item) => item.id === firstChild.id)
+        : next.length,
+      0,
+      node,
+    );
+    setSelectedId(node.id);
+    stage(next, "카테고리를 추가했습니다. 하단에서 변경사항을 저장하십시오.");
+    return null;
+  }
+  function keyboardMove(
+    event: KeyboardEvent<HTMLButtonElement>,
+    node: CategoryNode,
+  ) {
+    if (
+      editing ||
+      !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)
+    )
+      return;
+    event.preventDefault();
+    const siblings = children(node.parentId);
+    const index = siblings.findIndex((item) => item.id === node.id);
+    let destination: Pick<CategoryDrop, "parentId" | "beforeId"> | null = null;
+    if (event.key === "ArrowLeft" && node.parentId !== null) {
+      const parent = byId.get(node.parentId)!;
+      const uncles = children(parent.parentId);
+      const afterParent =
+        uncles[uncles.findIndex((item) => item.id === parent.id) + 1];
+      destination = {
+        parentId: parent.parentId,
+        beforeId: afterParent?.id ?? null,
+      };
+    } else if (event.key === "ArrowRight" && index > 0) {
+      destination = { parentId: siblings[index - 1].id, beforeId: null };
+    } else if (event.key === "ArrowUp" && index > 0) {
+      destination = {
+        parentId: node.parentId,
+        beforeId: siblings[index - 1].id,
+      };
+    } else if (event.key === "ArrowDown" && index < siblings.length - 1) {
+      destination = {
+        parentId: node.parentId,
+        beforeId: siblings[index + 2]?.id ?? null,
+      };
+    }
+    if (destination) {
+      move(node.id, destination);
+      window.requestAnimationFrame(() => {
+        [
+          ...(drag.pageRef.current?.querySelectorAll<HTMLElement>(
+            ".category-row",
+          ) ?? []),
+        ]
+          .find((row) => row.dataset.id === node.id)
+          ?.querySelector<HTMLButtonElement>(".grip")
+          ?.focus({ preventScroll: true });
+      });
+    }
+  }
+  function closeDelete() {
+    dialog.current?.close();
+    setDeletingId(null);
+  }
+  function deleteCategory() {
+    if (deletingId === null) return;
+    const node = byId.get(deletingId);
+    if (!node) {
+      closeDelete();
+      return;
+    }
+    const next = removeCategoryNode(nodes, node.id);
+    setSelectedId(node.parentId ?? next[0]?.id ?? null);
+    stage(next, "분류를 삭제했습니다. 실행 취소로 복원할 수 있습니다.");
+    closeDelete();
+  }
+  function inlineForm(depth: number) {
+    return editing ? (
+      <InlineCategoryForm
+        key={editing.mode + (editing.id ?? editing.parentId ?? "root")}
+        editing={editing}
+        depth={depth}
+        onCancel={() => setEditing(null)}
+        onSave={saveEdit}
+      />
+    ) : null;
+  }
+  function rows(parentId: string | null, depth = 0): React.ReactNode {
+    return children(parentId).map((node) => {
+      const hasChildren = children(node.id).length > 0;
+      return (
+        <div className="category-branch" key={node.id}>
+          {editing?.id === node.id ? (
+            inlineForm(depth)
+          ) : (
+            <div
+              className={
+                "category-row" + (selectedId === node.id ? " selected" : "")
+              }
+              style={{ "--depth": depth } as React.CSSProperties}
+              data-id={node.id}
+            >
+              <button
+                type="button"
+                className="expander"
+                disabled={!hasChildren}
+                aria-expanded={hasChildren ? expanded.has(node.id) : undefined}
+                aria-label={`${node.name} ${expanded.has(node.id) ? "접기" : "펼치기"}`}
+                onClick={() =>
+                  setExpanded((previous) => {
+                    const next = new Set(previous);
+                    if (next.has(node.id)) next.delete(node.id);
+                    else next.add(node.id);
+                    return next;
+                  })
+                }
+              >
+                {hasChildren ? (expanded.has(node.id) ? "⌄" : "›") : "·"}
+              </button>
+              <button
+                type="button"
+                className="grip"
+                aria-label={`${node.name} 끌어서 이동`}
+                title="끌어서 이동 · 방향키로 순서와 깊이 변경"
+                onPointerDown={(event) => drag.start(event, node, depth)}
+                onKeyDown={(event) => keyboardMove(event, node)}
+              >
+                ≡
+              </button>
+              <button
+                type="button"
+                className="row-name"
+                aria-pressed={selectedId === node.id}
+                onClick={() => {
+                  if (!editing) setSelectedId(node.id);
+                }}
+              >
+                {node.name}
+                <span className="inline-count">
+                  ({(counts.get(node.id) ?? 0).toLocaleString()})
+                </span>
+              </button>
+              <div className="row-actions">
+                <button
+                  type="button"
+                  data-action="add"
+                  aria-label={`${node.name} 하위 추가`}
+                  disabled={Boolean(editing) || nodes.length >= MAX_CATEGORIES}
+                  onClick={() => startEditing("add", node)}
+                >
+                  추가
+                </button>
+                <button
+                  type="button"
+                  data-action="edit"
+                  aria-label={`${node.name} 수정`}
+                  disabled={Boolean(editing)}
+                  onClick={() => startEditing("edit", node)}
+                >
+                  수정
+                </button>
+                <button
+                  type="button"
+                  data-action="delete"
+                  aria-label={`${node.name} 삭제`}
+                  disabled={
+                    Boolean(editing) || node.id === UNCLASSIFIED_CATEGORY_ID
+                  }
+                  onClick={() => setDeletingId(node.id)}
+                >
+                  삭제
+                </button>
+              </div>
+            </div>
+          )}
+          {editing?.mode === "add" && editing.parentId === node.id
+            ? inlineForm(depth + 1)
+            : null}
+          {hasChildren && expanded.has(node.id)
+            ? rows(node.id, depth + 1)
+            : null}
+        </div>
+      );
     });
   }
 
   return (
-    <main id="main-content" className="categories-page" tabIndex={-1}>
-      <header className="category-manager-heading">
+    <main
+      id="main-content"
+      className="categories-page"
+      tabIndex={-1}
+      ref={drag.pageRef}
+    >
+      <div className="page-heading">
         <div>
           <p className="eyebrow">기록 관리</p>
           <h1>카테고리 관리</h1>
-          <p>분류를 끌어 순서를 바꾸거나, 상위 분류 아래로 옮깁니다.</p>
         </div>
-        <button
-          className="dark-button"
-          type="button"
-          onClick={() => {
-            setAdding(true);
-            setNotice("");
-          }}
-        >
-          + 분류 추가
-        </button>
-      </header>
-      <p className="category-local-notice">
-        분류 설정은 이 브라우저에만 저장합니다. 원문과 페이지 계층은 바꾸지 않습니다.
-      </p>
-      {catalog.error ? <p className="category-error" role="alert">{catalog.error}</p> : null}
-      <p className="category-save-status" role="status">{dropTarget?.hint ?? notice}</p>
-      <div className="category-manager-layout">
-        <section
-          className="category-tree-panel"
-          aria-label="분류 목록"
-          onDragOver={() => setDropTarget(null)}
-          onDragLeave={leaveDropTarget}
-          onDrop={clearDrag}
-        >
-          <div className="category-tree-tools">
-            <button
-              type="button"
-              className="quiet-button"
-              onClick={() => setExpanded(new Set(groups.map((group) => group.id)))}
-            >
-              전체 펼치기
-            </button>
-            <button
-              type="button"
-              className="quiet-button"
-              onClick={() => setExpanded(new Set())}
-            >
-              전체 접기
-            </button>
-            <span>
-              {groups.reduce((total, group) => total + group.categories.length, 0)}개 하위 분류
-            </span>
-          </div>
-          <div className="category-tree-columns">
-            <span>분류</span>
-            <span>기록 수</span>
-            <span className="sr-only">순서 변경</span>
-          </div>
-          <ul className="category-manager-tree">
-            {groups.map((group, groupIndex) => (
-              <li
-                key={group.id}
-                className="category-manager-group-container"
-                data-drop-position={dropTarget?.targetId === group.id ? dropTarget.position : undefined}
-              >
-                <div
-                  className="category-manager-row category-manager-group"
-                  data-dragging={draggedId === group.id || undefined}
-                  data-drop-target={(
-                    dropTarget?.position === "append" && dropTarget.targetId === group.id
-                  ) || undefined}
-                  draggable
-                  onDragStart={(event) => startDrag(event, { kind: "group", id: group.id })}
-                  onDragEnd={clearDrag}
-                  onDragOver={(event) => previewDrop(event, { kind: "group", id: group.id })}
-                  onDragLeave={leaveDropTarget}
-                  onDrop={(event) => drop(event, { kind: "group", id: group.id })}
-                >
-                  <button
-                    type="button"
-                    className="category-row-select"
-                    aria-expanded={expanded.has(group.id)}
-                    onClick={() => toggleGroup(group.id)}
-                  >
-                    <span className="category-grip" aria-hidden="true">⠿</span>
-                    <span className="category-chevron" aria-hidden="true">{expanded.has(group.id) ? "⌄" : "›"}</span>
-                    <span>{group.name}</span>
-                  </button>
-                  <span className="category-row-count">{group.categories.reduce((total, item) => total + (counts.get(item.source) ?? 0), 0).toLocaleString()}</span>
-                  <div className="category-row-order">
-                    <button
-                      type="button"
-                      aria-label={`${group.name} 위로 이동`}
-                      disabled={groupIndex === 0}
-                      onClick={() => moveGroup(group.id, groupIndex - 1)}
-                    >↑</button>
-                    <button
-                      type="button"
-                      aria-label={`${group.name} 아래로 이동`}
-                      disabled={groupIndex === groups.length - 1}
-                      onClick={() => moveGroup(group.id, groupIndex + 1)}
-                    >↓</button>
-                  </div>
-                </div>
-                {expanded.has(group.id) ? (
-                  <ul>
-                    {group.categories.map((item, itemIndex) => (
-                      <li
-                        key={item.id}
-                        className="category-manager-row category-manager-item"
-                        data-category-source={item.source}
-                        data-selected={!adding && selectedId === item.id}
-                        data-dragging={draggedId === item.id || undefined}
-                        data-drop-position={dropTarget?.targetId === item.id ? dropTarget.position : undefined}
-                        draggable
-                        onDragStart={(event) => startDrag(event, { kind: "category", id: item.id })}
-                        onDragEnd={clearDrag}
-                        onDragOver={(event) => previewDrop(event, { kind: "category", id: item.id })}
-                        onDragLeave={leaveDropTarget}
-                        onDrop={(event) => drop(event, { kind: "category", id: item.id })}
-                      >
-                        <button
-                          type="button"
-                          className="category-row-select"
-                          aria-pressed={!adding && selectedId === item.id}
-                          onClick={() => {
-                            setSelectedId(item.id);
-                            setAdding(false);
-                            setNotice("");
-                          }}
-                        >
-                          <span className="category-grip" aria-hidden="true">⠿</span>
-                          <span className="category-folder" aria-hidden="true">▱</span>
-                          <span>{item.name}</span>
-                        </button>
-                        <span className="category-row-count">{(counts.get(item.source) ?? 0).toLocaleString()}</span>
-                        <div className="category-row-order">
-                          <button
-                            type="button"
-                            aria-label={`${item.name} 위로 이동`}
-                            disabled={itemIndex === 0}
-                            onClick={() => moveCategory(item.id, group.id, itemIndex - 1)}
-                          >↑</button>
-                          <button
-                            type="button"
-                            aria-label={`${item.name} 아래로 이동`}
-                            disabled={itemIndex === group.categories.length - 1}
-                            onClick={() => moveCategory(item.id, group.id, itemIndex + 1)}
-                          >↓</button>
-                        </div>
-                      </li>
-                    ))}
-                    {!group.categories.length ? <li className="category-empty-group">하위 분류가 없습니다. 분류를 추가하거나 끌어 옮기십시오.</li> : null}
-                  </ul>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </section>
-        <CategoryEditor
-          key={adding ? "new-category" : selectedId}
-          item={adding ? undefined : selected}
-          parentId={adding ? groups[0]?.id : selectedGroup?.id}
-          adding={adding}
-          posts={posts}
-          groups={groups}
-          onSave={(next, id, parentId) => {
-            if (!save(next)) return false;
-            setSelectedId(id);
-            setAdding(false);
-            setExpanded((previous) => new Set([...previous, parentId]));
-            return true;
-          }}
-        />
       </div>
+      <p className="category-local-note">
+        분류 설정은 이 브라우저에만 저장합니다. 원문 기록과 페이지 계층은 바꾸지
+        않습니다.
+      </p>
+      <div className="layout">
+        <section className="manager" aria-label="카테고리 목록 관리">
+          <div className="manager-heading">
+            <div>
+              <p>카테고리 순서와 계층을 정리합니다.</p>
+              <p className="muted">
+                끌어서 순서와 깊이를 바꾸고, 행 안에서 분류를 편집합니다.
+              </p>
+            </div>
+            <div className="tree-tools">
+              <span>
+                {nodes.length + (editing?.mode === "add" ? 1 : 0)} / 500
+              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  setExpanded(new Set(nodes.map((node) => node.id)))
+                }
+              >
+                전체 펼치기
+              </button>
+              <button type="button" onClick={() => setExpanded(new Set())}>
+                전체 접기
+              </button>
+            </div>
+          </div>
+          <div className="tree-frame">
+            <div className="all-row">
+              <span className="grip-icon" aria-hidden="true">
+                ≡
+              </span>
+              <span>분류 전체보기</span>
+            </div>
+            <div className="tree" aria-label="분류 계층">
+              {editing?.mode === "add" && editing.parentId === null
+                ? inlineForm(0)
+                : null}
+              {rows(null)}
+            </div>
+            <button
+              type="button"
+              id="add-bottom"
+              className="add-bottom"
+              disabled={Boolean(editing) || nodes.length >= MAX_CATEGORIES}
+              onClick={() => startEditing("add")}
+            >
+              <span>＋　카테고리 추가</span>
+              <span>
+                {nodes.length + (editing?.mode === "add" ? 1 : 0)} / 500
+              </span>
+            </button>
+          </div>
+          <div className="save-bar">
+            <div>
+              <p>
+                {catalog.dirty
+                  ? "저장하지 않은 변경사항이 있습니다."
+                  : "저장한 상태입니다."}
+              </p>
+              <button
+                type="button"
+                id="undo"
+                disabled={!catalog.canUndo || Boolean(editing)}
+                onClick={() => {
+                  catalog.undo();
+                  setNotice("마지막 변경을 취소했습니다.");
+                }}
+              >
+                실행 취소
+              </button>
+            </div>
+            <button
+              type="button"
+              className="dark"
+              id="save-all"
+              disabled={!catalog.dirty || Boolean(editing)}
+              onClick={() => {
+                if (catalog.saveNodes(nodes))
+                  setNotice("분류 설정을 저장했습니다.");
+                else setNotice("");
+              }}
+            >
+              변경사항 저장
+            </button>
+          </div>
+        </section>
+      </div>
+      {catalog.error ? (
+        <p className="error category-storage-error" role="alert">
+          {catalog.error}
+        </p>
+      ) : null}
+      <p className="status" role="status" aria-live="polite">
+        {notice}
+      </p>
+      <dialog
+        id="delete-dialog"
+        ref={dialog}
+        aria-labelledby="delete-title"
+        onCancel={() => setDeletingId(null)}
+      >
+        <div className="modal-body">
+          <h2 id="delete-title">분류 삭제</h2>
+          <p>
+            '{byId.get(deletingId ?? "")?.name}' 카테고리를 삭제하시겠습니까?
+          </p>
+          <p className="muted">
+            하위 분류는 한 단계 위로 옮깁니다. 기록은 미분류에 유지합니다.
+          </p>
+        </div>
+        <div className="modal-footer">
+          <button type="button" onClick={closeDelete}>
+            취소
+          </button>
+          <button
+            type="button"
+            id="confirm-delete"
+            className="dark"
+            onClick={deleteCategory}
+          >
+            삭제
+          </button>
+        </div>
+      </dialog>
+      <div id="drag-ghost" ref={drag.ghostRef} hidden />
+      <div id="drop-line" ref={drag.lineRef} hidden />
+      <div
+        id="drop-hint"
+        ref={drag.hintRef}
+        hidden
+        role="status"
+        aria-live="polite"
+      />
     </main>
   );
 }
 
-function CategoryEditor({ item, parentId, adding, posts, groups, onSave }: {
-  item?: CategoryItem;
-  parentId?: string;
-  adding: boolean;
-  posts: Post[];
-  groups: CategoryGroup[];
-  onSave: (groups: CategoryGroup[], id: string, parentId: string) => boolean;
+function InlineCategoryForm({
+  editing,
+  depth,
+  onCancel,
+  onSave,
+}: {
+  editing: Editing;
+  depth: number;
+  onCancel: () => void;
+  onSave: (name: string) => string | null;
 }) {
-  const [name, setName] = useState(item?.name ?? "");
-  const [parent, setParent] = useState(parentId ?? "");
+  const [name, setName] = useState(editing.name);
   const [error, setError] = useState("");
-  const selectedPosts = item ? posts.filter((post) => post.category === item.source) : [];
-
-  // A drag move updates the saved parent while the unfinished name stays editable.
-  useEffect(() => {
-    setParent(parentId ?? "");
-  }, [parentId]);
-
   function submit(event: FormEvent) {
     event.preventDefault();
     const normalized = normalizeCategoryName(name);
     if (!normalized || normalized.length > 100) {
-      setError("분류 이름은 1자에서 100자까지 입력하십시오.");
+      setError("이름은 1자에서 100자까지 입력하십시오.");
       return;
     }
-    const duplicate = groups.some((group) => group.categories.some((category) => category.id !== item?.id
-      && category.name.toLocaleLowerCase() === normalized.toLocaleLowerCase()));
-    if (duplicate || (adding && groups.some((group) => group.categories.some((category) => category.source === normalized)))) {
-      setError("같은 이름의 분류가 있습니다. 다른 이름을 입력하십시오.");
-      return;
-    }
-    if (!groups.some((group) => group.id === parent)) {
-      setError("상위 분류를 선택하십시오.");
-      return;
-    }
-    const category = item ? { ...item, name: normalized } : {
-      id: crypto.randomUUID(), source: normalized, name: normalized,
-    };
-    const next = groups.map((group) => {
-      if (group.id === parent && group.id === parentId && item) {
-        return { ...group, categories: group.categories.map((current) => current.id === item.id ? category : current) };
-      }
-      const categories = group.categories.filter((current) => current.id !== category.id);
-      if (group.id === parent) categories.push(category);
-      return { ...group, categories };
-    });
-    setError("");
-    if (onSave(next, category.id, parent)) setName(normalized);
+    setError(onSave(normalized) ?? "");
   }
-
   return (
-    <aside className="category-editor" aria-label="분류 편집">
-      <p className="eyebrow">{adding ? "새 분류" : "선택한 분류"}</p>
-      <h2>{adding ? "분류 추가" : item?.name ?? "분류를 선택하십시오"}</h2>
-      <p className="category-editor-count">{selectedPosts.length.toLocaleString()}개의 기록</p>
-      {adding || item ? (
-        <form onSubmit={submit} noValidate>
-          <label htmlFor="category-name" data-field="name">분류 이름</label>
-          <input
-            id="category-name"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            aria-describedby="category-name-hint"
-          />
-          <small id="category-name-hint">1자에서 100자까지 입력하십시오.</small>
-          <label htmlFor="category-parent" data-field="parent">상위 분류</label>
-          <select
-            id="category-parent"
-            value={parent}
-            onChange={(event) => setParent(event.target.value)}
-          >
-            {!groups.length ? <option value="">상위 분류가 없습니다</option> : null}
-            {groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}
-          </select>
-          {error ? <p className="category-error" role="alert">{error}</p> : null}
-          <button className="dark-button" type="submit" disabled={!groups.length}>
-            {adding ? "분류 저장" : "변경 저장"}
-          </button>
-        </form>
+    <div
+      className="inline-row"
+      style={{ "--depth": depth } as React.CSSProperties}
+    >
+      <form id="inline-form" onSubmit={submit} noValidate>
+        <label className="sr-only" htmlFor="inline-name">
+          카테고리 이름
+        </label>
+        <input
+          id="inline-name"
+          maxLength={100}
+          autoComplete="off"
+          autoFocus
+          value={name}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? "inline-error" : undefined}
+          onChange={(event) => setName(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              onCancel();
+            }
+          }}
+          placeholder="카테고리 이름"
+        />
+        <button type="button" onClick={onCancel}>
+          취소
+        </button>
+        <button
+          type="submit"
+          disabled={!normalizeCategoryName(name) || name === editing.name}
+        >
+          확인
+        </button>
+      </form>
+      {error ? (
+        <div id="inline-error" className="inline-error" role="alert">
+          {error}
+        </div>
       ) : null}
-      <section className="category-source-posts" aria-labelledby="category-posts-title">
-        <h3 id="category-posts-title">이 분류의 기록</h3>
-        {selectedPosts.length ? (
-          <ul>
-            {selectedPosts.map((post) => (
-              <li key={post.id}>
-                <a href={postHref(post.id)}>
-                  <span>{post.title}</span>
-                  <Arrow />
-                </a>
-              </li>
-            ))}
-          </ul>
-        ) : <p>아직 기록이 없습니다.</p>}
-      </section>
-    </aside>
+    </div>
   );
 }

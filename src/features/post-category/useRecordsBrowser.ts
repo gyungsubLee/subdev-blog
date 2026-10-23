@@ -3,6 +3,7 @@ import type { Post } from "../../shared/post";
 import { usePostPagination } from "../post-pagination/usePostPagination";
 import { usePostSearch } from "../post-search/usePostSearch";
 import type { CategoryGroup } from "./catalog";
+import { categoryMatches } from "./hierarchy";
 
 export type RecordsView = "sidebar" | "tabs" | "sections";
 
@@ -25,8 +26,8 @@ export function useRecordsBrowser(
   );
   const filteredPosts = posts.filter((post) => {
     const matchesCategory = category
-      ? post.category === category.source
-      : !group || group.categories.some((item) => item.source === post.category);
+      ? categoryMatches(category, post.category)
+      : !group || group.categories.some((item) => categoryMatches(item, post.category));
     return matchesCategory && search.matches(post);
   });
 
