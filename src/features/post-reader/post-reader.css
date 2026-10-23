@@ -1,8 +1,11 @@
+@import "@blocknote/core/fonts/inter.css";
+
 .article-layout {
   display: grid;
-  grid-template-columns: 205px minmax(0, 740px);
+  grid-template-columns:
+    var(--article-sidebar-width) minmax(0, var(--article-body-width));
   justify-content: space-between;
-  gap: 65px;
+  gap: var(--article-column-gap);
   padding-bottom: 55px;
 }
 
@@ -60,9 +63,18 @@
 
 .article-prose {
   min-width: 0;
-  color: #3f3d36;
+  color: #292820;
+  font-family: Inter,
+    "Inter fallback",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    sans-serif;
   font-size: 16px;
-  line-height: 1.95;
+  line-height: 1.5;
+  font-synthesis: style weight;
   overflow-wrap: anywhere;
 }
 
@@ -77,51 +89,48 @@
 .article-prose figure,
 .article-prose .table-scroll,
 .article-prose details {
-  margin-top: 20px;
-  margin-bottom: 24px;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.article-prose p:has(> a[id]:only-child) {
+  padding: 0;
 }
 
 .article-prose h1,
 .article-prose h2,
 .article-prose h3,
 .article-prose h4 {
-  margin-top: 52px;
-  margin-bottom: 20px;
+  margin: 0;
+  padding: 20px 0 3px;
   color: var(--ink);
-  font-family: var(--display);
-  font-weight: 600;
-  letter-spacing: -0.5px;
-  line-height: 1.6;
+  font-family: inherit;
+  font-weight: 700;
+  line-height: 1.5;
   scroll-margin-top: 35px;
 }
 
 .article-prose h1 {
-  font-size: 32px;
+  font-size: 48px;
 }
 
 .article-prose h2 {
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--line);
-  font-size: 27px;
+  font-size: 32px;
 }
 
 .article-prose h3 {
-  font-size: 22px;
+  font-size: 20.8px;
 }
 
 .article-prose h4 {
-  font-size: 19px;
+  font-size: 16px;
 }
 
 .article-prose a {
-  color: #a44d32;
+  color: inherit;
   text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 4px;
-}
-
-.article-prose a:hover {
-  color: #763923;
 }
 
 .article-prose img {
@@ -135,20 +144,20 @@
 
 .article-prose ul,
 .article-prose ol {
-  padding-left: 26px;
+  padding: 0 0 0 24px;
 }
 
-.article-prose li + li {
-  margin-top: 7px;
+.article-prose li {
+  padding: 3px 0;
 }
 
 .article-prose li > p {
-  margin: 6px 0;
+  padding: 0;
 }
 
 .article-prose li ul,
 .article-prose li ol {
-  margin: 10px 0;
+  margin: 0;
 }
 
 .article-prose .contains-task-list {
@@ -162,22 +171,27 @@
 }
 
 .article-prose blockquote {
-  margin-left: 0;
-  margin-right: 0;
-  border-left: 3px solid #c7beab;
-  padding: 1px 24px;
-  color: #777064;
-  background: #eeece3;
+  margin: 3px 0;
+  border-left: 2px solid #7d797a;
+  padding: 0 0 0 16px;
+  color: #7d797a;
+}
+
+.article-prose .article-toc {
+  padding-top: 24px;
+}
+
+.article-prose .article-toc p,
+.article-prose .article-toc ul,
+.article-prose .article-toc ol,
+.article-prose .article-toc li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .article-prose :not(pre) > code {
-  border: 1px solid #e3dfd2;
-  border-radius: 4px;
-  padding: 2px 5px;
-  color: #a24c34;
-  background: #eeebe2;
-  font-family: "SFMono-Regular", Consolas, monospace;
-  font-size: 0.82em;
+  font-family: monospace;
 }
 
 .article-prose .article-code {
@@ -233,8 +247,8 @@
 
 .article-prose hr {
   border: 0;
-  border-top: 1px solid var(--line);
-  margin: 40px 0;
+  border-top: 1px solid #7d797a;
+  margin: 11px 0;
 }
 
 .article-prose .table-scroll {
@@ -276,13 +290,6 @@
   color: var(--muted);
 }
 
-@media (max-width: 1000px) {
-  .article-layout {
-    grid-template-columns: 160px minmax(0, 1fr);
-    gap: 35px;
-  }
-}
-
 @media (max-width: 720px) {
   .article-layout {
     display: flex;
@@ -309,22 +316,5 @@
   .source-link {
     margin-top: 18px;
     padding-top: 13px;
-  }
-
-  .article-prose {
-    font-size: 15px;
-    line-height: 1.95;
-  }
-
-  .article-prose h1 {
-    font-size: 28px;
-  }
-
-  .article-prose h2 {
-    font-size: 24px;
-  }
-
-  .article-prose h3 {
-    font-size: 20px;
   }
 }

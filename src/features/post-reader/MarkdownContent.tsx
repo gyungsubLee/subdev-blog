@@ -34,6 +34,57 @@ export default function MarkdownContent({
           : defaultUrlTransform(url)
       }
       components={{
+        blockquote: ({ node, children, ...props }) => {
+          let firstParagraph = "";
+          let hasNestedQuote = false;
+          const listLinks: string[] = [];
+
+          function readContent(
+            element: NonNullable<typeof node>,
+            inList = false,
+          ): string {
+            if (element.tagName === "blockquote" && element !== node)
+              hasNestedQuote = true;
+            const text = element.children
+              .map((child) => {
+                if (child.type === "text") return child.value;
+                if (child.type !== "element") return "";
+                return readContent(
+                  child,
+                  inList || element.tagName === "ul" || element.tagName === "ol",
+                );
+              })
+              .join("");
+
+            if (element.tagName === "p" && !firstParagraph)
+              firstParagraph = text.trim();
+            if (
+              inList &&
+              element.tagName === "a" &&
+              typeof element.properties.href === "string"
+            )
+              listLinks.push(element.properties.href);
+            return text;
+          }
+
+          if (node) readContent(node);
+          // ponytail: match the existing export format; other TOC formats need explicit metadata.
+          const isToc =
+            firstParagraph === "목차" &&
+            !hasNestedQuote &&
+            listLinks.length > 0 &&
+            listLinks.every(
+              (href) =>
+                href.startsWith("#") &&
+                !href.startsWith("#/") &&
+                href.length > 1,
+            );
+          return (
+            <blockquote {...props} className={isToc ? "article-toc" : undefined}>
+              {children}
+            </blockquote>
+          );
+        },
         h1: ({ node, children }) => (
           <h1 id={"heading-" + node?.position?.start.line}>
             {children}
