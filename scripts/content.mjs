@@ -107,6 +107,8 @@ export async function getContentProvenance(root, {
   if (!deployment)
     return { contentCommit, contentState: dirty ? "git-local-dirty" : "git-local" };
   if (dirty) throw new Error("Deployment content must be clean; uncommitted content changes exist.");
+  const ignoredInputs = git(directory, "ls-files", "--others", "--ignored", "--exclude-standard", "--", "categories.json", "posts");
+  if (ignoredInputs) throw new Error("Deployment canonical inputs include ignored, untracked files.");
   if (!appGit || await realpath(git(project, "rev-parse", "--show-toplevel")) !== project)
     throw new Error("Deployment requires an app Git repository with a pinned content gitlink.");
   const gitlink = git(project, "ls-tree", "HEAD", "--", "content");

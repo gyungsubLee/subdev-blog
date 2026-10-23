@@ -511,6 +511,40 @@ test("content provenance reports pinned HEAD and accepts an equivalent root path
   assert.deepEqual(result, { contentCommit: input.sha, contentState: "git-pinned" });
 });
 
+for (const kind of ["post", "asset"]) {
+  test(`content provenance rejects ignored canonical ${kind} inputs in deployment`, async (t) => {
+    const input = await provenanceFixture(t);
+    const relative = kind === "post"
+      ? `posts/${otherId}/Title.md`
+      : `posts/${parentId}/ignored.webp`;
+    await writeFile(path.join(input.root, ".git/info/exclude"), relative + "\n");
+    if (kind === "post") await mkdir(path.dirname(path.join(input.root, relative)));
+    await writeFile(path.join(input.root, relative), kind === "post"
+      ? serializeMarkdownDocument(document(otherId))
+      : "IGNORED_ASSET");
+    assert.equal(git(input.root, "status", "--porcelain=v1", "--untracked-files=all"), "");
+    const snapshot = await readContent(input.root);
+    if (kind === "post") assert.equal(snapshot.documents.size, 2);
+    else assert.equal(snapshot.documents.get(parentId).allAssets[0].name, "ignored.webp");
+    await assert.rejects(content.getContentProvenance(input.root, {
+      projectRoot: input.projectRoot, env: { CI: "true" },
+    }), /ignored|untracked|canonical/i);
+    assert.equal((await content.getContentProvenance(input.root, {
+      projectRoot: input.projectRoot, env: {},
+    })).contentCommit, input.sha);
+  });
+}
+
+test("content provenance allows ignored cache files outside canonical inputs", async (t) => {
+  const input = await provenanceFixture(t);
+  await writeFile(path.join(input.root, ".git/info/exclude"), ".cache/\n");
+  await mkdir(path.join(input.root, ".cache"));
+  await writeFile(path.join(input.root, ".cache/local.json"), "LOCAL_CACHE");
+  assert.deepEqual(await content.getContentProvenance(input.root, {
+    projectRoot: input.projectRoot, env: { CI: "true" },
+  }), { contentCommit: input.sha, contentState: "git-pinned" });
+});
+
 for (const marker of ["CI", "GITHUB_ACTIONS", "VERCEL", "GITHUB_SHA", "VERCEL_GIT_COMMIT_SHA"]) {
   test(`content provenance enforces deployment cleanliness for ${marker}`, async (t) => {
     const input = await provenanceFixture(t);
