@@ -21,12 +21,14 @@ export default function PostPage({
   posts,
   onEdit,
   hash,
+  categoryName,
   backHref = HOME_HREF,
 }: {
   post: Post;
   posts: Post[];
   onEdit: (post: Post) => void;
   hash: string;
+  categoryName?: string;
   backHref?: string;
 }) {
   const body = getBody(post);
@@ -78,7 +80,7 @@ export default function PostPage({
               <span aria-hidden="true">/</span>
             </a>
           ))}
-          <span>{post.category}</span>
+          <span>{categoryName ?? post.category}</span>
         </nav>
         <h1>{post.title}</h1>
         <div className="article-meta">

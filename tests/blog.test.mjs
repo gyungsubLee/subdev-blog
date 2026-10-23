@@ -22,13 +22,14 @@ const base = {
   excerpt: "요약",
 };
 
-function render(posts, hash = "#/") {
+function render(posts, hash = "#/", categories = []) {
   const previousWindow = globalThis.window;
   globalThis.window = { location: { hash } };
   try {
     return renderToStaticMarkup(
       React.createElement(Blog, {
         posts,
+        categories,
         onWrite() {},
         onEdit() {},
       }),
@@ -356,4 +357,57 @@ test("original cover has priority over the first body image", () => {
   ]);
   assert.match(html, /src="\/notion\/assets\/original-cover\.webp"/);
   assert.ok(!html.includes("/notion/assets/body-image.webp"));
+});
+
+test("reader resolves category labels by canonical ID", () => {
+  const id = "12345678-1234-8234-9234-123456789012";
+  const post = { ...base, id, category: "canonical-id", categoryId: "canonical-id" };
+  const html = render([post], "#/post/" + id, [
+    { id: "canonical-id", name: "Readable category", parentId: null, order: 0, sources: ["canonical-id"] },
+  ]);
+  assert.match(html, /Readable category/);
+  assert.doesNotMatch(new JSDOM(html).window.document.querySelector(".breadcrumbs").textContent, /canonical-id/);
+});
+
+test("reader classifies attachment URLs before resolving article IDs", async () => {
+  const id = "12345678-1234-8234-9234-123456789012";
+  const post = { ...base, id };
+  const { pageLink } = await loadComponent("src/features/post-reader/page-links.ts");
+  for (const href of [
+    `/content/assets/${id}/첨부.pdf#page=2`,
+    `https://example.com/files/${id}.pdf`,
+    `/notion/assets/${id}.pdf`,
+    `../${id}/attachment.pdf`,
+    `https://notion.so/files/${id}.pdf`,
+  ]) assert.equal(pageLink(href, post, [post]), href);
+  assert.equal(pageLink(`https://www.notion.so/Title-${id.replaceAll("-", "")}#block`, post, [post]), "#/post/" + id + "#block");
+  assert.equal(pageLink("#heading", post, [post]), "#heading");
+  assert.equal(pageLink("#/post/" + id + "#block", post, [post]), "#/post/" + id + "#block");
+});
+
+test("page explorer orders siblings by explicit order then ID regardless of update dates", async () => {
+  const { default: PageTree } = await loadComponent("src/features/page-explorer/PageTree.tsx");
+  const posts = [
+    { ...base, id: "root-b", order: 2, updatedAt: "2030-01-01" },
+    { ...base, id: "child-b", parentId: "root-a", order: 0 },
+    { ...base, id: "root-a", order: 1, updatedAt: "2020-01-01" },
+    { ...base, id: "child-a", parentId: "root-a", order: 0 },
+  ];
+  const html = renderToStaticMarkup(React.createElement(PageTree, { posts, onClose() {} }));
+  const document = new JSDOM(html).window.document;
+  assert.deepEqual([...document.querySelectorAll("a")].map((link) => link.getAttribute("href")), [
+    "#/post/root-a", "#/post/child-a", "#/post/child-b", "#/post/root-b",
+  ]);
+});
+
+test("reader resolves literal percent paths before UUIDs in ancestor folder names", async () => {
+  const { pageLink } = await loadComponent("src/features/post-reader/page-links.ts");
+  const id = "12345678-1234-8234-9234-123456789012";
+  const current = { ...base, path: `Root ${id}/100% notes/Current.md` };
+  const target = { ...base, id: "child", path: `Root ${id}/100% notes/Child.md` };
+  const ancestor = { ...base, id };
+  assert.equal(pageLink("Child.md#section", current, [ancestor, target]), "#/post/child#section");
+  assert.equal(pageLink(`../Other%2520name.md`, { ...current, path: "Root/Sub/Current.md" }, [
+    { ...target, path: "Root/Other%20name.md" },
+  ]), "#/post/child");
 });

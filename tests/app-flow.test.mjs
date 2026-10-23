@@ -41,7 +41,7 @@ test("App loads summaries then the selected body and handles an invalid index", 
   };
   let root = createRoot(document.getElementById("root"));
   const post = {
-    id: "parent", title: "본문 검사", parentId: null, category: "개발",
+    id: "parent", title: "본문 검사", parentId: null, category: "canonical", categoryId: "canonical",
     createdAt: "2026-10-22T00:00:00.000Z",
     updatedAt: "2026-10-22T00:00:00.000Z",
     markdown: "PREVIEW_ONLY", excerpt: "요약", path: "parent.md", url: "",
@@ -55,6 +55,11 @@ test("App loads summaries then the selected body and handles an invalid index", 
   try {
     await act(async () => root.render(React.createElement(App)));
     assert.match(document.querySelector(".app-state").textContent, /불러오는 중/);
+    assert.deepEqual(requests.map(({ url }) => url), ["/content/index.json", "/content/categories.json"]);
+    await respond("/content/categories.json", [{
+      id: "canonical", name: "정식 분류", parentId: null,
+      order: 0, sources: ["canonical", "개발"],
+    }]);
     await respond("/content/index.json", [post]);
     assert.equal(document.querySelectorAll(".home-article-card").length, 1);
     for (const [selector, pageClass] of [
@@ -70,7 +75,7 @@ test("App loads summaries then the selected body and handles an invalid index", 
         await changed;
       });
       assert.ok(document.querySelector(pageClass));
-      assert.deepEqual(requests.map(({ url }) => url), ["/content/index.json"]);
+      assert.deepEqual(requests.map(({ url }) => url), ["/content/index.json", "/content/categories.json"]);
     }
     await act(async () => {
       const changed = once(dom.window, "hashchange");
@@ -78,7 +83,7 @@ test("App loads summaries then the selected body and handles an invalid index", 
       await changed;
     });
     assert.deepEqual(requests.map(({ url }) => url), [
-      "/content/index.json", "/content/posts/parent.json",
+      "/content/index.json", "/content/categories.json", "/content/posts/parent.json",
     ]);
     assert.equal(document.querySelector(".article-prose").getAttribute("aria-busy"), "true");
     assert.ok(!document.querySelector(".article-prose").textContent.includes("PREVIEW_ONLY"));
@@ -87,6 +92,7 @@ test("App loads summaries then the selected body and handles an invalid index", 
       ...post, markdown: "# 본문 검사\n\nFULL_BODY", bodyLoaded: true,
     });
     assert.match(document.querySelector(".article-prose").textContent, /FULL_BODY/);
+    assert.match(document.querySelector(".breadcrumbs").textContent, /정식 분류/);
     assert.equal(document.querySelector(".article-prose").getAttribute("aria-busy"), "false");
     assert.ok([...document.querySelectorAll(".article-actions button")].every((button) => !button.disabled));
 
@@ -94,6 +100,7 @@ test("App loads summaries then the selected body and handles an invalid index", 
     dom.window.history.replaceState(null, "", "/#/");
     root = createRoot(document.getElementById("root"));
     await act(async () => root.render(React.createElement(App)));
+    await respond("/content/categories.json", []);
     await respond("/content/index.json", { invalid: true });
     assert.match(document.querySelector('[role="alert"]').textContent, /글 파일 형식/);
   } finally {

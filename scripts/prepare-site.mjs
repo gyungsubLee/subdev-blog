@@ -1,57 +1,68 @@
-import { mkdir, readFile, writeFile, readdir, rm } from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, rename, rm, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { readContent, toPublicCategories, toPublicPosts } from "./content.mjs";
 
-const archived = JSON.parse(await readFile("content/posts.json", "utf8"));
-const byId = new Map(archived.map((post) => [post.id, post]));
-await mkdir("content/written", { recursive: true });
-for (const filename of await readdir("content/written")) {
-  if (!filename.endsWith(".json")) continue;
-  const written = JSON.parse(
-    await readFile("content/written/" + filename, "utf8"),
-  );
-  byId.set(written.id, written);
-}
-let posts = [...byId.values()].sort((a, b) =>
-  (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""),
-);
-if (!posts.length)
-  throw new Error(
-    "The archive is empty; finish the Notion export before building.",
-  );
-let assetMap = {};
+const snapshot = await readContent(process.env.CONTENT_ROOT ?? "content");
+const posts = toPublicPosts(snapshot);
+if (!posts.length) throw new Error("The canonical content is empty.");
+const categories = toPublicCategories(snapshot);
+
+// Validate the entire source before creating or replacing public output.
+await mkdir("public", { recursive: true });
+const stage = await mkdtemp(path.resolve("public/.content-stage-"));
+const output = path.resolve("public/content");
+const backup = path.join(stage, "previous");
+let hadPrevious = false;
+let preserveRecovery = false;
 try {
-  assetMap = JSON.parse(await readFile("public/notion/asset-map.json", "utf8"));
-} catch (error) {
-  if (error.code !== "ENOENT") throw error;
+  const next = path.join(stage, "next");
+  await mkdir(path.join(next, "posts"), { recursive: true });
+  for (const post of posts) {
+    await writeFile(path.join(next, "posts", post.id + ".json"), JSON.stringify(post));
+    const entry = snapshot.documents.get(post.id);
+    if (!entry.assets.length) continue;
+    const directory = path.join(next, "assets", post.id);
+    await mkdir(directory, { recursive: true });
+    for (const asset of entry.assets)
+      await copyFile(asset.absolutePath, path.join(directory, asset.name));
+  }
+  const index = posts.map((post) => ({
+    ...post,
+    markdown: post.markdown.slice(0, 1400),
+    bodyLoaded: false,
+  }));
+  await writeFile(path.join(next, "index.json"), JSON.stringify(index));
+  await writeFile(path.join(next, "categories.json"), JSON.stringify(categories));
+  try {
+    await rename(output, backup);
+    hadPrevious = true;
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+  try {
+    await rename(next, output);
+  } catch (error) {
+    if (hadPrevious) {
+      try {
+        await rename(backup, output);
+      } catch (restoreError) {
+        preserveRecovery = true;
+        throw new AggregateError(
+          [error, restoreError],
+          "Public output recovery retained at " + backup,
+        );
+      }
+    }
+    throw error;
+  }
+} finally {
+  if (!preserveRecovery) {
+    try {
+      await rm(stage, { recursive: true, force: true });
+    } catch (error) {
+      console.warn("Public output cleanup failed at " + stage + ": " + error.message);
+    }
+  }
 }
-const remapAssets = (text) =>
-  text.replace(
-    /\/notion\/assets\/[A-Za-z0-9._%-]+/g,
-    (url) => assetMap[url] || url,
-  );
-posts = posts.map((post) => ({
-  ...post,
-  markdown: remapAssets(post.markdown),
-  cover: typeof post.cover === "string" ? remapAssets(post.cover) : post.cover,
-}));
-for (const post of posts) {
-  if (!/^[a-f0-9-]{32,36}$/i.test(post.id))
-    throw new Error("Invalid archive page ID: " + post.id);
-}
-await rm("public/content/posts", { recursive: true, force: true });
-await rm("public/content/posts.json", { force: true });
-await mkdir("public/content/posts", { recursive: true });
-for (const post of posts) {
-  await writeFile(
-    "public/content/posts/" + post.id + ".json",
-    JSON.stringify({ ...post, bodyLoaded: true }),
-  );
-}
-const index = posts.map((post) => ({
-  ...post,
-  markdown: post.markdown.slice(0, 1400),
-  bodyLoaded: false,
-}));
-await writeFile("public/content/index.json", JSON.stringify(index));
-console.log(
-  "Prepared " + posts.length + " page summaries and separate article bodies.",
-);
+console.log("Prepared " + posts.length + " page summaries and separate article bodies.");
+console.log("Content root: " + snapshot.root + "; content commit: unavailable (not verified).");

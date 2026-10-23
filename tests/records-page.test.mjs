@@ -45,7 +45,16 @@ function Harness({ visible = true, items = posts, categoryGroups = groups }) {
   latest = browser;
   return visible ? React.createElement(RecordsPage, {
     posts: items,
-    catalog: { groups: categoryGroups, error: "", save() { return true; } },
+    catalog: {
+      nodes: categoryGroups.flatMap((group) =>
+        group.categories.map((category) => ({
+          ...category, sources: category.sources ?? [category.source],
+        })),
+      ),
+      groups: categoryGroups,
+      error: "",
+      save() { return true; },
+    },
     browser,
     onWrite() {},
   }) : React.createElement("p", null, "문서 상세");
@@ -150,6 +159,32 @@ test("removed selections fall back to all records and an empty catalog offers wr
     })));
     assert.ok(button("글 쓰기"));
     assert.equal(cardIds().length, 0);
+  } finally {
+    await act(async () => root.unmount());
+  }
+});
+
+test("record cards use canonical ID labels while source filters include new and moved posts", async () => {
+  const root = createRoot(document.getElementById("root"));
+  const categoryGroups = [{ id: "root", name: "Root", categories: [
+    { id: "canonical", source: "Old A", sources: ["Old A", "Old B", "canonical"], name: "Canonical label" },
+  ] }];
+  const items = [
+    { ...posts[0], id: "legacy-a", category: "Old A", categoryId: "canonical" },
+    { ...posts[0], id: "legacy-b", category: "Old B", categoryId: "canonical" },
+    { ...posts[0], id: "new", category: "canonical", categoryId: "canonical" },
+    { ...posts[0], id: "moved", category: "canonical", categoryId: "canonical" },
+  ];
+  try {
+    await act(async () => root.render(React.createElement(Harness, { items, categoryGroups })));
+    await click(button("Canonical label"));
+    assert.equal(latest.filteredPosts.length, 4);
+    for (const name of ["탭 보기", "섹션 보기", "사이드바 보기"]) {
+      await click(button(name));
+      assert.equal(cardIds().length, 4);
+      assert.ok([...document.querySelectorAll(".post-meta span:first-child")].every((node) => node.textContent === "Canonical label"));
+    }
+    assert.deepEqual(items.map((post) => post.category), ["Old A", "Old B", "canonical", "canonical"]);
   } finally {
     await act(async () => root.unmount());
   }

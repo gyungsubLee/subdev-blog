@@ -1,21 +1,27 @@
 import { useEffect, useState } from "react";
 import { readDrafts } from "../shared/drafts.mjs";
-import type { Post } from "../shared/post";
+import { validateCategoryNodes } from "../features/post-category/hierarchy";
+import type { Post, PublicCategory } from "../shared/post";
 
 export function usePosts(postId: string | undefined) {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [categories, setCategories] = useState<PublicCategory[]>([]);
   const [drafts, setDrafts] = useState<Post[]>([]);
   const [error, setError] = useState("");
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch("/content/index.json", { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) throw new Error("보관한 글을 불러오지 못했습니다.");
-        return response.json();
+    Promise.all([
+      fetch("/content/index.json", { signal: controller.signal }),
+      fetch("/content/categories.json", { signal: controller.signal }),
+    ])
+      .then(async ([indexResponse, categoryResponse]) => {
+        if (!indexResponse.ok || !categoryResponse.ok)
+          throw new Error("보관한 글을 불러오지 못했습니다.");
+        return Promise.all([indexResponse.json(), categoryResponse.json()]);
       })
-      .then((data) => {
+      .then(([data, categoryData]) => {
         if (
           !Array.isArray(data) ||
           !data.every(
@@ -25,6 +31,16 @@ export function usePosts(postId: string | undefined) {
         ) {
           throw new Error("글 파일 형식을 확인하십시오.");
         }
+        if (
+          !validateCategoryNodes(categoryData) ||
+          !categoryData.every((category): category is PublicCategory =>
+            "order" in category && typeof category.order === "number" &&
+            Number.isSafeInteger(category.order) && category.order >= 0,
+          )
+        ) {
+          throw new Error("분류 파일 형식을 확인하십시오.");
+        }
+        setCategories(categoryData);
         setPosts(data);
         setLoaded(true);
       })
@@ -74,5 +90,5 @@ export function usePosts(postId: string | undefined) {
     return () => controller.abort();
   }, [postId, posts]);
 
-  return { posts, drafts, error, loaded, setDrafts };
+  return { posts, categories, drafts, error, loaded, setDrafts };
 }

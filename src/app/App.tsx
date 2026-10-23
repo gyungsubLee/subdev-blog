@@ -10,7 +10,7 @@ const WritePage = lazy(() => import("../pages/write/WritePage"));
 
 export default function App() {
   const { hash, postId } = useHashRoute();
-  const { posts, drafts, error, loaded, setDrafts } = usePosts(postId);
+  const { posts, categories, drafts, error, loaded, setDrafts } = usePosts(postId);
   const [editing, setEditing] = useState<Post | null | undefined>(undefined);
 
   function edit(post: Post | null) {
@@ -39,6 +39,7 @@ export default function App() {
       ) : loaded ? (
         <BlogView
           posts={[...drafts, ...posts]}
+          categories={categories}
           hash={hash}
           onWrite={() => edit(null)}
           onEdit={edit}

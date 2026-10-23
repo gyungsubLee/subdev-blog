@@ -26,6 +26,14 @@ export type JsonValue =
   | JsonValue[]
   | { [key: string]: JsonValue };
 
+export type PublicCategory = {
+  id: string;
+  name: string;
+  parentId: string | null;
+  order: number;
+  sources: string[];
+};
+
 export type CanonicalDocumentId = string;
 export type LocalDraftId = `draft-${string}`;
 

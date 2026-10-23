@@ -47,6 +47,12 @@ export default function RecordsPage({
       ),
     ),
   );
+  const canonicalNames = new Map(
+    catalog.nodes.flatMap((node) => [
+      [node.id, node.name] as const,
+      ...node.sources.map((source) => [source, node.name] as const),
+    ]),
+  );
   const visiblePosts = browser.filteredPosts.slice(0, browser.limit);
   const title = category?.name ?? group?.name ?? "모든 기록";
 
@@ -61,7 +67,9 @@ export default function RecordsPage({
       <PostList
         posts={items.map((post) => ({
           ...post,
-          category: names.get(post.category) ?? post.category,
+          category:
+            canonicalNames.get(post.categoryId ?? post.category) ??
+            names.get(post.category) ?? post.category,
         }))}
         hasPosts={posts.length > 0}
         onReset={browser.resetFilters}

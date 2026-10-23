@@ -3,25 +3,31 @@ import type { Post } from "../../shared/post";
 
 export function pageLink(href: string, current: Post, posts: Post[]) {
   if (href.startsWith("#")) return href;
-  const fragment = href.split("#")[1];
-  const articleHref = (target: Post) =>
-    postHref(target.id, fragment);
-  const id = href
-    .match(
-      /[a-f0-9]{32}|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i,
-    )?.[0]
-    ?.replaceAll("-", "");
-  if (id) {
-    const target = posts.find((post) => post.id.replaceAll("-", "") === id);
-    if (target) return articleHref(target);
-  }
-  if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(href)) return href;
+  if (href.startsWith("/content/assets/") || href.startsWith("/notion/assets/"))
+    return href;
+
+  const external = /^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(href);
   try {
-    const path = decodeURIComponent(
-      new URL(href, "https://archive.local/" + current.path).pathname,
-    ).replace(/^\//, "");
-    const target = posts.find((post) => post.path.replace(/^\//, "") === path);
-    if (target) return articleHref(target);
+    // Post.path is a literal filename; only href is URL-encoded input.
+    const currentPath = current.path.split("/").map(encodeURIComponent).join("/");
+    const url = new URL(href, "https://archive.local/" + currentPath.replace(/^\//, ""));
+    const path = decodeURIComponent(url.pathname).replace(/^\//, "");
+    let pageName = path.split("/").at(-1) ?? "";
+    if (external) {
+      if (!/(?:^|\.)(?:notion\.so|notion\.site)$/i.test(url.hostname))
+        return href;
+      pageName = path.replace(/\/$/, "").split("/").at(-1) ?? "";
+    } else {
+      if (!/\.md$/i.test(pageName)) return href;
+      const target = posts.find((post) => post.path.replace(/^\//, "") === path);
+      if (target) return postHref(target.id, url.hash.slice(1) || undefined);
+      pageName = pageName.replace(/\.md$/i, "");
+    }
+    const id = pageName.match(
+      /([a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i,
+    )?.[1]?.replaceAll("-", "").toLowerCase();
+    const target = id && posts.find((post) => post.id.replaceAll("-", "").toLowerCase() === id);
+    if (target) return postHref(target.id, url.hash.slice(1) || undefined);
   } catch {
     return href;
   }

@@ -17,10 +17,11 @@ import CategoriesPage from "../pages/categories/CategoriesPage";
 import RecordsPage from "../pages/records/RecordsPage";
 import MissingPostPage from "../pages/post/MissingPostPage";
 import PostPage from "../pages/post/PostPage";
-import type { Post } from "../shared/post";
+import type { Post, PublicCategory } from "../shared/post";
 
 type BlogViewProps = {
   posts: Post[];
+  categories?: PublicCategory[];
   hash: string;
   onWrite: () => void;
   onEdit: (post: Post) => void;
@@ -28,6 +29,7 @@ type BlogViewProps = {
 
 export default function BlogView({
   posts,
+  categories,
   hash,
   onWrite,
   onEdit,
@@ -39,7 +41,7 @@ export default function BlogView({
   const isRecords = hash === RECORDS_HREF;
   const isCategories = hash === CATEGORIES_HREF;
   const isHome = !selectedId && !isRecords && !isCategories;
-  const catalog = useCategoryCatalog(posts);
+  const catalog = useCategoryCatalog(posts, categories);
   const records = useRecordsBrowser(posts, catalog.groups, isRecords && !dialog);
 
   useEffect(() => {
@@ -61,6 +63,12 @@ export default function BlogView({
     page = selected ? (
       <PostPage
         post={selected}
+        categoryName={
+          catalog.nodes.find((node) =>
+            node.id === selected.categoryId ||
+            node.sources.includes(selected.categoryId ?? selected.category),
+          )?.name
+        }
         posts={posts}
         hash={hash}
         onEdit={onEdit}

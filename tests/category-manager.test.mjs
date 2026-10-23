@@ -50,10 +50,10 @@ const groups = [
   { id: "tools", name: "도구", categories: [] },
 ];
 let current;
-function Harness({ visible = true }) {
-  current = useCategoryCatalog(posts);
+function Harness({ visible = true, items = posts, categories = [] }) {
+  current = useCategoryCatalog(items, categories);
   return visible
-    ? React.createElement(CategoriesPage, { posts, catalog: current })
+    ? React.createElement(CategoriesPage, { posts: items, catalog: current })
     : React.createElement("p", null, "다른 화면");
 }
 async function mount() {
@@ -381,6 +381,52 @@ test("a saved deletion can be undone and saved even when undo empties history", 
       ).sources,
       ["Spring ( Java )"],
     );
+  } finally {
+    await act(async () => root.unmount());
+  }
+});
+
+const canonical = [
+  { id: "canonical-spring", name: "Canonical Spring", parentId: null, order: 0, sources: ["Spring ( Java )", "canonical-spring"] },
+  { id: "empty-new", name: "Empty canonical", parentId: "canonical-spring", order: 1, sources: [] },
+];
+
+test("canonical categories initialize labels and personal v1/v2 settings overlay without ID-named nodes", async () => {
+  for (const version of [null, 1, 2]) {
+    dom.window.localStorage.clear();
+    if (version === 1) dom.window.localStorage.setItem(LEGACY, JSON.stringify({ version, groups }));
+    if (version === 2) dom.window.localStorage.setItem(KEY, JSON.stringify({ version, nodes: [
+      { id: "personal", name: "Personal Spring", parentId: null, sources: ["Spring ( Java )"] },
+    ] }));
+    const before = { ...dom.window.localStorage };
+    const root = createRoot(document.getElementById("root"));
+    try {
+      await act(async () => root.render(React.createElement(Harness, {
+        items: [...posts, { id: "new-post", title: "New", category: "canonical-spring", categoryId: "canonical-spring" }],
+        categories: canonical,
+      })));
+      assert.ok(current.nodes.some((node) => node.name === "Empty canonical"));
+      const owner = current.nodes.find((node) => node.sources.includes("canonical-spring"));
+      const expectedNames = { 1: "스프링", 2: "Personal Spring", null: "Canonical Spring" };
+      assert.equal(owner.name, expectedNames[version]);
+      assert.equal(current.nodes.some((node) => node.name === "canonical-spring"), false);
+      assert.deepEqual({ ...dom.window.localStorage }, before, "render does not migrate or overwrite stored settings");
+      assert.equal(current.nodes.flatMap((node) => node.sources).filter((source) => source === "canonical-spring").length, 1);
+    } finally {
+      await act(async () => root.unmount());
+    }
+  }
+});
+
+test("corrupt personal settings use canonical labels while preserving bytes and blocking save", async () => {
+  dom.window.localStorage.clear();
+  dom.window.localStorage.setItem(KEY, "BROKEN_BYTES");
+  const root = createRoot(document.getElementById("root"));
+  try {
+    await act(async () => root.render(React.createElement(Harness, { categories: canonical })));
+    assert.ok(current.nodes.some((node) => node.name === "Canonical Spring"));
+    assert.equal(current.saveNodes(current.nodes), false);
+    assert.equal(dom.window.localStorage.getItem(KEY), "BROKEN_BYTES");
   } finally {
     await act(async () => root.unmount());
   }

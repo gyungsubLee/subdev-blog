@@ -1,4 +1,4 @@
-import type { Post } from "../../shared/post";
+import type { Post, PublicCategory } from "../../shared/post";
 import {
   normalizeCategoryName,
   type CategoryGroup,
@@ -13,6 +13,54 @@ export type CategoryNode = {
 };
 export const UNCLASSIFIED_CATEGORY_ID = "group:unclassified";
 export const MAX_CATEGORIES = 500;
+
+// Keep personal aliases and placement; attach canonical IDs to their existing source owner.
+export function mergeCanonicalCategories(
+  nodes: CategoryNode[],
+  categories: PublicCategory[],
+): CategoryNode[] {
+  const next = nodes.map((node) => ({ ...node, sources: [...node.sources] }));
+  const owners = new Map(
+    next.flatMap((node) =>
+      node.sources.map((source) => [source, node] as const),
+    ),
+  );
+  const names = new Set(next.map((node) => node.name.toLocaleLowerCase()));
+  const canonicalOwners = new Map<string, string>();
+  const added = new Set<string>();
+  for (const category of categories) {
+    const sources = [...new Set([...category.sources, category.id])];
+    let owner =
+      next.find((node) => node.id === category.id) ??
+      owners.get(category.id) ??
+      sources.map((source) => owners.get(source)).find(Boolean);
+    if (!owner) {
+      let name = category.name;
+      for (let number = 2; names.has(name.toLocaleLowerCase()); number++) {
+        const suffix = ` (${number})`;
+        name = category.name.slice(0, 100 - suffix.length).trimEnd() + suffix;
+      }
+      owner = { id: category.id, name, parentId: category.parentId, sources: [] };
+      next.push(owner);
+      names.add(name.toLocaleLowerCase());
+      added.add(owner.id);
+    }
+    canonicalOwners.set(category.id, owner.id);
+    for (const source of sources) {
+      if (owners.has(source)) continue;
+      owner.sources.push(source);
+      owners.set(source, owner);
+    }
+  }
+  for (const node of next) {
+    if (added.has(node.id) && node.parentId !== null) {
+      const parentId = canonicalOwners.get(node.parentId) ?? node.parentId;
+      // A personal merge can put parent and child sources in the same node.
+      node.parentId = parentId === node.id ? null : parentId;
+    }
+  }
+  return next;
+}
 
 export function migrateCategoryGroups(groups: CategoryGroup[]): CategoryNode[] {
   const nodes = groups.flatMap((group) => [

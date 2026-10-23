@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Post } from "../../shared/post";
+import type { Post, PublicCategory } from "../../shared/post";
 import {
   createCategoryGroups,
   validateCategoryGroups,
@@ -9,6 +9,7 @@ import {
 import {
   categoryNodesToGroups,
   migrateCategoryGroups,
+  mergeCanonicalCategories,
   reconcileCategoryNodes,
   validateCategoryNodes,
   UNCLASSIFIED_CATEGORY_ID,
@@ -17,9 +18,17 @@ import {
 
 const STORAGE_KEY = "second-brain:categories:v2";
 const LEGACY_STORAGE_KEY = "second-brain:categories:v1";
+const NO_CATEGORIES: PublicCategory[] = [];
 
-export function useCategoryCatalog(posts: Post[]): CategoryCatalog {
+export function useCategoryCatalog(
+  posts: Post[],
+  categories: PublicCategory[] = NO_CATEGORIES,
+): CategoryCatalog {
   const [initial] = useState(() => {
+    const defaults = () =>
+      categories.length
+        ? mergeCanonicalCategories([], categories)
+        : migrateCategoryGroups(createCategoryGroups(posts));
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw !== null) {
@@ -31,7 +40,7 @@ export function useCategoryCatalog(posts: Post[]): CategoryCatalog {
       const legacyRaw = window.localStorage.getItem(LEGACY_STORAGE_KEY);
       if (legacyRaw === null)
         return {
-          nodes: migrateCategoryGroups(createCategoryGroups(posts)),
+          nodes: defaults(),
           error: "",
         };
       const legacy = JSON.parse(legacyRaw);
@@ -43,7 +52,7 @@ export function useCategoryCatalog(posts: Post[]): CategoryCatalog {
       return { nodes, error: "" };
     } catch {
       return {
-        nodes: migrateCategoryGroups(createCategoryGroups(posts)),
+        nodes: defaults(),
         error:
           "분류 설정을 읽지 못했습니다. 기존 저장 데이터를 확인하십시오. 저장은 중단했습니다.",
       };
@@ -56,23 +65,26 @@ export function useCategoryCatalog(posts: Post[]): CategoryCatalog {
     history: CategoryNode[][];
   }>({ nodes: null, history: [] });
   const nodes = useMemo(
-    () => reconcileCategoryNodes(savedNodes, posts),
-    [savedNodes, posts],
+    () =>
+      reconcileCategoryNodes(mergeCanonicalCategories(savedNodes, categories), posts),
+    [savedNodes, categories, posts],
   );
   const draftNodes = useMemo(
     () =>
-      draft.nodes === null ? nodes : reconcileCategoryNodes(draft.nodes, posts),
-    [draft.nodes, nodes, posts],
+      draft.nodes === null
+        ? nodes
+        : reconcileCategoryNodes(mergeCanonicalCategories(draft.nodes, categories), posts),
+    [draft.nodes, categories, nodes, posts],
   );
   const groups = useMemo(() => categoryNodesToGroups(nodes), [nodes]);
   const originalOwners = useMemo(
     () =>
       new Map(
-        reconcileCategoryNodes(initial.nodes, posts).flatMap((node) =>
+        reconcileCategoryNodes(mergeCanonicalCategories(initial.nodes, categories), posts).flatMap((node) =>
           node.sources.map((source) => [source, node.id] as const),
         ),
       ),
-    [initial.nodes, posts],
+    [initial.nodes, categories, posts],
   );
   const dirty = JSON.stringify(draftNodes) !== JSON.stringify(nodes);
 

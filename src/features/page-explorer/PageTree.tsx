@@ -4,12 +4,15 @@ import type { Post } from "../../shared/post";
 import "./page-explorer.css";
 
 export default function PageTree({ posts, onClose }: { posts: Post[]; onClose: () => void }) {
+  const orderedPosts = [...posts].sort(
+    (a, b) => (a.order ?? 0) - (b.order ?? 0) || a.id.localeCompare(b.id),
+  );
   const ids = new Set(posts.map((post) => post.id));
-  const roots = posts.filter(
+  const roots = orderedPosts.filter(
     (post) => !post.parentId || !ids.has(post.parentId),
   );
   const childrenByParent = new Map<string | null, Post[]>();
-  for (const post of posts) {
+  for (const post of orderedPosts) {
     const children = childrenByParent.get(post.parentId) || [];
     children.push(post);
     childrenByParent.set(post.parentId, children);
