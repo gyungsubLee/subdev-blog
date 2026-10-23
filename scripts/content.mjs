@@ -198,7 +198,8 @@ export function validateContent(snapshot) {
   for (const entry of entries) {
     for (const alias of [entry.filename, entry.metadata.legacy_path]) {
       if (!alias) continue;
-      const normalized = path.posix.normalize(decodePath(alias));
+      // Stored paths are literal filenames, including percent characters.
+      const normalized = path.posix.normalize(alias);
       if (paths.has(normalized) && paths.get(normalized) !== entry.metadata.id)
         throw new Error("Duplicate document path alias: " + alias);
       paths.set(normalized, entry.metadata.id);
@@ -264,7 +265,8 @@ function linkResolver(snapshot, entry, assets = new Map(), externals = new Set()
       if (!destination.startsWith("data:")) externals.add(destination);
       return destination;
     }
-    const decoded = decodePath(pathname);
+    // Decode URL input once; "%2520" names a literal "%20", not a space.
+    const decoded = decodeURIComponent(pathname);
     if (decoded.includes("\\") || /[\u0000-\u001f\u007f]/.test(decoded))
       throw new Error("Unsafe content path: " + destination);
     if (/\.md$/i.test(decoded)) {

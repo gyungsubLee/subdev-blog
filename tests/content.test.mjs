@@ -313,3 +313,32 @@ test("retains recovery bytes and the publication cause when rollback cannot rest
   assert.deepEqual(await readFile(path.join(root, recovery, "original.tmp")), bytes);
   assert.equal((await readdir(root)).includes(".content-write-lock"), false);
 });
+
+test("keeps literal percent filenames and legacy aliases while resolving encoded destinations", async (t) => {
+  const legacyPath = "Main/리액트-c6a3a1072bb9/React + GSAP-e975482b1dcd/vw, vh, %-e3bc5990fb11/index.md";
+  const root = await fixture(t, [
+    document(parentId, { title: "vw, vh, %", legacy_path: legacyPath }),
+    document(inheritedChildId, {}, `[legacy](${encodeURI(legacyPath)}#block) [canonical](../${parentId}/vw,%20vh,%20%25.md#body)`),
+  ]);
+  const folder = path.join(root, "posts", parentId);
+  await fsPromises.rename(path.join(folder, "Title.md"), path.join(folder, "vw, vh, %.md"));
+  const snapshot = await readContent(root);
+  assert.equal(snapshot.documents.get(parentId).filename, `posts/${parentId}/vw, vh, %.md`);
+  assert.equal(snapshot.documents.get(parentId).metadata.legacy_path, legacyPath);
+  assert.equal(snapshot.paths.get(legacyPath), parentId);
+  const post = toPublicPosts(snapshot).find((item) => item.id === inheritedChildId);
+  assert.equal(post.markdown, `[legacy](#/post/${parentId}#block) [canonical](#/post/${parentId}#body)`);
+});
+
+test("does not decode stored percent-encoded-looking aliases into different paths", async (t) => {
+  const root = await fixture(t, [
+    document(parentId, { legacy_path: "old/literal%20name.md" }),
+    document(inheritedChildId, { legacy_path: "old/literal name.md" }),
+    document(explicitChildId, {}, "[percent](old/literal%2520name.md) [space](old/literal%20name.md)"),
+  ]);
+  const snapshot = await readContent(root);
+  assert.equal(snapshot.paths.get("old/literal%20name.md"), parentId);
+  assert.equal(snapshot.paths.get("old/literal name.md"), inheritedChildId);
+  const post = toPublicPosts(snapshot).find((item) => item.id === explicitChildId);
+  assert.equal(post.markdown, `[percent](#/post/${parentId}) [space](#/post/${inheritedChildId})`);
+});
