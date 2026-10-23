@@ -165,7 +165,6 @@ aside.records-sidebar {
 .records-sidebar button[aria-pressed="true"] {
   color: var(--accent);
   background: #efe1d6;
-  box-shadow: inset 2px 0 var(--accent);
 }
 
 .records-count {
