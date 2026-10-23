@@ -324,3 +324,11 @@ test("shared extension objects serialize as JSON values without YAML aliases", (
 test("patch headers validate supplied known metadata before discarding non-editable fields", () => {
   assert.throws(() => parseMarkdownDocument(`---\nschema_version: 1\ndocument_mode: patch\nid: ${documentId}\nbase_revision: ${revision}\nparent_id: invalid\n---\nbody`));
 });
+
+test("truncated whitespace suffixes cannot expose a Windows device name", () => {
+  assert.equal(canonicalFilename("CON" + " ".repeat(194) + "x"), "_CON.md");
+});
+
+test("truncated whitespace-only prefixes use the empty-title fallback", () => {
+  assert.equal(canonicalFilename(" ".repeat(197) + "x"), "제목 없음.md");
+});

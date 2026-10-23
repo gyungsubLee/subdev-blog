@@ -374,12 +374,12 @@ export function mergeDocumentPatch(original, value, currentRevision) {
 }
 
 export function canonicalFilename(title) {
+  const reservedNamePattern = /^(?:con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])(?:\.|$)/i;
   let stem = readString(title, "제목")
     .normalize("NFC")
     .replace(/[<>:"/\\|?*\u0000-\u001f\u007f-\u009f]/g, "_")
     .replace(/[. ]+$/, "");
-  if (!stem) stem = "제목 없음";
-  if (/^(?:con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])(?:\.|$)/i.test(stem))
+  if (reservedNamePattern.test(stem))
     stem = "_" + stem;
   const encoder = new TextEncoder();
   let filename = "";
@@ -390,5 +390,8 @@ export function canonicalFilename(title) {
     filename += point;
     bytes += size;
   }
-  return filename.replace(/[. ]+$/, "") + ".md";
+  // Truncation can expose an empty stem or a bare reserved name.
+  filename = filename.replace(/[. ]+$/, "") || "제목 없음";
+  if (reservedNamePattern.test(filename)) filename = "_" + filename;
+  return filename + ".md";
 }
