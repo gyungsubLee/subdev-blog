@@ -1,47 +1,22 @@
-import { ALL_CATEGORIES } from "../../features/post-category/config";
-import type { RefObject } from "react";
 import Arrow from "../../components/icons/Arrow";
+import PostArt from "../../components/post-art/PostArt";
 import { site } from "../../config/site";
-import PostCategoryFilter from "../../features/post-category/PostCategoryFilter";
-import FeaturedPosts from "../../features/post-list/FeaturedPosts";
-import PostList from "../../features/post-list/PostList";
-import PostLoadMore from "../../features/post-pagination/PostLoadMore";
-import PostResultCount from "../../features/post-pagination/PostResultCount";
-import PostSearch from "../../features/post-search/PostSearch";
 import type { Post } from "../../shared/post";
+import { formatDate } from "../../shared/post-content";
+import { postHref, RECORDS_HREF } from "../../shared/routes";
 import "./HomePage.css";
 
-type HomePageProps = {
-  posts: Post[];
-  filtered: Post[];
-  query: string;
-  searchRef: RefObject<HTMLInputElement | null>;
-  onQueryChange: (query: string) => void;
-  onQueryClear: () => void;
-  category: string;
-  categories: string[];
-  onCategoryChange: (category: string) => void;
-  limit: number;
-  onLoadMore: () => void;
-  onResetFilters: () => void;
-  onWrite: () => void;
-};
+export default function HomePage({ posts }: { posts: Post[] }) {
+  const articles = posts
+    .filter((post) => !post.draft)
+    .sort(
+      (a, b) =>
+        (Date.parse(b.createdAt) || 0) - (Date.parse(a.createdAt) || 0),
+    );
+  const latest = articles.slice(0, 4);
+  // ponytail: 조회수 연동 전에는 최신 글 5개로 순위 UI만 표시한다. 집계 연결 후 교체한다.
+  const popular = articles.slice(0, 5);
 
-export default function HomePage({
-  posts,
-  filtered,
-  query,
-  searchRef,
-  onQueryChange,
-  onQueryClear,
-  category,
-  categories,
-  onCategoryChange,
-  limit,
-  onLoadMore,
-  onResetFilters,
-  onWrite,
-}: HomePageProps) {
   return (
     <main id="main-content" tabIndex={-1}>
       <section className="blog-intro" aria-labelledby="blog-title">
@@ -59,48 +34,79 @@ export default function HomePage({
           {site.introDescriptionEnd}
         </p>
       </section>
-      {!query.trim() && category === ALL_CATEGORIES ? (
-        <FeaturedPosts posts={posts} />
-      ) : null}
-      <section className="all-posts" aria-labelledby="all-posts-title">
-        <div className="section-heading">
-          <h2 id="all-posts-title">
-            모든 기록 <span>{posts.length}</span>
-          </h2>
-          <PostSearch
-            query={query}
-            inputRef={searchRef}
-            onChange={onQueryChange}
-            onClear={onQueryClear}
-          />
-        </div>
-        <PostCategoryFilter
-          category={category}
-          categories={categories}
-          onChange={onCategoryChange}
-        />
-        <PostResultCount query={query} count={filtered.length} />
-        <PostList
-          posts={filtered.slice(0, limit)}
-          hasPosts={posts.length > 0}
-          onReset={onResetFilters}
-          onWrite={onWrite}
-        />
-        <PostLoadMore
-          limit={limit}
-          total={filtered.length}
-          onLoadMore={onLoadMore}
-        />
-      </section>
-      <section className="writing-invitation">
-        <div>
-          <span className="eyebrow">한 편의 기록에서 시작합니다</span>
-          <h2>다음 생각을 남겨 보세요.</h2>
-        </div>
-        <button className="dark-button" type="button" onClick={onWrite}>
-          새 글 쓰기 <Arrow />
-        </button>
-      </section>
+      <div className="home-discovery">
+        <section className="home-latest" aria-labelledby="latest-articles-title">
+          <div className="home-section-heading">
+            <h2 id="latest-articles-title">최신 아티클</h2>
+            <a href={RECORDS_HREF}>
+              전체 아티클 보기 <Arrow />
+            </a>
+          </div>
+          {latest.length ? (
+            <div className="home-article-grid">
+              {latest.map((post, index) => (
+                <a
+                  className="home-article-card"
+                  key={post.id}
+                  href={postHref(post.id)}
+                >
+                  <PostArt post={post} variant={index} />
+                  <div className="home-article-copy">
+                    <time dateTime={post.createdAt}>
+                      {formatDate(post.createdAt)}
+                    </time>
+                    <h3>{post.title}</h3>
+                    <p>{post.excerpt}</p>
+                    <span className="home-read-link">
+                      아티클 읽기 <Arrow />
+                    </span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p className="home-empty">공개한 아티클이 아직 없습니다.</p>
+          )}
+        </section>
+        <aside className="home-popular" aria-labelledby="popular-articles-title">
+          <div className="home-section-heading">
+            <h2 id="popular-articles-title">인기 아티클</h2>
+            <span className="home-sample-badge">순위 예시</span>
+          </div>
+          <p className="home-popular-description">
+            조회수 연동 전 예시 목록입니다.
+          </p>
+          {popular.length ? (
+            <ol className="home-popular-list" role="list">
+              {popular.map((post, index) => (
+                <li key={post.id}>
+                  <a className="home-popular-link" href={postHref(post.id)}>
+                    <span className="home-rank" aria-hidden="true">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <div className="home-popular-copy">
+                      <h3>{post.title}</h3>
+                      <time dateTime={post.createdAt}>
+                        {formatDate(post.createdAt)}
+                      </time>
+                    </div>
+                    <Arrow />
+                  </a>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="home-empty">표시할 아티클이 없습니다.</p>
+          )}
+          <a className="home-archive-link" href={RECORDS_HREF}>
+            <div>
+              <strong>찾는 아티클이 있나요?</strong>
+              <span>기록 관리에서 검색하고 찾아보세요.</span>
+            </div>
+            <Arrow />
+          </a>
+        </aside>
+      </div>
     </main>
   );
 }

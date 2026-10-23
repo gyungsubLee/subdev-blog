@@ -76,12 +76,19 @@ test("loading article never renders or exports its preview body", () => {
   assert.match(html, /disabled=""[^>]*>편집하기/);
 });
 
-test("home marks browser drafts and has a labelled search", () => {
-  const html = render([{ ...base, draft: true }]);
-  assert.match(html, /이 브라우저의 초안|초안/);
-  assert.match(html, /제목과 요약 검색/);
-  assert.match(html, /모든 기록/);
-  assert.match(html, /type="search"/);
+test("home shows article sections and keeps browser drafts in records", () => {
+  const published = { ...base, id: "published" };
+  const draft = { ...base, id: "draft", draft: true };
+  const home = new JSDOM(render([draft, published]));
+  try {
+    assert.ok(home.window.document.querySelector("#latest-articles-title"));
+    assert.ok(home.window.document.querySelector("#popular-articles-title"));
+    assert.equal(home.window.document.querySelector('input[type="search"]'), null);
+    assert.equal(home.window.document.querySelector('main a[href="#/post/draft"]'), null);
+    assert.match(render([draft, published], "#/records"), /이 브라우저의 초안|초안/);
+  } finally {
+    home.window.close();
+  }
 });
 
 test("header separates records and category routes while the wordmark opens home", () => {
@@ -98,7 +105,7 @@ test("header separates records and category routes while the wordmark opens home
       [...document.querySelectorAll(".header-navigation a")].map((link) => [
         link.textContent.trim(), link.getAttribute("href"),
       ]),
-      [["기록", "#/records"], ["카테고리 관리", "#/categories"]],
+      [["기록 관리", "#/records"], ["카테고리 관리", "#/categories"]],
     );
     assert.equal(
       document.querySelector('.header-navigation [aria-current="page"]')?.getAttribute("href") ?? null,

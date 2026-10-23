@@ -56,7 +56,7 @@ test("App loads summaries then the selected body and handles an invalid index", 
     await act(async () => root.render(React.createElement(App)));
     assert.match(document.querySelector(".app-state").textContent, /불러오는 중/);
     await respond("/content/index.json", [post]);
-    assert.equal(document.querySelectorAll(".post-card").length, 1);
+    assert.equal(document.querySelectorAll(".home-article-card").length, 1);
     for (const [selector, pageClass] of [
       ['.header-navigation a[href="#/records"]', ".records-page"],
       ['.header-navigation a[href="#/categories"]', ".categories-page"],

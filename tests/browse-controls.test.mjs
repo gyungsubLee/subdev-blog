@@ -27,83 +27,66 @@ const { default: React, act } = await import("react");
 const { createRoot } = await import("react-dom/client");
 const { default: Blog } = await loadComponent("tests/support/BlogHarness.tsx");
 
-test("search, category and visible count compose and survive article navigation", async () => {
+test("home leaves browsing controls and search shortcuts to records", async () => {
   const root = createRoot(document.getElementById("root"));
   const posts = Array.from({ length: 36 }, (_, index) => ({
     id: "p" + index,
     title: "공통 기록 " + index,
     parentId: null,
-    category: index < 24 ? "개발" : "일상",
+    category: index < 24 ? "리액트" : "Docker",
     createdAt: "2026-10-22T00:00:00.000Z",
     updatedAt: "2026-10-22T00:00:00.000Z",
-    markdown: index === 20 ? "본문전용 단어" : "기록 본문",
-    excerpt: index === 0 ? "TypeScript 요약" : "기록 요약",
+    markdown: "기록 본문",
+    excerpt: "기록 요약",
     path: "p" + index + ".md",
     url: "",
   }));
   const cards = () => document.querySelectorAll(".post-grid .post-card").length;
-  const button = (text) => [...document.querySelectorAll("button")].find(
-    (element) => element.textContent.trim().startsWith(text),
-  );
   async function click(element) {
+    assert.ok(element, "expected control");
     await act(async () => element.click());
   }
-  async function search(value) {
-    const input = document.querySelector('input[type="search"]');
-    await act(async () => {
-      Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value")
-        .set.call(input, value);
-      input.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
-    });
-  }
   async function navigate(anchor) {
+    assert.ok(anchor, "expected route link");
     await act(async () => {
       const changed = once(dom.window, "hashchange");
       anchor.click();
       await changed;
     });
   }
+  function searchShortcut() {
+    const main = document.querySelector("main");
+    main.focus();
+    return main.dispatchEvent(new dom.window.KeyboardEvent("keydown", {
+      key: "/", bubbles: true, cancelable: true,
+    }));
+  }
+  function assertHomeControls() {
+    const main = document.querySelector("main");
+    assert.ok(!main.querySelector("input"), "home has no search field");
+    assert.ok(!main.querySelector('[aria-label="카테고리"]'));
+    assert.ok(!main.querySelector(".load-more"));
+    assert.equal(searchShortcut(), true, "home does not intercept the search shortcut");
+  }
   try {
     await act(async () => root.render(React.createElement(Blog, {
       posts, onWrite() {}, onEdit() {},
     })));
+    assertHomeControls();
+    await navigate(document.querySelector('.header-navigation a[href="#/records"]'));
+    assert.ok(document.querySelector(".records-page"));
+    assert.ok(document.querySelector('input[type="search"]'));
+    assert.ok(document.querySelector('.records-sidebar[aria-label="카테고리"]'));
+    assert.equal(searchShortcut(), false);
+    assert.equal(document.activeElement, document.querySelector('input[type="search"]'));
     assert.equal(cards(), 12);
-    await click(button("더 보기"));
+    await click(document.querySelector(".load-more button"));
     assert.equal(cards(), 24);
-    await click(button("개발"));
-    assert.equal(cards(), 12, "category change resets the visible count");
-    assert.match(document.querySelector(".result-count").textContent, /24개의 기록/);
-    await click(button("더 보기"));
-    assert.equal(cards(), 24);
-    await search("공통");
-    assert.equal(cards(), 12, "search change resets the visible count");
-    await click(button("더 보기"));
-    assert.equal(cards(), 24);
-    await navigate(document.querySelector(".post-card"));
-    assert.equal(document.querySelector(".article-header h1").textContent, "공통 기록 0");
-    await navigate(document.querySelector(".back-link"));
-    assert.equal(document.querySelector('input[type="search"]').value, "공통");
-    assert.equal(button("개발").getAttribute("aria-pressed"), "true");
-    assert.equal(cards(), 24, "article roundtrip preserves the visible count");
-    const input = document.querySelector('input[type="search"]');
-    input.focus();
-    await act(async () => input.dispatchEvent(new dom.window.KeyboardEvent(
-      "keydown", { key: "Escape", bubbles: true },
-    )));
-    assert.equal(input.value, "");
-    assert.equal(cards(), 24, "Escape clears search without resetting the visible count");
-    assert.notEqual(document.activeElement, input);
-    await search("본문전용");
-    assert.equal(cards(), 1, "search includes article Markdown");
-    await search("  typescript  ");
-    assert.equal(cards(), 1, "search trims and ignores case in excerpts");
-    await search("일치하지않는검색어");
-    assert.equal(cards(), 0);
-    assert.ok(document.querySelector(".empty-results"));
-    await click(button("전체 글 보기"));
-    assert.equal(document.querySelector('input[type="search"]').value, "");
-    assert.equal(button("전체").getAttribute("aria-pressed"), "true");
-    assert.equal(cards(), 12);
+    await click(document.querySelector('button[aria-label="리액트"]'));
+    assert.equal(document.querySelector('button[aria-label="리액트"]').getAttribute("aria-pressed"), "true");
+    assert.equal(cards(), 12, "records category selection resets pagination");
+    await navigate(document.querySelector(".wordmark"));
+    assertHomeControls();
   } finally {
     await act(async () => root.unmount());
     dom.window.close();

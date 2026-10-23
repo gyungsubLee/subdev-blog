@@ -108,10 +108,9 @@ test("records filters, view and visible count survive article and home roundtrip
     assert.equal(searchShortcut(), true, "category manager has no list search shortcut");
     await navigate(document.querySelector(".wordmark"));
     assert.ok(document.querySelector(".blog-intro"));
-    assert.equal(document.querySelector('input[type="search"]').value, "");
-    assert.equal(searchShortcut(), false);
-    assert.equal(document.activeElement, document.querySelector('input[type="search"]'));
-    await navigate(document.querySelector(".post-card"));
+    assert.ok(!document.querySelector('input[type="search"]'));
+    assert.equal(searchShortcut(), true, "home has no list search shortcut");
+    await navigate(document.querySelector(".home-article-card"));
     assert.equal(document.querySelector(".back-link").getAttribute("href"), "#/");
     await navigate(document.querySelector(".back-link"));
     await navigate(document.querySelector('.header-navigation a[href="#/records"]'));
