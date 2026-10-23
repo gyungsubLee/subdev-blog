@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { readDrafts } from "../shared/drafts.mjs";
-import { validateCategoryNodes } from "../features/post-category/hierarchy";
+import { validatePublicCategories } from "../features/post-category/hierarchy";
 import type { Post, PublicCategory } from "../shared/post";
 
 export function usePosts(postId: string | undefined) {
@@ -31,13 +31,7 @@ export function usePosts(postId: string | undefined) {
         ) {
           throw new Error("글 파일 형식을 확인하십시오.");
         }
-        if (
-          !validateCategoryNodes(categoryData) ||
-          !categoryData.every((category): category is PublicCategory =>
-            "order" in category && typeof category.order === "number" &&
-            Number.isSafeInteger(category.order) && category.order >= 0,
-          )
-        ) {
+        if (!validatePublicCategories(categoryData)) {
           throw new Error("분류 파일 형식을 확인하십시오.");
         }
         setCategories(categoryData);

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { once } from "node:events";
-import test from "node:test";
+import test, { after } from "node:test";
 import { JSDOM } from "jsdom";
 import { loadComponent } from "./support/load-component.mjs";
 
@@ -106,6 +106,43 @@ test("App loads summaries then the selected body and handles an invalid index", 
   } finally {
     await act(async () => root.unmount());
     globalThis.fetch = nativeFetch;
-    dom.window.close();
   }
 });
+
+test("App loads distinct canonical categories sharing a display name", async () => {
+  const nativeFetch = globalThis.fetch;
+  const categories = [
+    { id: "notes-a", name: "Notes", parentId: null, order: 0, sources: ["notes-a"] },
+    { id: "notes-b", name: "Notes", parentId: null, order: 1, sources: ["notes-b"] },
+  ];
+  const posts = categories.map((category, index) => ({
+    id: "post-" + index, title: "Post " + index, parentId: null,
+    category: category.id, categoryId: category.id,
+    createdAt: "2026-10-22T00:00:00.000Z", updatedAt: "2026-10-22T00:00:00.000Z",
+    markdown: "Body", excerpt: "Summary", path: "post-" + index + ".md", url: "",
+  }));
+  const responses = new Map([
+    ["/content/index.json", posts], ["/content/categories.json", categories],
+  ]);
+  globalThis.fetch = async (url) => {
+    assert.ok(responses.has(url), "expected public loader request: " + url);
+    return { ok: true, json: async () => responses.get(url) };
+  };
+  dom.window.history.replaceState(null, "", "/#/categories");
+  dom.window.localStorage.clear();
+  const root = createRoot(document.getElementById("root"));
+  try {
+    await act(async () => root.render(React.createElement(App)));
+    assert.equal(document.querySelector('[role="alert"]')?.textContent ?? "", "");
+    assert.deepEqual(
+      [...document.querySelectorAll(".category-row .row-name")].map((node) => node.firstChild.textContent),
+      ["Notes", "Notes (2)"],
+    );
+    assert.equal(dom.window.localStorage.getItem("second-brain:categories:v2"), null);
+  } finally {
+    await act(async () => root.unmount());
+    globalThis.fetch = nativeFetch;
+  }
+});
+
+after(() => dom.window.close());

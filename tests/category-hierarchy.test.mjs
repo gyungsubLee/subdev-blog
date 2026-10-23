@@ -132,3 +132,22 @@ test("legacy name collisions migrate without losing IDs, aliases or assignments"
   assert.equal(migrated[0].name, "Java");
   assert.equal(migrated[2].name, "Java (2)");
 });
+
+test("canonical category validation permits shared labels but rejects broken public references", () => {
+  const categories = [
+    { id: "notes-a", name: "Notes", parentId: null, order: 0, sources: ["notes-a"] },
+    { id: "notes-b", name: "Notes", parentId: "notes-a", order: 1, sources: ["notes-b"] },
+  ];
+  assert.equal(tree.validatePublicCategories(categories), true);
+  assert.equal(tree.validateCategoryNodes(categories), false, "personal settings still require unique names");
+  const merged = tree.mergeCanonicalCategories([], categories);
+  assert.equal(tree.validateCategoryNodes(merged), true);
+  assert.deepEqual(merged.map((node) => node.name), ["Notes", "Notes (2)"]);
+  for (const invalid of [
+    categories.map((node) => ({ ...node, order: -1 })),
+    categories.map((node) => ({ ...node, sources: [1] })),
+    [categories[0], { ...categories[1], parentId: "absent" }],
+    [{ ...categories[0], parentId: "notes-b" }, categories[1]],
+    [categories[0], { ...categories[1], id: "notes-a" }],
+  ]) assert.equal(tree.validatePublicCategories(invalid), false);
+});

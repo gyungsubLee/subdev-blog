@@ -104,10 +104,9 @@ export function categoryDescendants(
   return result;
 }
 
-export function validateCategoryNodes(value: unknown): value is CategoryNode[] {
+function validateCategoryHierarchy(value: unknown): value is CategoryNode[] {
   if (!Array.isArray(value)) return false;
   const nodes = new Map<string, CategoryNode>();
-  const names = new Set<string>();
   const sources = new Set<string>();
   for (const node of value) {
     if (
@@ -116,10 +115,6 @@ export function validateCategoryNodes(value: unknown): value is CategoryNode[] {
       !node.id.trim() ||
       nodes.has(node.id) ||
       typeof node.name !== "string" ||
-      !node.name.length ||
-      node.name.length > 100 ||
-      normalizeCategoryName(node.name) !== node.name ||
-      names.has(node.name.toLocaleLowerCase()) ||
       (node.parentId !== null && typeof node.parentId !== "string") ||
       !Array.isArray(node.sources)
     )
@@ -129,7 +124,6 @@ export function validateCategoryNodes(value: unknown): value is CategoryNode[] {
       sources.add(source);
     }
     nodes.set(node.id, node);
-    names.add(node.name.toLocaleLowerCase());
   }
   for (const node of value) {
     const ancestors = new Set([node.id]);
@@ -142,6 +136,27 @@ export function validateCategoryNodes(value: unknown): value is CategoryNode[] {
     }
   }
   return true;
+}
+
+export function validateCategoryNodes(value: unknown): value is CategoryNode[] {
+  if (!validateCategoryHierarchy(value)) return false;
+  const names = new Set<string>();
+  for (const node of value) {
+    const name = node.name.toLocaleLowerCase();
+    if (
+      !node.name.length || node.name.length > 100 ||
+      normalizeCategoryName(node.name) !== node.name || names.has(name)
+    ) return false;
+    names.add(name);
+  }
+  return true;
+}
+
+export function validatePublicCategories(value: unknown): value is PublicCategory[] {
+  return validateCategoryHierarchy(value) && value.every(
+    (category) => "order" in category && typeof category.order === "number" &&
+      Number.isSafeInteger(category.order) && category.order >= 0,
+  );
 }
 
 export function moveCategoryNode(
