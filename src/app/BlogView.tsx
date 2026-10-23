@@ -7,7 +7,6 @@ import {
 import { ALL_CATEGORIES } from "../features/post-category/config";
 import { useEffect, useState } from "react";
 import SiteDialog from "../components/dialog/SiteDialog";
-import Arrow from "../components/icons/Arrow";
 import SiteFooter from "../components/layout/SiteFooter";
 import SiteHeader from "../components/layout/SiteHeader";
 import { site } from "../config/site";
@@ -37,7 +36,7 @@ export default function BlogView({
   onWrite,
   onEdit,
 }: BlogViewProps) {
-  const [dialog, setDialog] = useState<"tree" | "about" | null>(null);
+  const [dialog, setDialog] = useState<"tree" | null>(null);
   const [backHref, setBackHref] = useState(HOME_HREF);
   const selectedId = postIdFromHash(hash);
   const selected = posts.find((post) => post.id === selectedId);
@@ -141,40 +140,19 @@ export default function BlogView({
       <SiteHeader
         activeHref={hash}
         onExplore={() => setDialog("tree")}
-        onAbout={() => setDialog("about")}
         onWrite={onWrite}
       />
       {page}
       <SiteFooter />
       <SiteDialog
         open={dialog !== null}
-        title={dialog === "tree" ? "페이지 탐색" : site.name}
+        title="페이지 탐색"
         onClose={() => setDialog(null)}
       >
-        {dialog === "tree" ? (
-          <>
-            <p className="dialog-description">
-              원문의 페이지 구조를 따라 기록을 탐색합니다.
-            </p>
-            <PageTree posts={posts} onClose={() => setDialog(null)} />
-          </>
-        ) : (
-          <div className="about-copy">
-            <p>{site.aboutIntro}</p>
-            <p>{site.aboutArchive}</p>
-            <p>{site.aboutDrafts}</p>
-            <button
-              className="dark-button"
-              type="button"
-              onClick={() => {
-                setDialog(null);
-                onWrite();
-              }}
-            >
-              새 글 쓰기 <Arrow />
-            </button>
-          </div>
-        )}
+        <p className="dialog-description">
+          원문의 페이지 구조를 따라 기록을 탐색합니다.
+        </p>
+        <PageTree posts={posts} onClose={() => setDialog(null)} />
       </SiteDialog>
     </div>
   );

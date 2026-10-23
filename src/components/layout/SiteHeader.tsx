@@ -5,14 +5,12 @@ import "./layout.css";
 type SiteHeaderProps = {
   activeHref?: string;
   onExplore: () => void;
-  onAbout: () => void;
   onWrite: () => void;
 };
 
 export default function SiteHeader({
   activeHref,
   onExplore,
-  onAbout,
   onWrite,
 }: SiteHeaderProps) {
   return (
@@ -23,7 +21,7 @@ export default function SiteHeader({
           href={RECORDS_HREF}
           aria-current={activeHref === RECORDS_HREF ? "page" : undefined}
         >
-          기록
+          기록 관리
         </a>
         <a
           href={CATEGORIES_HREF}
@@ -33,9 +31,6 @@ export default function SiteHeader({
         </a>
         <button type="button" onClick={onExplore}>
           페이지 탐색
-        </button>
-        <button type="button" onClick={onAbout}>
-          소개
         </button>
       </nav>
       <button
