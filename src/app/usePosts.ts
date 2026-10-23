@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { readDrafts } from "../shared/drafts.mjs";
+import { useEffect, useMemo, useState } from "react";
+import { draftAssetUrl, draftDisplayMarkdown, readDrafts } from "../shared/drafts.mjs";
 import { validatePublicCategories } from "../features/post-category/hierarchy";
 import type { Post, PublicCategory } from "../shared/post";
 
@@ -84,5 +84,10 @@ export function usePosts(postId: string | undefined) {
     return () => controller.abort();
   }, [postId, posts]);
 
-  return { posts, categories, drafts, error, loaded, setDrafts };
+  const displayedDrafts = useMemo(() => drafts.map((draft) => ({
+    ...draft,
+    markdown: draftDisplayMarkdown(draft),
+    cover: draft.cover ? draftAssetUrl(draft, draft.cover) : draft.cover,
+  })), [drafts]);
+  return { posts, categories, drafts: displayedDrafts, error, loaded, setDrafts };
 }

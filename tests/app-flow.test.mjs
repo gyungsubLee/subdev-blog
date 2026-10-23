@@ -145,4 +145,30 @@ test("App loads distinct canonical categories sharing a display name", async () 
   }
 });
 
+test("App displays saved legacy draft assets without rewriting their stored Markdown", async () => {
+  const nativeFetch = globalThis.fetch;
+  const owner = "11111111-1111-4111-8111-111111111111";
+  const markdown = "![legacy](/notion/assets/hash.webp)";
+  const draft = {
+    id: "draft-old", sourceId: owner, title: "Legacy draft", category: "Development",
+    parentId: null, createdAt: "2026-10-22", updatedAt: "2026-10-22",
+    markdown, blocks: [], draft: true, path: "", url: "", excerpt: "old",
+  };
+  dom.window.localStorage.clear();
+  const stored = JSON.stringify([draft]);
+  dom.window.localStorage.setItem("second-brain:drafts:v1", stored);
+  globalThis.fetch = async () => ({ ok: true, json: async () => [] });
+  dom.window.history.replaceState(null, "", "/#/post/draft-old");
+  const root = createRoot(document.getElementById("root"));
+  try {
+    await act(async () => root.render(React.createElement(App)));
+    assert.equal(document.querySelector('img[alt="legacy"]').getAttribute("src"), `/content/assets/${owner}/hash.webp`);
+    assert.equal(dom.window.localStorage.getItem("second-brain:drafts:v1"), stored);
+  } finally {
+    await act(async () => root.unmount());
+    globalThis.fetch = nativeFetch;
+    dom.window.localStorage.clear();
+  }
+});
+
 after(() => dom.window.close());

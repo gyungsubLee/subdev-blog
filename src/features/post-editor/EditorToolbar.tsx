@@ -9,7 +9,7 @@ type EditorToolbarProps = {
   status: string;
   error: string;
   onClose: () => void;
-  onImport: (file: File | undefined) => Promise<void>;
+  onImport: (file: File | File[] | undefined) => Promise<void>;
   onExportMarkdown: () => void;
   onExportBackup: () => void;
   onSave: () => void;
@@ -50,9 +50,10 @@ export default function EditorToolbar({
           불러오기
           <input
             type="file"
-            accept=".md,.markdown,.json"
+            multiple
+            aria-label="본문과 형제 첨부"
             onChange={(event) => {
-              void onImport(event.target.files?.[0]);
+              void onImport(Array.from(event.target.files ?? []));
               event.target.value = "";
             }}
           />

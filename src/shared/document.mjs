@@ -6,45 +6,120 @@ function readString(value, label) {
   return value;
 }
 
+/** Validate flat sibling names before using them as paths or backup keys. */
+export function attachmentName(value) {
+  const name = readString(value, "첨부 이름");
+  if (
+    !name || name === "." || name === ".." ||
+    /[\\/<>:"|?*\u0000-\u001f\u007f]/.test(name) || /[. ]$/.test(name) ||
+    /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(name) ||
+    /\.md$/i.test(name) || new TextEncoder().encode(name).length > 255
+  ) throw new Error("첨부 이름은 안전한 형제 파일 이름이어야 합니다.");
+  return name;
+}
+
+/** Native data URLs keep image and non-image sibling bytes JSON-safe. */
+export function dataUrlBytes(value) {
+  const match = readString(value, "첨부 데이터").match(
+    /^data:([a-z\d.+-]+\/[a-z\d.+-]+);base64,([a-z\d+/]*={0,2})$/i,
+  );
+  if (!match || match[2].length % 4 !== 0 || match[2].length > 14 * 1024 * 1024)
+    throw new Error("첨부 data URL 형식을 확인하십시오.");
+  let binary;
+  try {
+    binary = atob(match[2]);
+  } catch {
+    throw new Error("첨부 data URL 바이트를 확인하십시오.");
+  }
+  if (btoa(binary) !== match[2]) throw new Error("첨부 base64 형식을 확인하십시오.");
+  const maximum = match[1].toLowerCase().startsWith("image/") ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
+  if (binary.length > maximum) throw new Error("첨부 크기가 제한을 넘었습니다.");
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index++) bytes[index] = binary.charCodeAt(index);
+  return { mime: match[1].toLowerCase(), bytes };
+}
+
+export function validateDocumentAttachments(value = []) {
+  if (!Array.isArray(value)) throw new Error("첨부는 배열이어야 합니다.");
+  const names = new Set();
+  return value.map((attachment) => {
+    const name = attachmentName(attachment?.name);
+    const key = name.normalize("NFC").toLowerCase();
+    if (names.has(key)) throw new Error("첨부 이름이 겹칩니다.");
+    names.add(key);
+    dataUrlBytes(attachment.dataUrl);
+    return { name, dataUrl: attachment.dataUrl };
+  });
+}
+
 export function parseBlockBackup(text) {
   const data = JSON.parse(text);
-  if (
-    !data ||
-    typeof data !== "object" ||
-    !Array.isArray(data.blocks) ||
-    !data.blocks.length
-  ) {
+  validateJson(data);
+  if (!data || typeof data !== "object" || !Array.isArray(data.blocks))
     throw new Error("블록 문서 형식을 확인하십시오.");
+  const result = {
+    ...data,
+    title: readString(data.title, "제목"),
+    category: data.category === undefined ? "기록" : readString(data.category, "분류"),
+  };
+  for (const key of ["sourceId", "createdAt", "markdown", "originalMarkdown"])
+    if (data[key] !== undefined) readString(data[key], key);
+  if (data.documentId !== undefined) result.documentId = readUuid(data.documentId, "문서 ID");
+  if (data.baseRevision !== undefined) readRevision(data.baseRevision);
+  if (data.editorMode !== undefined && !["markdown", "blocks"].includes(data.editorMode))
+    throw new Error("본문 편집 형식을 확인하십시오.");
+  if (data.documentMode !== undefined && !["full", "patch", "legacy"].includes(data.documentMode))
+    throw new Error("문서 형식을 확인하십시오.");
+  if (data.documentMode === "full") {
+    result.metadata = canonicalMetadata(data.metadata);
+    if (result.metadata.id !== result.documentId) throw new Error("문서 ID가 메타데이터와 다릅니다.");
+  } else if (data.metadata !== undefined) {
+    if (!data.metadata || Array.isArray(data.metadata) || typeof data.metadata !== "object")
+      throw new Error("메타데이터 형식을 확인하십시오.");
+    if (data.documentMode === "legacy") parseMarkdownDocument(serializeHeader(data.metadata, ""));
+    else validateKnownFields(structuredClone(data.metadata));
   }
-  const title = readString(data.title, "제목");
-  const category =
-    data.category === undefined ? "기록" : readString(data.category, "분류");
-  const sourceId =
-    data.sourceId === undefined
-      ? undefined
-      : readString(data.sourceId, "원본 ID");
-  const createdAt =
-    data.createdAt === undefined
-      ? undefined
-      : readString(data.createdAt, "작성일");
-  return { title, category, blocks: data.blocks, sourceId, createdAt };
+  if (data.documentMode === "patch") validatePatch({
+    id: data.documentId,
+    baseRevision: data.baseRevision,
+    changes: data.changes ?? {},
+    markdown: data.markdown,
+  });
+  if (data.attachments !== undefined) result.attachments = validateDocumentAttachments(data.attachments);
+  return result;
 }
 
 export function markdownDocument(draft) {
+  if (draft.documentMode === "patch") return serializeDocumentPatch({
+    id: draft.documentId,
+    baseRevision: draft.baseRevision,
+    changes: draft.changes ?? {},
+    markdown: draft.markdown,
+  });
+  if (draft.documentMode === "full") return serializeMarkdownDocument({
+    metadata: draft.metadata,
+    markdown: draft.markdown,
+  }, { baseRevision: draft.baseRevision });
+  if (draft.documentMode === "legacy") return serializeHeader({
+    ...draft.metadata,
+    id: draft.documentId,
+    ...(draft.sourceId ? { source_id: draft.sourceId } : {}),
+    title: draft.title,
+    ...(draft.category && draft.metadata?.category_id === undefined && !draft.categoryChanged ? { category: draft.category } : {}),
+    ...(draft.categoryChanged ? { category_id: draft.metadata.category_id } : {}),
+    ...(draft.createdAt ? { created: draft.createdAt } : {}),
+    ...(draft.updatedAt ? { updated: draft.updatedAt } : {}),
+  }, draft.markdown);
+  // Keep legacy callers readable while upgraded drafts use full/patch transport.
   return [
     "---",
-    "id: " + JSON.stringify(draft.id.replace(/^draft-/, "")),
+    "id: " + JSON.stringify(draft.documentId ?? draft.id.replace(/^draft-/, "")),
     ...(draft.sourceId ? ["source_id: " + JSON.stringify(draft.sourceId)] : []),
     "title: " + JSON.stringify(draft.title),
     "category: " + JSON.stringify(draft.category),
     "created: " + JSON.stringify(draft.createdAt),
     "updated: " + JSON.stringify(draft.updatedAt),
-    "---",
-    "",
-    "# " + draft.title,
-    "",
-    draft.markdown,
-    "",
+    "---", "", "# " + draft.title, "", draft.markdown, "",
   ].join("\n");
 }
 
