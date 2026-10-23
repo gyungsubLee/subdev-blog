@@ -71,3 +71,10 @@
 - Chrome tab 1490580392 at `http://127.0.0.1:5173/#/categories`: verified root add, inline rename, pointer nesting under CS, save, reload persistence, delete dialog, undo, and removal of the temporary verification category. Original categories and post assignments were retained.
 - Visual review confirms approved manager styling and controls. Existing app header/footer and real stored category data remain; the mockup's example hierarchy is not imposed on user data.
 - Capture: full-page Chrome tab screenshot, JPEG 1728×1543, stable across two consecutive captures. The connector emits JPEG, so these are visual review artifacts and do not establish lossless pixel equivalence. Reference screenshot is `category-mockup/v2/simplified.png`; final artifact is `category-implementation.jpg` alongside the mockup folder.
+
+## Follow-up: existing test failures
+
+- The 12 failures came from uncommitted test changes that replaced hash URLs/hashchange with pathname URLs/popstate. The runtime, README, and approved design still use hash routes.
+- Restored the five affected test files to their existing committed hash-route contract, including real hashchange waits and the missing `once` import. No assertions were removed and no production routing behavior changed. The before snapshots and exact patches were saved under `/private/tmp/category-route-test-backup/`.
+- Focused navigation/records tests: 15/15 passed. Full `npm run check`: 131/131 passed, zero failures. `npm run build` passed with the existing chunk-size warning.
+- Other concurrent Markdown/exporter changes remain outside this task's commit. The full-suite result describes the current shared working tree.
