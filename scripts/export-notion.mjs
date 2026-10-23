@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from 'node:fs/promises';
+import { assertLegacyContentWritable } from './content.mjs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { execFile } from 'node:child_process';
@@ -703,6 +704,7 @@ export function renderArchivedPosts(sourceRecords, existingPosts, manifest) {
 }
 
 async function main() {
+  await assertLegacyContentWritable(project);
   await fs.mkdir(cache, { recursive: true });
   await fs.mkdir(path.join(archive, 'assets'), { recursive: true });
   const queued = await collectGraph();

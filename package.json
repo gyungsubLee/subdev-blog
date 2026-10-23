@@ -12,6 +12,7 @@
     "export": "node scripts/export-notion.mjs",
     "import:md": "node scripts/import-markdown.mjs",
     "predev": "node scripts/prepare-site.mjs",
+    "check:content": "node scripts/content.mjs --check",
     "check:export": "node tests/export-check.mjs",
     "check:assets": "node tests/export-web-assets.mjs",
     "prepare:assets": "node scripts/prepare-web-assets.mjs",

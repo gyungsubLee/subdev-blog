@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readContent, toPublicPosts } from "../scripts/content.mjs";
 import { test } from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { JSDOM } from "jsdom";
 import { loadComponent } from "./support/load-component.mjs";
 
-const posts = JSON.parse(
-  await readFile(new URL("../content/posts.json", import.meta.url), "utf8"),
+const posts = toPublicPosts(
+  await readContent(process.env.CONTENT_ROOT ?? new URL("../content/", import.meta.url)),
 );
 const { default: MarkdownContent } = await loadComponent(
   "src/features/post-reader/MarkdownContent.tsx",

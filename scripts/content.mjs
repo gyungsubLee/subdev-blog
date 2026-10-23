@@ -3,6 +3,7 @@ import {
   lstat, link, mkdir, mkdtemp, readFile, readdir, realpath, rename, rm, writeFile,
 } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   canonicalFilename, parseMarkdownDocument, serializeMarkdownDocument,
 } from "../src/shared/document.mjs";
@@ -530,4 +531,57 @@ export async function writeContentDocument(
       ({ target, error }) => "Cleanup failed for " + target + ": " + error.message,
     );
   return result;
+}
+
+/** Keep legacy writers available only in an unmigrated backup checkout. */
+export async function assertLegacyContentWritable(project) {
+  const message = "Legacy content writes are disabled for canonical or uninitialized content. " +
+    "Use npm run check:content to validate canonical Markdown. " +
+    "check:export and check:assets require a pre-migration backup checkout.";
+  if (process.env.CONTENT_ROOT !== undefined) throw new Error(message);
+
+  let gitmodules = "";
+  try {
+    gitmodules = await readFile(path.join(project, ".gitmodules"), "utf8");
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+  if (/^\s*path\s*=\s*"?content\/?"?\s*(?:[#;].*)?$/m.test(gitmodules))
+    throw new Error(message);
+
+  for (const marker of ["categories.json", "posts"]) {
+    try {
+      await lstat(path.join(project, "content", marker));
+    } catch (error) {
+      if (error.code === "ENOENT") continue;
+      throw error;
+    }
+    throw new Error(message);
+  }
+  try {
+    await regularPath(path.join(project, "content/posts.json"));
+  } catch (error) {
+    if (error.code === "ENOENT") throw new Error(message, { cause: error });
+    throw error;
+  }
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try {
+    if (process.argv.length !== 3 || process.argv[2] !== "--check")
+      throw new Error("Usage: node scripts/content.mjs --check");
+    const root = process.env.CONTENT_ROOT ?? fileURLToPath(new URL("../content/", import.meta.url));
+    const snapshot = await readContent(root);
+    console.log(JSON.stringify({
+      posts: snapshot.documents.size,
+      categories: snapshot.categories.length,
+      referencedAttachments: [...snapshot.documents.values()].reduce(
+        (count, entry) => count + entry.assets.length, 0,
+      ),
+      errors: 0,
+    }));
+  } catch (error) {
+    console.error(error.message);
+    process.exitCode = 1;
+  }
 }

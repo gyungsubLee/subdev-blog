@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import { cp, mkdtemp, mkdir, readFile, readdir, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import fsPromises from "node:fs/promises";
 import { syncBuiltinESMExports } from "node:module";
 import os from "node:os";
@@ -341,4 +342,132 @@ test("does not decode stored percent-encoded-looking aliases into different path
   assert.equal(snapshot.paths.get("old/literal name.md"), inheritedChildId);
   const post = toPublicPosts(snapshot).find((item) => item.id === explicitChildId);
   assert.equal(post.markdown, `[percent](#/post/${parentId}) [space](#/post/${inheritedChildId})`);
+});
+
+function checkContent(root, cwd = process.cwd(), script = path.resolve("scripts/content.mjs")) {
+  const env = { ...process.env };
+  if (root === undefined) delete env.CONTENT_ROOT;
+  else env.CONTENT_ROOT = root;
+  return spawnSync(process.execPath, [script, "--check"], {
+    cwd, env, encoding: "utf8", timeout: 10_000,
+  });
+}
+
+test("content checking validates the selected corpus and preserves canonical files", async (t) => {
+  const root = await fixture(t, [document(parentId, {}, "![image](./picture.webp)\n![again](./picture.webp)")]);
+  const filename = path.join(root, "posts", parentId, "Title.md");
+  const asset = path.join(root, "posts", parentId, "picture.webp");
+  await writeFile(asset, "IMAGE_BYTES");
+  const before = await readFile(filename);
+  const result = checkContent(root);
+  assert.equal(result.status, 0, result.stderr);
+  assert.ok(result.stdout.trim(), "The content CLI must report corpus counts");
+  assert.deepEqual(JSON.parse(result.stdout), {
+    posts: 1, categories: 2, referencedAttachments: 1, errors: 0,
+  });
+  assert.equal(digest(await readFile(filename)), digest(before));
+  assert.equal(await readFile(asset, "utf8"), "IMAGE_BYTES");
+  await rm(asset);
+  const missingAssetCheck = checkContent(root);
+  assert.notEqual(missingAssetCheck.status, 0);
+  assert.match(missingAssetCheck.stderr, /Missing attachment/);
+  assert.equal(digest(await readFile(filename)), digest(before));
+});
+
+test("content checking defaults to app content and never falls back to legacy JSON", async (t) => {
+  const project = await legacyProject(t);
+  const canonical = await fixture(t, [document()]);
+  await cp(canonical, path.join(project, "content"), { recursive: true });
+  const script = path.join(project, "scripts/content.mjs");
+  const result = checkContent(undefined, project, script);
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(JSON.parse(result.stdout).posts, 1);
+  await rm(path.join(project, "content/categories.json"));
+  assert.notEqual(checkContent(undefined, project, script).status, 0);
+});
+
+test("content checking rejects invalid hierarchy and missing or uninitialized content", async (t) => {
+  const invalid = await fixture(t, [document(parentId, { parent_id: otherId })]);
+  const result = checkContent(invalid);
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Missing post parent/);
+  for (const root of [path.join(invalid, "missing"), await fixture(t, [])]) {
+    if (!root.endsWith("missing")) await rm(path.join(root, "categories.json"));
+    const missing = checkContent(root);
+    assert.notEqual(missing.status, 0);
+    assert.match(missing.stderr, /ENOENT|initializ/i);
+  }
+});
+
+async function legacyProject(t) {
+  const root = await realpath(await mkdtemp(path.join(os.tmpdir(), "legacy-content-cli-")));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await mkdir(path.join(root, "scripts"));
+  for (const filename of ["content.mjs", "export-notion.mjs", "repair-markdown.mjs", "prepare-web-assets.mjs"])
+    await cp(path.resolve("scripts", filename), path.join(root, "scripts", filename));
+  await cp(path.resolve("src/shared"), path.join(root, "src/shared"), { recursive: true });
+  await symlink(path.resolve("node_modules"), path.join(root, "node_modules"));
+  await mkdir(path.join(root, "content"));
+  await mkdir(path.join(root, "public/notion"), { recursive: true });
+  for (const [filename, value] of [
+    ["posts.json", []], ["records.json", {}],
+    ["manifest.json", { assetDetails: [], archivePath: path.join(root, "archive") }],
+  ]) await writeFile(path.join(root, "content", filename), JSON.stringify(value));
+  await writeFile(path.join(root, "public/notion/asset-map.json"), "PREVIOUS_PUBLIC_BYTES");
+  return root;
+}
+
+for (const script of ["export-notion.mjs", "repair-markdown.mjs", "prepare-web-assets.mjs"]) {
+  test(`${script} refuses direct legacy writes for selected and uninitialized canonical content`, async (t) => {
+    const project = await legacyProject(t);
+    const canonical = await fixture(t, [document()]);
+    const filename = path.join(canonical, "posts", parentId, "Title.md");
+    const canonicalBefore = digest(await readFile(filename));
+    const publicFilename = path.join(project, "public/notion/asset-map.json");
+    const legacyFilename = path.join(project, "content/posts.json");
+    for (const mode of ["selected", "selected-missing", "default", "marker", "uninitialized", "missing"]) {
+      if (mode === "default") {
+        await cp(canonical, path.join(project, "content"), { recursive: true });
+      } else if (mode === "marker") {
+        await rm(path.join(project, "content/posts"), { recursive: true });
+        await rm(path.join(project, "content/categories.json"));
+        await writeFile(path.join(project, ".gitmodules"), '[submodule "content"]\n\tpath = content\n\turl = ../canonical.git\n');
+      } else if (mode === "uninitialized") {
+        await rm(path.join(project, "content"), { recursive: true });
+        await mkdir(path.join(project, "content"));
+      } else if (mode === "missing") {
+        await rm(path.join(project, ".gitmodules"));
+      }
+      const env = { ...process.env };
+      delete env.CONTENT_ROOT;
+      if (mode.startsWith("selected"))
+        env.CONTENT_ROOT = mode === "selected" ? canonical : path.join(canonical, "missing");
+      // Restrict writes to the disposable clone: the old exporter has a personal archive path.
+      const result = spawnSync(process.execPath, [
+        "--permission", "--allow-fs-read=*", `--allow-fs-write=${project}`,
+        path.join(project, "scripts", script),
+      ], { cwd: project, env, encoding: "utf8", timeout: 10_000 });
+      assert.notEqual(result.status, 0, script + ": " + mode);
+      assert.match(result.stderr, /Legacy content writes are disabled/, script + ": " + mode);
+      assert.equal(digest(await readFile(filename)), canonicalBefore);
+      assert.equal(await readFile(publicFilename, "utf8"), "PREVIOUS_PUBLIC_BYTES");
+      if (!["uninitialized", "missing"].includes(mode))
+        assert.equal(await readFile(legacyFilename, "utf8"), "[]");
+      assert.equal((await readdir(path.join(project, "content"))).includes("raw"), false);
+    }
+  });
+}
+
+test("legacy modules remain importable without reading or writing content", async (t) => {
+  const project = await legacyProject(t);
+  await rm(path.join(project, "content"), { recursive: true });
+  const result = spawnSync(process.execPath, ["--input-type=module", "--eval", `
+    for (const filename of ["export-notion.mjs", "repair-markdown.mjs", "prepare-web-assets.mjs"])
+      await import(${JSON.stringify("file://" + project + "/scripts/")} + filename);
+    console.log("IMPORTED");
+  `], { cwd: project, env: { ...process.env, CONTENT_ROOT: "missing" }, encoding: "utf8" });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.stdout.trim(), "IMPORTED");
+  assert.equal((await readdir(project)).includes("content"), false);
+  assert.deepEqual(await readdir(path.join(project, "public/notion")), ["asset-map.json"]);
 });

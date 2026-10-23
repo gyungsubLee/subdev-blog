@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readContent, toPublicPosts } from "../scripts/content.mjs";
 import test from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -89,8 +89,8 @@ test("authored quote anchors remain reachable after applying reader styling", (t
 });
 
 test("the actual statistics TOC preserves every original fragment target", async (t) => {
-  const posts = JSON.parse(
-    await readFile(new URL("../content/posts.json", import.meta.url), "utf8"),
+  const posts = toPublicPosts(
+    await readContent(process.env.CONTENT_ROOT ?? new URL("../content/", import.meta.url)),
   );
   const current = posts.find(
     (entry) => entry.id === "3f2eda9b-0fe1-80db-84ad-c844a2eb9f9f",
