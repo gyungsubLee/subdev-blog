@@ -19,6 +19,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
+          submodules: recursive
           persist-credentials: false
 
       - name: Set up Node.js
@@ -32,7 +33,9 @@ jobs:
         run: npm ci
 
       - name: Check version and source
-        run: npm run check
+        run: |
+          npm run check
+          npm run check:content
 
       - name: Read package version
         id: version
@@ -68,6 +71,9 @@ jobs:
             encoding: 'utf8',
           }).trim();
           assert.equal(selectedCommit, expected.commit, 'Checkout differs from selected commit');
+          expected.contentCommit = execFileSync('git', ['rev-parse', 'HEAD:content'], {
+            encoding: 'utf8',
+          }).trim();
 
           const actual = JSON.parse(fs.readFileSync('dist/build-info.json', 'utf8'));
           for (const [field, value] of Object.entries(expected)) {
@@ -123,7 +129,7 @@ jobs:
             `- Workflow: ${process.env.GITHUB_WORKFLOW}`,
             `- Run: [${process.env.GITHUB_RUN_NUMBER} (${process.env.GITHUB_RUN_ID}), attempt ${process.env.GITHUB_RUN_ATTEMPT}](${runUrl})`,
             ...artifact,
-            '- Checks: npm ci, npm run check, npm run build, build identity verification',
+            '- Checks: npm ci, npm run check, npm run check:content, npm run build, build identity verification',
             '',
             notes,
             '',

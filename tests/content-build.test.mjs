@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, readdir, rename, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -44,11 +44,18 @@ async function fixture(t) {
   return { cwd, root };
 }
 
-function build({ cwd, root }, imports = []) {
+function localEnv(overrides = {}) {
+  const env = { ...process.env };
+  for (const name of ["CI", "GITHUB_ACTIONS", "VERCEL", "GITHUB_SHA", "VERCEL_GIT_COMMIT_SHA", "CONTENT_COMMIT_SHA", "CONTENT_ROOT"])
+    delete env[name];
+  return { ...env, ...overrides };
+}
+
+function build({ cwd, root, script = prepare }, imports = [], overrides = {}) {
   return spawnSync(
     process.execPath,
-    [...imports.flatMap((filename) => ["--import", filename]), prepare],
-    { cwd, env: { ...process.env, CONTENT_ROOT: root }, encoding: "utf8" },
+    [...imports.flatMap((filename) => ["--import", filename]), script],
+    { cwd, env: localEnv({ CONTENT_ROOT: root, ...overrides }), encoding: "utf8" },
   );
 }
 
@@ -81,7 +88,7 @@ test("public projections exclude agent metadata and preserve attachment URLs", a
   assert.deepEqual(await readdir(path.join(output, "assets", parentId)), ["첨부.pdf"]);
   assert.equal(await readFile(path.join(output, "assets", parentId, "첨부.pdf"), "utf8"), "PDF_BYTES");
   assert.equal(await readFile(path.join(input.cwd, "public", "notion", "keep.bin"), "utf8"), "ORIGINAL_BYTES");
-  assert.match(result.stdout, /content commit.*unavailable/i);
+  assert.match(result.stdout, /content commit: null.*local-staging/i);
 });
 
 test("invalid canonical input preserves the previous public output", async (t) => {
@@ -132,3 +139,54 @@ for (const failure of ["publish", "cleanup"]) {
     }
   });
 }
+
+async function packageFixture(t) {
+  const input = await fixture(t);
+  const root = path.join(input.cwd, "content");
+  await rename(input.root, root);
+  await mkdir(path.join(input.cwd, "scripts"));
+  for (const filename of ["content.mjs", "prepare-site.mjs"])
+    await cp(path.resolve("scripts", filename), path.join(input.cwd, "scripts", filename));
+  await cp(path.resolve("src/shared"), path.join(input.cwd, "src/shared"), { recursive: true });
+  for (const filename of ["vite.config.ts", "package.json"])
+    await cp(path.resolve(filename), path.join(input.cwd, filename));
+  await symlink(path.resolve("node_modules"), path.join(input.cwd, "node_modules"));
+  await writeFile(path.join(input.cwd, "index.html"), '<!doctype html><title>Fixture</title><p>Content build</p>');
+  return { ...input, root, script: path.join(input.cwd, "scripts/prepare-site.mjs") };
+}
+
+test("deployment provenance failure preserves the previous public output", async (t) => {
+  const input = await packageFixture(t);
+  const output = path.join(input.cwd, "public/content");
+  await mkdir(output);
+  await writeFile(path.join(output, "index.json"), "PREVIOUS_OUTPUT");
+  const failed = build(input, [], { VERCEL: "1" });
+  assert.notEqual(failed.status, 0);
+  assert.match(failed.stderr, /CONTENT_COMMIT_SHA/);
+  assert.equal(await readFile(path.join(output, "index.json"), "utf8"), "PREVIOUS_OUTPUT");
+  const passed = build(input, [], { VERCEL: "1", CONTENT_COMMIT_SHA: "a".repeat(40) });
+  assert.equal(passed.status, 0, passed.stderr);
+  assert.equal(JSON.parse(await readFile(path.join(output, "index.json"))).length, 2);
+  assert.match(passed.stdout, /package-attested/);
+});
+
+test("Vite emits content identity for local staging and enforces Gitless deployment attestation", async (t) => {
+  const input = await packageFixture(t);
+  function vite(env) {
+    return spawnSync(process.execPath, [path.resolve("node_modules/vite/bin/vite.js"), "build"], {
+      cwd: input.cwd, env: localEnv(env), encoding: "utf8", timeout: 30_000,
+    });
+  }
+  const local = vite({});
+  assert.equal(local.status, 0, local.stderr);
+  assert.equal(JSON.parse(await readFile(path.join(input.cwd, "dist/build-info.json"))).contentCommit, null);
+  const missing = vite({ GITHUB_SHA: "b".repeat(40) });
+  assert.notEqual(missing.status, 0);
+  assert.match(missing.stderr, /CONTENT_COMMIT_SHA/);
+  const packaged = vite({ GITHUB_SHA: "b".repeat(40), CONTENT_COMMIT_SHA: "a".repeat(40) });
+  assert.equal(packaged.status, 0, packaged.stderr);
+  const info = JSON.parse(await readFile(path.join(input.cwd, "dist/build-info.json")));
+  assert.equal(info.contentCommit, "a".repeat(40));
+  assert.equal(info.commit, "b".repeat(40));
+  assert.doesNotMatch(JSON.stringify(info), /AI_INTERNAL_SENTINEL|content-package-|content-build-/);
+});

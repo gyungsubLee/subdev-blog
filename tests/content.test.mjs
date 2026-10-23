@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { spawnSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { cp, mkdtemp, mkdir, readFile, readdir, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import fsPromises from "node:fs/promises";
 import { syncBuiltinESMExports } from "node:module";
@@ -9,6 +9,7 @@ import path from "node:path";
 import test from "node:test";
 import { serializeMarkdownDocument } from "../src/shared/document.mjs";
 import { readContent, validateContent, toPublicPosts, toPublicCategories, writeContentDocument } from "../scripts/content.mjs";
+import * as content from "../scripts/content.mjs";
 
 const parentId = "1c3eda9b-0fe1-819c-beab-c6a3a1072bb9";
 const inheritedChildId = "1d4eda9b-0fe1-80a2-95f7-e975482b1dcd";
@@ -346,6 +347,8 @@ test("does not decode stored percent-encoded-looking aliases into different path
 
 function checkContent(root, cwd = process.cwd(), script = path.resolve("scripts/content.mjs")) {
   const env = { ...process.env };
+  for (const name of ["CI", "GITHUB_ACTIONS", "VERCEL", "GITHUB_SHA", "VERCEL_GIT_COMMIT_SHA", "CONTENT_COMMIT_SHA"])
+    delete env[name];
   if (root === undefined) delete env.CONTENT_ROOT;
   else env.CONTENT_ROOT = root;
   return spawnSync(process.execPath, [script, "--check"], {
@@ -364,6 +367,7 @@ test("content checking validates the selected corpus and preserves canonical fil
   assert.ok(result.stdout.trim(), "The content CLI must report corpus counts");
   assert.deepEqual(JSON.parse(result.stdout), {
     posts: 1, categories: 2, referencedAttachments: 1, errors: 0,
+    contentCommit: null, contentState: "local-staging",
   });
   assert.equal(digest(await readFile(filename)), digest(before));
   assert.equal(await readFile(asset, "utf8"), "IMAGE_BYTES");
@@ -470,4 +474,113 @@ test("legacy modules remain importable without reading or writing content", asyn
   assert.equal(result.stdout.trim(), "IMPORTED");
   assert.equal((await readdir(project)).includes("content"), false);
   assert.deepEqual(await readdir(path.join(project, "public/notion")), ["asset-map.json"]);
+});
+
+function git(cwd, ...args) {
+  return execFileSync("git", ["-C", cwd, ...args], {
+    encoding: "utf8", stdio: ["ignore", "pipe", "pipe"],
+  }).trim();
+}
+
+function commit(cwd) {
+  git(cwd, "-c", "user.name=Content Test", "-c", "user.email=content@example.invalid", "commit", "-qm", "Fixture");
+  return git(cwd, "rev-parse", "HEAD");
+}
+
+async function provenanceFixture(t) {
+  const project = await realpath(await mkdtemp(path.join(os.tmpdir(), "content-provenance-")));
+  t.after(() => rm(project, { recursive: true, force: true }));
+  const root = path.join(project, "content");
+  await cp(await fixture(t, [document()]), root, { recursive: true });
+  git(root, "init", "-q");
+  git(root, "add", ".");
+  const sha = commit(root);
+  git(project, "init", "-q");
+  await writeFile(path.join(project, ".gitmodules"), '[submodule "content"]\n\tpath = content\n\turl = https://example.invalid/content.git\n');
+  git(project, "add", ".gitmodules");
+  git(project, "update-index", "--add", "--cacheinfo", `160000,${sha},content`);
+  commit(project);
+  return { root, projectRoot: project, sha };
+}
+
+test("content provenance reports pinned HEAD and accepts an equivalent root path", async (t) => {
+  const input = await provenanceFixture(t);
+  const result = await content.getContentProvenance(input.root + path.sep + ".", {
+    projectRoot: input.projectRoot, env: { CI: "true", CONTENT_COMMIT_SHA: input.sha },
+  });
+  assert.deepEqual(result, { contentCommit: input.sha, contentState: "git-pinned" });
+});
+
+for (const marker of ["CI", "GITHUB_ACTIONS", "VERCEL", "GITHUB_SHA", "VERCEL_GIT_COMMIT_SHA"]) {
+  test(`content provenance enforces deployment cleanliness for ${marker}`, async (t) => {
+    const input = await provenanceFixture(t);
+    await writeFile(path.join(input.root, "untracked.txt"), "dirty");
+    await assert.rejects(content.getContentProvenance(input.root, {
+      projectRoot: input.projectRoot, env: { [marker]: "true" },
+    }), /dirty|clean|uncommitted/i);
+    assert.deepEqual(await content.getContentProvenance(input.root, {
+      projectRoot: input.projectRoot, env: {},
+    }), { contentCommit: input.sha, contentState: "git-local-dirty" });
+  });
+}
+
+for (const change of ["tracked", "staged", "head", "index", "missing-gitlink"]) {
+  test(`content provenance rejects a deployment with ${change} changes`, async (t) => {
+    const input = await provenanceFixture(t);
+    if (change === "tracked" || change === "staged" || change === "head") {
+      await writeFile(path.join(input.root, "categories.json"), "[]");
+      if (change !== "tracked") git(input.root, "add", "categories.json");
+      if (change === "head") commit(input.root);
+    } else if (change === "index") {
+      git(input.projectRoot, "update-index", "--force-remove", "content");
+    } else {
+      git(input.projectRoot, "update-index", "--force-remove", "content");
+      commit(input.projectRoot);
+    }
+    await assert.rejects(content.getContentProvenance(input.root, {
+      projectRoot: input.projectRoot, env: { CI: "true" },
+    }), /dirty|clean|gitlink|mismatch|commit/i);
+  });
+}
+
+test("content provenance rejects invalid or mismatched supplied commit IDs", async (t) => {
+  const input = await provenanceFixture(t);
+  for (const value of ["", "HEAD", input.sha.slice(0, 8), "g".repeat(40), "a".repeat(40)]) {
+    await assert.rejects(content.getContentProvenance(input.root, {
+      projectRoot: input.projectRoot, env: { CI: "true", CONTENT_COMMIT_SHA: value },
+    }), /CONTENT_COMMIT_SHA|mismatch/i);
+  }
+});
+
+test("content provenance distinguishes Gitless package attestation from local staging", async (t) => {
+  const projectRoot = await realpath(await mkdtemp(path.join(os.tmpdir(), "content-package-")));
+  t.after(() => rm(projectRoot, { recursive: true, force: true }));
+  const root = path.join(projectRoot, "content");
+  await cp(await fixture(t), root, { recursive: true });
+  assert.deepEqual(await content.getContentProvenance(root, { projectRoot, env: {} }), {
+    contentCommit: null, contentState: "local-staging",
+  });
+  await assert.rejects(content.getContentProvenance(root, { projectRoot, env: { VERCEL: "1" } }), /CONTENT_COMMIT_SHA/);
+  assert.deepEqual(await content.getContentProvenance(root, {
+    projectRoot, env: { VERCEL: "1", CONTENT_COMMIT_SHA: "a".repeat(40) },
+  }), { contentCommit: "a".repeat(40), contentState: "package-attested" });
+  await writeFile(path.join(root, ".git"), "gitdir: /missing/content/repository\n");
+  await assert.rejects(content.getContentProvenance(root, {
+    projectRoot, env: { VERCEL: "1", CONTENT_COMMIT_SHA: "a".repeat(40) },
+  }), /git|repository/i);
+});
+
+test("content provenance rejects uninitialized submodules and external deployment roots", async (t) => {
+  const input = await provenanceFixture(t);
+  await rm(path.join(input.root, ".git"), { recursive: true });
+  await assert.rejects(content.getContentProvenance(input.root, {
+    projectRoot: input.projectRoot, env: { CI: "true", CONTENT_COMMIT_SHA: input.sha },
+  }), /initializ|submodule|git/i);
+  const external = await fixture(t);
+  assert.deepEqual(await content.getContentProvenance(external, {
+    projectRoot: input.projectRoot, env: {},
+  }), { contentCommit: null, contentState: "local-staging" });
+  await assert.rejects(content.getContentProvenance(external, {
+    projectRoot: input.projectRoot, env: { CI: "true", CONTENT_COMMIT_SHA: input.sha },
+  }), /CONTENT_ROOT|external|content root/i);
 });

@@ -1,8 +1,9 @@
 import { copyFile, mkdir, mkdtemp, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { readContent, toPublicCategories, toPublicPosts } from "./content.mjs";
+import { getContentProvenance, readContent, toPublicCategories, toPublicPosts } from "./content.mjs";
 
 const snapshot = await readContent(process.env.CONTENT_ROOT ?? "content");
+const provenance = await getContentProvenance(snapshot.root, { projectRoot: process.cwd() });
 const posts = toPublicPosts(snapshot);
 if (!posts.length) throw new Error("The canonical content is empty.");
 const categories = toPublicCategories(snapshot);
@@ -65,4 +66,4 @@ try {
   }
 }
 console.log("Prepared " + posts.length + " page summaries and separate article bodies.");
-console.log("Content root: " + snapshot.root + "; content commit: unavailable (not verified).");
+console.log("Content root: " + snapshot.root + "; content commit: " + provenance.contentCommit + " (" + provenance.contentState + ").");

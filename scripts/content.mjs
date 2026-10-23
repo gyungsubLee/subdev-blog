@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import {
   lstat, link, mkdir, mkdtemp, readFile, readdir, realpath, rename, rm, writeFile,
 } from "node:fs/promises";
@@ -51,6 +52,69 @@ async function regularPath(filename, directory = false) {
       "Content paths must be regular " +
       (directory ? "directories: " : "files: ") + filename,
     );
+}
+
+async function hasGitMetadata(directory) {
+  try {
+    await lstat(path.join(directory, ".git"));
+    return true;
+  } catch (error) {
+    if (error.code === "ENOENT") return false;
+    throw error;
+  }
+}
+
+/** Validate build provenance separately from the editable document contract. */
+export async function getContentProvenance(root, {
+  projectRoot = fileURLToPath(new URL("../", import.meta.url)),
+  env = process.env,
+} = {}) {
+  const directory = await realpath(root);
+  const project = await realpath(projectRoot);
+  await regularPath(path.join(directory, "categories.json"));
+  await regularPath(path.join(directory, "posts"), true);
+  const deployment = ["CI", "GITHUB_ACTIONS", "VERCEL"].some(
+    (name) => env[name] && !["0", "false"].includes(env[name].toLowerCase()),
+  ) || Boolean(env.GITHUB_SHA || env.VERCEL_GIT_COMMIT_SHA);
+  const supplied = env.CONTENT_COMMIT_SHA;
+  if (supplied !== undefined && !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i.test(supplied))
+    throw new Error("CONTENT_COMMIT_SHA must be a full hexadecimal Git commit ID.");
+
+  if (deployment && directory !== await realpath(path.join(project, "content")))
+    throw new Error("Deployment CONTENT_ROOT must resolve to the app content directory.");
+  const contentGit = await hasGitMetadata(directory);
+  const appGit = await hasGitMetadata(project);
+  if (!contentGit) {
+    if (deployment && appGit)
+      throw new Error("The content submodule is not initialized. Run git submodule update --init --recursive.");
+    if (deployment && supplied === undefined)
+      throw new Error("Gitless deployment requires CONTENT_COMMIT_SHA from a known-clean content package.");
+    // ponytail: Gitless origin is attested by the clean packaging process; runtime cannot prove it from a SHA.
+    return deployment
+      ? { contentCommit: supplied.toLowerCase(), contentState: "package-attested" }
+      : { contentCommit: null, contentState: "local-staging" };
+  }
+
+  const git = (cwd, ...args) => execFileSync("git", ["-C", cwd, ...args], {
+    encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], maxBuffer: 16 * 1024 * 1024,
+  }).trim();
+  if (await realpath(git(directory, "rev-parse", "--show-toplevel")) !== directory)
+    throw new Error("The content root must be its own Git repository.");
+  const contentCommit = git(directory, "rev-parse", "--verify", "HEAD^{commit}");
+  if (supplied !== undefined && supplied.toLowerCase() !== contentCommit)
+    throw new Error("CONTENT_COMMIT_SHA differs from the content HEAD commit.");
+  const dirty = Boolean(git(directory, "status", "--porcelain=v1", "--untracked-files=all"));
+  if (!deployment)
+    return { contentCommit, contentState: dirty ? "git-local-dirty" : "git-local" };
+  if (dirty) throw new Error("Deployment content must be clean; uncommitted content changes exist.");
+  if (!appGit || await realpath(git(project, "rev-parse", "--show-toplevel")) !== project)
+    throw new Error("Deployment requires an app Git repository with a pinned content gitlink.");
+  const gitlink = git(project, "ls-tree", "HEAD", "--", "content");
+  if (gitlink !== `160000 commit ${contentCommit}\tcontent`)
+    throw new Error("The app HEAD content gitlink differs from the content HEAD commit.");
+  if (git(project, "ls-files", "--stage", "--", "content") !== `160000 ${contentCommit} 0\tcontent`)
+    throw new Error("The app index content gitlink differs from its committed gitlink.");
+  return { contentCommit, contentState: "git-pinned" };
 }
 
 /**
@@ -572,6 +636,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       throw new Error("Usage: node scripts/content.mjs --check");
     const root = process.env.CONTENT_ROOT ?? fileURLToPath(new URL("../content/", import.meta.url));
     const snapshot = await readContent(root);
+    const provenance = await getContentProvenance(root);
     console.log(JSON.stringify({
       posts: snapshot.documents.size,
       categories: snapshot.categories.length,
@@ -579,6 +644,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
         (count, entry) => count + entry.assets.length, 0,
       ),
       errors: 0,
+      ...provenance,
     }));
   } catch (error) {
     console.error(error.message);
