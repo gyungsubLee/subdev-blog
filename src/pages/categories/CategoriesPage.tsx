@@ -4,6 +4,7 @@ import {
   useState,
   type FormEvent,
   type KeyboardEvent,
+  type ReactNode,
 } from "react";
 import {
   normalizeCategoryName,
@@ -27,9 +28,27 @@ type Editing = {
   parentId: string | null;
   name: string;
 };
-type Props = { posts: Post[]; catalog: CategoryCatalog };
+type Props = {
+  posts: Post[];
+  catalog: Pick<CategoryCatalog,
+    "draftNodes" | "stage" | "undo" | "canUndo" | "dirty" | "saveNodes" | "error"
+  >;
+  canonical?: boolean;
+  busy?: boolean;
+  note?: ReactNode;
+  footer?: ReactNode;
+  deleteError?: (node: CategoryNode) => string | null;
+};
 
-export default function CategoriesPage({ posts, catalog }: Props) {
+export default function CategoriesPage({
+  posts,
+  catalog,
+  canonical = false,
+  busy = false,
+  note,
+  footer,
+  deleteError,
+}: Props) {
   const nodes = catalog.draftNodes;
   const byId = new Map(nodes.map((node) => [node.id, node]));
   const [selectedId, setSelectedId] = useState<string | null>(
@@ -46,11 +65,15 @@ export default function CategoriesPage({ posts, catalog }: Props) {
   const children = (parentId: string | null) =>
     nodes.filter((node) => node.parentId === parentId);
   const directCounts = new Map<string, number>();
-  for (const post of posts)
-    directCounts.set(post.category, (directCounts.get(post.category) ?? 0) + 1);
+  for (const post of posts) {
+    if (canonical && post.draft) continue;
+    const category = canonical ? (post.categoryId ?? post.category) : post.category;
+    directCounts.set(category, (directCounts.get(category) ?? 0) + 1);
+  }
   const counts = new Map<string, number>();
   for (const node of nodes) {
-    const count = node.sources.reduce(
+    const categoryKeys = canonical ? [...new Set([node.id, ...node.sources])] : node.sources;
+    const count = categoryKeys.reduce(
       (total, source) => total + (directCounts.get(source) ?? 0),
       0,
     );
@@ -107,7 +130,7 @@ export default function CategoriesPage({ posts, catalog }: Props) {
       );
     }
   }
-  const drag = useCategoryDrag(nodes, editing !== null, move);
+  const drag = useCategoryDrag(nodes, editing !== null || busy, move);
 
   function startEditing(mode: Editing["mode"], node?: CategoryNode) {
     if (editing) {
@@ -132,6 +155,7 @@ export default function CategoriesPage({ posts, catalog }: Props) {
   function saveEdit(name: string): string | null {
     if (!editing) return null;
     if (
+      !canonical &&
       nodes.some(
         (node) =>
           node.id !== editing.id &&
@@ -230,7 +254,15 @@ export default function CategoriesPage({ posts, catalog }: Props) {
       closeDelete();
       return;
     }
-    const next = removeCategoryNode(nodes, node.id);
+    const blocked = deleteError?.(node);
+    if (blocked) {
+      setNotice(blocked);
+      closeDelete();
+      return;
+    }
+    const next = canonical
+      ? nodes.filter((item) => item.id !== node.id)
+      : removeCategoryNode(nodes, node.id);
     setSelectedId(node.parentId ?? next[0]?.id ?? null);
     stage(next, "분류를 삭제했습니다. 실행 취소로 복원할 수 있습니다.");
     closeDelete();
@@ -325,8 +357,11 @@ export default function CategoriesPage({ posts, catalog }: Props) {
                   data-action="delete"
                   aria-label={`${node.name} 삭제`}
                   disabled={
-                    Boolean(editing) || node.id === UNCLASSIFIED_CATEGORY_ID
+                    Boolean(editing) ||
+                    node.id === UNCLASSIFIED_CATEGORY_ID ||
+                    Boolean(deleteError?.(node))
                   }
+                  title={deleteError?.(node) ?? undefined}
                   onClick={() => setDeletingId(node.id)}
                 >
                   삭제
@@ -359,96 +394,97 @@ export default function CategoriesPage({ posts, catalog }: Props) {
         </div>
       </div>
       <p className="category-local-note">
-        분류 설정은 이 브라우저에만 저장합니다. 원문 기록과 페이지 계층은 바꾸지
-        않습니다.
+        {note ?? <>분류 설정은 이 브라우저에만 저장합니다. 원문 기록과 페이지 계층은 바꾸지 않습니다.</>}
       </p>
-      <div className="layout">
-        <section className="manager" aria-label="카테고리 목록 관리">
-          <div className="manager-heading">
-            <div>
-              <p>카테고리 순서와 계층을 정리합니다.</p>
-              <p className="muted">
-                끌어서 순서와 깊이를 바꾸고, 행 안에서 분류를 편집합니다.
-              </p>
+      <fieldset className="category-edit-controls" disabled={busy}>
+        <div className="layout">
+          <section className="manager" aria-label="카테고리 목록 관리">
+            <div className="manager-heading">
+              <div>
+                <p>카테고리 순서와 계층을 정리합니다.</p>
+                <p className="muted">
+                  끌어서 순서와 깊이를 바꾸고, 행 안에서 분류를 편집합니다.
+                </p>
+              </div>
+              <div className="tree-tools">
+                <span>
+                  {nodes.length + (editing?.mode === "add" ? 1 : 0)} / 500
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setExpanded(new Set(nodes.map((node) => node.id)))
+                  }
+                >
+                  전체 펼치기
+                </button>
+                <button type="button" onClick={() => setExpanded(new Set())}>
+                  전체 접기
+                </button>
+              </div>
             </div>
-            <div className="tree-tools">
-              <span>
-                {nodes.length + (editing?.mode === "add" ? 1 : 0)} / 500
-              </span>
+            <div className="tree-frame">
+              <div className="all-row">
+                <span className="grip-icon" aria-hidden="true">
+                  ≡
+                </span>
+                <span>분류 전체보기</span>
+              </div>
+              <div className="tree" aria-label="분류 계층">
+                {editing?.mode === "add" && editing.parentId === null
+                  ? inlineForm(0)
+                  : null}
+                {rows(null)}
+              </div>
               <button
                 type="button"
-                onClick={() =>
-                  setExpanded(new Set(nodes.map((node) => node.id)))
-                }
+                id="add-bottom"
+                className="add-bottom"
+                disabled={Boolean(editing) || nodes.length >= MAX_CATEGORIES}
+                onClick={() => startEditing("add")}
               >
-                전체 펼치기
+                <span>＋　카테고리 추가</span>
+                <span>
+                  {nodes.length + (editing?.mode === "add" ? 1 : 0)} / 500
+                </span>
               </button>
-              <button type="button" onClick={() => setExpanded(new Set())}>
-                전체 접기
-              </button>
             </div>
-          </div>
-          <div className="tree-frame">
-            <div className="all-row">
-              <span className="grip-icon" aria-hidden="true">
-                ≡
-              </span>
-              <span>분류 전체보기</span>
-            </div>
-            <div className="tree" aria-label="분류 계층">
-              {editing?.mode === "add" && editing.parentId === null
-                ? inlineForm(0)
-                : null}
-              {rows(null)}
-            </div>
-            <button
-              type="button"
-              id="add-bottom"
-              className="add-bottom"
-              disabled={Boolean(editing) || nodes.length >= MAX_CATEGORIES}
-              onClick={() => startEditing("add")}
-            >
-              <span>＋　카테고리 추가</span>
-              <span>
-                {nodes.length + (editing?.mode === "add" ? 1 : 0)} / 500
-              </span>
-            </button>
-          </div>
-          <div className="save-bar">
-            <div>
-              <p>
-                {catalog.dirty
-                  ? "저장하지 않은 변경사항이 있습니다."
-                  : "저장한 상태입니다."}
-              </p>
+            <div className="save-bar">
+              <div>
+                <p>
+                  {catalog.dirty
+                    ? "저장하지 않은 변경사항이 있습니다."
+                    : "저장한 상태입니다."}
+                </p>
+                <button
+                  type="button"
+                  id="undo"
+                  disabled={!catalog.canUndo || Boolean(editing)}
+                  onClick={() => {
+                    catalog.undo();
+                    setNotice("마지막 변경을 취소했습니다.");
+                  }}
+                >
+                  실행 취소
+                </button>
+              </div>
               <button
                 type="button"
-                id="undo"
-                disabled={!catalog.canUndo || Boolean(editing)}
+                className="dark"
+                id="save-all"
+                disabled={!catalog.dirty || Boolean(editing)}
                 onClick={() => {
-                  catalog.undo();
-                  setNotice("마지막 변경을 취소했습니다.");
+                  if (catalog.saveNodes(nodes))
+                    setNotice("분류 설정을 저장했습니다.");
+                  else setNotice("");
                 }}
               >
-                실행 취소
+                변경사항 저장
               </button>
             </div>
-            <button
-              type="button"
-              className="dark"
-              id="save-all"
-              disabled={!catalog.dirty || Boolean(editing)}
-              onClick={() => {
-                if (catalog.saveNodes(nodes))
-                  setNotice("분류 설정을 저장했습니다.");
-                else setNotice("");
-              }}
-            >
-              변경사항 저장
-            </button>
-          </div>
-        </section>
-      </div>
+          </section>
+        </div>
+      </fieldset>
       {catalog.error ? (
         <p className="error category-storage-error" role="alert">
           {catalog.error}
@@ -457,6 +493,7 @@ export default function CategoriesPage({ posts, catalog }: Props) {
       <p className="status" role="status" aria-live="polite">
         {notice}
       </p>
+      {footer}
       <dialog
         id="delete-dialog"
         ref={dialog}
@@ -469,7 +506,9 @@ export default function CategoriesPage({ posts, catalog }: Props) {
             '{byId.get(deletingId ?? "")?.name}' 카테고리를 삭제하시겠습니까?
           </p>
           <p className="muted">
-            하위 분류는 한 단계 위로 옮깁니다. 기록은 미분류에 유지합니다.
+            {canonical
+              ? "하위 분류와 배정한 글이 없는 분류만 삭제합니다."
+              : "하위 분류는 한 단계 위로 옮깁니다. 기록은 미분류에 유지합니다."}
           </p>
         </div>
         <div className="modal-footer">
@@ -480,6 +519,7 @@ export default function CategoriesPage({ posts, catalog }: Props) {
             type="button"
             id="confirm-delete"
             className="dark"
+            disabled={busy}
             onClick={deleteCategory}
           >
             삭제

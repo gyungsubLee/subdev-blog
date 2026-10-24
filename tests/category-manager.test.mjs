@@ -142,13 +142,13 @@ test("approved list edits are staged until save and migrate v1 without overwriti
     );
     assert.equal(dom.window.localStorage.getItem(LEGACY), original);
     assert.equal(posts[0].parentId, "original-parent");
-    assert.equal(
+    assert.ok(
       document.querySelector(
         '.category-editor, #category-parent, [data-action="manage"], [data-action="move"]',
-      ),
-      null,
+      ) === null,
+      "legacy category controls are absent",
     );
-    assert.equal(document.querySelector(".all-row button"), null);
+    assert.ok(document.querySelector(".all-row button") === null, "the all-row button is absent");
   } finally {
     await act(async () => root.unmount());
   }
@@ -267,7 +267,7 @@ test("blank, duplicate and long names never alter a draft", async () => {
       );
     }
     await click(button("취소"));
-    assert.equal(document.querySelector("#inline-form"), null);
+    assert.ok(document.querySelector("#inline-form") === null, "the inline form closes after cancellation");
   } finally {
     await act(async () => root.unmount());
   }
@@ -358,7 +358,7 @@ test("pointer drag promotes a source category and clears the insertion marker on
       "backend",
     );
     assert.equal(document.getElementById("drop-line").hidden, true);
-    assert.equal(document.querySelector(".drag-source"), null);
+    assert.ok(document.querySelector(".drag-source") === null, "drag styling clears after dropping");
   } finally {
     await act(async () => root.unmount());
   }

@@ -1,0 +1,168 @@
+name: Publish content
+run-name: cms:${{ inputs.request_id }}:${{ inputs.candidate_sha }}
+on:
+  workflow_dispatch:
+    inputs:
+      request_id:
+        required: true
+        type: string
+      candidate_sha:
+        required: true
+        type: string
+      base_sha:
+        required: true
+        type: string
+permissions:
+  contents: read
+# Publication, including preview creation, is serialized across requests.
+concurrency:
+  group: cms-content-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'gyungsubLee/subdev-blog' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      REQUEST_ID: ${{ inputs.request_id }}
+      CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+      BASE_SHA: ${{ inputs.base_sha }}
+      GITHUB_APP_BRANCH: ${{ vars.GITHUB_APP_BRANCH }}
+      GITHUB_CONTENT_BRANCH: ${{ vars.GITHUB_CONTENT_BRANCH }}
+      CONTENT_REPOSITORY_PATH: ${{ runner.temp }}/content-source
+    steps:
+      - name: Check out trusted application
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Check inputs and secrets
+        env:
+          GITHUB_APP_ID: ${{ secrets.GITHUB_APP_ID }}
+          GITHUB_INSTALLATION_ID: ${{ vars.GITHUB_INSTALLATION_ID }}
+          GITHUB_APP_REPOSITORY_ID: ${{ vars.GITHUB_APP_REPOSITORY_ID }}
+          GITHUB_CONTENT_REPOSITORY_ID: ${{ vars.GITHUB_CONTENT_REPOSITORY_ID }}
+          GITHUB_APP_PRIVATE_KEY: ${{ secrets.GITHUB_APP_PRIVATE_KEY }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          for (const name of ['GITHUB_APP_ID', 'GITHUB_INSTALLATION_ID', 'GITHUB_APP_REPOSITORY_ID', 'GITHUB_CONTENT_REPOSITORY_ID', 'GITHUB_APP_PRIVATE_KEY', 'GITHUB_APP_BRANCH', 'GITHUB_CONTENT_BRANCH', 'VERCEL_TOKEN', 'VERCEL_ORG_ID', 'VERCEL_PROJECT_ID']) assert(process.env[name], 'Missing required configuration: ' + name);
+          assert(/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(process.env.REQUEST_ID), 'Invalid request UUID');
+          for (const name of ['BASE_SHA', 'CANDIDATE_SHA']) assert(/^[a-f0-9]{40}$/.test(process.env[name]), 'Invalid SHA: ' + name);
+          NODE
+          git check-ref-format "refs/heads/$GITHUB_APP_BRANCH"
+          git check-ref-format "refs/heads/$GITHUB_CONTENT_BRANCH"
+      - name: Install trusted dependencies
+        run: npm ci
+      - name: Create scoped installation token
+        id: token
+        env:
+          GITHUB_APP_ID: ${{ secrets.GITHUB_APP_ID }}
+          GITHUB_INSTALLATION_ID: ${{ vars.GITHUB_INSTALLATION_ID }}
+          GITHUB_APP_REPOSITORY_ID: ${{ vars.GITHUB_APP_REPOSITORY_ID }}
+          GITHUB_CONTENT_REPOSITORY_ID: ${{ vars.GITHUB_CONTENT_REPOSITORY_ID }}
+          GITHUB_APP_PRIVATE_KEY: ${{ secrets.GITHUB_APP_PRIVATE_KEY }}
+        run: node scripts/publish-content.mjs token
+      - name: Fetch content objects
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+        run: |
+          echo "GIT_CONFIG_COUNT=1" >> "$GITHUB_ENV"
+          echo "GIT_CONFIG_KEY_0=http.https://github.com/.extraheader" >> "$GITHUB_ENV"
+          AUTH="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          echo "::add-mask::$AUTH"
+          echo "GIT_CONFIG_VALUE_0=AUTHORIZATION: basic $AUTH" >> "$GITHUB_ENV"
+          export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.https://github.com/.extraheader GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $AUTH"
+          git clone --no-checkout https://github.com/gyungsubLee/subdev-blog-content.git "$CONTENT_REPOSITORY_PATH"
+          git -C "$CONTENT_REPOSITORY_PATH" fetch origin "refs/heads/cms/requests/$REQUEST_ID"
+          test "$(git -C "$CONTENT_REPOSITORY_PATH" rev-parse FETCH_HEAD)" = "$CANDIDATE_SHA"
+      - name: Validate candidate
+        run: node scripts/publish-content.mjs validate
+      - name: Promote content
+        id: promote
+        run: node scripts/publish-content.mjs promote
+      - name: Update app gitlink
+        id: pin
+        if: steps.promote.outputs.state == 'saved'
+        run: node scripts/publish-content.mjs pin
+      - name: Prepare verified application
+        if: steps.pin.outputs.state == 'published'
+        env:
+          APP_COMMIT: ${{ steps.pin.outputs.commit }}
+        run: |
+          git checkout --detach "$APP_COMMIT"
+          git -C "$CONTENT_REPOSITORY_PATH" checkout --detach "$CANDIDATE_SHA"
+          git submodule init content
+          git -c protocol.file.allow=always -c submodule.content.url="$CONTENT_REPOSITORY_PATH" submodule update content
+          npm ci
+          GITHUB_SHA="$APP_COMMIT" npm run build
+      - name: Deploy preview
+        id: preview
+        if: steps.pin.outputs.state == 'published'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          APP_COMMIT: ${{ steps.pin.outputs.commit }}
+        run: |
+          npx --yes vercel@58.1.0 pull --yes --environment=preview --token="$VERCEL_TOKEN"
+          GITHUB_SHA="$APP_COMMIT" npx --yes vercel@58.1.0 build --token="$VERCEL_TOKEN"
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          const info = JSON.parse(fs.readFileSync('.vercel/output/static/build-info.json', 'utf8'));
+          assert.equal(info.commit, process.env.APP_COMMIT);
+          assert.equal(info.contentCommit, process.env.CANDIDATE_SHA);
+          assert(fs.statSync('.vercel/output/static/content/index.json').size > 2);
+          NODE
+          URL="$(npx --yes vercel@58.1.0 deploy --prebuilt --token="$VERCEL_TOKEN")"
+          export PREVIEW_URL="$URL"
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          const url = new URL(process.env.PREVIEW_URL);
+          assert.equal(url.protocol, 'https:');
+          assert(url.hostname.endsWith('.vercel.app'));
+          const identity = await fetch(new URL('/build-info.json', url));
+          assert(identity.ok, 'Preview build identity unavailable');
+          const info = await identity.json();
+          assert.equal(info.commit, process.env.APP_COMMIT);
+          assert.equal(info.contentCommit, process.env.CANDIDATE_SHA);
+          const content = await fetch(new URL('/content/index.json', url));
+          assert(content.ok, 'Preview content unavailable');
+          assert.deepEqual(await content.json(), JSON.parse(fs.readFileSync('.vercel/output/static/content/index.json', 'utf8')));
+          const root = '.vercel/output/static/content';
+          const files = fs.readdirSync(root, { recursive: true, withFileTypes: true }).filter(entry => entry.isFile());
+          for (let offset = 0; offset < files.length; offset += 20) {
+            await Promise.all(files.slice(offset, offset + 20).map(async entry => {
+              const local = entry.parentPath + '/' + entry.name;
+              const pathname = '/content/' + local.slice(root.length + 1).split('/').map(encodeURIComponent).join('/');
+              const response = await fetch(new URL(pathname, url));
+              assert(response.ok, 'Preview content unavailable: ' + pathname);
+              assert.deepEqual(Buffer.from(await response.arrayBuffer()), fs.readFileSync(local), 'Preview content mismatch: ' + pathname);
+            }));
+          }
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `Preview: ${url}\n\nApp: ${info.commit}\n\nContent: ${info.contentCommit}\n`);
+          NODE
+      - name: Write publication summary
+        if: always()
+        env:
+          SOURCE_STATE: ${{ steps.promote.outputs.state }}
+          APP_STATE: ${{ steps.pin.outputs.state }}
+        run: |
+          printf 'Request: %s\n\nSource: %s\n\nApp: %s\n' "$REQUEST_ID" "$SOURCE_STATE" "$APP_STATE" >> "$GITHUB_STEP_SUMMARY"
+      - name: Revoke installation token
+        if: always() && steps.token.outputs.token != ''
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+        run: |
+          curl --fail --silent --show-error -X DELETE -H "Authorization: Bearer $GH_TOKEN" -H 'X-GitHub-Api-Version: 2026-03-10' https://api.github.com/installation/token

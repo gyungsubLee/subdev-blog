@@ -34,6 +34,7 @@ const { default: App } = await loadComponent("src/app/App.tsx");
 test("App loads summaries then the selected body and handles an invalid index", async () => {
   const nativeFetch = globalThis.fetch;
   const requests = [];
+  const contentRequests = () => requests.filter(({ url }) => url.startsWith("/content/")).map(({ url }) => url);
   const pending = new Map();
   globalThis.fetch = (url, options) => {
     requests.push({ url, signal: options.signal });
@@ -55,7 +56,8 @@ test("App loads summaries then the selected body and handles an invalid index", 
   try {
     await act(async () => root.render(React.createElement(App)));
     assert.match(document.querySelector(".app-state").textContent, /불러오는 중/);
-    assert.deepEqual(requests.map(({ url }) => url), ["/content/index.json", "/content/categories.json"]);
+    assert.deepEqual(contentRequests(), ["/content/index.json", "/content/categories.json"]);
+    assert.ok(requests.some(({ url }) => url === "/api/session"));
     await respond("/content/categories.json", [{
       id: "canonical", name: "정식 분류", parentId: null,
       order: 0, sources: ["canonical", "개발"],
@@ -64,25 +66,24 @@ test("App loads summaries then the selected body and handles an invalid index", 
     assert.equal(document.querySelectorAll(".home-article-card").length, 1);
     for (const [selector, pageClass] of [
       ['.header-navigation a[href="#/records"]', ".records-page"],
-      ['.header-navigation a[href="#/categories"]', ".categories-page"],
       ['.wordmark', ".blog-intro"],
     ]) {
       const link = document.querySelector(selector);
-      assert.ok(link, "expected navigation link: " + selector);
+      assert.ok(link !== null, "expected navigation link: " + selector);
       await act(async () => {
         const changed = once(dom.window, "hashchange");
         link.click();
         await changed;
       });
-      assert.ok(document.querySelector(pageClass));
-      assert.deepEqual(requests.map(({ url }) => url), ["/content/index.json", "/content/categories.json"]);
+      assert.ok(document.querySelector(pageClass) !== null);
+      assert.deepEqual(contentRequests(), ["/content/index.json", "/content/categories.json"]);
     }
     await act(async () => {
       const changed = once(dom.window, "hashchange");
       dom.window.location.hash = "#/post/parent";
       await changed;
     });
-    assert.deepEqual(requests.map(({ url }) => url), [
+    assert.deepEqual(contentRequests(), [
       "/content/index.json", "/content/categories.json", "/content/posts/parent.json",
     ]);
     assert.equal(document.querySelector(".article-prose").getAttribute("aria-busy"), "true");
@@ -94,7 +95,9 @@ test("App loads summaries then the selected body and handles an invalid index", 
     assert.match(document.querySelector(".article-prose").textContent, /FULL_BODY/);
     assert.match(document.querySelector(".breadcrumbs").textContent, /정식 분류/);
     assert.equal(document.querySelector(".article-prose").getAttribute("aria-busy"), "false");
-    assert.ok([...document.querySelectorAll(".article-actions button")].every((button) => !button.disabled));
+    const actions = [...document.querySelectorAll(".article-actions button")];
+    assert.equal(actions.find((button) => button.textContent.includes("내려받기")).disabled, false);
+    assert.equal(actions.find((button) => button.textContent.includes("편집하기")).disabled, true);
 
     await act(async () => root.unmount());
     dom.window.history.replaceState(null, "", "/#/");
@@ -123,20 +126,21 @@ test("App loads distinct canonical categories sharing a display name", async () 
   }));
   const responses = new Map([
     ["/content/index.json", posts], ["/content/categories.json", categories],
+    ["/api/session", { state: "signed_out" }],
   ]);
   globalThis.fetch = async (url) => {
     assert.ok(responses.has(url), "expected public loader request: " + url);
     return { ok: true, json: async () => responses.get(url) };
   };
-  dom.window.history.replaceState(null, "", "/#/categories");
+  dom.window.history.replaceState(null, "", "/#/records");
   dom.window.localStorage.clear();
   const root = createRoot(document.getElementById("root"));
   try {
     await act(async () => root.render(React.createElement(App)));
     assert.equal(document.querySelector('[role="alert"]')?.textContent ?? "", "");
     assert.deepEqual(
-      [...document.querySelectorAll(".category-row .row-name")].map((node) => node.firstChild.textContent),
-      ["Notes", "Notes (2)"],
+      [...document.querySelectorAll(".post-meta span")].map((node) => node.textContent),
+      ["Notes", "Notes"],
     );
     assert.equal(dom.window.localStorage.getItem("second-brain:categories:v2"), null);
   } finally {

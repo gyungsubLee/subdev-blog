@@ -5,10 +5,7 @@ import type {
   CategoryCatalog,
   CategoryGroup,
 } from "../../features/post-category/catalog";
-import type {
-  RecordsView,
-  useRecordsBrowser,
-} from "../../features/post-category/useRecordsBrowser";
+import type { useRecordsBrowser } from "../../features/post-category/useRecordsBrowser";
 import PostList from "../../features/post-list/PostList";
 import PostLoadMore from "../../features/post-pagination/PostLoadMore";
 import PostResultCount from "../../features/post-pagination/PostResultCount";
@@ -21,19 +18,15 @@ type RecordsPageProps = {
   catalog: CategoryCatalog;
   browser: ReturnType<typeof useRecordsBrowser>;
   onWrite: () => void;
+  canManageCategories?: boolean;
 };
-
-const views: { id: RecordsView; name: string }[] = [
-  { id: "sidebar", name: "사이드바 보기" },
-  { id: "tabs", name: "탭 보기" },
-  { id: "sections", name: "섹션 보기" },
-];
 
 export default function RecordsPage({
   posts,
   catalog,
   browser,
   onWrite,
+  canManageCategories = true,
 }: RecordsPageProps) {
   const { groups } = catalog;
   const group = groups.find((item) => item.id === browser.groupId);
@@ -79,44 +72,24 @@ export default function RecordsPage({
   }
 
   function categoryButtons(item: CategoryGroup) {
-    return item.categories.map((category) => (
+    const children = item.categories.filter((category) => category.id !== item.id);
+    return children.map((category) => (
       <button
         key={category.id}
         type="button"
-        style={
-          browser.view === "sidebar"
-            ? { paddingLeft: 12 + (category.depth ?? 0) * 16 }
-            : undefined
-        }
+        style={{ paddingLeft: 12 + (category.depth ?? 0) * 16 }}
         aria-label={category.name}
         aria-pressed={browser.categoryId === category.id}
         onClick={() => browser.selectCategory(category.id)}
       >
         <span>{category.name}</span>
-        {browser.view === "sidebar" ? (
-          <span className="records-count">
-            {posts
-              .filter((post) => categoryMatches(category, post.category))
-              .length.toLocaleString()}
-          </span>
-        ) : null}
+        <span className="records-count">
+          {posts
+            .filter((post) => categoryMatches(category, post.category))
+            .length.toLocaleString()}
+        </span>
       </button>
     ));
-  }
-
-  function childTabs(item: CategoryGroup) {
-    return (
-      <div className="records-child-tabs" role="group" aria-label={item.name + " 하위 분류"}>
-        <button
-          type="button"
-          aria-pressed={browser.groupId === item.id && !browser.categoryId}
-          onClick={() => browser.selectGroup(item.id)}
-        >
-          {item.name} 전체
-        </button>
-        {categoryButtons(item)}
-      </div>
-    );
   }
 
   const allButton = (
@@ -125,10 +98,8 @@ export default function RecordsPage({
       aria-pressed={!browser.groupId}
       onClick={() => browser.selectGroup(null)}
     >
-      {browser.view === "sidebar" ? "모든 기록" : "전체"}
-      {browser.view === "sidebar" ? (
-        <span className="records-count">{posts.length.toLocaleString()}</span>
-      ) : null}
+      모든 기록
+      <span className="records-count">{posts.length.toLocaleString()}</span>
     </button>
   );
 
@@ -143,22 +114,13 @@ export default function RecordsPage({
           <p className="records-description">개발하며 배운 내용을 주제별로 모았습니다.</p>
         </div>
         <div className="records-view-control">
-          <div role="group" aria-label="보기 방식">
+          <div>
             <span className="records-view-label">보기 방식</span>
-            {views.map((view) => (
-              <button
-                key={view.id}
-                type="button"
-                aria-label={view.name}
-                title={view.name}
-                aria-pressed={browser.view === view.id}
-                onClick={() => browser.setView(view.id)}
-              >
-                <RecordViewIcon view={view.id} />
-              </button>
-            ))}
+            <span className="records-view-option" role="img" aria-label="사이드바 보기">
+              <RecordViewIcon />
+            </span>
           </div>
-          <p>{views.find((view) => view.id === browser.view)?.name}</p>
+          <p>사이드바 보기</p>
         </div>
       </header>
       <div className="records-toolbar">
@@ -168,57 +130,47 @@ export default function RecordsPage({
           onChange={browser.setQuery}
           onClear={browser.clearQuery}
         />
-        <a href="#/categories" className="outline-button">카테고리 관리</a>
+        {canManageCategories ? (
+          <a href="#/categories" className="outline-button">카테고리 관리</a>
+        ) : null}
       </div>
-      <div className={"records-body records-layout-" + browser.view}>
-        {browser.view === "sidebar" ? (
-          <aside className="records-sidebar" aria-label="카테고리">
-            <h2>카테고리</h2>
-            {allButton}
-            {groups.map((item, index) => (
+      <div className="records-body records-layout-sidebar">
+        <aside className="records-sidebar" aria-label="카테고리">
+          <h2>카테고리</h2>
+          {allButton}
+          {groups.map((item, index) => {
+            const children = categoryButtons(item);
+            const rootButton = (
+              <button
+                key={item.id}
+                type="button"
+                className="records-category-root"
+                aria-label={item.name}
+                aria-pressed={browser.groupId === item.id && !browser.categoryId}
+                onClick={() => browser.selectGroup(item.id)}
+              >
+                <span>{item.name}</span>
+                <span className="records-count">
+                  {groupPosts(posts, item).length.toLocaleString()}
+                </span>
+              </button>
+            );
+            return children.length ? (
               <details
                 key={item.id}
                 open={browser.groupId === item.id || (!browser.groupId && index === 0)}
               >
-                <summary>
-                  <span>{item.name}</span>
-                  <span className="records-count">
-                    {groupPosts(posts, item).length.toLocaleString()}
-                  </span>
+                <summary aria-label={item.name + " 하위 분류"}>
+                  {rootButton}
                 </summary>
                 <div className="records-tree-children">
-                  <button
-                    type="button"
-                    aria-pressed={browser.groupId === item.id && !browser.categoryId}
-                    onClick={() => browser.selectGroup(item.id)}
-                  >
-                    {item.name} 전체
-                  </button>
-                  {categoryButtons(item)}
+                  {children}
                 </div>
               </details>
-            ))}
-          </aside>
-        ) : null}
+            ) : rootButton;
+          })}
+        </aside>
         <section className="records-content" aria-label="기록 목록">
-          {browser.view === "tabs" ? (
-            <>
-              <nav className="records-group-tabs" aria-label="상위 분류">
-                {allButton}
-                {groups.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    aria-pressed={browser.groupId === item.id}
-                    onClick={() => browser.selectGroup(item.id)}
-                  >
-                    {item.name}
-                  </button>
-                ))}
-              </nav>
-              {group ? childTabs(group) : null}
-            </>
-          ) : null}
           <div className="records-context">
             <div>
               {category && group ? (
@@ -230,37 +182,7 @@ export default function RecordsPage({
             </div>
             <PostResultCount query={browser.query} count={browser.filteredPosts.length} />
           </div>
-          {browser.view === "sections" && browser.filteredPosts.length ? (
-            <>
-              <div className="records-section-reset">{allButton}</div>
-              {groups.map((item) => {
-                const matches = groupPosts(browser.filteredPosts, item);
-                const visible = groupPosts(visiblePosts, item);
-                return (
-                  <details
-                    className="records-section"
-                    key={item.id}
-                    open={!browser.groupId || browser.groupId === item.id}
-                  >
-                    <summary>
-                      <span>{item.name}</span>
-                      <span className="records-count">{matches.length.toLocaleString()}</span>
-                    </summary>
-                    <div className="records-section-content">
-                      {childTabs(item)}
-                      {visible.length ? cards(visible) : (
-                        <p className="records-section-empty">
-                          {matches.length
-                            ? "더 보기를 누르면 나머지 기록을 표시합니다."
-                            : "현재 조건에 맞는 기록이 없습니다."}
-                        </p>
-                      )}
-                    </div>
-                  </details>
-                );
-              })}
-            </>
-          ) : cards(visiblePosts)}
+          {cards(visiblePosts)}
           <PostLoadMore
             limit={browser.limit}
             total={browser.filteredPosts.length}

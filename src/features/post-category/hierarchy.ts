@@ -284,7 +284,7 @@ export function categoryMatches(
   ).includes(source);
 }
 
-// Records retain their existing three views; each root exposes its ordered descendants.
+// Each root exposes its ordered descendants for records browsing.
 export function categoryNodesToGroups(nodes: CategoryNode[]): CategoryGroup[] {
   function item(node: CategoryNode, depth: number): CategoryItem {
     const branch = categoryDescendants(nodes, node.id);

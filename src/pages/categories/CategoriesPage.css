@@ -458,3 +458,10 @@
 .categories-page .category-storage-error {
   margin-top: 14px;
 }
+
+.categories-page .category-edit-controls {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}

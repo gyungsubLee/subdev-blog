@@ -1,0 +1,54 @@
+.managed-editor {
+  width: min(100% - 3rem, 1100px);
+  margin: 3rem auto 6rem;
+}
+
+.management-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-block: 1.5rem;
+}
+
+.managed-editor fieldset {
+  border: 0;
+  padding: 0;
+}
+
+.managed-editor label {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.managed-editor input,
+.managed-editor textarea,
+.managed-editor select {
+  min-width: 0;
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+}
+
+.managed-editor textarea {
+  font-family: ui-monospace, monospace;
+  line-height: 1.7;
+  resize: vertical;
+}
+
+.publish-status {
+  margin-block: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid #d7d2c8;
+}
+
+.publish-status a {
+  display: inline-block;
+  margin-right: 1rem;
+  text-decoration: underline;
+}

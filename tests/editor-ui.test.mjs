@@ -196,7 +196,7 @@ test("real React editor mounts, saves, imports, exports, and opens the slash men
         document.querySelector('input[aria-label="글 제목"]').value,
         "가져온 제목",
       );
-      assert.equal(document.querySelector('[role="alert"]'), null);
+      assert.ok(document.querySelector('[role="alert"]') === null, "the import finishes without an alert");
     },
   );
 

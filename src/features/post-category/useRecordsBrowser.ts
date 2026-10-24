@@ -5,8 +5,6 @@ import { usePostSearch } from "../post-search/usePostSearch";
 import type { CategoryGroup } from "./catalog";
 import { categoryMatches } from "./hierarchy";
 
-export type RecordsView = "sidebar" | "tabs" | "sections";
-
 export function useRecordsBrowser(
   posts: Post[],
   groups: CategoryGroup[],
@@ -14,7 +12,6 @@ export function useRecordsBrowser(
 ) {
   const search = usePostSearch(enabled);
   const pagination = usePostPagination();
-  const [view, setView] = useState<RecordsView>("sidebar");
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const categoryGroup = groups.find((group) =>
@@ -65,8 +62,6 @@ export function useRecordsBrowser(
     categoryId: category?.id ?? null,
     selectGroup,
     selectCategory,
-    view,
-    setView,
     limit: pagination.limit,
     showMore: pagination.showMore,
     resetFilters,

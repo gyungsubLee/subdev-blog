@@ -78,7 +78,10 @@ test("home leaves browsing controls and search shortcuts to records", async () =
     assert.ok(document.querySelector('input[type="search"]'));
     assert.ok(document.querySelector('.records-sidebar[aria-label="카테고리"]'));
     assert.equal(searchShortcut(), false);
-    assert.equal(document.activeElement, document.querySelector('input[type="search"]'));
+    assert.ok(
+      document.activeElement === document.querySelector('input[type="search"]'),
+      "the search shortcut focuses the search field",
+    );
     assert.equal(cards(), 12);
     await click(document.querySelector(".load-more button"));
     assert.equal(cards(), 24);

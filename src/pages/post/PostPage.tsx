@@ -23,6 +23,7 @@ export default function PostPage({
   hash,
   categoryName,
   backHref = HOME_HREF,
+  canEdit = true,
 }: {
   post: Post;
   posts: Post[];
@@ -30,6 +31,7 @@ export default function PostPage({
   hash: string;
   categoryName?: string;
   backHref?: string;
+  canEdit?: boolean;
 }) {
   const body = getBody(post);
   const ancestors: Post[] = [];
@@ -65,7 +67,7 @@ export default function PostPage({
           <button
             className="outline-button"
             type="button"
-            disabled={post.bodyLoaded === false}
+            disabled={post.bodyLoaded === false || !canEdit}
             onClick={() => onEdit(post)}
           >
             편집하기

@@ -27,7 +27,7 @@ const { default: React, act } = await import("react");
 const { createRoot } = await import("react-dom/client");
 const { default: Blog } = await loadComponent("tests/support/BlogHarness.tsx");
 
-test("records filters, view and visible count survive article and home roundtrips", async () => {
+test("records filters and visible count survive article and home roundtrips", { timeout: 15_000 }, async () => {
   const root = createRoot(document.getElementById("root"));
   const posts = Array.from({ length: 36 }, (_, index) => ({
     id: "p" + index,
@@ -52,7 +52,7 @@ test("records filters, view and visible count survive article and home roundtrip
   async function navigate(anchor) {
     assert.ok(anchor, "expected route link");
     await act(async () => {
-      const changed = once(dom.window, "hashchange");
+      const changed = once(dom.window, "hashchange", { signal: AbortSignal.timeout(5_000) });
       anchor.click();
       await changed;
     });
@@ -71,8 +71,10 @@ test("records filters, view and visible count survive article and home roundtrip
     assert.ok(document.querySelector(".records-page"));
     assert.equal(document.title, "기록 — Second Brain");
     assert.equal(searchShortcut(), false);
-    assert.equal(document.activeElement, document.querySelector('input[type="search"]'));
-    await click(document.querySelector('[aria-label="탭 보기"]'));
+    assert.ok(
+      document.activeElement === document.querySelector('input[type="search"]'),
+      "the search shortcut focuses the search field",
+    );
     await click(button("프론트엔드"));
     await click(document.querySelector('button[aria-label="리액트"]'));
     const input = document.querySelector('input[type="search"]');
@@ -83,18 +85,13 @@ test("records filters, view and visible count survive article and home roundtrip
     });
     await click(button("더 보기"));
     assert.equal(cards(), 24);
-    await click(document.querySelector('[aria-label="섹션 보기"]'));
-    assert.equal(cards(), 24);
     await navigate(document.querySelector(".post-card"));
     assert.equal(document.querySelector(".back-link").getAttribute("href"), "#/records");
     assert.equal(document.querySelector(".article-header h1").textContent, "공통 기록 0");
     assert.equal(searchShortcut(), true, "article disables list search shortcuts");
     await navigate(document.querySelector(".back-link"));
     assert.equal(document.querySelector('input[type="search"]').value, "공통");
-    assert.equal(document.querySelector('[aria-label="섹션 보기"]').getAttribute("aria-pressed"), "true");
     assert.equal(document.querySelector('button[aria-label="리액트"]').getAttribute("aria-pressed"), "true");
-    assert.equal(cards(), 24);
-    await click(document.querySelector('[aria-label="탭 보기"]'));
     assert.equal(cards(), 24);
 
     await click(button("페이지 탐색"));
@@ -115,7 +112,6 @@ test("records filters, view and visible count survive article and home roundtrip
     await navigate(document.querySelector(".back-link"));
     await navigate(document.querySelector('.header-navigation a[href="#/records"]'));
     assert.equal(document.querySelector('input[type="search"]').value, "공통");
-    assert.equal(document.querySelector('[aria-label="탭 보기"]').getAttribute("aria-pressed"), "true");
     assert.equal(document.querySelector('button[aria-label="리액트"]').getAttribute("aria-pressed"), "true");
     assert.equal(cards(), 24);
   } finally {

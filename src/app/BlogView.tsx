@@ -4,7 +4,7 @@ import {
   RECORDS_HREF,
   postIdFromHash,
 } from "../shared/routes";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SiteDialog from "../components/dialog/SiteDialog";
 import SiteFooter from "../components/layout/SiteFooter";
 import SiteHeader from "../components/layout/SiteHeader";
@@ -18,6 +18,9 @@ import RecordsPage from "../pages/records/RecordsPage";
 import MissingPostPage from "../pages/post/MissingPostPage";
 import PostPage from "../pages/post/PostPage";
 import type { Post, PublicCategory } from "../shared/post";
+import type { Management } from "../features/content-management/useManagement";
+import ManagedCategories from "../features/content-management/ManagedCategories";
+import { categoryNodesToGroups } from "../features/post-category/hierarchy";
 
 type BlogViewProps = {
   posts: Post[];
@@ -25,6 +28,7 @@ type BlogViewProps = {
   hash: string;
   onWrite: () => void;
   onEdit: (post: Post) => void;
+  management?: Management;
 };
 
 export default function BlogView({
@@ -33,6 +37,7 @@ export default function BlogView({
   hash,
   onWrite,
   onEdit,
+  management,
 }: BlogViewProps) {
   const [dialog, setDialog] = useState<"tree" | null>(null);
   const [backHref, setBackHref] = useState(HOME_HREF);
@@ -41,7 +46,21 @@ export default function BlogView({
   const isRecords = hash === RECORDS_HREF;
   const isCategories = hash === CATEGORIES_HREF;
   const isHome = !selectedId && !isRecords && !isCategories;
-  const catalog = useCategoryCatalog(posts, categories);
+  const personalCatalog = useCategoryCatalog(posts, categories);
+  const canonicalNodes = useMemo(() => [...(categories ?? [])]
+    .sort((a, b) => a.order - b.order)
+    .map((category) => ({
+      id: category.id,
+      name: category.name,
+      parentId: category.parentId,
+      sources: [...new Set([...category.sources, category.id])],
+    })), [categories]);
+  const canonicalGroups = useMemo(() => categoryNodesToGroups(canonicalNodes), [canonicalNodes]);
+  const catalog = management ? {
+    ...personalCatalog,
+    nodes: canonicalNodes,
+    groups: canonicalGroups,
+  } : personalCatalog;
   const records = useRecordsBrowser(posts, catalog.groups, isRecords && !dialog);
 
   useEffect(() => {
@@ -73,6 +92,7 @@ export default function BlogView({
         hash={hash}
         onEdit={onEdit}
         backHref={backHref}
+        canEdit={!management || management.session.state === "ready"}
       />
     ) : (
       <MissingPostPage />
@@ -84,10 +104,22 @@ export default function BlogView({
         catalog={catalog}
         browser={records}
         onWrite={onWrite}
+        canManageCategories={!management || management.session.state === "ready"}
       />
     );
   } else if (isCategories) {
-    page = <CategoriesPage posts={posts} catalog={catalog} />;
+    if (!management) {
+      page = <CategoriesPage posts={posts} catalog={catalog} />;
+    } else if (management.session.state === "ready") {
+      page = <ManagedCategories categories={categories ?? []} posts={posts} session={management.session} />;
+    } else {
+      page = (
+        <main className="app-state" id="main-content" tabIndex={-1}>
+          <h1>로그인이 필요합니다</h1>
+          <p>카테고리 관리는 GitHub 로그인 후 이용할 수 있습니다.</p>
+        </main>
+      );
+    }
   } else {
     page = <HomePage posts={posts} />;
   }
@@ -108,6 +140,7 @@ export default function BlogView({
         activeHref={hash}
         onExplore={() => setDialog("tree")}
         onWrite={onWrite}
+        management={management}
       />
       {page}
       <SiteFooter />

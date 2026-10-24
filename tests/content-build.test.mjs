@@ -147,6 +147,7 @@ async function packageFixture(t) {
   await mkdir(path.join(input.cwd, "scripts"));
   for (const filename of ["content.mjs", "prepare-site.mjs"])
     await cp(path.resolve("scripts", filename), path.join(input.cwd, "scripts", filename));
+  await cp(path.resolve("server"), path.join(input.cwd, "server"), { recursive: true });
   await cp(path.resolve("src/shared"), path.join(input.cwd, "src/shared"), { recursive: true });
   for (const filename of ["vite.config.ts", "package.json"])
     await cp(path.resolve(filename), path.join(input.cwd, filename));
