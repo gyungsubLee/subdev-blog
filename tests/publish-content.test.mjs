@@ -428,7 +428,7 @@ test('native network diagnostics expose only bounded error codes and HTTP status
   assert.deepEqual(entries[2], { event: 'undici:request:headers', status: 403 });
 });
 
-test('preview alias moves only after all deployed bytes pass verification', { timeout: 15_000 }, async t => {
+test('preview alias moves only after all deployed bytes pass verification', { timeout: 20_000 }, async t => {
   const source = await readFile(new URL('../.github/workflows/publish-content.yml', import.meta.url), 'utf8');
   const step = YAML.parse(source).jobs.publish.steps.find(step => step.name === 'Deploy preview');
   const root = await mkdtemp(path.join(os.tmpdir(), 'preview-alias-'));
@@ -455,6 +455,7 @@ if (args.includes('deploy')) console.log('https://subdev-blog-cms-test-deploymen
   const fetcher = path.join(root, 'fetch-preview.mjs');
   await writeFile(fetcher, `import fs from 'node:fs';
 import path from 'node:path';
+const reads = new Map();
 globalThis.fetch = async (address, options) => {
   const url = new URL(address);
   if (url.origin === 'https://api.vercel.com') {
@@ -463,21 +464,44 @@ globalThis.fetch = async (address, options) => {
     fs.appendFileSync(process.env.CMS_TEST_ALIASES, JSON.stringify({ pathname: url.pathname, team: url.searchParams.get('teamId'), alias: body.alias }) + '\\n');
     return Response.json({ alias: body.alias });
   }
-  if (process.env.CMS_TEST_BAD_CONTENT === '1' && url.pathname.endsWith('/asset.bin')) return new Response(Buffer.alloc(8192, 98));
+  const attempt = (reads.get(url.pathname) || 0) + 1;
+  reads.set(url.pathname, attempt);
+  fs.appendFileSync(process.env.CMS_TEST_READS, JSON.stringify({ pathname: url.pathname, deadline: options?.signal instanceof AbortSignal }) + '\\n');
+  const mode = process.env.CMS_TEST_READ_MODE;
+  if (mode === 'identity-body' && url.pathname === '/build-info.json' && attempt === 1) {
+    return new Response(new ReadableStream({ start(controller) { controller.error(new Error('private body failure')); } }));
+  }
+  if (url.pathname.endsWith('/asset.bin')) {
+    if (mode === 'network') throw new Error('private network failure');
+    if (mode === '503' && attempt === 1) return new Response('temporary', { status: 503 });
+    if (mode === '429' && attempt === 1) return new Response('temporary', { status: 429, headers: { 'Retry-After': '120' } });
+    if (mode === '404' || mode === '403') return new Response('private error body', { status: Number(mode) });
+    if (mode === 'mismatch') return new Response(Buffer.alloc(8192, 98));
+  }
   return new Response(fs.readFileSync(path.join(process.cwd(), '.vercel/output/static', decodeURIComponent(url.pathname.slice(1)))));
 };
 `);
   const commands = path.join(root, 'commands.jsonl');
   const aliasRequests = path.join(root, 'aliases.jsonl');
+  const reads = path.join(root, 'reads.jsonl');
+  const waits = path.join(root, 'waits.jsonl');
+  const run = step.run.replace(
+    'const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));',
+    "const pause = async milliseconds => fs.appendFileSync(process.env.CMS_TEST_WAITS, milliseconds + '\\n');",
+  );
   const alias = 'subdev-blog-cms-gyungsublee.vercel.app';
   for (const scenario of [
-    { alias, badContent: false, success: true, aliasCalls: 1 },
-    { alias, badContent: true, success: false, aliasCalls: 0 },
-    { alias: '', badContent: false, success: true, aliasCalls: 0 },
+    { alias, mode: '503', success: true, aliasCalls: 1, attempts: 2, waits: [1000] },
+    { alias, mode: '404', success: false, aliasCalls: 0, attempts: 3, waits: [1000, 2000], error: 'Preview request failed (status 404): /content/asset.bin' },
+    { alias, mode: '403', success: false, aliasCalls: 0, attempts: 1, waits: [], error: 'Preview request failed (status 403): /content/asset.bin' },
+    { alias, mode: 'mismatch', success: false, aliasCalls: 0, attempts: 1, waits: [], error: 'Preview content mismatch: /content/asset.bin' },
+    { alias, mode: 'network', success: false, aliasCalls: 0, attempts: 3, waits: [1000, 2000], error: 'Preview request failed (status network): /content/asset.bin' },
+    { alias, mode: '429', success: true, aliasCalls: 1, attempts: 2, waits: [30000] },
+    { alias, mode: 'identity-body', success: true, aliasCalls: 1, attempts: 1, identityAttempts: 2, waits: [1000] },
+    { alias: '', mode: '', success: true, aliasCalls: 0, attempts: 1, waits: [] },
   ]) {
-    await writeFile(commands, '');
-    await writeFile(aliasRequests, '');
-    const result = spawnSync('bash', ['-e', '-c', step.run], {
+    for (const file of [commands, aliasRequests, reads, waits]) await writeFile(file, '');
+    const result = spawnSync('bash', ['-e', '-c', run], {
       cwd: root,
       env: {
         ...process.env,
@@ -490,7 +514,9 @@ globalThis.fetch = async (address, options) => {
         CANDIDATE_SHA: info.contentCommit,
         PREVIEW_URL: '',
         CMS_PREVIEW_ALIAS: scenario.alias,
-        CMS_TEST_BAD_CONTENT: scenario.badContent ? '1' : '',
+        CMS_TEST_READ_MODE: scenario.mode,
+        CMS_TEST_READS: reads,
+        CMS_TEST_WAITS: waits,
         CMS_TEST_COMMANDS: commands,
         CMS_TEST_ALIASES: aliasRequests,
         GITHUB_STEP_SUMMARY: path.join(root, 'summary.md'),
@@ -498,13 +524,22 @@ globalThis.fetch = async (address, options) => {
       encoding: 'utf8',
       timeout: 4000,
     });
-    assert.equal(result.status === 0, scenario.success, 'Unexpected preview verification result');
+    assert.equal(result.status === 0, scenario.success, 'Unexpected preview verification result for ' + scenario.mode);
     const diagnostics = result.stderr.split('\n').filter(line => line.includes('CMS_TEST_DEPLOY'));
     assert.equal(diagnostics.length, 1, 'Network diagnostics must apply only to the deployment command');
     if (!scenario.success) {
-      assert.ok(result.stderr.includes('Preview content mismatch: /content/asset.bin'), 'Mismatch must identify its file');
-      assert.ok(Buffer.byteLength(result.stderr) < 4096, 'Mismatch diagnostics must stay bounded');
+      assert.ok(result.stderr.includes(scenario.error), 'Failure must identify its status or byte mismatch and pathname');
+      assert.ok(Buffer.byteLength(result.stderr) < 4096, 'Failure diagnostics must stay bounded');
+      for (const sentinel of ['private body failure', 'private network failure', 'private error body']) {
+        assert.ok(!result.stderr.includes(sentinel), 'Failure diagnostics must omit network messages and response bodies');
+      }
     }
+    const attempts = (await readFile(reads, 'utf8')).trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
+    assert.equal(attempts.filter(entry => entry.pathname === '/content/asset.bin').length, scenario.attempts, 'Only transient reads may retry');
+    assert.equal(attempts.filter(entry => entry.pathname === '/build-info.json').length, scenario.identityAttempts ?? 1, 'Identity must use the same bounded reader');
+    assert.ok(attempts.every(entry => entry.deadline), 'Every preview read must have an abort deadline');
+    const delays = (await readFile(waits, 'utf8')).trim().split('\n').filter(Boolean).map(Number);
+    assert.deepEqual(delays, scenario.waits, 'Retry delay must honor the attempt count and capped Retry-After');
     const calls = (await readFile(commands, 'utf8')).trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
     const deployment = calls.find(args => args.includes('deploy'));
     assert.ok(deployment?.includes('--archive=tgz'), 'Large content trees require an archive upload');
