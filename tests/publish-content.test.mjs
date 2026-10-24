@@ -316,6 +316,16 @@ test('workflow installs trusted dependencies before running the publication CLI'
   assert.equal(steps[firstCli].run.trim(), 'node scripts/publish-content.mjs token');
 });
 
+test('workflow prepares project settings before source promotion without downloading runtime secrets', async () => {
+  const source = await readFile(new URL('../.github/workflows/publish-content.yml', import.meta.url), 'utf8');
+  const steps = YAML.parse(source).jobs.publish.steps;
+  const prepare = steps.findIndex(step => step.run?.trim() === 'node scripts/vercel-preview.mjs prepare');
+  const promotion = steps.findIndex(step => step.name === 'Promote content');
+  assert.ok(prepare >= 0 && prepare < promotion, 'Project access must be checked before source promotion');
+  const deploy = steps.find(step => step.name === 'Deploy preview');
+  assert.ok(!deploy.run.includes(' pull '), 'Project-scoped tokens must not use CLI owner lookup');
+});
+
 test('workflow uses permitted stored configuration names and preserves CLI environment names', async () => {
   const source = await readFile(new URL('../.github/workflows/publish-content.yml', import.meta.url), 'utf8');
   const workflow = YAML.parse(source);
@@ -399,6 +409,8 @@ test('preview alias moves only after all deployed bytes pass verification', { ti
   await writeFile(path.join(output, 'build-info.json'), JSON.stringify(info));
   await writeFile(path.join(output, 'content', 'index.json'), '[{"id":"test"}]');
   await writeFile(path.join(output, 'content', 'asset.bin'), Buffer.alloc(8192, 97));
+  await mkdir(path.join(root, 'scripts'));
+  await writeFile(path.join(root, 'scripts', 'vercel-preview.mjs'), await readFile(new URL('../scripts/vercel-preview.mjs', import.meta.url), 'utf8'));
   const bin = path.join(root, 'bin');
   await mkdir(bin);
   await writeFile(path.join(bin, 'npx'), `#!${process.execPath}
@@ -411,13 +423,20 @@ if (args.includes('deploy')) console.log('https://subdev-blog-cms-test-deploymen
   const fetcher = path.join(root, 'fetch-preview.mjs');
   await writeFile(fetcher, `import fs from 'node:fs';
 import path from 'node:path';
-globalThis.fetch = async address => {
+globalThis.fetch = async (address, options) => {
   const url = new URL(address);
+  if (url.origin === 'https://api.vercel.com') {
+    if (!url.pathname.endsWith('/aliases')) throw new Error('Unexpected Vercel API path');
+    const body = JSON.parse(options.body);
+    fs.appendFileSync(process.env.CMS_TEST_ALIASES, JSON.stringify({ pathname: url.pathname, team: url.searchParams.get('teamId'), alias: body.alias }) + '\\n');
+    return Response.json({ alias: body.alias });
+  }
   if (process.env.CMS_TEST_BAD_CONTENT === '1' && url.pathname.endsWith('/asset.bin')) return new Response(Buffer.alloc(8192, 98));
   return new Response(fs.readFileSync(path.join(process.cwd(), '.vercel/output/static', decodeURIComponent(url.pathname.slice(1)))));
 };
 `);
   const commands = path.join(root, 'commands.jsonl');
+  const aliasRequests = path.join(root, 'aliases.jsonl');
   const alias = 'subdev-blog-cms-gyungsublee.vercel.app';
   for (const scenario of [
     { alias, badContent: false, success: true, aliasCalls: 1 },
@@ -425,6 +444,7 @@ globalThis.fetch = async address => {
     { alias: '', badContent: false, success: true, aliasCalls: 0 },
   ]) {
     await writeFile(commands, '');
+    await writeFile(aliasRequests, '');
     const result = spawnSync('bash', ['-e', '-c', step.run], {
       cwd: root,
       env: {
@@ -432,12 +452,15 @@ globalThis.fetch = async address => {
         PATH: bin + path.delimiter + process.env.PATH,
         NODE_OPTIONS: '--import=' + fetcher,
         VERCEL_TOKEN: 'test-token',
+        VERCEL_ORG_ID: 'team_test',
+        VERCEL_PROJECT_ID: 'prj_test',
         APP_COMMIT: info.commit,
         CANDIDATE_SHA: info.contentCommit,
         PREVIEW_URL: '',
         CMS_PREVIEW_ALIAS: scenario.alias,
         CMS_TEST_BAD_CONTENT: scenario.badContent ? '1' : '',
         CMS_TEST_COMMANDS: commands,
+        CMS_TEST_ALIASES: aliasRequests,
         GITHUB_STEP_SUMMARY: path.join(root, 'summary.md'),
       },
       encoding: 'utf8',
@@ -451,13 +474,15 @@ globalThis.fetch = async address => {
     const calls = (await readFile(commands, 'utf8')).trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
     const deployment = calls.find(args => args.includes('deploy'));
     assert.ok(deployment?.includes('--archive=tgz'), 'Large content trees require an archive upload');
-    const aliases = calls.filter(args => args.includes('alias'));
+    assert.equal(calls.filter(args => args.includes('alias')).length, 0, 'Alias assignment must avoid CLI owner lookup');
+    const aliases = (await readFile(aliasRequests, 'utf8')).trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
     assert.equal(aliases.length, scenario.aliasCalls, 'Alias must follow successful byte verification');
     if (aliases.length) {
-      assert.deepEqual(aliases[0], [
-        '--yes', 'vercel@58.1.0', 'alias', 'set',
-        'https://subdev-blog-cms-test-deployment.vercel.app', alias, '--token=test-token',
-      ]);
+      assert.deepEqual(aliases[0], {
+        pathname: '/v2/deployments/subdev-blog-cms-test-deployment.vercel.app/aliases',
+        team: 'team_test',
+        alias,
+      });
     }
   }
 });
