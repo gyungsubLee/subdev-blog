@@ -43,7 +43,7 @@ export default function PublishStatus({
           setError("진행 상태를 확인하지 못했습니다. Actions 실행을 확인하십시오.");
         }
       }
-      if (active) timer = setTimeout(poll, 5000);
+      if (active) timer = setTimeout(poll, 30000);
     }
     timer = setTimeout(poll, 1500);
     return () => { active = false; clearTimeout(timer); };

@@ -179,6 +179,44 @@ test("fresh publication responses clear stale alerts and retain current errors",
   }
 });
 
+test("publication polling preserves the first check, waits thirty seconds and stops after publication", { timeout: 5000 }, async (t) => {
+  const { default: PublishStatus } = await loadComponent("src/features/content-management/PublishStatus.tsx");
+  const previous = globalThis.fetch;
+  let polls = 0;
+  globalThis.fetch = async (url) => {
+    assert.ok(url.startsWith("/api/publish?"), "Polling must read publication status");
+    polls++;
+    return reply({ state: polls === 1 ? "saved" : "published" });
+  };
+  function PublicationStatus() {
+    const [publication, setPublication] = React.useState({
+      requestId: "request", candidateCommit: "c".repeat(40), runId: 1, state: "saved",
+    });
+    return React.createElement(PublishStatus, { publication, csrfToken: "test-csrf", onChange: setPublication });
+  }
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  try {
+    await mounted(React.createElement(PublicationStatus), async () => {
+      await act(async () => t.mock.timers.tick(1499));
+      assert.equal(polls, 0, "The first poll must wait 1.5 seconds");
+      await act(async () => t.mock.timers.tick(1));
+      assert.equal(polls, 1);
+      await act(async () => t.mock.timers.tick(5000));
+      assert.equal(polls, 1, "Five seconds must not trigger another GitHub status check");
+      await act(async () => t.mock.timers.tick(24999));
+      assert.equal(polls, 1, "Recurring polls must wait the full thirty seconds");
+      await act(async () => t.mock.timers.tick(1));
+      assert.equal(polls, 2);
+      assert.equal(document.querySelector('[role="status"]').textContent, "게시 완료");
+      await act(async () => t.mock.timers.tick(60000));
+      assert.equal(polls, 2, "Published requests must stop polling");
+    });
+  } finally {
+    t.mock.timers.reset();
+    globalThis.fetch = previous;
+  }
+});
+
 test("canonical title edits send untouched Markdown and CSRF to a candidate publication", async () => {
   const { default: Editor } = await loadComponent("src/features/content-management/ManagedPostEditor.tsx");
   const markdown = "\n# Keep H1\n\n<details>\n<summary>Keep HTML</summary>\nraw\n</details>\n";
