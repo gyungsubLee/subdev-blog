@@ -398,6 +398,36 @@ test('preview alias preflight accepts only the optional CMS preview namespace', 
   }
 });
 
+test('native network diagnostics expose only bounded error codes and HTTP status', { timeout: 5000 }, () => {
+  const preload = new URL('../scripts/vercel-network-diagnostics.mjs', import.meta.url).href;
+  const result = spawnSync(process.execPath, ['--import', preload, '--input-type=module', '-e', `
+    import { channel } from 'node:diagnostics_channel';
+    const secret = 'must-never-appear';
+    const error = new AggregateError(
+      Array.from({ length: 10 }, (_, index) => Object.assign(new Error(secret), { code: 'CODE_' + index })),
+      secret,
+      { cause: Object.assign(new Error(secret), { code: 'UND_ERR_SOCKET' }) },
+    );
+    error.code = 'ECONNRESET';
+    error.cause.cause = error;
+    channel('undici:request:error').publish({ error, request: { headers: secret, body: secret, origin: secret } });
+    channel('undici:client:connectError').publish({ error: { code: secret, cause: { code: 'BAD\\nCODE' }, message: secret }, connectParams: { hostname: secret } });
+    for (const statusCode of [200, 399, 403, 1000, secret]) {
+      channel('undici:request:headers').publish({ request: { headers: secret }, response: { statusCode, headers: secret, statusText: secret } });
+    }
+    for (let index = 0; index < 10; index++) channel('undici:request:error').publish({ error });
+  `], { encoding: 'utf8', timeout: 3000, maxBuffer: 8192 });
+  assert.equal(result.status, 0, 'Diagnostic preload must not interrupt the process');
+  assert.equal(result.stdout, '');
+  assert.ok(Buffer.byteLength(result.stderr) < 2048, 'Diagnostics must stay bounded');
+  assert.ok(!result.stderr.includes('must-never-appear'), 'Diagnostics must omit messages, headers, bodies, and URLs');
+  const entries = result.stderr.trim().split('\n').map(line => JSON.parse(line));
+  assert.equal(entries.length, 5, 'Diagnostic event count must be bounded');
+  assert.deepEqual(entries[0], { event: 'undici:request:error', codes: ['ECONNRESET', 'UND_ERR_SOCKET', 'CODE_0', 'CODE_1', 'CODE_2'] });
+  assert.deepEqual(entries[1], { event: 'undici:client:connectError', codes: [] });
+  assert.deepEqual(entries[2], { event: 'undici:request:headers', status: 403 });
+});
+
 test('preview alias moves only after all deployed bytes pass verification', { timeout: 15_000 }, async t => {
   const source = await readFile(new URL('../.github/workflows/publish-content.yml', import.meta.url), 'utf8');
   const step = YAML.parse(source).jobs.publish.steps.find(step => step.name === 'Deploy preview');
@@ -411,12 +441,14 @@ test('preview alias moves only after all deployed bytes pass verification', { ti
   await writeFile(path.join(output, 'content', 'asset.bin'), Buffer.alloc(8192, 97));
   await mkdir(path.join(root, 'scripts'));
   await writeFile(path.join(root, 'scripts', 'vercel-preview.mjs'), await readFile(new URL('../scripts/vercel-preview.mjs', import.meta.url), 'utf8'));
+  await writeFile(path.join(root, 'scripts', 'vercel-network-diagnostics.mjs'), await readFile(new URL('../scripts/vercel-network-diagnostics.mjs', import.meta.url), 'utf8'));
   const bin = path.join(root, 'bin');
   await mkdir(bin);
   await writeFile(path.join(bin, 'npx'), `#!${process.execPath}
 const fs = require('node:fs');
 const args = process.argv.slice(2);
 fs.appendFileSync(process.env.CMS_TEST_COMMANDS, JSON.stringify(args) + '\\n');
+require('node:diagnostics_channel').channel('undici:request:error').publish({ error: { code: 'CMS_TEST_DEPLOY' } });
 if (args.includes('deploy')) console.log('https://subdev-blog-cms-test-deployment.vercel.app');
 `);
   await chmod(path.join(bin, 'npx'), 0o755);
@@ -467,6 +499,8 @@ globalThis.fetch = async (address, options) => {
       timeout: 4000,
     });
     assert.equal(result.status === 0, scenario.success, 'Unexpected preview verification result');
+    const diagnostics = result.stderr.split('\n').filter(line => line.includes('CMS_TEST_DEPLOY'));
+    assert.equal(diagnostics.length, 1, 'Network diagnostics must apply only to the deployment command');
     if (!scenario.success) {
       assert.ok(result.stderr.includes('Preview content mismatch: /content/asset.bin'), 'Mismatch must identify its file');
       assert.ok(Buffer.byteLength(result.stderr) < 4096, 'Mismatch diagnostics must stay bounded');

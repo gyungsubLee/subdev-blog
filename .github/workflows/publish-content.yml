@@ -132,7 +132,7 @@ jobs:
           assert.equal(info.contentCommit, process.env.CANDIDATE_SHA);
           assert(fs.statSync('.vercel/output/static/content/index.json').size > 2);
           NODE
-          URL="$(npx --yes vercel@58.1.0 deploy --prebuilt --archive=tgz --token="$VERCEL_TOKEN")"
+          URL="$(NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--import=./scripts/vercel-network-diagnostics.mjs" npx --yes vercel@58.1.0 deploy --prebuilt --archive=tgz --token="$VERCEL_TOKEN")"
           export PREVIEW_URL="$URL"
           node --input-type=module <<'NODE'
           import assert from 'node:assert/strict';
