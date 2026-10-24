@@ -424,6 +424,8 @@ globalThis.fetch = async address => {
     });
     assert.equal(result.status === 0, scenario.success, 'Unexpected preview verification result');
     const calls = (await readFile(commands, 'utf8')).trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
+    const deployment = calls.find(args => args.includes('deploy'));
+    assert.ok(deployment?.includes('--archive=tgz'), 'Large content trees require an archive upload');
     const aliases = calls.filter(args => args.includes('alias'));
     assert.equal(aliases.length, scenario.aliasCalls, 'Alias must follow successful byte verification');
     if (aliases.length) {
