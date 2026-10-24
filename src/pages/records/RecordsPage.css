@@ -38,41 +38,6 @@
   line-height: 1.8;
 }
 
-.records-view-control {
-  flex-shrink: 0;
-  text-align: right;
-}
-
-.records-view-control > div {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.records-view-label {
-  margin-right: 20px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.records-view-option {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  border: 1px solid var(--accent);
-  border-radius: 5px;
-  color: var(--accent);
-  background: #efe1d6;
-}
-
-.records-view-control > p {
-  margin-top: 12px;
-  color: var(--accent);
-  font-size: 12px;
-}
-
 .records-toolbar {
   display: flex;
   align-items: center;
@@ -253,19 +218,6 @@ aside.records-sidebar {
     font-size: 12px;
   }
 
-  .records-view-option {
-    width: 36px;
-    height: 36px;
-  }
-
-  .records-view-label {
-    display: none;
-  }
-
-  .records-view-control > p {
-    font-size: 11px;
-  }
-
   .records-toolbar {
     gap: 16px;
     margin-top: 24px;
@@ -305,10 +257,6 @@ aside.records-sidebar {
 @media (max-width: 400px) {
   .records-heading {
     flex-wrap: wrap;
-  }
-
-  .records-view-control {
-    margin-left: auto;
   }
 
   .records-toolbar {
