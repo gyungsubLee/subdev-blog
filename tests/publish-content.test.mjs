@@ -377,7 +377,7 @@ test('preview alias moves only after all deployed bytes pass verification', { ti
   const info = { commit: 'a'.repeat(40), contentCommit: 'b'.repeat(40) };
   await writeFile(path.join(output, 'build-info.json'), JSON.stringify(info));
   await writeFile(path.join(output, 'content', 'index.json'), '[{"id":"test"}]');
-  await writeFile(path.join(output, 'content', 'asset.bin'), 'original bytes');
+  await writeFile(path.join(output, 'content', 'asset.bin'), Buffer.alloc(8192, 97));
   const bin = path.join(root, 'bin');
   await mkdir(bin);
   await writeFile(path.join(bin, 'npx'), `#!${process.execPath}
@@ -392,7 +392,7 @@ if (args.includes('deploy')) console.log('https://subdev-blog-cms-test-deploymen
 import path from 'node:path';
 globalThis.fetch = async address => {
   const url = new URL(address);
-  if (process.env.CMS_TEST_BAD_CONTENT === '1' && url.pathname.endsWith('/asset.bin')) return new Response('wrong bytes');
+  if (process.env.CMS_TEST_BAD_CONTENT === '1' && url.pathname.endsWith('/asset.bin')) return new Response(Buffer.alloc(8192, 98));
   return new Response(fs.readFileSync(path.join(process.cwd(), '.vercel/output/static', decodeURIComponent(url.pathname.slice(1)))));
 };
 `);
@@ -423,6 +423,10 @@ globalThis.fetch = async address => {
       timeout: 4000,
     });
     assert.equal(result.status === 0, scenario.success, 'Unexpected preview verification result');
+    if (!scenario.success) {
+      assert.ok(result.stderr.includes('Preview content mismatch: /content/asset.bin'), 'Mismatch must identify its file');
+      assert.ok(Buffer.byteLength(result.stderr) < 4096, 'Mismatch diagnostics must stay bounded');
+    }
     const calls = (await readFile(commands, 'utf8')).trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
     const deployment = calls.find(args => args.includes('deploy'));
     assert.ok(deployment?.includes('--archive=tgz'), 'Large content trees require an archive upload');

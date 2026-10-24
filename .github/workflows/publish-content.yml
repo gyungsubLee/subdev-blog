@@ -140,9 +140,6 @@ jobs:
           const info = await identity.json();
           assert.equal(info.commit, process.env.APP_COMMIT);
           assert.equal(info.contentCommit, process.env.CANDIDATE_SHA);
-          const content = await fetch(new URL('/content/index.json', url));
-          assert(content.ok, 'Preview content unavailable');
-          assert.deepEqual(await content.json(), JSON.parse(fs.readFileSync('.vercel/output/static/content/index.json', 'utf8')));
           const root = '.vercel/output/static/content';
           const files = fs.readdirSync(root, { recursive: true, withFileTypes: true }).filter(entry => entry.isFile());
           for (let offset = 0; offset < files.length; offset += 20) {
@@ -151,7 +148,9 @@ jobs:
               const pathname = '/content/' + local.slice(root.length + 1).split('/').map(encodeURIComponent).join('/');
               const response = await fetch(new URL(pathname, url));
               assert(response.ok, 'Preview content unavailable: ' + pathname);
-              assert.deepEqual(Buffer.from(await response.arrayBuffer()), fs.readFileSync(local), 'Preview content mismatch: ' + pathname);
+              const actualBuffer = Buffer.from(await response.arrayBuffer());
+              const expectedBuffer = fs.readFileSync(local);
+              assert.ok(actualBuffer.equals(expectedBuffer), 'Preview content mismatch: ' + pathname);
             }));
           }
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `Preview: ${url}\n\nApp: ${info.commit}\n\nContent: ${info.contentCommit}\n`);
