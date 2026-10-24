@@ -12,6 +12,7 @@ const uuid = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 function git(root, ...args) {
   return execFileSync('git', ['-C', root, ...args], {
     encoding: 'utf8',
+    maxBuffer: 16 * 1024 * 1024,
     stdio: ['ignore', 'pipe', 'pipe'],
   }).trim();
 }

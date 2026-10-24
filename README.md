@@ -88,16 +88,19 @@ Notion의 공개 API는 비공식 인터페이스다. 공개하지 않은 페이
 
 | 위치 | 이름 |
 | --- | --- |
-| Actions secrets | `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` |
-| Actions variables | `GITHUB_INSTALLATION_ID`, `GITHUB_APP_REPOSITORY_ID`, `GITHUB_CONTENT_REPOSITORY_ID`, `GITHUB_APP_BRANCH`, `GITHUB_CONTENT_BRANCH` |
+| Actions secrets | `CMS_APP_ID`, `CMS_APP_PRIVATE_KEY`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` |
+| Actions variables | `CMS_INSTALLATION_ID`, `CMS_APP_REPOSITORY_ID`, `CMS_CONTENT_REPOSITORY_ID`, `CMS_APP_BRANCH`, `CMS_CONTENT_BRANCH`, 선택값 `CMS_PREVIEW_ALIAS` |
 | Vercel 서버 환경 | `.env.example`의 주석 처리하지 않은 모든 이름 |
 
 앱 브랜치는 저장소의 기본 브랜치여야 한다. 해당 브랜치에 게시 workflow가 있어야 연결 확인을 통과한다.
+Actions의 secret·variable 이름은 `GITHUB_`로 시작할 수 없다. Workflow가 `CMS_` 저장값을 내부 `GITHUB_` 환경 변수로 연결한다.
 브랜치 보호 규칙은 App의 정상 fast-forward 커밋을 허용해야 한다. 강제 푸시는 사용하지 않는다.
 개발 주소는 `http://127.0.0.1:5173`이다. 별도 개발 App이나 해당 주소의 Callback URL을 등록하고 개발 서버를 다시 시작한다.
 비밀값에는 `VITE_` 접두사를 붙이지 않는다. `CMS_SESSION_KEY`를 바꾸면 기존 로그인을 만료시킨다.
 
 초기 게시 대상은 preview다. `vercel.json`의 `git.deploymentEnabled: false`로 Git 푸시의 자동 배포를 막고 Actions에서 preview를 만든다.
+로그인에 고정 주소가 필요하면 `CMS_PREVIEW_ALIAS`를 설정하고 서버의 `CMS_ORIGIN`과 맞춘다.
+별칭은 `subdev-blog-cms-<식별자>.vercel.app` 형태만 허용한다. 원본 응답 검증 뒤 해당 별칭을 최신 preview로 연결한다.
 이 설정은 [Vercel의 Git 배포 설정](https://vercel.com/docs/project-configuration/git-configuration)을 따른다.
 운영 배포 전환은 별도 승인 뒤 진행한다. 공개 preview 응답을 검사하므로 Vercel 인증 보호가 켜져 있으면 검증이 실패한다.
 실제 GitHub 로그인·권한 취소·검증용 생성·수정·삭제·preview 검증은 App과 secrets를 등록한 환경에서 수행해야 한다.

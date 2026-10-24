@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, writeFile, rm, chmod, symlink, readFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -41,6 +41,45 @@ test('validates real commit and rejects noncontent changes and wrong parent', as
   git(f.root, 'add', '.');
   git(f.root, 'commit', '-m', 'bad');
   await assert.rejects(validateCandidate({ ...f, base: f.candidate, candidate: git(f.root, 'rev-parse', 'HEAD') }), /path/);
+});
+
+test('validates content when the inherited Git tree exceeds one MiB', { timeout: 10_000 }, async t => {
+  const f = await fixture(t);
+  const entries = git(f.root, 'ls-tree', f.candidate).split('\n');
+  const blob = git(f.root, 'rev-parse', `${f.candidate}:categories.json`);
+  // Unchanged archive entries enlarge the Git output without creating thousands of files.
+  for (let index = 0; index < 6000; index++) {
+    const name = `archive-${String(index).padStart(4, '0')}-${'x'.repeat(128)}`;
+    entries.push(`100644 blob ${blob}\t${name}`);
+  }
+  const tree = execFileSync('git', ['-C', f.root, 'mktree'], {
+    input: entries.join('\n') + '\n',
+    encoding: 'utf8',
+  }).trim();
+  const base = git(f.root, 'commit-tree', tree, '-p', f.candidate, '-m', 'large inherited tree');
+  const changedBlob = execFileSync('git', ['-C', f.root, 'hash-object', '-w', '--stdin'], {
+    input: '[ ]',
+    encoding: 'utf8',
+  }).trim();
+  const candidateTree = execFileSync('git', ['-C', f.root, 'mktree'], {
+    input: entries.map(entry => entry.endsWith('\tcategories.json')
+      ? `100644 blob ${changedBlob}\tcategories.json`
+      : entry).join('\n') + '\n',
+    encoding: 'utf8',
+  }).trim();
+  const candidate = git(f.root, 'commit-tree', candidateTree, '-p', base, '-m', 'update categories');
+  const treeOutput = execFileSync('git', ['-C', f.root, 'ls-tree', '-r', '-z', candidate], {
+    maxBuffer: 16 * 1024 * 1024,
+  });
+  assert.ok(treeOutput.length > 1024 * 1024, 'Fixture must exceed the default Git output buffer');
+
+  let result;
+  try {
+    result = await validateCandidate({ root: f.root, base, candidate });
+  } catch (error) {
+    assert.fail(`Content validation failed: ${error.code ?? error.message}`);
+  }
+  assert.deepEqual(result.changed, ['categories.json']);
 });
 
 test('source promotion retries, preserves descendants and rejects divergence', async t => {
@@ -275,4 +314,123 @@ test('workflow installs trusted dependencies before running the publication CLI'
   assert(install >= 0, 'A dedicated dependency installation step is required');
   assert(firstCli > install, 'Publication CLI imports require installed dependencies');
   assert.equal(steps[firstCli].run.trim(), 'node scripts/publish-content.mjs token');
+});
+
+test('workflow uses permitted stored configuration names and preserves CLI environment names', async () => {
+  const source = await readFile(new URL('../.github/workflows/publish-content.yml', import.meta.url), 'utf8');
+  const workflow = YAML.parse(source);
+  assert.deepEqual(JSON.stringify(workflow).match(/(?:vars|secrets)\.GITHUB_[A-Z_]+/g) ?? [], []);
+  const job = workflow.jobs.publish;
+  assert.equal(job.env.GITHUB_APP_BRANCH, '${{ vars.CMS_APP_BRANCH }}');
+  assert.equal(job.env.GITHUB_CONTENT_BRANCH, '${{ vars.CMS_CONTENT_BRANCH }}');
+  for (const name of ['Check inputs and secrets', 'Create scoped installation token']) {
+    const step = job.steps.find(step => step.name === name);
+    assert.equal(step.env.GITHUB_APP_ID, '${{ secrets.CMS_APP_ID }}');
+    assert.equal(step.env.GITHUB_APP_PRIVATE_KEY, '${{ secrets.CMS_APP_PRIVATE_KEY }}');
+    for (const suffix of ['INSTALLATION_ID', 'APP_REPOSITORY_ID', 'CONTENT_REPOSITORY_ID']) {
+      assert.equal(step.env[`GITHUB_${suffix}`], '${{ vars.CMS_' + suffix + ' }}');
+    }
+  }
+});
+
+test('preview alias preflight accepts only the optional CMS preview namespace', { timeout: 10_000 }, async () => {
+  const source = await readFile(new URL('../.github/workflows/publish-content.yml', import.meta.url), 'utf8');
+  const step = YAML.parse(source).jobs.publish.steps.find(step => step.name === 'Check inputs and secrets');
+  const env = {
+    ...process.env,
+    GITHUB_APP_ID: '1',
+    GITHUB_APP_PRIVATE_KEY: 'test-key',
+    GITHUB_INSTALLATION_ID: '2',
+    GITHUB_APP_REPOSITORY_ID: '3',
+    GITHUB_CONTENT_REPOSITORY_ID: '4',
+    GITHUB_APP_BRANCH: 'main',
+    GITHUB_CONTENT_BRANCH: 'main',
+    REQUEST_ID: id,
+    BASE_SHA: 'a'.repeat(40),
+    CANDIDATE_SHA: 'b'.repeat(40),
+    VERCEL_TOKEN: 'test-token',
+    VERCEL_ORG_ID: 'test-org',
+    VERCEL_PROJECT_ID: 'test-project',
+  };
+  for (const [alias, allowed] of [
+    ['', true],
+    ['subdev-blog-cms-gyungsublee.vercel.app', true],
+    ['subdev-blog.vercel.app', false],
+    ['subdev-blog-cms-example.com', false],
+  ]) {
+    const result = spawnSync('bash', ['-e', '-c', step.run], {
+      env: { ...env, CMS_PREVIEW_ALIAS: alias },
+      encoding: 'utf8',
+      timeout: 3000,
+    });
+    assert.equal(result.status === 0, allowed, `Unexpected preflight result for alias ${JSON.stringify(alias)}`);
+  }
+});
+
+test('preview alias moves only after all deployed bytes pass verification', { timeout: 15_000 }, async t => {
+  const source = await readFile(new URL('../.github/workflows/publish-content.yml', import.meta.url), 'utf8');
+  const step = YAML.parse(source).jobs.publish.steps.find(step => step.name === 'Deploy preview');
+  const root = await mkdtemp(path.join(os.tmpdir(), 'preview-alias-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const output = path.join(root, '.vercel', 'output', 'static');
+  await mkdir(path.join(output, 'content'), { recursive: true });
+  const info = { commit: 'a'.repeat(40), contentCommit: 'b'.repeat(40) };
+  await writeFile(path.join(output, 'build-info.json'), JSON.stringify(info));
+  await writeFile(path.join(output, 'content', 'index.json'), '[{"id":"test"}]');
+  await writeFile(path.join(output, 'content', 'asset.bin'), 'original bytes');
+  const bin = path.join(root, 'bin');
+  await mkdir(bin);
+  await writeFile(path.join(bin, 'npx'), `#!${process.execPath}
+const fs = require('node:fs');
+const args = process.argv.slice(2);
+fs.appendFileSync(process.env.CMS_TEST_COMMANDS, JSON.stringify(args) + '\\n');
+if (args.includes('deploy')) console.log('https://subdev-blog-cms-test-deployment.vercel.app');
+`);
+  await chmod(path.join(bin, 'npx'), 0o755);
+  const fetcher = path.join(root, 'fetch-preview.mjs');
+  await writeFile(fetcher, `import fs from 'node:fs';
+import path from 'node:path';
+globalThis.fetch = async address => {
+  const url = new URL(address);
+  if (process.env.CMS_TEST_BAD_CONTENT === '1' && url.pathname.endsWith('/asset.bin')) return new Response('wrong bytes');
+  return new Response(fs.readFileSync(path.join(process.cwd(), '.vercel/output/static', decodeURIComponent(url.pathname.slice(1)))));
+};
+`);
+  const commands = path.join(root, 'commands.jsonl');
+  const alias = 'subdev-blog-cms-gyungsublee.vercel.app';
+  for (const scenario of [
+    { alias, badContent: false, success: true, aliasCalls: 1 },
+    { alias, badContent: true, success: false, aliasCalls: 0 },
+    { alias: '', badContent: false, success: true, aliasCalls: 0 },
+  ]) {
+    await writeFile(commands, '');
+    const result = spawnSync('bash', ['-e', '-c', step.run], {
+      cwd: root,
+      env: {
+        ...process.env,
+        PATH: bin + path.delimiter + process.env.PATH,
+        NODE_OPTIONS: '--import=' + fetcher,
+        VERCEL_TOKEN: 'test-token',
+        APP_COMMIT: info.commit,
+        CANDIDATE_SHA: info.contentCommit,
+        PREVIEW_URL: '',
+        CMS_PREVIEW_ALIAS: scenario.alias,
+        CMS_TEST_BAD_CONTENT: scenario.badContent ? '1' : '',
+        CMS_TEST_COMMANDS: commands,
+        GITHUB_STEP_SUMMARY: path.join(root, 'summary.md'),
+      },
+      encoding: 'utf8',
+      timeout: 4000,
+    });
+    assert.equal(result.status === 0, scenario.success, 'Unexpected preview verification result');
+    const calls = (await readFile(commands, 'utf8')).trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
+    const aliases = calls.filter(args => args.includes('alias'));
+    assert.equal(aliases.length, scenario.aliasCalls, 'Alias must follow successful byte verification');
+    if (aliases.length) {
+      assert.deepEqual(aliases[0], [
+        '--yes', 'vercel@58.1.0', 'alias', 'set',
+        'https://subdev-blog-cms-test-deployment.vercel.app', alias, '--token=test-token',
+      ]);
+    }
+  }
 });

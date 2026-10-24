@@ -27,8 +27,8 @@ jobs:
       REQUEST_ID: ${{ inputs.request_id }}
       CANDIDATE_SHA: ${{ inputs.candidate_sha }}
       BASE_SHA: ${{ inputs.base_sha }}
-      GITHUB_APP_BRANCH: ${{ vars.GITHUB_APP_BRANCH }}
-      GITHUB_CONTENT_BRANCH: ${{ vars.GITHUB_CONTENT_BRANCH }}
+      GITHUB_APP_BRANCH: ${{ vars.CMS_APP_BRANCH }}
+      GITHUB_CONTENT_BRANCH: ${{ vars.CMS_CONTENT_BRANCH }}
       CONTENT_REPOSITORY_PATH: ${{ runner.temp }}/content-source
     steps:
       - name: Check out trusted application
@@ -44,11 +44,12 @@ jobs:
           cache: npm
       - name: Check inputs and secrets
         env:
-          GITHUB_APP_ID: ${{ secrets.GITHUB_APP_ID }}
-          GITHUB_INSTALLATION_ID: ${{ vars.GITHUB_INSTALLATION_ID }}
-          GITHUB_APP_REPOSITORY_ID: ${{ vars.GITHUB_APP_REPOSITORY_ID }}
-          GITHUB_CONTENT_REPOSITORY_ID: ${{ vars.GITHUB_CONTENT_REPOSITORY_ID }}
-          GITHUB_APP_PRIVATE_KEY: ${{ secrets.GITHUB_APP_PRIVATE_KEY }}
+          GITHUB_APP_ID: ${{ secrets.CMS_APP_ID }}
+          GITHUB_INSTALLATION_ID: ${{ vars.CMS_INSTALLATION_ID }}
+          GITHUB_APP_REPOSITORY_ID: ${{ vars.CMS_APP_REPOSITORY_ID }}
+          GITHUB_CONTENT_REPOSITORY_ID: ${{ vars.CMS_CONTENT_REPOSITORY_ID }}
+          GITHUB_APP_PRIVATE_KEY: ${{ secrets.CMS_APP_PRIVATE_KEY }}
+          CMS_PREVIEW_ALIAS: ${{ vars.CMS_PREVIEW_ALIAS }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -58,6 +59,7 @@ jobs:
           for (const name of ['GITHUB_APP_ID', 'GITHUB_INSTALLATION_ID', 'GITHUB_APP_REPOSITORY_ID', 'GITHUB_CONTENT_REPOSITORY_ID', 'GITHUB_APP_PRIVATE_KEY', 'GITHUB_APP_BRANCH', 'GITHUB_CONTENT_BRANCH', 'VERCEL_TOKEN', 'VERCEL_ORG_ID', 'VERCEL_PROJECT_ID']) assert(process.env[name], 'Missing required configuration: ' + name);
           assert(/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(process.env.REQUEST_ID), 'Invalid request UUID');
           for (const name of ['BASE_SHA', 'CANDIDATE_SHA']) assert(/^[a-f0-9]{40}$/.test(process.env[name]), 'Invalid SHA: ' + name);
+          if (process.env.CMS_PREVIEW_ALIAS) assert(/^subdev-blog-cms-[a-z0-9-]+\.vercel\.app$/.test(process.env.CMS_PREVIEW_ALIAS), 'Invalid CMS preview alias');
           NODE
           git check-ref-format "refs/heads/$GITHUB_APP_BRANCH"
           git check-ref-format "refs/heads/$GITHUB_CONTENT_BRANCH"
@@ -66,11 +68,11 @@ jobs:
       - name: Create scoped installation token
         id: token
         env:
-          GITHUB_APP_ID: ${{ secrets.GITHUB_APP_ID }}
-          GITHUB_INSTALLATION_ID: ${{ vars.GITHUB_INSTALLATION_ID }}
-          GITHUB_APP_REPOSITORY_ID: ${{ vars.GITHUB_APP_REPOSITORY_ID }}
-          GITHUB_CONTENT_REPOSITORY_ID: ${{ vars.GITHUB_CONTENT_REPOSITORY_ID }}
-          GITHUB_APP_PRIVATE_KEY: ${{ secrets.GITHUB_APP_PRIVATE_KEY }}
+          GITHUB_APP_ID: ${{ secrets.CMS_APP_ID }}
+          GITHUB_INSTALLATION_ID: ${{ vars.CMS_INSTALLATION_ID }}
+          GITHUB_APP_REPOSITORY_ID: ${{ vars.CMS_APP_REPOSITORY_ID }}
+          GITHUB_CONTENT_REPOSITORY_ID: ${{ vars.CMS_CONTENT_REPOSITORY_ID }}
+          GITHUB_APP_PRIVATE_KEY: ${{ secrets.CMS_APP_PRIVATE_KEY }}
         run: node scripts/publish-content.mjs token
       - name: Fetch content objects
         env:
@@ -113,6 +115,7 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           APP_COMMIT: ${{ steps.pin.outputs.commit }}
+          CMS_PREVIEW_ALIAS: ${{ vars.CMS_PREVIEW_ALIAS }}
         run: |
           npx --yes vercel@58.1.0 pull --yes --environment=preview --token="$VERCEL_TOKEN"
           GITHUB_SHA="$APP_COMMIT" npx --yes vercel@58.1.0 build --token="$VERCEL_TOKEN"
@@ -153,6 +156,10 @@ jobs:
           }
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `Preview: ${url}\n\nApp: ${info.commit}\n\nContent: ${info.contentCommit}\n`);
           NODE
+          if [ -n "$CMS_PREVIEW_ALIAS" ]; then
+            npx --yes vercel@58.1.0 alias set "$URL" "$CMS_PREVIEW_ALIAS" --token="$VERCEL_TOKEN"
+            printf 'CMS preview: https://%s\n' "$CMS_PREVIEW_ALIAS" >> "$GITHUB_STEP_SUMMARY"
+          fi
       - name: Write publication summary
         if: always()
         env:
