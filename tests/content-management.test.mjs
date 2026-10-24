@@ -132,6 +132,53 @@ test("logging out an expired session restores public controls and login", async 
   }
 });
 
+test("fresh publication responses clear stale alerts and retain current errors", { timeout: 5000 }, async (t) => {
+  const { default: PublishStatus } = await loadComponent("src/features/content-management/PublishStatus.tsx");
+  const previous = globalThis.fetch;
+  let polls = 0;
+  globalThis.fetch = async (_url, options = {}) => {
+    if (options.method === "POST") return reply({ state: "saved", runId: 2 });
+    polls++;
+    return reply(polls === 1
+      ? { state: "published" }
+      : { state: "pending", error: "Current workflow warning" });
+  };
+  const initial = {
+    requestId: "request", candidateCommit: "c".repeat(40), runId: 1,
+    state: "pending", error: "Publication did not complete; resume this request.",
+  };
+  function PublicationStatus({ initial }) {
+    const [publication, setPublication] = React.useState(initial);
+    return React.createElement(PublishStatus, { publication, csrfToken: "test-csrf", onChange: setPublication });
+  }
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  try {
+    await mounted(React.createElement(PublicationStatus, { initial }), async (root) => {
+      assert.equal(document.querySelector('[role="alert"]').textContent, initial.error);
+      await act(async () => document.querySelector(".publish-status button").click());
+      assert.equal(document.querySelector('[role="status"]').textContent, "원본 저장 완료");
+      assert.ok(document.querySelector('[role="alert"]') === null, "A successful retry must clear the previous error");
+      await act(async () => root.render(React.createElement(PublicationStatus, {
+        key: "poll", initial: { ...initial, state: "saved" },
+      })));
+      assert.equal(document.querySelector('[role="alert"]').textContent, initial.error);
+      await act(async () => t.mock.timers.tick(1500));
+      assert.equal(polls, 1);
+      assert.equal(document.querySelector('[role="status"]').textContent, "게시 완료");
+      assert.ok(document.querySelector('[role="alert"]') === null, "A successful poll must clear the previous error");
+      await act(async () => root.render(React.createElement(PublicationStatus, {
+        key: "new-error", initial: { ...initial, state: "saved" },
+      })));
+      await act(async () => t.mock.timers.tick(1500));
+      assert.equal(polls, 2);
+      assert.equal(document.querySelector('[role="alert"]').textContent, "Current workflow warning");
+    });
+  } finally {
+    t.mock.timers.reset();
+    globalThis.fetch = previous;
+  }
+});
+
 test("canonical title edits send untouched Markdown and CSRF to a candidate publication", async () => {
   const { default: Editor } = await loadComponent("src/features/content-management/ManagedPostEditor.tsx");
   const markdown = "\n# Keep H1\n\n<details>\n<summary>Keep HTML</summary>\nraw\n</details>\n";

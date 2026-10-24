@@ -35,7 +35,7 @@ export default function PublishStatus({
         const next = await requestApi<Partial<Publication>>("/api/publish?" + params);
         if (active) {
           setError("");
-          onChange({ ...publication, ...next });
+          onChange({ ...publication, error: undefined, ...next });
         }
       } catch (reason) {
         if (active) {
@@ -53,7 +53,7 @@ export default function PublishStatus({
     try {
       setError("");
       const next = await sendApi<Partial<Publication>>("/api/publish", { requestId, candidateCommit }, csrfToken);
-      onChange({ ...publication, ...next, state: next.state ?? "validating" });
+      onChange({ ...publication, error: undefined, ...next, state: next.state ?? "validating" });
     } catch (reason) {
       setNeedsLogin(reason instanceof Error && "status" in reason && reason.status === 401);
       setError(reason instanceof Error ? reason.message : "게시를 다시 시작하지 못했습니다.");
