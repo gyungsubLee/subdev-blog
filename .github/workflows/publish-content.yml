@@ -29,7 +29,6 @@ jobs:
       BASE_SHA: ${{ inputs.base_sha }}
       GITHUB_APP_BRANCH: ${{ vars.CMS_APP_BRANCH }}
       GITHUB_CONTENT_BRANCH: ${{ vars.CMS_CONTENT_BRANCH }}
-      CONTENT_REPOSITORY_PATH: ${{ runner.temp }}/content-source
     steps:
       - name: Check out trusted application
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -54,6 +53,7 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
+          printf 'CONTENT_REPOSITORY_PATH=%s/content-source\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
           node --input-type=module <<'NODE'
           import assert from 'node:assert/strict';
           for (const name of ['GITHUB_APP_ID', 'GITHUB_INSTALLATION_ID', 'GITHUB_APP_REPOSITORY_ID', 'GITHUB_CONTENT_REPOSITORY_ID', 'GITHUB_APP_PRIVATE_KEY', 'GITHUB_APP_BRANCH', 'GITHUB_CONTENT_BRANCH', 'VERCEL_TOKEN', 'VERCEL_ORG_ID', 'VERCEL_PROJECT_ID']) assert(process.env[name], 'Missing required configuration: ' + name);

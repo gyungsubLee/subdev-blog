@@ -333,6 +333,25 @@ test('workflow uses permitted stored configuration names and preserves CLI envir
   }
 });
 
+test('workflow initializes the runner content path at step runtime', { timeout: 5000 }, async t => {
+  const source = await readFile(new URL('../.github/workflows/publish-content.yml', import.meta.url), 'utf8');
+  const job = YAML.parse(source).jobs.publish;
+  assert.ok(!Object.values(job.env).some(value => /\$\{\{\s*runner\./.test(value)), 'Job environment cannot evaluate runner context');
+  const step = job.steps.find(step => step.name === 'Check inputs and secrets');
+  const initialization = step.run.split("node --input-type=module <<'NODE'")[0];
+  const root = await mkdtemp(path.join(os.tmpdir(), 'publish-env-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const runnerTemp = path.join(root, 'runner temp');
+  const environmentFile = path.join(root, 'github env');
+  const result = spawnSync('bash', ['-e', '-c', initialization], {
+    env: { ...process.env, RUNNER_TEMP: runnerTemp, GITHUB_ENV: environmentFile },
+    encoding: 'utf8',
+    timeout: 3000,
+  });
+  assert.equal(result.status, 0, 'Runtime environment initialization must succeed');
+  assert.equal(await readFile(environmentFile, 'utf8'), `CONTENT_REPOSITORY_PATH=${runnerTemp}/content-source\n`);
+});
+
 test('preview alias preflight accepts only the optional CMS preview namespace', { timeout: 10_000 }, async () => {
   const source = await readFile(new URL('../.github/workflows/publish-content.yml', import.meta.url), 'utf8');
   const step = YAML.parse(source).jobs.publish.steps.find(step => step.name === 'Check inputs and secrets');
@@ -345,6 +364,8 @@ test('preview alias preflight accepts only the optional CMS preview namespace', 
     GITHUB_CONTENT_REPOSITORY_ID: '4',
     GITHUB_APP_BRANCH: 'main',
     GITHUB_CONTENT_BRANCH: 'main',
+    RUNNER_TEMP: os.tmpdir(),
+    GITHUB_ENV: '/dev/null',
     REQUEST_ID: id,
     BASE_SHA: 'a'.repeat(40),
     CANDIDATE_SHA: 'b'.repeat(40),
