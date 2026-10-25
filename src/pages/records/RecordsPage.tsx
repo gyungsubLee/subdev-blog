@@ -1,5 +1,4 @@
 import { categoryMatches } from "../../features/post-category/hierarchy";
-import RecordViewIcon from "../../components/icons/RecordViewIcon";
 import { site } from "../../config/site";
 import type {
   CategoryCatalog,
@@ -112,15 +111,6 @@ export default function RecordsPage({
             기록 <span>{posts.length.toLocaleString()}</span>
           </h1>
           <p className="records-description">개발하며 배운 내용을 주제별로 모았습니다.</p>
-        </div>
-        <div className="records-view-control">
-          <div>
-            <span className="records-view-label">보기 방식</span>
-            <span className="records-view-option" role="img" aria-label="사이드바 보기">
-              <RecordViewIcon />
-            </span>
-          </div>
-          <p>사이드바 보기</p>
         </div>
       </header>
       <div className="records-toolbar">

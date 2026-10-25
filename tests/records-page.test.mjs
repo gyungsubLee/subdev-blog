@@ -84,7 +84,9 @@ test("sidebar browsing preserves category filters and visible count", { timeout:
   const root = createRoot(document.getElementById("root"));
   try {
     await act(async () => root.render(React.createElement(Harness)));
-    assert.ok(document.querySelector('[aria-label="사이드바 보기"]'));
+    assert.ok(document.querySelector(".records-view-control") === null, "view control is removed");
+    assert.ok(document.querySelector('[aria-label="사이드바 보기"]') === null, "sidebar view icon is removed");
+    assert.ok(!document.querySelector(".records-heading").textContent.includes("보기 방식"));
     assert.ok(!button("탭 보기"), "tab view is no longer offered");
     assert.ok(!button("섹션 보기"), "section view is no longer offered");
     assert.ok(document.querySelector('aside[aria-label="카테고리"]'));
