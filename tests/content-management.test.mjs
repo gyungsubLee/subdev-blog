@@ -3,11 +3,11 @@ import test, { after } from "node:test";
 import { JSDOM } from "jsdom";
 import { loadComponent } from "./support/load-component.mjs";
 
-const dom = new JSDOM('<!doctype html><div id="root"></div>', {
+const dom = new JSDOM('<!doctype html><meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content"><div id="root"></div>', {
   url: "https://blog.example/#/",
   pretendToBeVisual: true,
 });
-for (const name of ["window", "document", "navigator", "Node", "Element", "HTMLElement", "MutationObserver", "FileReader"]) {
+for (const name of ["window", "document", "navigator", "Node", "Element", "HTMLElement", "MutationObserver", "FileReader", "DOMParser", "DOMRect", "DocumentFragment", "Text", "NodeFilter", "HTMLDivElement", "HTMLParagraphElement", "HTMLInputElement", "Range", "KeyboardEvent", "MouseEvent", "Event"]) {
   Object.defineProperty(globalThis, name, {
     value: name === "window" ? dom.window : dom.window[name],
     configurable: true,
@@ -16,7 +16,17 @@ for (const name of ["window", "document", "navigator", "Node", "Element", "HTMLE
 globalThis.localStorage = dom.window.localStorage;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 dom.window.scrollTo = () => {};
-dom.window.matchMedia = () => ({ matches: false });
+dom.window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
+globalThis.requestAnimationFrame = dom.window.requestAnimationFrame.bind(dom.window);
+globalThis.cancelAnimationFrame = dom.window.cancelAnimationFrame.bind(dom.window);
+globalThis.ResizeObserver = dom.window.ResizeObserver = class { observe() {} unobserve() {} disconnect() {} };
+globalThis.IntersectionObserver = dom.window.IntersectionObserver = class { observe() {} unobserve() {} disconnect() {} };
+dom.window.HTMLElement.prototype.scrollIntoView = function () {};
+dom.window.Element.prototype.getBoundingClientRect = () => new dom.window.DOMRect(0, 0, 100, 30);
+dom.window.Range.prototype.getBoundingClientRect = () => new dom.window.DOMRect();
+dom.window.Range.prototype.getClientRects = () => [];
+dom.window.document.elementFromPoint = () => dom.window.document.body;
 dom.window.HTMLDialogElement.prototype.close = function () {};
 dom.window.HTMLDialogElement.prototype.showModal = function () {};
 const { default: React, act } = await import("react");
@@ -291,9 +301,22 @@ for (const existing of [false, true]) test(`${existing ? "existing" : "new"}-pos
   const props = { post: existing ? post : null, session: ready, onClose() {} };
   try {
     await mounted(React.createElement(Editor, { ...props, key: "first" }), async (root) => {
-      await act(async () => document.querySelector('button[type="submit"]').click());
+      async function saveAndWait(count) {
+        await act(async () => document.querySelector('button[type="submit"]').click());
+        const deadline = Date.now() + 3000;
+        while (saves.length < count) {
+          if (Date.now() > deadline) assert.fail("Retry save did not reach the API");
+          await act(async () => new Promise((resolve) => setTimeout(resolve, 10)));
+        }
+      }
+      await saveAndWait(1);
       await act(async () => root.render(React.createElement(Editor, { ...props, key: "second" })));
-      await act(async () => document.querySelector('button[type="submit"]').click());
+      const deadline = Date.now() + 3000;
+      while (!document.querySelector('button[type="submit"]')) {
+        if (Date.now() > deadline) assert.fail("Recovered editor did not mount");
+        await act(async () => new Promise((resolve) => setTimeout(resolve, 10)));
+      }
+      await saveAndWait(2);
       assert.equal(saves.length, 2);
       assert.equal(existing ? saves[0].operation.id : saves[0].operation.document.metadata.id, id);
       assert.deepEqual(saves[1], saves[0]);

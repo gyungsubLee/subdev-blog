@@ -151,11 +151,14 @@ export const codeBlockSpec = createBlockSpec<
     toExternalHTML(block) {
       const figure = document.createElement("div");
       const pre = document.createElement("pre");
+      pre.dataset.codeCaption = block.props.caption;
+      pre.dataset.codeWrap = String(block.props.wrap);
       const code = document.createElement("code");
       code.className = "language-" + block.props.language;
       code.dataset.language = block.props.language;
       pre.appendChild(code);
       figure.appendChild(pre);
+      // Native Markdown export needs a visible paragraph as its caption fallback.
       if (block.props.caption) {
         const caption = document.createElement("p");
         caption.textContent = block.props.caption;

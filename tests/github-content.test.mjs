@@ -34,6 +34,9 @@ function setup(options = {}) {
     for (const item of options.documents ?? []) {
         entries.push({path:`posts/${item.metadata.id}/${item.metadata.title}.md`,type:'blob',mode:'100644',sha:put(serializeMarkdownDocument(item))});
     }
+    if (options.editor) {
+        entries.push({path:`posts/${id}/editor.json`,type:'blob',mode:'100644',sha:put(JSON.stringify(options.editor, null, 2) + '\n')});
+    }
     const commits = new Map([[base, {
                 sha: base, tree: { sha: 'b'.repeat(40) }, parents: []
             }]]);
@@ -785,4 +788,163 @@ test('oversized pending Markdown and fresh category JSON fail before accepting a
     }});
     assert.equal(result.status, 413);
     assert.equal(g.calls.filter(call => call.method !== 'GET').length, 0);
+});
+
+const editorDocument = (markdown = document.markdown, blocks = [{type:'paragraph',content:[{type:'text',text:'Untouched',styles:{}}]}], documentId = id) => ({
+    schemaVersion:1,documentId,markdownHash:revision(markdown),blocks,
+});
+
+test('canonical source returns validated editor data and a separate exact-byte revision without exposing an attachment', async () => {
+    const editor = editorDocument();
+    const f = setup({editor});
+    const result = await f.call('content?kind=post&id=' + id);
+    assert.equal(result.status, 200);
+    assert.equal(result.editor?.documentId, id);
+    assert.equal(result.editorRevision, revision(JSON.stringify(editor, null, 2) + '\n'));
+    assert.equal(result.assets.some(asset => asset.name === 'editor.json'), false);
+    const blank = await setup().call('content?kind=new');
+    assert.equal(blank.editor, null);
+    assert.equal(blank.editorRevision, null);
+});
+
+test('saves reject invalid or externally desynchronized editor data', async () => {
+    for (const editor of [{...editorDocument(),schemaVersion:9},editorDocument('external body'),editorDocument(document.markdown, [{type:'not-installed'}])]) {
+        const f = setup({editor});
+        const result = await f.call('content', {requestId,baseCommit:f.base,operation:{
+            type:'post.update',id,baseRevision:revision(raw),baseEditorRevision:revision(JSON.stringify(editor,null,2) + '\n'),editor:editorDocument(),
+        }});
+        assert.equal(result.status, 422);
+        assert.equal(f.calls.filter(call => call.method !== 'GET').length, 0);
+    }
+});
+
+test('authenticated recovery returns exact Markdown and raw broken editor source without allowing overwrite', async () => {
+    for (const editorRaw of [
+        JSON.stringify({...editorDocument(),schemaVersion:9},null,2) + '\n',
+        JSON.stringify(editorDocument('external body')),
+        '{broken editor JSON\r\n',
+        ' '.repeat(2 * 1024 * 1024 + 1),
+    ]) {
+        const f = setup({editor:editorDocument()});
+        const entry = f.trees.get('b'.repeat(40)).find(entry => entry.path.endsWith('/editor.json'));
+        const bytes = Buffer.from(editorRaw);
+        entry.sha = sha(bytes);
+        f.blobs.set(entry.sha,bytes);
+        const source = await f.call('content?kind=post&id=' + id);
+        assert.equal(source.status, 200);
+        assert.equal(source.editor, null);
+        assert.equal(source.document.markdown, document.markdown);
+        assert.equal(source.revision, revision(raw));
+        assert.equal(source.editorRevision, revision(editorRaw));
+        assert.equal(typeof source.editorError, 'string');
+        assert.ok(source.editorError.length > 0);
+        assert.equal(source.editorRaw, bytes.length <= 2 * 1024 * 1024 ? editorRaw : undefined);
+        assert.equal(source.assets.some(asset => asset.name === 'editor.json'), false);
+        const overwritten = await f.call('content', {requestId,baseCommit:f.base,operation:{
+            type:'post.update',id,baseRevision:source.revision,baseEditorRevision:source.editorRevision,editor:editorDocument(),
+        }});
+        assert.equal(overwritten.status, bytes.length <= 2 * 1024 * 1024 ? 422 : 413);
+        assert.equal(f.calls.filter(call => call.method !== 'GET').length, 0);
+        assert.equal(f.refs.get('heads/main'), f.base);
+    }
+});
+
+test('a block post is created with Markdown and editor JSON in the same Git commit', async () => {
+    const f = setup();
+    const newDocument = otherDocument({}, '# Created');
+    const editor = editorDocument(newDocument.markdown, [{type:'heading',props:{level:1},content:[{type:'text',text:'Created',styles:{}}]}], otherId);
+    const saved = await f.call('content', {requestId,baseCommit:f.base,operation:{type:'post.create',document:newDocument,editor,baseEditorRevision:null}});
+    assert.equal(saved.state, 'published');
+    const entries = f.trees.get(f.commits.get(saved.contentCommit).tree.sha);
+    assert.equal(entries.some(entry => entry.path === `posts/${otherId}/Sibling.md`), true);
+    assert.equal(entries.some(entry => entry.path === `posts/${otherId}/editor.json`), true);
+    const restored = await f.call('content?kind=post&id=' + otherId);
+    assert.equal(restored.editor?.blocks[0].props.level, 1);
+    assert.equal(restored.document.markdown, '# Created');
+    assert.equal(f.calls.filter(call => call.path === '/git/commits' && call.method === 'POST').length, 1);
+});
+
+test('editor-only settings changes save repeatedly and identical paired files report unchanged', async () => {
+    const f = setup({editor:editorDocument()});
+    let current = await f.call('content?kind=post&id=' + id);
+    let previousCommit = f.base;
+    for (const wrap of [true,false]) {
+        const editor = editorDocument(document.markdown, [{type:'codeBlock',props:{language:'text',caption:'Caption',wrap},content:'example'}]);
+        const result = await f.call('content', {requestId:wrap ? requestId : 'abcdefab-1234-1234-1234-123456789abd',baseCommit:current.contentCommit,operation:{
+            type:'post.update',id,baseRevision:current.revision,baseEditorRevision:current.editorRevision,editor,
+        }});
+        assert.equal(result.state, 'published');
+        assert.notEqual(result.contentCommit, previousCommit);
+        previousCommit = result.contentCommit;
+        current = await f.call('content?kind=post&id=' + id);
+        assert.equal(current.editor?.blocks[0].props.wrap, wrap);
+    }
+    const same = await f.call('content', {requestId:'abcdefab-1234-1234-1234-123456789abe',baseCommit:current.contentCommit,operation:{
+        type:'post.update',id,baseRevision:current.revision,baseEditorRevision:current.editorRevision,editor:current.editor,
+    }});
+    assert.equal(same.state, 'unchanged');
+    assert.equal(f.calls.filter(call => call.path === '/git/commits' && call.method === 'POST').length, 2);
+});
+
+test('paired updates reject stale editor revisions and a body change without a new editor before writes', async () => {
+    for (const operation of [
+        {baseEditorRevision:'0'.repeat(64),editor:editorDocument()},
+        {editor:editorDocument()},
+        {baseEditorRevision:revision(JSON.stringify(editorDocument(),null,2) + '\n'),markdown:'# Replaced'},
+        {baseEditorRevision:revision(JSON.stringify(editorDocument(),null,2) + '\n'),markdown:'# Changed',editor:editorDocument()},
+    ]) {
+        const f = setup({editor:editorDocument()});
+        const result = await f.call('content', {requestId,baseCommit:f.base,operation:{type:'post.update',id,baseRevision:revision(raw),...operation}});
+        assert.ok(result.status === 409 || result.status === 422);
+        assert.equal(f.calls.filter(call => call.method !== 'GET').length, 0);
+        assert.equal(f.refs.get('heads/main'), f.base);
+    }
+});
+
+test('metadata-only edits can preserve existing editor bytes with a matching editor revision', async () => {
+    const f = setup({editor:editorDocument()});
+    const original = await f.call('content?kind=post&id=' + id);
+    const result = await f.call('content', {requestId,baseCommit:f.base,operation:{
+        type:'post.update',id,baseRevision:original.revision,baseEditorRevision:original.editorRevision,changes:{title:'Renamed'},
+    }});
+    assert.equal(result.state, 'published');
+    const restored = await f.call('content?kind=post&id=' + id);
+    assert.equal(restored.editorRevision, original.editorRevision);
+    assert.equal(restored.document.markdown, document.markdown);
+});
+
+test('reserved editor filenames cannot be uploaded as attachments through case or encoding changes', async () => {
+    for (const name of ['editor.json','EDITOR.JSON','%65ditor.json','%2565ditor.json']) {
+        const f = setup();
+        const asset = await f.call('assets', {content:Buffer.from('overwrite').toString('base64')});
+        const writesBefore = f.calls.filter(call => call.method !== 'GET').length;
+        const result = await f.call('content', {requestId,baseCommit:f.base,operation:{type:'post.update',id,baseRevision:revision(raw),assets:[{...asset,name}]}});
+        assert.equal(result.status, 400);
+        assert.equal(f.calls.filter(call => call.method !== 'GET').length, writesBefore);
+    }
+});
+
+test('source inventories reject editor filename aliases instead of exposing them as attachments', async () => {
+    for (const name of ['EDITOR.JSON','%65ditor.json','%2565ditor.json']) {
+        const f = setup({editor:editorDocument()});
+        const editorEntry = f.trees.get('b'.repeat(40)).find(entry => entry.path.endsWith('/editor.json'));
+        editorEntry.path = `posts/${id}/${name}`;
+        const result = await f.call('content?kind=post&id=' + id);
+        assert.equal(result.status, 409);
+    }
+});
+
+test('publish revalidates editor pairing and allows mutable editor settings on retained candidates', async () => {
+    for (const paired of [false,true]) {
+        const f = setup({editor:editorDocument()});
+        const editor = editorDocument(paired ? document.markdown : '# Stale', [{type:'codeBlock',props:{caption:'Changed',wrap:true},content:'code'}]);
+        const bytes = Buffer.from(JSON.stringify(editor,null,2) + '\n');
+        const blobSha = sha(bytes);
+        f.blobs.set(blobSha, bytes);
+        const entries = f.trees.get('b'.repeat(40)).map(entry => entry.path.endsWith('/editor.json') ? {...entry,sha:blobSha} : entry);
+        const candidateCommit = retainedCandidate(f,entries);
+        const result = await f.call('publish', {requestId,candidateCommit});
+        assert.equal(result.status, paired ? 200 : 422);
+        assert.equal(f.refs.get('heads/main'), paired ? candidateCommit : f.base);
+    }
 });

@@ -6,7 +6,11 @@ import {
   type ReactNode,
 } from "react";
 
-export default function MarkdownCodeBlock({ children }: { children?: ReactNode }) {
+export default function MarkdownCodeBlock({ children, caption, wrap = false }: {
+  children?: ReactNode;
+  caption?: string;
+  wrap?: boolean;
+}) {
   const pre = useRef<HTMLPreElement>(null);
   const [message, setMessage] = useState("복사");
   const code = Children.toArray(children).find((child) =>
@@ -25,9 +29,9 @@ export default function MarkdownCodeBlock({ children }: { children?: ReactNode }
     window.setTimeout(() => setMessage("복사"), 2000);
   }
   return (
-    <figure className="article-code">
+    <figure className="article-code" data-wrap={String(wrap)}>
       <figcaption>
-        <span>{language}</span>
+        <span>{language}{caption ? " · " + caption : ""}</span>
         <button type="button" onClick={copy} aria-live="polite">
           {message}
         </button>

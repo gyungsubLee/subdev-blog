@@ -4,13 +4,15 @@ import test, { after } from "node:test";
 import { JSDOM } from "jsdom";
 import { loadComponent } from "./support/load-component.mjs";
 
-const dom = new JSDOM('<!doctype html><div id="root"></div>', {
+const dom = new JSDOM('<!doctype html><meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content"><div id="root"></div>', {
   url: "https://blog.example/#/",
   pretendToBeVisual: true,
 });
 for (const name of [
   "window", "document", "navigator", "Node", "Element", "HTMLElement",
   "MutationObserver", "DOMParser", "DocumentFragment", "Text", "NodeFilter",
+  "HTMLDivElement", "HTMLParagraphElement", "HTMLInputElement", "HTMLAnchorElement",
+  "DOMRect", "Range", "KeyboardEvent", "InputEvent", "MouseEvent", "Event",
 ]) {
   Object.defineProperty(globalThis, name, {
     value: name === "window" ? dom.window : dom.window[name],
@@ -22,7 +24,26 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 globalThis.requestAnimationFrame = dom.window.requestAnimationFrame.bind(dom.window);
 globalThis.cancelAnimationFrame = dom.window.cancelAnimationFrame.bind(dom.window);
 dom.window.scrollTo = () => {};
-dom.window.matchMedia = () => ({ matches: false });
+dom.window.matchMedia = () => ({
+  matches: false,
+  addEventListener() {},
+  removeEventListener() {},
+});
+globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
+globalThis.ResizeObserver = dom.window.ResizeObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+globalThis.IntersectionObserver = dom.window.IntersectionObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+dom.window.Element.prototype.getBoundingClientRect = () => new dom.window.DOMRect(0, 0, 100, 30);
+dom.window.Range.prototype.getBoundingClientRect = () => new dom.window.DOMRect();
+dom.window.Range.prototype.getClientRects = () => [];
+dom.window.document.elementFromPoint = () => dom.window.document.body;
 dom.window.HTMLElement.prototype.scrollIntoView = function () {};
 dom.window.HTMLDialogElement.prototype.close = function () {};
 dom.window.HTMLDialogElement.prototype.showModal = function () {};
@@ -158,6 +179,14 @@ const canonicalCategories = [{ id: "notes", name: "기록", parent_id: null, ord
 const readySession = { state: "ready", user: { id: 12, login: "owner" }, csrfToken: "csrf" };
 const reply = (data) => ({ ok: true, json: async () => data });
 
+async function waitFor(predicate, message) {
+  const deadline = Date.now() + 3000;
+  while (!predicate()) {
+    if (Date.now() > deadline) assert.fail(message);
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 10)));
+  }
+}
+
 for (const operation of ["update", "create", "delete"]) {
   test(`App refreshes the public index after post ${operation} and reads the saved body after closing`, { timeout: 5000 }, async () => {
     const previous = globalThis.fetch;
@@ -196,7 +225,8 @@ for (const operation of ["update", "create", "delete"]) {
         : [...document.querySelectorAll(".article-actions button")].find((button) => button.textContent.includes("편집하기"));
       assert.ok(edit !== null && edit !== undefined, "An authenticated reader can open the editor");
       await act(async () => edit.click());
-      assert.ok(document.querySelector(".managed-editor") !== null);
+      const editorSelector = operation === "create" ? ".editor-page.notebook-writing" : ".managed-editor";
+      await waitFor(() => document.querySelector(editorSelector) !== null, "The authenticated writing editor must open");
       if (operation === "delete") {
         const remove = [...document.querySelectorAll("button")].find((button) => button.textContent === "글 삭제");
         await act(async () => remove.click());
@@ -204,10 +234,14 @@ for (const operation of ["update", "create", "delete"]) {
       } else {
         await act(async () => document.querySelector('button[type="submit"]').click());
       }
-      assert.equal(document.querySelector('.publish-status [role="status"]').textContent, "게시 완료");
+      await waitFor(
+        () => document.querySelector('.publish-status [role="status"]')?.textContent === "게시 완료",
+        "The saved post must reach published status",
+      );
       assert.ok(requests.includes("/api/public?kind=index&after=" + savedCommit), "The refresh must bypass an older cached index");
-      await act(async () => document.querySelector(".management-toolbar button").click());
-      assert.ok(document.querySelector(".managed-editor") === null);
+      const closeSelector = operation === "create" ? ".editor-back" : ".management-toolbar button";
+      await act(async () => document.querySelector(closeSelector).click());
+      assert.ok(document.querySelector(editorSelector) === null, "Closing returns to the public view");
       if (operation === "create") {
         assert.match(document.querySelector("main").textContent, /저장한 글/);
         await act(async () => {

@@ -40,6 +40,55 @@ async function fixture(t, docs = [document(parentId, { category_id: "source:리�
 }
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
+function editorSource(markdown) {
+  return {
+    schemaVersion: 1,
+    documentId: parentId,
+    markdownHash: digest(markdown),
+    blocks: [{ id: "code", type: "codeBlock", props: { language: "js", wrap: true, caption: "예제" }, content: [{ type: "text", text: "const value = 1;", styles: {} }], children: [] }],
+  };
+}
+
+test("editor source is validated separately from attachments", async (t) => {
+  const doc = document();
+  const root = await fixture(t, [doc]);
+  const editorPath = path.join(root, "posts", parentId, "editor.json");
+  const bytes = JSON.stringify(editorSource(doc.markdown));
+  await writeFile(editorPath, bytes);
+  const entry = (await readContent(root)).documents.get(parentId);
+  assert.equal(entry.editor?.blocks[0].props.wrap, true);
+  assert.equal(entry.editorRevision, digest(bytes));
+  assert.equal(entry.allAssets.length, 0);
+  assert.equal(entry.assets.length, 0);
+  await writeFile(editorPath, JSON.stringify(editorSource("different body")));
+  await assert.rejects(readContent(root), /Markdown|markdown|본문|hash/i);
+});
+
+test("local metadata edits preserve paired source and reject stale body projections", async (t) => {
+  const doc = document();
+  const root = await fixture(t, [doc]);
+  const editorPath = path.join(root, "posts", parentId, "editor.json");
+  const bytes = JSON.stringify(editorSource(doc.markdown));
+  await writeFile(editorPath, bytes);
+  let entry = (await readContent(root)).documents.get(parentId);
+  await writeContentDocument(root, { metadata: { ...entry.metadata, title: "Renamed" }, markdown: entry.markdown }, [], { expectedRevision: entry.revision });
+  assert.equal(await readFile(editorPath, "utf8"), bytes);
+  entry = (await readContent(root)).documents.get(parentId);
+  await assert.rejects(writeContentDocument(root, { metadata: entry.metadata, markdown: "changed" }, [], { expectedRevision: entry.revision }), /Markdown|markdown|본문|hash/i);
+  assert.equal((await readContent(root)).documents.get(parentId).markdown, doc.markdown);
+});
+
+test("editor source cannot be uploaded or linked as an ordinary attachment", async (t) => {
+  const root = await fixture(t, [document()]);
+  const entry = (await readContent(root)).documents.get(parentId);
+  for (const name of ["editor.json", "EDITOR.JSON", "%65ditor.json"]) {
+    await assert.rejects(writeContentDocument(root, entry, [{ name, bytes: Buffer.from("{}") }], { expectedRevision: entry.revision }), /reserved|editor|attachment/i);
+  }
+  entry.markdown = "[source](./editor.json)";
+  entry.allAssets = [{ name: "editor.json", absolutePath: "/unused/editor.json" }];
+  assert.throws(() => validateContent({ categories, documents: new Map([[parentId, entry]]), allowUnresolvedLinks: true }), /reserved|editor|attachment/i);
+});
+
 test("explicit child categories override inherited categories", async (t) => {
   const root = await fixture(t);
   const snapshot = await readContent(root);

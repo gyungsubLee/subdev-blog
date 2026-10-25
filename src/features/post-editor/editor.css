@@ -358,3 +358,36 @@
     top: 155px;
   }
 }
+
+.editor-fields {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.editor-category select {
+  max-width: 240px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 3px;
+  background: #efede5;
+  font: inherit;
+  color: #5a584e;
+}
+
+.editor-page .publish-status {
+  font-size: 13px;
+}
+
+.editor-page button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.editor-attachment {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}

@@ -1,3 +1,4 @@
+import { COLORS_DEFAULT } from "@blocknote/core";
 import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -15,8 +16,15 @@ const markdownSchema = {
   tagNames: [...(defaultSchema.tagNames || []), "u", "section"],
   attributes: {
     ...defaultSchema.attributes,
+    "*": [
+      ...(defaultSchema.attributes?.["*"] ?? []),
+      ["dataTextColor", ...Object.keys(COLORS_DEFAULT)],
+      ["dataBackgroundColor", ...Object.keys(COLORS_DEFAULT)],
+      ["dataTextAlignment", "left", "center", "right", "justify"],
+    ],
     code: [["className", /^language-./, "math-inline", "math-display"]],
     section: [["dataIvoryNotebook", "true"]],
+    pre: [["dataCodeCaption"], ["dataCodeWrap", "true", "false"]],
   },
   protocols: { ...defaultSchema.protocols, src: ["http", "https", "data"] },
 };
@@ -113,22 +121,29 @@ export default function MarkdownContent({
             </blockquote>
           );
         },
-        h1: ({ node, children }) => (
-          <h1 id={"heading-" + node?.position?.start.line}>
+        h1: ({ node, children, ...props }) => (
+          <h1 {...props} id={"heading-" + node?.position?.start.line}>
             {children}
           </h1>
         ),
-        h2: ({ node, children }) => (
-          <h2 id={"heading-" + node?.position?.start.line}>
+        h2: ({ node, children, ...props }) => (
+          <h2 {...props} id={"heading-" + node?.position?.start.line}>
             {children}
           </h2>
         ),
-        h3: ({ node, children }) => (
-          <h3 id={"heading-" + node?.position?.start.line}>
+        h3: ({ node, children, ...props }) => (
+          <h3 {...props} id={"heading-" + node?.position?.start.line}>
             {children}
           </h3>
         ),
-        pre: ({ children }) => <MarkdownCodeBlock>{children}</MarkdownCodeBlock>,
+        pre: ({ node, children }) => (
+          <MarkdownCodeBlock
+            caption={typeof node?.properties.dataCodeCaption === "string" ? node.properties.dataCodeCaption : undefined}
+            wrap={node?.properties.dataCodeWrap === "true"}
+          >
+            {children}
+          </MarkdownCodeBlock>
+        ),
         a: ({ href, id, children }) => {
           if (!href) return <a id={id}>{children}</a>;
           const url = pageLink(href || "", post, posts);

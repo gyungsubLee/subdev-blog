@@ -82,6 +82,30 @@ test('public index reads canonical GitHub content without login or a token', asy
   assert.ok(f.calls.every(call => !call.path.includes('/git/blobs/')));
 });
 
+test('public reads exclude editor source without fetching its private editing payload', async () => {
+  const f = fixture({ files: { [`posts/${ID}/editor.json`]: '{"blocks":[]}' } });
+  const result = await f.call();
+  assert.equal(result.status, 200);
+  assert.equal(Object.hasOwn(result.body.posts[0], 'editor'), false);
+  assert.ok(f.calls.every(call => !call.path.endsWith('/editor.json')));
+});
+
+test('public Markdown cannot publish editor source as an attachment', async () => {
+  for (const name of ['editor.json', 'EDITOR.JSON', '%65ditor.json']) {
+    const f = fixture({ files: {
+      [`posts/${ID}/Title.md`]: document(`[source](./${name})`),
+      [`posts/${ID}/${name}`]: '{"blocks":[]}',
+    } });
+    const result = await f.call();
+    assert.equal(result.status, 502, 'reserved editor source must not become a public attachment');
+  }
+});
+
+test('encoded aliases of the reserved editor filename fail public tree validation', async () => {
+  const f = fixture({ files: { [`posts/${ID}/%2565ditor.json`]: '{"blocks":[]}' } });
+  assert.equal((await f.call()).status, 502);
+});
+
 test('body, cover, icon and attachments remain pinned to the list commit after head advances', async () => {
   const files = {
     [`posts/${ID}/Title.md`]: document('![cover](./a&b.png#image)', { cover: './a&b.png', icon: './a&b.png' }),

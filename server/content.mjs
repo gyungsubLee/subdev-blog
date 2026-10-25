@@ -4,6 +4,7 @@ import { posix } from 'node:path';
 import { createGitHubClient, httpError } from './github.mjs';
 import { parseMarkdownDocument, serializeMarkdownDocument, mergeDocumentPatch, canonicalFilename } from '../src/shared/document.mjs';
 import { rewriteContentLinks } from '../src/shared/content-links.mjs';
+import { EDITOR_FILENAME, isEditorFilename, validateEditorDocument } from '../src/shared/editor-document.mjs';
 import { validateContent, toPublicPosts, toPublicPost } from '../scripts/content.mjs';
 const UUID = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 const SHA = /^[a-f0-9]{40}$/;
@@ -89,7 +90,7 @@ function flatName(name) {
     requireValue(!/[\\/<>:"|?*\u0000-\u001f\u007f]/.test(decoded), 'Asset name must be flat');
     requireValue(decoded !== '.' && decoded !== '..' && !/[. ]$/.test(decoded), 'Invalid asset name');
     const reservedName = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(decoded);
-    requireValue(!reservedName && !/\.md$/i.test(decoded), 'Reserved asset name');
+    requireValue(!reservedName && !/\.md$/i.test(decoded) && !isEditorFilename(decoded), 'Reserved asset name');
     return name;
 }
 
@@ -118,22 +119,44 @@ export async function handleContentRequest(request, { token, config, fetcher, co
         requireValue(bytes.length <= MAX_DOCUMENT, 'Category document exceeds 2 MiB', 413);
         return { categories: JSON.parse(bytes.toString('utf8')), revision: digest(bytes) };
     };
-    const readPost = async (tree, id) => {
+    const readPost = async (tree, id, {recoverEditor = false} = {}) => {
         uuid(id);
         const prefix = `posts/${id}/`;
         const files = tree.entries.filter(entry => entry.path.startsWith(prefix));
         requireValue(files.every(entry => entry.type === 'blob' && entry.mode === '100644' && !entry.path.slice(prefix.length).includes('/')), 'Unsafe canonical post tree', 409);
+        const editorFiles = files.filter(entry => isEditorFilename(entry.path.slice(prefix.length)));
+        requireValue(editorFiles.length <= 1 && editorFiles.every(entry => entry.path === prefix + EDITOR_FILENAME), 'Reserved editor filename', 409);
         const documents = files.filter(entry => entry.path.endsWith('.md'));
         requireValue(documents.length === 1, 'Canonical document missing or ambiguous', 404);
         const bytes = await blob(documents[0].sha);
         requireValue(bytes.length <= MAX_DOCUMENT, 'Markdown document exceeds 2 MiB', 413);
         const parsed = validateDocument(() => parseMarkdownDocument(bytes.toString('utf8')));
         requireValue(parsed.documentMode === 'full' && parsed.metadata.id === id, 'Canonical document ID mismatch', 409);
+        const editorFile = files.find(entry => entry.path === prefix + EDITOR_FILENAME);
+        let editor = null;
+        let editorRevision = null;
+        let editorError;
+        let editorRaw;
+        if (editorFile) {
+            const editorBytes = await blob(editorFile.sha);
+            editorRevision = digest(editorBytes);
+            try {
+                requireValue(editorBytes.length <= MAX_DOCUMENT, 'Editor document exceeds 2 MiB', 413);
+                editor = validateDocument(() => validateEditorDocument(JSON.parse(editorBytes.toString('utf8')), {
+                    documentId: id, markdownHash: digest(parsed.markdown),
+                }));
+            } catch (error) {
+                if (!recoverEditor) throw error;
+                editorError = error.message;
+                if (editorBytes.length <= MAX_DOCUMENT) editorRaw = editorBytes.toString('utf8');
+            }
+        }
         return {
             document: { metadata: parsed.metadata, markdown: parsed.markdown },
+            editor, editorRevision, editorError, editorRaw,
             filename: documents[0].path.slice(prefix.length), path: documents[0].path,
             revision: digest(bytes),
-            assets: files.filter(entry => !entry.path.endsWith('.md')).map(entry => ({
+            assets: files.filter(entry => !entry.path.endsWith('.md') && entry.path !== prefix + EDITOR_FILENAME).map(entry => ({
                 name: entry.path.slice(prefix.length), sha: entry.sha, size: entry.size
             })),
         };
@@ -223,7 +246,8 @@ export async function handleContentRequest(request, { token, config, fetcher, co
                 requireValue(markdownFiles.length === 1, 'Canonical document missing or ambiguous', 404);
                 const file = markdownFiles[0];
                 const cached = baseline.get(file.path);
-                const matching = cached?.blobSha === file.sha;
+                const hasEditor = files.some(entry => entry.path === `posts/${id}/${EDITOR_FILENAME}`);
+                const matching = cached?.blobSha === file.sha && !hasEditor;
                 const hasReferences = Array.isArray(cached?.references);
                 if (matching && requireReferences && !hasReferences) {
                     requireValue(ids.length <= 64, 'Structural catalog references are missing', 502);
@@ -243,6 +267,7 @@ export async function handleContentRequest(request, { token, config, fetcher, co
                 const post = loaded.get(id) ?? await readPost(tree, id);
                 documents.set(id, {
                     ...post.document, filename: post.path, revision: post.revision,
+                    editor: post.editor, editorRevision: post.editorRevision,
                     assets: post.assets, allAssets: post.assets,
                 });
             }
@@ -369,6 +394,7 @@ export async function handleContentRequest(request, { token, config, fetcher, co
             return;
         }
         const post = await readPost(after, id);
+        requireValue(!original?.editor || post.editor, 'Candidate removes editor document', 409);
         requireValue(post.filename === canonicalFilename(post.document.metadata.title), 'Candidate filename differs from title', 409);
         requireValue(!original || post.document.metadata.parent_id === original.document.metadata.parent_id, 'Candidate changes immutable document parent', 409);
         validatePostReferences(after, post.document, categories.categories, !original);
@@ -430,11 +456,11 @@ export async function handleContentRequest(request, { token, config, fetcher, co
                         schema_version: 1, id: randomUUID(), title: '', parent_id: null, created: date, updated: date
                     }, markdown: '' };
                 return json({
-                    document, revision: null, contentCommit, categories: categories.categories, assets: []
+                    document, editor: null, editorRevision: null, revision: null, contentCommit, categories: categories.categories, assets: []
                 });
             }
             requireValue(kind === 'post', 'Invalid content kind');
-            const post = await readPost(tree, url.searchParams.get('id'));
+            const post = await readPost(tree, url.searchParams.get('id'), {recoverEditor:true});
             const { path, ...result } = post;
             return json({
                 ...result, contentCommit, categories: categories.categories
@@ -510,6 +536,9 @@ export async function handleContentRequest(request, { token, config, fetcher, co
                             id, baseRevision: operation.baseRevision, changes: operation.changes ?? {}, markdown: operation.markdown ?? original.document.markdown
                         }, original.revision));
                 }
+                if (original?.editor || operation.editor !== undefined || operation.baseEditorRevision !== undefined) {
+                    requireValue((operation.baseEditorRevision ?? null) === (original?.editorRevision ?? null), 'Editor revision changed', 409);
+                }
                 if (operation.type === 'post.delete') {
                     await validatePostDeletion(tree, id, original);
                     for (const entry of tree.entries.filter(entry => entry.path.startsWith(`posts/${id}/`)))
@@ -518,6 +547,16 @@ export async function handleContentRequest(request, { token, config, fetcher, co
                         });
                 }
                 else {
+                    let editor = original?.editor ?? null;
+                    if (operation.editor !== undefined) {
+                        editor = validateDocument(() => validateEditorDocument(operation.editor, {
+                            documentId: id, markdownHash: digest(document.markdown),
+                        }));
+                    } else if (editor) {
+                        requireValue(document.markdown === original.document.markdown, 'Body edits require an updated editor document', 422);
+                    }
+                    const editorBytes = editor ? Buffer.from(JSON.stringify(editor, null, 2) + '\n') : null;
+                    requireValue(!editorBytes || editorBytes.length <= MAX_DOCUMENT, 'Editor document exceeds 2 MiB', 413);
                     requireValue(operation.assets === undefined || Array.isArray(operation.assets), 'Invalid assets');
                     const assets = operation.assets ?? [];
                     for (const asset of assets) {
@@ -530,7 +569,8 @@ export async function handleContentRequest(request, { token, config, fetcher, co
                             return current.name === asset.name && current.sha === asset.sha && current.size === asset.size;
                         });
                     });
-                    unchanged = documentUnchanged && assetsUnchanged;
+                    const editorUnchanged = JSON.stringify(original?.editor ?? null) === JSON.stringify(editor);
+                    unchanged = documentUnchanged && assetsUnchanged && editorUnchanged;
                     const text = validateDocument(() => serializeMarkdownDocument(document));
                     requireValue(Buffer.byteLength(text) <= MAX_DOCUMENT, 'Markdown document exceeds 2 MiB', 413);
                     const categories = await readCategories(tree);
@@ -558,6 +598,11 @@ export async function handleContentRequest(request, { token, config, fetcher, co
                     changes.push({
                         path, mode: '100644', type: 'blob', sha: await writeBlob(Buffer.from(text))
                     });
+                    if (editorBytes && !editorUnchanged) {
+                        changes.push({
+                            path: `posts/${id}/${EDITOR_FILENAME}`, mode: '100644', type: 'blob', sha: await writeBlob(editorBytes)
+                        });
+                    }
                 }
             }
             if (unchanged)

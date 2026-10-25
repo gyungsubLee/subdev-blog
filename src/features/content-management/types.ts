@@ -1,4 +1,4 @@
-import type { ContentDocument, JsonValue } from "../../shared/post";
+import type { ContentDocument, EditorDocument, JsonValue } from "../../shared/post";
 
 export type ManagementSession = {
   state: "signed_out" | "checking" | "ready" | "blocked";
@@ -25,6 +25,10 @@ export type CanonicalCategory = {
 
 export type SourceDocument = {
   document: ContentDocument;
+  editor?: EditorDocument | null;
+  editorRevision?: string | null;
+  editorError?: string;
+  editorRaw?: string;
   filename?: string;
   revision: string | null;
   contentCommit: string;

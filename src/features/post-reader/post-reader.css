@@ -247,6 +247,11 @@
   tab-size: 2;
 }
 
+.article-code[data-wrap="true"] pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .article-code code {
   font-family: inherit;
 }
@@ -323,4 +328,94 @@
     margin-top: 18px;
     padding-top: 13px;
   }
+}
+
+/* Match the installed BlockNote light palette without accepting authored CSS. */
+
+.article-prose [data-text-color="gray"] {
+  color: #9b9a97;
+}
+
+.article-prose [data-background-color="gray"] {
+  background-color: #ebeced;
+}
+
+.article-prose [data-text-color="brown"] {
+  color: #64473a;
+}
+
+.article-prose [data-background-color="brown"] {
+  background-color: #e9e5e3;
+}
+
+.article-prose [data-text-color="red"] {
+  color: #e03e3e;
+}
+
+.article-prose [data-background-color="red"] {
+  background-color: #fbe4e4;
+}
+
+.article-prose [data-text-color="orange"] {
+  color: #d9730d;
+}
+
+.article-prose [data-background-color="orange"] {
+  background-color: #f6e9d9;
+}
+
+.article-prose [data-text-color="yellow"] {
+  color: #dfab01;
+}
+
+.article-prose [data-background-color="yellow"] {
+  background-color: #fbf3db;
+}
+
+.article-prose [data-text-color="green"] {
+  color: #4d6461;
+}
+
+.article-prose [data-background-color="green"] {
+  background-color: #ddedea;
+}
+
+.article-prose [data-text-color="blue"] {
+  color: #0b6e99;
+}
+
+.article-prose [data-background-color="blue"] {
+  background-color: #ddebf1;
+}
+
+.article-prose [data-text-color="purple"] {
+  color: #6940a5;
+}
+
+.article-prose [data-background-color="purple"] {
+  background-color: #eae4f2;
+}
+
+.article-prose [data-text-color="pink"] {
+  color: #ad1a72;
+}
+
+.article-prose [data-background-color="pink"] {
+  background-color: #f4dfeb;
+}
+
+.article-prose [data-text-alignment="left"] {
+  text-align: left;
+}
+
+.article-prose [data-text-alignment="center"] {
+  text-align: center;
+}
+
+.article-prose [data-text-alignment="right"] {
+  text-align: right;
+}
+
+.article-prose [data-text-alignment="justify"] {
+  text-align: justify;
 }

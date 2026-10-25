@@ -102,3 +102,25 @@ test("math rendering does not trust URL or HTML macros", () => {
   assert.equal(document.querySelector("a, .enclosing"), null);
   assert.equal(document.querySelectorAll(".katex").length, 2);
 });
+
+
+test("published code captions and wrapping use only explicitly allowed attributes", () => {
+  const document = render('<pre data-code-caption="Caption &lt;script&gt;" data-code-wrap="true" style="position:fixed" onclick="alert(1)"><code class="language-js">const n = 1;</code></pre>');
+  const figure = document.querySelector('.article-code');
+  assert.ok(figure !== null);
+  assert.equal(figure.dataset.wrap, "true");
+  assert.equal(figure.querySelector('figcaption span')?.textContent, "js · Caption <script>");
+  assert.ok(document.querySelector('script, [style], [onclick]') === null, "Code settings must not allow authored scripts or styles");
+});
+
+test("reader color attributes admit only the installed palette and supported alignment", () => {
+  const document = render('<p data-text-color="red" data-background-color="yellow" data-text-alignment="center" style="position:fixed">Safe palette</p><p data-text-color="url(javascript:alert(1))" data-background-color="#f00" data-text-alignment="fixed">Rejected values</p>');
+  const paragraphs = [...document.querySelectorAll("p")];
+  assert.equal(paragraphs[0].getAttribute("data-text-color"), "red");
+  assert.equal(paragraphs[0].getAttribute("data-background-color"), "yellow");
+  assert.equal(paragraphs[0].getAttribute("data-text-alignment"), "center");
+  assert.equal(paragraphs[1].hasAttribute("data-text-color"), false);
+  assert.equal(paragraphs[1].hasAttribute("data-background-color"), false);
+  assert.equal(paragraphs[1].hasAttribute("data-text-alignment"), false);
+  assert.ok(document.querySelector("[style]") === null);
+});

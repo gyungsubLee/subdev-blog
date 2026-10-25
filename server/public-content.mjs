@@ -3,6 +3,7 @@ import { gzipSync } from 'node:zlib';
 import { readFile as readLocalFile } from 'node:fs/promises';
 import { createGitHubClient, httpError } from './github.mjs';
 import { canonicalFilename, parseMarkdownDocument } from '../src/shared/document.mjs';
+import { EDITOR_FILENAME, isEditorFilename } from '../src/shared/editor-document.mjs';
 import { validateContent, toPublicPosts, toPublicPost, toPublicCategories } from '../scripts/content.mjs';
 
 const REPOSITORY = 'gyungsubLee/subdev-blog-content';
@@ -186,6 +187,11 @@ async function readSnapshot(commit, cache, github, fetcher, catalog) {
       const name = parts[2];
       requireValue(parts.length === 3 && name && name !== '.' && name !== '..' && !/[\\/\u0000-\u001f\u007f]/.test(name), 'Unsafe public post path');
       requireValue(entry.type === 'blob' && entry.mode === '100644' && SHA.test(entry.sha), 'Unsafe public post tree');
+      // Editor source belongs to authenticated editing, never the attachment inventory.
+      if (isEditorFilename(name)) {
+        requireValue(name === EDITOR_FILENAME, 'Reserved editor filename');
+        continue;
+      }
       if (!documents.has(parts[1])) documents.set(parts[1], { files: [], assets: [] });
       const document = documents.get(parts[1]);
       if (/\.md$/i.test(name)) document.files.push(entry);

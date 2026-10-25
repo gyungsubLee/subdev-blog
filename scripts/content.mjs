@@ -9,6 +9,7 @@ import {
   canonicalFilename, parseMarkdownDocument, serializeMarkdownDocument,
 } from "../src/shared/document.mjs";
 import { rewriteContentLinks } from "../src/shared/content-links.mjs";
+import { EDITOR_FILENAME, isEditorFilename, validateEditorDocument } from "../src/shared/editor-document.mjs";
 
 const uuidPattern = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i;
 const fallbackCategory = "group:unclassified";
@@ -38,7 +39,8 @@ function assetName(value) {
     /[\\/<>:"|?*\u0000-\u001f\u007f]/.test(decoded) ||
     decoded === "." || decoded === ".." || /[. ]$/.test(decoded) ||
     /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(decoded) ||
-    /\.md$/i.test(decoded) || Buffer.byteLength(decoded) > 255
+    /\.md$/i.test(decoded) || isEditorFilename(decoded) ||
+    Buffer.byteLength(decoded) > 255
   ) {
     throw new Error("Attachments need safe flat filenames: " + value);
   }
@@ -151,9 +153,23 @@ export async function readContent(root) {
       throw new Error("Folder ID differs from document ID: " + filename);
     if (markdownNames[0] !== canonicalFilename(parsed.metadata.title))
       throw new Error("Document filename differs from title: " + filename);
+    let editor;
+    let editorRevision = null;
+    if (names.includes(EDITOR_FILENAME)) {
+      const editorPath = path.join(folder, EDITOR_FILENAME);
+      await regularPath(editorPath);
+      if ((await lstat(editorPath)).size > 2 * 1024 * 1024)
+        throw new Error("Editor document is too large: " + id);
+      const editorBytes = await readFile(editorPath);
+      editor = validateEditorDocument(JSON.parse(editorBytes.toString("utf8")), {
+        documentId: id,
+        markdownHash: hash(parsed.markdown),
+      });
+      editorRevision = hash(editorBytes);
+    }
     const allAssets = [];
     const portableNames = new Set([markdownNames[0].normalize("NFC").toLowerCase()]);
-    for (const name of names.filter((name) => !markdownNames.includes(name))) {
+    for (const name of names.filter((name) => !markdownNames.includes(name) && name !== EDITOR_FILENAME)) {
       assetName(name);
       const key = name.normalize("NFC").toLowerCase();
       if (portableNames.has(key)) throw new Error("Conflicting content filenames: " + name);
@@ -170,6 +186,8 @@ export async function readContent(root) {
       absolutePath,
       revision: hash(bytes),
       blobSha: createHash("sha1").update(`blob ${bytes.length}\0`).update(bytes).digest("hex"),
+      editor,
+      editorRevision,
       assets: [],
       allAssets,
     });
@@ -239,6 +257,11 @@ export function validateContent(snapshot) {
   for (const entry of entries) {
     // Reuse the document boundary validator without altering opaque extension values.
     serializeMarkdownDocument(entry);
+    if (entry.editor !== undefined && entry.editor !== null)
+      validateEditorDocument(entry.editor, {
+        documentId: entry.metadata.id,
+        markdownHash: hash(entry.markdown),
+      });
   }
   const byId = validateHierarchy(
     entries, (entry) => entry.metadata.id,
@@ -515,6 +538,8 @@ export async function writeContentDocument(
       filename,
       absolutePath,
       revision: hash(serialized),
+      editor: previous?.editor,
+      editorRevision: previous?.editorRevision ?? null,
       assets: [],
       allAssets,
     };

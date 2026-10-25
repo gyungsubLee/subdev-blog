@@ -68,6 +68,13 @@ export type ContentDocument = {
   markdown: string;
 };
 
+export type EditorDocument = {
+  schemaVersion: 1;
+  documentId: CanonicalDocumentId;
+  markdownHash: string;
+  blocks: { [key: string]: JsonValue }[];
+};
+
 export type DocumentPatch = {
   id: CanonicalDocumentId;
   baseRevision: string;

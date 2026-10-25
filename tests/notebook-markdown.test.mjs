@@ -165,3 +165,84 @@ test("a toggle keeps its notebook and preceding text after Markdown import", () 
     editor._tiptapEditor.destroy();
   }
 });
+
+
+test("ordinary toggles and code settings survive Markdown publication without a notebook", () => {
+  const editor = BlockNoteEditor.create({ schema: editorSchema, initialContent: [
+    { type: "paragraph", content: "Before" },
+    { type: "toggleListItem", content: "Open me", children: [{ type: "paragraph", content: "Hidden body" }] },
+    { type: "codeBlock", props: { language: "javascript", caption: "Example caption", wrap: true }, content: "const answer = 42;" },
+    { type: "paragraph", content: "After" },
+  ] });
+  try {
+    const rendered = renderBody(serializeEditorMarkdown(editor));
+    assert.equal(rendered.querySelector("details > summary")?.textContent, "Open me");
+    assert.match(rendered.querySelector("details")?.textContent ?? "", /Hidden body/);
+    const code = rendered.querySelector(".article-code");
+    assert.ok(code !== null, "Code remains a reader code block");
+    assert.equal(code.dataset.wrap, "true");
+    assert.match(code.textContent, /Example caption/);
+    assert.equal(code.querySelector("pre code")?.textContent, "const answer = 42;");
+  } finally {
+    editor._tiptapEditor.destroy();
+  }
+});
+
+test("adjacent toggles remain independent expandable sections", () => {
+  const editor = BlockNoteEditor.create({ schema: editorSchema, initialContent: [
+    { type: "toggleListItem", content: "First", children: [{ type: "paragraph", content: "First body" }] },
+    { type: "toggleListItem", content: "Second", children: [{ type: "paragraph", content: "Second body" }] },
+  ] });
+  try {
+    const rendered = renderBody(serializeEditorMarkdown(editor));
+    const sections = [...rendered.querySelectorAll("details")];
+    assert.equal(sections.length, 2);
+    assert.deepEqual(sections.map((section) => section.querySelector("summary")?.textContent), ["First", "Second"]);
+    assert.match(sections[1].textContent, /Second body/);
+  } finally {
+    editor._tiptapEditor.destroy();
+  }
+});
+
+test("published formatting retains the editor palette, alignment and semantic underline", () => {
+  const editor = BlockNoteEditor.create({ schema: editorSchema, initialContent: [
+    { type: "heading", props: { level: 2, textColor: "blue", textAlignment: "center" }, content: "Colored heading" },
+    { type: "paragraph", props: { backgroundColor: "yellow", textAlignment: "right" }, content: [
+      { type: "text", text: "Marked", styles: { textColor: "red", backgroundColor: "green", underline: true } },
+    ] },
+    { type: "bulletListItem", content: "Styled child", children: [{ type: "paragraph", props: { textColor: "purple" }, content: "Nested color" }] },
+  ] });
+  try {
+    const markdown = serializeEditorMarkdown(editor);
+    const rendered = renderBody(markdown);
+    const heading = rendered.querySelector("h2");
+    assert.equal(heading?.getAttribute("data-text-color"), "blue");
+    assert.equal(heading?.getAttribute("data-text-alignment"), "center");
+    const paragraph = [...rendered.querySelectorAll("p")].find((item) => item.textContent === "Marked");
+    assert.equal(paragraph?.getAttribute("data-background-color"), "yellow");
+    assert.equal(paragraph?.getAttribute("data-text-alignment"), "right");
+    assert.equal(paragraph?.querySelector("u")?.textContent, "Marked");
+    assert.equal(paragraph?.querySelector('[data-text-color="red"]')?.textContent, "Marked");
+    assert.equal(paragraph?.querySelector('[data-background-color="green"]')?.textContent, "Marked");
+    assert.equal(rendered.querySelector('li [data-text-color="purple"]')?.textContent, "Nested color");
+    assert.ok(rendered.querySelector("[style]") === null, "Authored CSS must remain stripped");
+  } finally {
+    editor._tiptapEditor.destroy();
+  }
+});
+
+
+test("toggle headings publish as expandable headings with their nested body", () => {
+  const editor = BlockNoteEditor.create({ schema: editorSchema, initialContent: [
+    { type: "heading", props: { level: 2, isToggleable: true }, content: "Expandable heading", children: [{ type: "paragraph", content: "Heading body" }] },
+  ] });
+  try {
+    const rendered = renderBody(serializeEditorMarkdown(editor));
+    const details = rendered.querySelector("details");
+    assert.ok(details !== null, "Toggle headings must preserve their expandable container");
+    assert.equal(details.querySelector("summary h2")?.textContent, "Expandable heading");
+    assert.match(details.textContent, /Heading body/);
+  } finally {
+    editor._tiptapEditor.destroy();
+  }
+});
