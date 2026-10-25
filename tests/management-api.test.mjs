@@ -76,3 +76,26 @@ test('slow identity checks cannot extend session past the token expiry', async (
   Date.now = originalNow;
  }
 });
+
+
+test('public reads bypass management configuration for direct and rewritten routes', async () => {
+ for (const path of ['/api/public?kind=index', '/api?path=public&kind=index']) {
+  let calls = 0;
+  const response = await handleRequest(new Request('https://blog.test' + path), {
+   env: {},
+   fetcher: async () => { calls++; throw new Error('private-upstream-detail'); },
+  });
+  assert.equal(response.status, 502);
+  assert.ok(calls > 0, 'Public content must reach GitHub independently of login settings');
+  assert.equal((await response.text()).includes('private-upstream-detail'), false);
+ }
+});
+
+test('public reads refuse mutation methods before contacting GitHub', async () => {
+ let calls = 0;
+ const response = await handleRequest(new Request('https://blog.test/api/public?kind=index', { method: 'POST' }), {
+  env: {}, fetcher: async () => { calls++; return Response.json({}); },
+ });
+ assert.equal(response.status, 405);
+ assert.equal(calls, 0);
+});

@@ -191,3 +191,29 @@ test("Vite emits content identity for local staging and enforces Gitless deploym
   assert.equal(info.commit, "b".repeat(40));
   assert.doesNotMatch(JSON.stringify(info), /AI_INTERNAL_SENTINEL|content-package-|content-build-/);
 });
+
+
+test("prepare emits a server-only summary catalog keyed by original Git blob identity", async (t) => {
+  const input = await fixture(t);
+  const filename = path.join(input.root, "posts", parentId, "Title.md");
+  await writeFile(filename, await readFile(filename, "utf8") + `\n\n[Child](../${childId}/Title.md)`);
+  const result = build(input);
+  assert.equal(result.status, 0, result.stderr);
+  const catalog = JSON.parse(await readFile(path.join(input.cwd, "server/content-catalog.json"), "utf8"));
+  assert.equal(catalog.version, 1);
+  assert.equal(catalog.documents.length, 2);
+  const entry = catalog.documents.find(item => item.metadata.id === parentId);
+  assert.ok(entry !== undefined, "Catalog must include the canonical source identity");
+  const bytes = await readFile(path.join(input.root, "posts", parentId, "Title.md"));
+  const blobSha = createHash("sha1").update(`blob ${bytes.length}\0`).update(bytes).digest("hex");
+  assert.equal(entry.blobSha, blobSha);
+  assert.equal(entry.revision, createHash("sha256").update(bytes).digest("hex"));
+  assert.equal(entry.filename, `posts/${parentId}/Title.md`);
+  assert.equal(entry.markdown.length, 1400);
+  assert.ok(entry.markdown.includes("./첨부.pdf"), "Catalog keeps authored paths for fresh commit projection");
+  assert.equal(entry.metadata.agent.secret, "AI_INTERNAL_SENTINEL");
+  assert.equal(entry.assets.some(asset => asset.name === "unused.txt"), true);
+  assert.deepEqual(entry.references, [childId], "References beyond the summary remain available for safe deletion checks");
+  const publicNames = await readdir(path.join(input.cwd, "public/content"));
+  assert.equal(publicNames.includes("content-catalog.json"), false);
+});

@@ -1,10 +1,26 @@
 import { createHash, randomUUID } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import { posix } from 'node:path';
 import { createGitHubClient, httpError } from './github.mjs';
 import { parseMarkdownDocument, serializeMarkdownDocument, mergeDocumentPatch, canonicalFilename } from '../src/shared/document.mjs';
+import { rewriteContentLinks } from '../src/shared/content-links.mjs';
+import { validateContent, toPublicPosts, toPublicPost } from '../scripts/content.mjs';
 const UUID = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 const SHA = /^[a-f0-9]{40}$/;
 const MAX_ASSET = 5 * 1024 * 1024;
 const MAX_WIRE = 4 * 1024 * 1024;
+// Saved source files must fit the public runtime file limit.
+const MAX_DOCUMENT = 2 * 1024 * 1024;
+let catalogFile;
+function readCatalog() {
+    catalogFile ??= readFile(new URL('./content-catalog.json', import.meta.url), 'utf8')
+        .then(JSON.parse)
+        .catch(error => {
+            if (error.code === 'ENOENT') return null;
+            throw httpError(502, 'Invalid structural content catalog');
+        });
+    return catalogFile;
+}
 const digest = value => createHash('sha256').update(value).digest('hex');
 const json = (value, status = 200) => Response.json(value, {
     status,
@@ -58,24 +74,35 @@ async function readJson(request, limit = MAX_WIRE) {
 function flatName(name) {
     requireValue(typeof name === 'string' && name.length > 0, 'Asset name required');
     requireValue(Buffer.byteLength(name) <= 200, 'Asset name is too long');
-    requireValue(!/[\\/\u0000-\u001f\u007f]/.test(name), 'Asset name must be flat');
-    requireValue(name !== '.' && name !== '..' && !/[. ]$/.test(name), 'Invalid asset name');
-    const reservedName = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(name);
-    requireValue(!reservedName && !/\.md$/i.test(name), 'Reserved asset name');
+    let decoded = name;
+    try {
+        for (let count = 0; count < 5; count++) {
+            const next = decodeURIComponent(decoded);
+            if (next === decoded) break;
+            decoded = next;
+            if (!/%[a-f0-9]{2}/i.test(decoded)) break;
+            requireValue(count < 4, 'Repeated asset path encoding');
+        }
+    } catch {
+        throw httpError(400, 'Invalid asset path encoding');
+    }
+    requireValue(!/[\\/<>:"|?*\u0000-\u001f\u007f]/.test(decoded), 'Asset name must be flat');
+    requireValue(decoded !== '.' && decoded !== '..' && !/[. ]$/.test(decoded), 'Invalid asset name');
+    const reservedName = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(decoded);
+    requireValue(!reservedName && !/\.md$/i.test(decoded), 'Reserved asset name');
     return name;
 }
 
-export async function handleContentRequest(request, { token, config, fetcher, connection }) {
+export async function handleContentRequest(request, { token, config, fetcher, connection, catalog }) {
     const github = createGitHubClient(token, fetcher);
     const content = `/repos/${config.content.owner}/${config.content.repo}`;
-    const app = `/repos/${config.app.owner}/${config.app.repo}`;
     const call = (path, options) => github(content + path, options);
     const blob = async (sha) => {
         const value = await call('/git/blobs/' + commitSha(sha));
         requireValue(value.encoding === 'base64' && typeof value.content === 'string', 'Invalid Git blob', 502);
         return Buffer.from(value.content.replace(/\s/g, ''), 'base64');
     };
-    const head = async () => (await call('/git/ref/heads/' + encodeURIComponent(config.content.branch))).object.sha;
+    const head = async () => commitSha((await call('/git/ref/heads/' + encodeURIComponent(config.content.branch))).object.sha);
     const snapshot = async (commit) => {
         const record = await call('/git/commits/' + commitSha(commit));
         const result = await call('/git/trees/' + record.tree.sha + '?recursive=1');
@@ -88,6 +115,7 @@ export async function handleContentRequest(request, { token, config, fetcher, co
         const entry = tree.entries.find(entry => entry.path === 'categories.json' && entry.type === 'blob' && entry.mode === '100644');
         requireValue(entry, 'Canonical categories missing', 409);
         const bytes = await blob(entry.sha);
+        requireValue(bytes.length <= MAX_DOCUMENT, 'Category document exceeds 2 MiB', 413);
         return { categories: JSON.parse(bytes.toString('utf8')), revision: digest(bytes) };
     };
     const readPost = async (tree, id) => {
@@ -98,6 +126,7 @@ export async function handleContentRequest(request, { token, config, fetcher, co
         const documents = files.filter(entry => entry.path.endsWith('.md'));
         requireValue(documents.length === 1, 'Canonical document missing or ambiguous', 404);
         const bytes = await blob(documents[0].sha);
+        requireValue(bytes.length <= MAX_DOCUMENT, 'Markdown document exceeds 2 MiB', 413);
         const parsed = validateDocument(() => parseMarkdownDocument(bytes.toString('utf8')));
         requireValue(parsed.documentMode === 'full' && parsed.metadata.id === id, 'Canonical document ID mismatch', 409);
         return {
@@ -112,7 +141,7 @@ export async function handleContentRequest(request, { token, config, fetcher, co
     const requestBranch = requestId => 'heads/cms/requests/' + uuid(requestId);
     const existingCandidate = async (requestId) => {
         try {
-            return (await call('/git/ref/' + requestBranch(requestId))).object.sha;
+            return commitSha((await call('/git/ref/' + requestBranch(requestId))).object.sha);
         }
         catch (error) {
             if (error.status === 404)
@@ -124,46 +153,243 @@ export async function handleContentRequest(request, { token, config, fetcher, co
         commitSha(candidate);
         requireValue(await existingCandidate(requestId) === candidate, 'Candidate does not match request branch', 409);
         const record = await call('/git/commits/' + candidate);
-        requireValue(record.message?.startsWith(`cms-request:${requestId}\npayload-sha256:`) && record.parents?.length === 1, 'Invalid candidate provenance', 409);
+        const expectedMessage = new RegExp(`^cms-request:${requestId}\\npayload-sha256:[a-f0-9]{64}$`);
+        const validProvenance = expectedMessage.test(record.message) && record.parents?.length === 1
+            && SHA.test(record.parents[0]?.sha);
+        requireValue(validProvenance, 'Invalid candidate provenance', 409);
         return record;
     };
-    const runTitle = (id, candidate) => `cms:${id}:${candidate}`;
-    const findRun = async (id, candidate, excludeId) => {
-        for (let page = 1; ; page++) {
-            const result = await github(`${app}/actions/workflows/${config.workflow}/runs?per_page=100&event=workflow_dispatch&page=${page}`);
-            const runs = result.workflow_runs ?? [];
-            const run = runs.find(run => run.display_title === runTitle(id, candidate) && run.id !== excludeId);
-            if (run) return run;
-            if (runs.length < 100) return null;
+    const acceptedCandidate = async (requestId, candidate, base, current) => {
+        if (current !== candidate) {
+            if (current === base) return null;
+            const comparison = await call(`/compare/${candidate}...${current}`);
+            if (!['ahead', 'identical'].includes(comparison.status)) return null;
+        }
+        return {
+            state: current === candidate ? 'published' : 'superseded',
+            requestId, candidateCommit: candidate, contentCommit: current, baseCommit: base,
+            commitUrl: `https://github.com/${config.content.owner}/${config.content.repo}/commit/${candidate}`,
+        };
+    };
+    const applyCandidate = async (requestId, candidate, base, validated = false) => {
+        let current = await head();
+        let accepted = await acceptedCandidate(requestId, candidate, base, current);
+        if (accepted) return accepted;
+        requireValue(current === base, 'Canonical branch conflict: reload the original and submit a new request.', 409);
+        if (!validated) await validatePendingCandidate(candidate, base);
+
+        let updateError;
+        try {
+            await call('/git/refs/heads/' + encodeURIComponent(config.content.branch), {
+                method: 'PATCH', body: {sha: candidate, force: false},
+            });
+        } catch (error) {
+            // A lost response can still leave the candidate accepted by GitHub.
+            updateError = error;
+        }
+        current = await head();
+        accepted = await acceptedCandidate(requestId, candidate, base, current);
+        if (accepted) return accepted;
+        requireValue(current === base, 'Canonical branch conflict: this candidate was not saved.', 409);
+        if (updateError) throw updateError;
+        throw httpError(503, 'Canonical update is not visible yet. Resume this request.');
+    };
+    const readDocuments = async (tree, loaded = new Map(), requireReferences = false) => {
+        const filesById = new Map();
+        for (const entry of tree.entries) {
+            if (!entry.path.startsWith('posts/')) continue;
+            const parts = entry.path.split('/');
+            if (parts.length < 3) continue;
+            if (!filesById.has(parts[1])) filesById.set(parts[1], []);
+            filesById.get(parts[1]).push(entry);
+        }
+        const ids = [...filesById.keys()];
+        const sourceCatalog = catalog ?? await readCatalog();
+        requireValue(sourceCatalog || ids.length <= 64, 'Structural content catalog is missing', 502);
+        if (sourceCatalog) {
+            requireValue(sourceCatalog.version === 1 && Array.isArray(sourceCatalog.documents), 'Invalid structural content catalog', 502);
+        }
+        const baseline = new Map((sourceCatalog?.documents ?? []).map(entry => [entry.filename, entry]));
+        const documents = new Map();
+        let index = 0;
+        // ponytail: the build catalog covers unchanged blobs; six lanes read only changed documents. Rebuild the catalog if that delta outgrows request limits.
+        await Promise.all(Array.from({length: Math.min(6, ids.length)}, async () => {
+            while (index < ids.length) {
+                const id = ids[index++];
+                uuid(id);
+                const files = filesById.get(id);
+                requireValue(files.every(entry => entry.type === 'blob' && entry.mode === '100644' && entry.path.split('/').length === 3), 'Unsafe canonical post tree', 409);
+                const markdownFiles = files.filter(entry => /\.md$/i.test(entry.path));
+                requireValue(markdownFiles.length === 1, 'Canonical document missing or ambiguous', 404);
+                const file = markdownFiles[0];
+                const cached = baseline.get(file.path);
+                const matching = cached?.blobSha === file.sha;
+                const hasReferences = Array.isArray(cached?.references);
+                if (matching && requireReferences && !hasReferences) {
+                    requireValue(ids.length <= 64, 'Structural catalog references are missing', 502);
+                }
+                if (!loaded.has(id) && matching && (!requireReferences || hasReferences)) {
+                    requireValue(cached.metadata?.id === id && /^[a-f0-9]{64}$/.test(cached.revision), 'Invalid structural catalog document', 502);
+                    requireValue(!hasReferences || cached.references.every(reference => typeof reference === 'string' && UUID.test(reference)), 'Invalid structural catalog references', 502);
+                    const assets = files.filter(entry => !/\.md$/i.test(entry.path)).map(entry => ({
+                        name: entry.path.split('/').at(-1), sha: entry.sha, size: entry.size,
+                    }));
+                    documents.set(id, {
+                        metadata: cached.metadata, markdown: '', filename: file.path, revision: cached.revision,
+                        assets, allAssets: assets, references: cached.references,
+                    });
+                    continue;
+                }
+                const post = loaded.get(id) ?? await readPost(tree, id);
+                documents.set(id, {
+                    ...post.document, filename: post.path, revision: post.revision,
+                    assets: post.assets, allAssets: post.assets,
+                });
+            }
+        }));
+        return documents;
+    };
+    const validatePostDeletion = async (tree, id, original) => {
+        const categories = await readCategories(tree);
+        const documents = await readDocuments(tree, new Map([[id, original]]), true);
+        const corpus = {categories: categories.categories, documents};
+        validateDocument(() => validateContent(corpus));
+        for (const post of toPublicPosts(corpus)) {
+            if (post.id === id) continue;
+            const metadata = documents.get(post.id).metadata;
+            const links = [post.cover, post.icon];
+            rewriteContentLinks(post.markdown, destination => {
+                links.push(destination);
+                return destination;
+            });
+            const linked = links.some(value => {
+                return typeof value === 'string' && value.startsWith('#/post/')
+                    && value.slice(7).split(/[?#]/)[0] === id;
+            });
+            const related = ['related_ids', 'source_ids'].some(key => metadata[key]?.includes(id))
+                || documents.get(post.id).references?.includes(id);
+            requireValue(!linked && post.parentId !== id && !related, 'Deleted post has inbound references: ' + id, 409);
         }
     };
-    const dispatch = async (requestId, candidate, base) => {
-        let run = await findRun(requestId, candidate);
-        const previousRunId = run?.status === 'completed' && run.conclusion !== 'success' ? run.id : undefined;
-        if (previousRunId) run = null;
-        if (!run) {
-            try {
-                const response = await github(`${app}/actions/workflows/${config.workflow}/dispatches`, {
-                    method: 'POST', body: { ref: config.app.branch, inputs: {
-                            request_id: requestId, candidate_sha: candidate, base_sha: base
-                        } },
-                });
-                const runId = response?.workflow_run_id ?? response?.run_id ?? response?.id;
-                if (runId)
-                    run = { id: runId, html_url: response.html_url ?? response.run_url };
-            }
-            catch (error) {
-                run = await findRun(requestId, candidate, previousRunId);
-                if (!run)
-                    throw error;
-            }
-            if (!run)
-                run = await findRun(requestId, candidate, previousRunId);
+    const validateCategoryDeletion = async (tree, previous, categories) => {
+        const ids = new Set(categories.map(category => category.id));
+        const deleted = previous.filter(category => !ids.has(category.id));
+        for (const category of deleted) {
+            requireValue(!previous.some(child => child.parent_id === category.id), 'Cannot delete category with children: ' + category.id, 409);
         }
-        requireValue(run?.id, 'Workflow accepted; run is not visible yet. Resume this request.', 503);
-        return {
-            requestId, candidateCommit: candidate, baseCommit: base, runId: run.id, runUrl: run.html_url, state: 'validating'
+        if (deleted.length > 0) {
+            const documents = await readDocuments(tree);
+            for (const category of deleted) {
+                requireValue(![...documents.values()].some(entry => entry.metadata.category_id === category.id), 'Cannot delete assigned category: ' + category.id, 409);
+            }
+        }
+    };
+    const validatePostReferences = (tree, document, categories, creating) => {
+        const id = document.metadata.id;
+        requireValue(document.metadata.category_id === undefined || categories.some(category => category.id === document.metadata.category_id), 'Missing explicit category', 422);
+        if (creating) {
+            const existingIds = new Set(tree.entries
+                .filter(entry => /^posts\/[^/]+\/[^/]+\.md$/i.test(entry.path))
+                .map(entry => entry.path.split('/')[1]));
+            const parent = document.metadata.parent_id;
+            requireValue(parent === null || (parent !== id && existingIds.has(parent)), 'Missing or invalid parent document', 422);
+            existingIds.add(id);
+            for (const reference of [...(document.metadata.related_ids ?? []), ...(document.metadata.source_ids ?? [])]) {
+                requireValue(existingIds.has(reference), 'Missing document reference: ' + reference, 422);
+            }
+        }
+    };
+    const validateAuthoredLinks = async (tree, document, filename, assets, categories) => {
+        const sourceCatalog = catalog ?? await readCatalog();
+        if (sourceCatalog) {
+            requireValue(sourceCatalog.version === 1 && Array.isArray(sourceCatalog.documents), 'Invalid structural content catalog', 502);
+        }
+        const baseline = new Map((sourceCatalog?.documents ?? []).map(entry => [entry.filename, entry]));
+        const documents = new Map();
+        const paths = new Map();
+        for (const file of tree.entries) {
+            const parts = file.path.split('/');
+            if (parts.length !== 3 || parts[0] !== 'posts' || !UUID.test(parts[1]) || !/\.md$/i.test(parts[2])) continue;
+            const cached = baseline.get(file.path);
+            const metadata = cached?.blobSha === file.sha ? cached.metadata : {id: parts[1]};
+            documents.set(parts[1], {metadata, markdown: '', filename: file.path});
+            paths.set(posix.normalize(file.path), parts[1]);
+            if (metadata.legacy_path) paths.set(posix.normalize(metadata.legacy_path), parts[1]);
+        }
+        const id = document.metadata.id;
+        documents.set(id, {...document, filename, assets, allAssets: assets});
+        paths.set(posix.normalize(filename), id);
+        if (document.metadata.legacy_path) paths.set(posix.normalize(document.metadata.legacy_path), id);
+        const projection = {
+            categories, documents, paths, allowUnresolvedLinks: true,
+            effectiveCategories: new Map([[id, document.metadata.category_id ?? 'group:unclassified']]),
         };
+        // Project only this authored body. Discard rewritten output so saved Markdown bytes stay intact.
+        validateDocument(() => toPublicPost(projection, id));
+    };
+    const validatePendingCandidate = async (candidate, base) => {
+        const before = await snapshot(base);
+        const after = await snapshot(candidate);
+        const previous = new Map(before.entries.filter(entry => entry.type !== 'tree').map(entry => [entry.path, entry]));
+        const next = new Map(after.entries.filter(entry => entry.type !== 'tree').map(entry => [entry.path, entry]));
+        const changed = [...new Set([...previous.keys(), ...next.keys()])].filter(path => {
+            const older = previous.get(path);
+            const newer = next.get(path);
+            return older?.sha !== newer?.sha || older?.mode !== newer?.mode || older?.type !== newer?.type;
+        });
+        requireValue(changed.length > 0, 'Empty candidate', 409);
+        const ids = new Set();
+        for (const path of changed) {
+            const parts = path.split('/');
+            const safePostPath = parts.length === 3 && parts[0] === 'posts' && UUID.test(parts[1])
+                && parts[2] && !/[\\\u0000-\u001f]/.test(parts[2]) && !['.', '..'].includes(parts[2]);
+            const entry = next.get(path);
+            const validMode = !entry || (entry.mode === '100644' && entry.type === 'blob');
+            requireValue((path === 'categories.json' || safePostPath) && validMode,
+                'Forbidden candidate path or mode: ' + path, 409);
+            if (safePostPath) ids.add(parts[1]);
+        }
+        const categories = await readCategories(after);
+        if (changed.includes('categories.json')) {
+            requireValue(ids.size === 0, 'Candidate mixes category and document operations', 409);
+            requireValue(categories.categories.some(category => category.id === 'group:unclassified'), 'Cannot delete unclassified category', 422);
+            validateDocument(() => validateContent({categories: categories.categories, documents: new Map()}));
+            await validateCategoryDeletion(before, (await readCategories(before)).categories, categories.categories);
+            return;
+        }
+        requireValue(ids.size === 1, 'Candidate must change one post', 409);
+        const [id] = ids;
+        const prefix = `posts/${id}/`;
+        const existed = before.entries.some(entry => entry.path.startsWith(prefix));
+        const remains = after.entries.some(entry => entry.path.startsWith(prefix));
+        const original = existed ? await readPost(before, id) : undefined;
+        if (!remains) {
+            requireValue(original, 'Deleted candidate document missing', 409);
+            await validatePostDeletion(before, id, original);
+            return;
+        }
+        const post = await readPost(after, id);
+        requireValue(post.filename === canonicalFilename(post.document.metadata.title), 'Candidate filename differs from title', 409);
+        requireValue(!original || post.document.metadata.parent_id === original.document.metadata.parent_id, 'Candidate changes immutable document parent', 409);
+        validatePostReferences(after, post.document, categories.categories, !original);
+        const names = new Set([post.filename.normalize('NFC').toLowerCase()]);
+        for (const asset of post.assets) {
+            flatName(asset.name);
+            const key = asset.name.normalize('NFC').toLowerCase();
+            requireValue(!names.has(key), 'Candidate asset filename collision', 409);
+            names.add(key);
+            const older = original?.assets.find(item => item.name.normalize('NFC').toLowerCase() === key);
+            requireValue(!older || (older.name === asset.name && older.sha === asset.sha), 'Candidate replaces a canonical asset', 409);
+            if (!older) {
+                const bytes = await blob(asset.sha);
+                requireValue(bytes.length > 0 && bytes.length <= MAX_ASSET, 'Invalid asset size', 413);
+            }
+        }
+        const retainsAssets = !original || original.assets.every(asset => {
+            return post.assets.some(item => item.name === asset.name && item.sha === asset.sha);
+        });
+        requireValue(retainsAssets, 'Candidate removes canonical assets', 409);
+        await validateAuthoredLinks(after, post.document, post.path, post.assets, categories.categories);
     };
     const writeBlob = async (bytes) => (await call('/git/blobs', { method: 'POST', body: { content: bytes.toString('base64'), encoding: 'base64' } })).sha;
     try {
@@ -226,7 +452,7 @@ export async function handleContentRequest(request, { token, config, fetcher, co
             if (existing) {
                 const record = await verifyCandidate(requestId, existing);
                 requireValue(record.message === message && record.parents[0].sha === baseCommit, 'Request ID already used for different content', 409);
-                return json(await dispatch(requestId, existing, baseCommit));
+                return json(await applyCandidate(requestId, existing, baseCommit));
             }
             requireValue(await head() === baseCommit, 'Canonical branch changed', 409);
             const tree = await snapshot(baseCommit);
@@ -255,18 +481,13 @@ export async function handleContentRequest(request, { token, config, fetcher, co
                     };
                 });
                 requireValue(ids.has('group:unclassified'), 'Cannot delete unclassified category', 422);
-                for (const item of merged) {
-                    const visited = new Set([item.id]);
-                    let parent = item.parent_id;
-                    while (parent !== null) {
-                        requireValue(ids.has(parent) && !visited.has(parent), 'Invalid category ancestry', 422);
-                        visited.add(parent);
-                        parent = merged.find(category => category.id === parent).parent_id;
-                    }
-                }
+                validateDocument(() => validateContent({categories: merged, documents: new Map()}));
+                await validateCategoryDeletion(tree, current.categories, merged);
                 unchanged = JSON.stringify(merged) === JSON.stringify(current.categories);
+                const bytes = Buffer.from(JSON.stringify(merged, null, 2) + '\n');
+                requireValue(bytes.length <= MAX_DOCUMENT, 'Category document exceeds 2 MiB', 413);
                 changes.push({
-                    path: 'categories.json', mode: '100644', type: 'blob', sha: await writeBlob(Buffer.from(JSON.stringify(merged, null, 2) + '\n'))
+                    path: 'categories.json', mode: '100644', type: 'blob', sha: await writeBlob(bytes)
                 });
             }
             else {
@@ -290,6 +511,7 @@ export async function handleContentRequest(request, { token, config, fetcher, co
                         }, original.revision));
                 }
                 if (operation.type === 'post.delete') {
+                    await validatePostDeletion(tree, id, original);
                     for (const entry of tree.entries.filter(entry => entry.path.startsWith(`posts/${id}/`)))
                         changes.push({
                             path: entry.path, mode: entry.mode, type: 'blob', sha: null
@@ -310,7 +532,25 @@ export async function handleContentRequest(request, { token, config, fetcher, co
                     });
                     unchanged = documentUnchanged && assetsUnchanged;
                     const text = validateDocument(() => serializeMarkdownDocument(document));
+                    requireValue(Buffer.byteLength(text) <= MAX_DOCUMENT, 'Markdown document exceeds 2 MiB', 413);
+                    const categories = await readCategories(tree);
+                    validatePostReferences(tree, document, categories.categories, operation.type === 'post.create');
                     const path = `posts/${id}/${canonicalFilename(document.metadata.title)}`;
+                    const names = new Set();
+                    for (const asset of assets) {
+                        const name = flatName(asset.name);
+                        const key = name.normalize('NFC').toLowerCase();
+                        requireValue(!names.has(key), 'Duplicate asset name');
+                        names.add(key);
+                        const bytes = await blob(commitSha(asset.sha));
+                        requireValue(Number.isSafeInteger(asset.size) && bytes.length === asset.size && bytes.length > 0 && bytes.length <= MAX_ASSET, 'Invalid asset size');
+                        const previous = original?.assets.find(item => item.name.normalize('NFC').toLowerCase() === key);
+                        requireValue(!previous || (previous.name === name && previous.sha === asset.sha), 'Asset filename collision', 409);
+                        changes.push({
+                            path: `posts/${id}/${name}`, mode: '100644', type: 'blob', sha: asset.sha
+                        });
+                    }
+                    await validateAuthoredLinks(tree, document, path, [...(original?.assets ?? []), ...assets], categories.categories);
                     if (original && original.path !== path)
                         changes.push({
                             path: original.path, mode: '100644', type: 'blob', sha: null
@@ -318,19 +558,6 @@ export async function handleContentRequest(request, { token, config, fetcher, co
                     changes.push({
                         path, mode: '100644', type: 'blob', sha: await writeBlob(Buffer.from(text))
                     });
-                    const names = new Set();
-                    for (const asset of assets) {
-                        const name = flatName(asset.name);
-                        requireValue(!names.has(name), 'Duplicate asset name');
-                        names.add(name);
-                        const bytes = await blob(commitSha(asset.sha));
-                        requireValue(Number.isSafeInteger(asset.size) && bytes.length === asset.size && bytes.length > 0 && bytes.length <= MAX_ASSET, 'Invalid asset size');
-                        const previous = original?.assets.find(item => item.name === name);
-                        requireValue(!previous || previous.sha === asset.sha, 'Asset filename collision', 409);
-                        changes.push({
-                            path: `posts/${id}/${name}`, mode: '100644', type: 'blob', sha: asset.sha
-                        });
-                    }
                 }
             }
             if (unchanged)
@@ -350,83 +577,22 @@ export async function handleContentRequest(request, { token, config, fetcher, co
                 const concurrent = await existingCandidate(requestId);
                 const record = await verifyCandidate(requestId, concurrent);
                 requireValue(record.message === message && record.parents[0].sha === baseCommit, 'Request ID conflict', 409);
-                return json(await dispatch(requestId, concurrent, baseCommit));
+                return json(await applyCandidate(requestId, concurrent, baseCommit));
             }
-            return json(await dispatch(requestId, candidate.sha, baseCommit));
+            return json(await applyCandidate(requestId, candidate.sha, baseCommit, true));
         }
         if (url.pathname === '/api/publish') {
+            requireValue(['GET', 'POST'].includes(request.method), 'Method not allowed', 405);
             const input = request.method === 'POST' ? await readJson(request) : Object.fromEntries(url.searchParams);
             const { requestId, candidateCommit } = input;
             const candidate = await verifyCandidate(requestId, candidateCommit);
-            if (request.method === 'POST')
-                return json(await dispatch(requestId, candidateCommit, candidate.parents[0].sha));
-            requireValue(request.method === 'GET', 'Method not allowed', 405);
-            requireValue(/^\d+$/.test(String(input.runId)), 'Invalid run ID');
-            const run = await github(`${app}/actions/runs/${input.runId}`);
-            requireValue(run.display_title === runTitle(requestId, candidateCommit) && (run.event === undefined || run.event === 'workflow_dispatch') && (run.path === undefined || run.path.startsWith('.github/workflows/' + config.workflow)), 'Workflow does not match request', 409);
+            const baseCommit = candidate.parents[0].sha;
+            if (request.method === 'POST') return json(await applyCandidate(requestId, candidateCommit, baseCommit));
             const current = await head();
-            let accepted = current === candidateCommit;
-            let canonicalConflict = false;
-            let sourceDescendsCandidate = false;
-            if (!accepted) {
-                const comparison = await call(`/compare/${candidateCommit}...${current}`);
-                sourceDescendsCandidate = comparison.status === 'ahead';
-                accepted = sourceDescendsCandidate || comparison.status === 'identical';
-                canonicalConflict = !accepted && current !== candidate.parents[0].sha;
-            }
-            let deployConclusion;
-            if (accepted && run.status === 'completed') {
-                let jobsPath = `${app}/actions/runs/${input.runId}`;
-                if (run.run_attempt !== undefined) {
-                    requireValue(Number.isSafeInteger(run.run_attempt) && run.run_attempt > 0, 'Invalid workflow attempt', 502);
-                    jobsPath += `/attempts/${run.run_attempt}`;
-                }
-                const deploymentSteps = [];
-                for (let page = 1; ; page++) {
-                    const result = await github(`${jobsPath}/jobs?per_page=100&page=${page}`);
-                    requireValue(Array.isArray(result.jobs), 'Invalid workflow jobs response', 502);
-                    for (const job of result.jobs) {
-                        for (const step of job.steps ?? []) {
-                            if (step.name === 'Deploy preview') deploymentSteps.push(step);
-                        }
-                    }
-                    if (result.jobs.length < 100) break;
-                }
-                if (deploymentSteps.length > 0) {
-                    if (deploymentSteps.every(step => step.conclusion === 'success')) {
-                        deployConclusion = 'success';
-                    } else if (deploymentSteps.every(step => step.conclusion === 'skipped')) {
-                        deployConclusion = 'skipped';
-                    }
-                }
-            }
-            let state = 'validating';
-            if (accepted) {
-                state = 'saved';
-                if (run.status === 'completed') {
-                    state = 'pending';
-                    if (run.conclusion === 'success' && deployConclusion === 'success') {
-                        state = 'published';
-                    } else if (sourceDescendsCandidate && deployConclusion === 'skipped') {
-                        state = 'superseded';
-                    }
-                }
-            } else if (canonicalConflict) {
-                state = 'failed';
-            } else if (run.status === 'completed') {
-                state = 'failed';
-            }
-            const result = {state, runUrl:run.html_url};
-            if (accepted) {
-                result.contentCommit = candidateCommit;
-                result.commitUrl = `https://github.com/${config.content.owner}/${config.content.repo}/commit/${candidateCommit}`;
-            }
-            if (canonicalConflict) {
-                result.error = 'Canonical branch conflict: this candidate was not saved. Reload the original and submit a new request.';
-            } else if (state === 'failed' || state === 'pending') {
-                result.error = 'Publication did not complete; resume this request.';
-            }
-            return json(result);
+            const accepted = await acceptedCandidate(requestId, candidateCommit, baseCommit, current);
+            if (accepted) return json(accepted);
+            requireValue(current === baseCommit, 'Canonical branch conflict: this candidate was not saved.', 409);
+            return json({state: 'pending', requestId, candidateCommit, baseCommit});
         }
         throw httpError(404, 'Unknown content route');
     }

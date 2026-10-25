@@ -20,7 +20,9 @@ npm run dev
 
 개발 서버는 명령 출력의 주소에서 연다. 원본은 `content/posts/<글 ID>/<실제 제목>.md`에 있다.
 각 글의 이미지는 Markdown과 같은 폴더에 둔다. 본문은 `./이미지.webp` 같은 상대경로로 이미지를 참조한다.
-앱이 기록한 submodule 커밋을 사용한다. 빌드에서 원격 최신 브랜치를 자동으로 가져오지 않는다.
+빌드는 앱이 기록한 submodule 커밋을 기준 목록으로 사용한다. 빌드에서 원격 최신 브랜치를 자동으로 가져오지 않는다.
+일반 글 조회는 `/api/public`이 콘텐츠 저장소의 기준 브랜치에서 읽는다.
+글을 저장해도 앱을 다시 빌드하거나 배포하지 않는다. 이 전환 코드는 운영 전에 한 번 배포해야 한다.
 콘텐츠 원격은 [subdev-blog-content](https://github.com/gyungsubLee/subdev-blog-content)다. 연결 검증 상태는 이전 기록에서 확인한다.
 `content/posts.json`과 `content/written/`는 이전 입력이며 현재 빌드의 원본이 아니다.
 
@@ -55,16 +57,18 @@ Notion의 공개 API는 비공식 인터페이스다. 공개하지 않은 페이
 
 ## 글 작성과 게시 범위
 
-상단의 GitHub 아이콘이 있는 `로그인` 버튼으로 로그인한다. 서버가 본인 계정·App 설치·저장소·브랜치·게시 workflow를 확인한다.
+상단의 GitHub 아이콘이 있는 `로그인` 버튼으로 로그인한다. 서버가 본인 계정·App 설치·저장소·브랜치를 확인한다.
 연결이 준비되면 `글쓰기`와 글 상세의 `수정`을 사용할 수 있다.
 상단의 로그인 버튼은 글쓰기 버튼으로 바뀐다. 연결 재확인 버튼과 설정 오류 문구는 상단에 표시하지 않는다.
 정식 글은 원문 Markdown으로 편집한다. 제목만 수정하면 본문과 확장 메타데이터를 보존한다.
 기존 블록 초안과 브라우저 자동 저장은 유지한다. 기존 블록 초안은 기존 편집기로 연다.
 
 `원본 저장`은 콘텐츠 저장소의 `cms/requests/<요청 UUID>`에 후보 커밋을 만든다.
-`publish-content.yml`은 전체 콘텐츠를 검증한 뒤 원본 브랜치와 앱의 submodule 커밋을 순서대로 갱신한다.
-앱 커밋은 검사와 빌드가 성공한 뒤 푸시한다. 이후 Vercel preview를 만들고 실제 응답의 앱·콘텐츠 SHA와 파일을 확인한다.
-화면은 검증 중, 원본 저장 완료, 게시 대기, 게시 완료와 실패를 구분한다. 실패한 요청은 같은 요청으로 재시도한다.
+서버는 문서 형식·권한·수정 충돌을 확인하고 콘텐츠 브랜치를 fast-forward로 갱신한다.
+저장 성공은 기준 브랜치에 커밋이 포함됐는지 확인한 뒤 표시한다. 앱 커밋·Actions 실행·Vercel 배포를 만들지 않는다.
+응답을 잃으면 같은 요청 ID로 결과를 확인하고 재시도한다. 편집한 초안은 보존한다.
+완료한 저장은 화면의 글 목록·본문·분류를 새 콘텐츠 커밋으로 다시 읽는다.
+기존 `publish-content.yml`은 수동 작업용으로 남지만 웹 저장 경로에서 호출하지 않는다.
 글 삭제는 하위 글·참조가 없을 때 허용한다. 카테고리 삭제는 하위 분류·직접 배정한 글이 없을 때 허용한다.
 `group:unclassified`는 삭제하지 않는다. 첨부 하나의 최대 크기는 5MiB다.
 
@@ -72,38 +76,29 @@ Notion의 공개 API는 비공식 인터페이스다. 공개하지 않은 페이
 전환 뒤에는 기존 JSON 쓰기를 차단한다.
 기존 작성 기능의 설명은 [Notion 작성 UX](docs/notion-writing-ux.md)에 있다.
 
-## GitHub 로그인과 게시 초기 설정
+## GitHub 로그인과 저장 초기 설정
 
-구현 계약은 [설계서](docs/superpowers/specs/2026-10-24-github-content-management-design.md)와 [실행 계획](docs/superpowers/plans/2026-10-24-github-content-management.md)에 있다.
-아래 설정을 마치기 전에는 관리 기능을 차단한다. 공개 조회는 계속 동작한다.
+조회·저장 변경의 계약은 [설계서](docs/superpowers/specs/2026-10-25-github-runtime-content-design.md)에 있다.
+아래 설정을 마치기 전에는 관리 기능을 차단한다. 공개 조회는 로그인 설정과 독립한다.
 
 1. 본인 계정에 GitHub App을 등록한다. Webhook은 사용하지 않는다.
-2. Repository permissions를 `Contents: Read and write`, `Actions: Read and write`, 기본 `Metadata: Read-only`로 한정한다.
-3. 사용자 access token 만료를 활성화한다. Callback URL은 `<CMS_ORIGIN>/api/auth/callback`으로 등록한다.
+2. Repository permissions는 `Contents: Read and write`와 기본 `Metadata: Read-only`를 사용한다.
+3. 사용자 access token 만료를 켠다. Callback URL은 `<CMS_ORIGIN>/api/auth/callback`으로 등록한다.
 4. App을 `gyungsubLee/subdev-blog`와 `gyungsubLee/subdev-blog-content` 두 저장소에만 설치한다.
-5. App ID·Client ID·Client secret·설치 ID와 본인 숫자 사용자 ID를 기록한다. 두 저장소의 숫자 ID와 실제 브랜치명도 확인한다.
+5. App ID·Client ID·Client secret·설치 ID와 본인 숫자 사용자 ID를 기록한다. 두 저장소의 숫자 ID와 브랜치명도 확인한다.
 6. [.env.example](.env.example)을 `.env.local`로 복사하고 값을 채운다. `CMS_SESSION_KEY`는 예시 명령으로 새로 만든다.
-7. Vercel의 해당 환경에도 같은 서버 변수를 등록한다. 운영·preview 주소는 HTTPS를 사용하고 `CMS_ORIGIN`과 로그인하는 주소를 정확히 맞춘다.
-8. 앱 저장소의 Actions에 아래 secrets와 variables를 등록한다. Private key는 Vercel 환경에 넣지 않는다.
+7. Vercel에도 같은 서버 변수를 등록한다. HTTPS 주소를 사용하고 `CMS_ORIGIN`과 로그인하는 주소를 정확히 맞춘다.
 
-| 위치 | 이름 |
-| --- | --- |
-| Actions secrets | `CMS_APP_ID`, `CMS_APP_PRIVATE_KEY`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` |
-| Actions variables | `CMS_INSTALLATION_ID`, `CMS_APP_REPOSITORY_ID`, `CMS_CONTENT_REPOSITORY_ID`, `CMS_APP_BRANCH`, `CMS_CONTENT_BRANCH`, 선택값 `CMS_PREVIEW_ALIAS` |
-| Vercel 서버 환경 | `.env.example`의 주석 처리하지 않은 모든 이름 |
-
-앱 브랜치는 저장소의 기본 브랜치여야 한다. 해당 브랜치에 게시 workflow가 있어야 연결 확인을 통과한다.
-Actions의 secret·variable 이름은 `GITHUB_`로 시작할 수 없다. Workflow가 `CMS_` 저장값을 내부 `GITHUB_` 환경 변수로 연결한다.
-브랜치 보호 규칙은 App의 정상 fast-forward 커밋을 허용해야 한다. 강제 푸시는 사용하지 않는다.
-개발 주소는 `http://127.0.0.1:5173`이다. 별도 개발 App이나 해당 주소의 Callback URL을 등록하고 개발 서버를 다시 시작한다.
+기존 App의 `Actions: Read and write`는 호환하지만 웹 저장에 필수는 아니다. 관리 연결은 활성 workflow를 요구하지 않는다.
+앱 브랜치는 저장소의 기본 브랜치를 사용한다. 콘텐츠 브랜치 보호는 App의 fast-forward 커밋을 허용해야 한다.
+강제 푸시는 사용하지 않는다. 공개 읽기 토큰은 아래 공개 조회 설명을 따른다.
+개발 주소는 `http://127.0.0.1:5173`이다. 개발 App이나 같은 주소의 Callback URL을 등록한다.
 비밀값에는 `VITE_` 접두사를 붙이지 않는다. `CMS_SESSION_KEY`를 바꾸면 기존 로그인을 만료시킨다.
 
-초기 게시 대상은 preview다. `vercel.json`의 `git.deploymentEnabled: false`로 Git 푸시의 자동 배포를 막고 Actions에서 preview를 만든다.
-로그인에 고정 주소가 필요하면 `CMS_PREVIEW_ALIAS`를 설정하고 서버의 `CMS_ORIGIN`과 맞춘다.
-별칭은 `subdev-blog-cms-<식별자>.vercel.app` 형태만 허용한다. 원본 응답 검증 뒤 해당 별칭을 최신 preview로 연결한다.
-이 설정은 [Vercel의 Git 배포 설정](https://vercel.com/docs/project-configuration/git-configuration)을 따른다.
-운영 배포 전환은 별도 승인 뒤 진행한다. 공개 preview 응답을 검사하므로 Vercel 인증 보호가 켜져 있으면 검증이 실패한다.
-실제 GitHub 로그인·권한 취소·검증용 생성·수정·삭제·preview 검증은 App과 secrets를 등록한 환경에서 수행해야 한다.
+웹 저장에는 Actions secrets, App private key와 Vercel 배포 토큰이 필요하지 않다.
+수동 게시 workflow를 사용할 때만 기존 Actions 설정을 유지한다.
+`vercel.json`의 `git.deploymentEnabled:false`는 Git 푸시의 자동 배포를 막는다.
+실제 로그인·권한 취소·원격 저장은 설정한 환경에서 별도로 확인한다.
 
 ## 콘텐츠 구조
 
@@ -117,6 +112,25 @@ Actions의 secret·variable 이름은 `GITHUB_`로 시작할 수 없다. Workflo
 AI 메타데이터와 원문 확장 필드는 원본에 보존하며 공개 목록·본문·다운로드에 포함하지 않는다.
 공개 콘텐츠 저장소에서는 frontmatter를 읽을 수 있다. 비공개 메모와 로컬 LLM wiki는 저장소 밖에 둔다.
 LLM wiki의 색인·근거 계약은 콘텐츠 저장소 문서에 보관한다. 생성기와 AI 실행 기능은 구현하지 않는다.
+
+## 공개 콘텐츠 조회
+
+`GET /api/public?kind=index`는 공개 글 목록·분류·콘텐츠 커밋을 반환한다.
+`GET /api/public?kind=post&id=<UUID>&commit=<SHA>`는 같은 커밋의 본문을 반환한다.
+첨부파일은 공개 콘텐츠 저장소의 같은 커밋에 고정한 raw 주소를 사용한다.
+로그인 설정이 없어도 공개 조회는 동작한다. 서버는 저장소가 공개인지 확인하고 다른 저장소를 요청으로 받지 않는다.
+
+서버는 기준 브랜치를 최대 30초 동안 캐시한다. 자신의 저장 직후에는 새 커밋을 기준으로 캐시를 다시 확인한다.
+GitHub 오류와 제한 초과는 화면에 오류로 표시한다. 이전 빌드의 글로 몰래 대체하지 않는다.
+서버 전용 `GITHUB_PUBLIC_TOKEN`을 설정하면 GitHub API의 인증된 호출 한도를 사용할 수 있다.
+토큰은 콘텐츠 저장소의 읽기 권한만 부여한다. 토큰을 프런트엔드 설정이나 번들에 넣지 않는다.
+토큰이 없으면 공개 읽기를 시도한다. 익명 한도 때문에 트래픽이 늘면 조회가 제한될 수 있다.
+
+빌드는 서버 전용 `server/content-catalog.json`에 원본 요약과 Git blob ID를 기록한다.
+서버는 GitHub의 실제 트리와 이 기준을 비교해 바뀐 Markdown만 다시 읽는다. 본문은 요청한 글만 내려받는다.
+이 파일은 서버 함수의 입력이며 `public/`와 앱 Git에 넣지 않는다. 원본 메타데이터를 공개 응답으로 내보내지 않는다.
+함수 번들은 기준 목록만 포함한다. 원본 콘텐츠·공개 첨부·테스트·문서는 함수 번들에서 제외한다.
+앱 릴리스 때 submodule 기준을 갱신하면 빌드 이후 변경분을 읽는 비용도 줄어든다.
 
 ## 검사와 빌드
 

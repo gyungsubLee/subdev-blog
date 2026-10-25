@@ -1,4 +1,4 @@
-node_modules/
+node_modules
 dist/
 .vercel/
 .tmp/
@@ -15,3 +15,5 @@ content/web-assets-report.json
 content/migration-cleanup-report.json
 notion-root-response.json
 public/content/
+
+server/content-catalog.json

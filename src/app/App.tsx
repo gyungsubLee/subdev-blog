@@ -12,7 +12,7 @@ const ManagedPostEditor = lazy(() => import("../features/content-management/Mana
 
 export default function App() {
   const { hash, postId } = useHashRoute();
-  const { posts, categories, drafts, error, loaded, setDrafts } = usePosts(postId);
+  const { posts, categories, drafts, error, loaded, setDrafts, reload } = usePosts(postId);
   const [editing, setEditing] = useState<Post | null | undefined>(undefined);
   const management = useManagement();
 
@@ -45,6 +45,7 @@ export default function App() {
               key={editing?.id ?? "new"}
               post={editing}
               session={management.session}
+              onSaved={reload}
               onClose={() => setEditing(undefined)}
             />
           )}
@@ -57,6 +58,7 @@ export default function App() {
           onWrite={() => edit(null)}
           onEdit={edit}
           management={management}
+          onContentSaved={reload}
         />
       ) : (
         <main className="app-state">기록을 불러오는 중입니다.</main>

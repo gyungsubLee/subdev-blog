@@ -40,13 +40,12 @@ function connectedFetcher(overrides = {}) {
   return Response.json({id:path.endsWith('subdev-blog-content')?14:13,default_branch:'main',permissions:{push:true}});
  };
 }
-test('connection readiness checks owner repositories, installation and publishing',async()=>{
+test('connection readiness checks owner repositories and installation',async()=>{
  assert.deepEqual(await checkConnection('token',connectedConfig,connectedFetcher()),{repository:'gyungsubLee/subdev-blog-content',branch:'main',contentCommit:'content-head',appContentCommit:'deployed-content',appCommit:'app-head'});
  for(const overrides of [
   {'/user/installations':{installations:[{id:12,app_id:11,suspended_at:'now',permissions:{contents:'write',actions:'write'}}]}},
   {'/user/installations/12/repositories':{repositories:[{id:13}]}},
   {'/repos/gyungsubLee/subdev-blog':{id:999,permissions:{push:true}}},
-  {'/repos/gyungsubLee/subdev-blog/actions/workflows/publish-content.yml':{state:'disabled_manually'}},
   {'/repos/gyungsubLee/subdev-blog/contents/content':{type:'file'}}
  ]) await assert.rejects(checkConnection('token',connectedConfig,connectedFetcher(overrides)),{status:403});
 });
@@ -85,4 +84,18 @@ test('existing nondefault app branch cannot report publishing ready', async () =
   },
  });
  await assert.rejects(checkConnection('token', connectedConfig, fetcher), { status: 403 });
+});
+
+
+test('content management accepts Contents-only installations without any Actions query', async () => {
+ const calls = [];
+ const upstream = connectedFetcher({
+  '/user/installations': { installations: [{ id: 12, app_id: 11, permissions: { contents: 'write', metadata: 'read' } }] },
+ });
+ const connection = await checkConnection('token', connectedConfig, async (url, options) => {
+  calls.push(new URL(url).pathname);
+  return upstream(url, options);
+ });
+ assert.equal(connection.contentCommit, 'content-head');
+ assert.equal(calls.some(path => path.includes('/actions/')), false);
 });

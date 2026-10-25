@@ -169,6 +169,7 @@ export async function readContent(root) {
       filename,
       absolutePath,
       revision: hash(bytes),
+      blobSha: createHash("sha1").update(`blob ${bytes.length}\0`).update(bytes).digest("hex"),
       assets: [],
       allAssets,
     });
@@ -299,7 +300,8 @@ function linkResolver(snapshot, entry, assets = new Map(), externals = new Set()
     if (!destination) return destination;
     if (destination.startsWith("#/post/")) {
       const id = destination.slice(7).split(/[?#]/)[0];
-      if (!snapshot.documents.has(id)) throw new Error("Missing linked document: " + id);
+      if (!snapshot.documents.has(id) && !snapshot.allowUnresolvedLinks)
+        throw new Error("Missing linked document: " + id);
       return destination;
     }
     if (destination.startsWith("#")) return destination;
@@ -311,7 +313,7 @@ function linkResolver(snapshot, entry, assets = new Map(), externals = new Set()
     if (publicAsset) {
       if (publicAsset[1] !== entry.metadata.id)
         throw new Error("Attachments must belong to their document: " + destination);
-      return resolveAsset(publicAsset[2]) + suffix;
+      return resolveAsset(publicAsset[2], pathname) + suffix;
     }
     if (/^(?:https?:)?\/\//i.test(destination)) {
       const url = new URL(destination, "https://content.invalid");
@@ -339,18 +341,26 @@ function linkResolver(snapshot, entry, assets = new Map(), externals = new Set()
     if (/\.md$/i.test(decoded)) {
       const relative = path.posix.normalize(path.posix.join(path.posix.dirname(entry.filename), decoded));
       const id = snapshot.paths.get(relative) ?? snapshot.paths.get(path.posix.normalize(decoded));
-      if (!id) throw new Error("Missing Markdown document: " + destination);
+      if (!id) {
+        if (snapshot.allowUnresolvedLinks) return destination;
+        throw new Error("Missing Markdown document: " + destination);
+      }
       return "#/post/" + id + suffix.replace(/^\?[^#]*/, "");
     }
-    return resolveAsset(decoded.replace(/^\.\//, "")) + suffix;
+    return resolveAsset(decoded.replace(/^\.\//, ""), pathname) + suffix;
   };
 
-  function resolveAsset(name) {
+  function resolveAsset(name, original) {
     const decoded = assetName(name);
     const asset = (entry.allAssets ?? entry.assets).find((item) => item.name === decoded);
-    if (!asset) throw new Error("Missing attachment for " + entry.metadata.id + ": " + name);
+    if (!asset) {
+      if (snapshot.allowUnresolvedLinks) return original;
+      throw new Error("Missing attachment for " + entry.metadata.id + ": " + name);
+    }
     assets.set(asset.name, asset);
-    return "/content/assets/" + entry.metadata.id + "/" + encodeURIComponent(asset.name);
+    return snapshot.assetUrl
+      ? snapshot.assetUrl(asset, entry)
+      : "/content/assets/" + entry.metadata.id + "/" + encodeURIComponent(asset.name);
   }
 }
 
@@ -379,46 +389,58 @@ export function toPublicCategories(snapshot) {
 
 export function toPublicPosts(snapshot) {
   const categories = new Map(snapshot.categories.map((category) => [category.id, category]));
-  return [...snapshot.documents.values()].map((entry) => {
-    const metadata = entry.metadata;
-    const categoryId = snapshot.effectiveCategories.get(metadata.id);
-    const category = categories.get(categoryId);
-    const legacyCategory = metadata.legacy_category;
-    const resolve = linkResolver(snapshot, entry);
-    const markdown = rewriteContentLinks(entry.markdown, resolve);
-    const publicImage = (key) => {
-      const value = metadata[key];
-      return typeof value === "string" && !opaqueIcon(key, value)
-        ? resolve(value)
-        : value;
-    };
-    let compatibleCategory = categoryId === fallbackCategory ? "미분류" : categoryId;
-    if (category?.sources.includes(legacyCategory)) compatibleCategory = legacyCategory;
-    const excerpt = entry.markdown
-      .replace(/<[^>]*>/g, " ")
-      .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
-      .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-      .replace(/[#*`_>]/g, "")
-      .replace(/\s+/g, " ").trim().slice(0, 180);
-    return {
-      id: metadata.id,
-      title: metadata.title,
-      parentId: metadata.parent_id,
-      category: compatibleCategory,
-      categoryId,
-      createdAt: metadata.created,
-      updatedAt: metadata.updated,
-      markdown,
-      path: entry.filename,
-      url: metadata.source_url ?? "",
-      excerpt,
-      cover: publicImage("cover"),
-      icon: publicImage("icon"),
-      order: metadata.order ?? 0,
-      revision: entry.revision,
-      bodyLoaded: true,
-    };
-  }).sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt) || a.id.localeCompare(b.id));
+  return [...snapshot.documents.values()]
+    .map((entry) => publicPost(snapshot, entry, categories))
+    .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt) || a.id.localeCompare(b.id));
+}
+
+/** Project one pinned document without rewriting every other document body. */
+export function toPublicPost(snapshot, id) {
+  const entry = snapshot.documents.get(id);
+  if (!entry) return undefined;
+  const categories = new Map(snapshot.categories.map((category) => [category.id, category]));
+  return publicPost(snapshot, entry, categories);
+}
+
+function publicPost(snapshot, entry, categories) {
+  const metadata = entry.metadata;
+  const categoryId = snapshot.effectiveCategories.get(metadata.id);
+  const category = categories.get(categoryId);
+  const legacyCategory = metadata.legacy_category;
+  const resolve = linkResolver(snapshot, entry);
+  const markdown = rewriteContentLinks(entry.markdown, resolve);
+  const publicImage = (key) => {
+    const value = metadata[key];
+    return typeof value === "string" && !opaqueIcon(key, value)
+      ? resolve(value)
+      : value;
+  };
+  let compatibleCategory = categoryId === fallbackCategory ? "미분류" : categoryId;
+  if (category?.sources.includes(legacyCategory)) compatibleCategory = legacyCategory;
+  const excerpt = entry.markdown
+    .replace(/<[^>]*>/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/[#*`_>]/g, "")
+    .replace(/\s+/g, " ").trim().slice(0, 180);
+  return {
+    id: metadata.id,
+    title: metadata.title,
+    parentId: metadata.parent_id,
+    category: compatibleCategory,
+    categoryId,
+    createdAt: metadata.created,
+    updatedAt: metadata.updated,
+    markdown,
+    path: entry.filename,
+    url: metadata.source_url ?? "",
+    excerpt,
+    cover: publicImage("cover"),
+    icon: publicImage("icon"),
+    order: metadata.order ?? 0,
+    revision: entry.revision,
+    bodyLoaded: true,
+  };
 }
 
 /**

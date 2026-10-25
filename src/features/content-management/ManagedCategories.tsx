@@ -37,10 +37,11 @@ function categoryNodes(categories: CanonicalCategory[]): CategoryNode[] {
     }));
 }
 
-export default function ManagedCategories({ session, posts = [] }: {
+export default function ManagedCategories({ session, posts = [], onSaved }: {
   categories: PublicCategory[];
   session: ManagementSession;
   posts?: Post[];
+  onSaved?: (contentCommit?: string) => void;
 }) {
   const [source, setSource] = useState<{ categories: CanonicalCategory[]; revision: string; contentCommit: string }>();
   const [draft, setDraft] = useState<CategoryDraft>();
@@ -100,6 +101,12 @@ export default function ManagedCategories({ session, posts = [] }: {
       setDraftError("편집 내용을 보관하지 못했습니다. 화면을 닫기 전에 내용을 복사하십시오.");
     }
   }, [draft, publication, draftError]);
+
+  useEffect(() => {
+    if (publication && ["published", "superseded", "unchanged"].includes(publication.state)) {
+      onSaved?.(publication.contentCommit ?? publication.candidateCommit);
+    }
+  }, [publication?.state, publication?.contentCommit, publication?.candidateCommit, onSaved]);
 
   function stageNodes(nodes: CategoryNode[]) {
     if (!draft || busy) return;
@@ -213,7 +220,7 @@ export default function ManagedCategories({ session, posts = [] }: {
     posts={posts}
     canonical
     busy={busy}
-    note="원본 카테고리를 수정합니다. 저장 후 게시 검증을 시작합니다."
+    note="원본 카테고리를 수정합니다. 저장하면 공개 화면에 적용합니다."
     footer={footer}
     deleteError={deleteError}
     catalog={{

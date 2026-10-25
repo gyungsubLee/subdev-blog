@@ -29,6 +29,7 @@ type BlogViewProps = {
   onWrite: () => void;
   onEdit: (post: Post) => void;
   management?: Management;
+  onContentSaved?: (contentCommit?: string) => void;
 };
 
 export default function BlogView({
@@ -38,6 +39,7 @@ export default function BlogView({
   onWrite,
   onEdit,
   management,
+  onContentSaved,
 }: BlogViewProps) {
   const [dialog, setDialog] = useState<"tree" | null>(null);
   const [backHref, setBackHref] = useState(HOME_HREF);
@@ -111,7 +113,14 @@ export default function BlogView({
     if (!management) {
       page = <CategoriesPage posts={posts} catalog={catalog} />;
     } else if (management.session.state === "ready") {
-      page = <ManagedCategories categories={categories ?? []} posts={posts} session={management.session} />;
+      page = (
+        <ManagedCategories
+          categories={categories ?? []}
+          posts={posts}
+          session={management.session}
+          onSaved={onContentSaved}
+        />
+      );
     } else {
       page = (
         <main className="app-state" id="main-content" tabIndex={-1}>

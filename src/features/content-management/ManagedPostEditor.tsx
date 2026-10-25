@@ -22,10 +22,12 @@ export default function ManagedPostEditor({
   post,
   session,
   onClose,
+  onSaved,
 }: {
   post: Post | null;
   session: ManagementSession;
   onClose: () => void;
+  onSaved?: (contentCommit?: string) => void;
 }) {
   const [source, setSource] = useState<SourceDocument | null>(null);
   const [draft, setDraft] = useState<SourceDraft | null>(null);
@@ -105,6 +107,12 @@ export default function ManagedPostEditor({
       setDraftError("초안을 저장하지 못했습니다. Markdown으로 내보내십시오.");
     }
   }, [draft, publication, draftKey, draftError]);
+
+  useEffect(() => {
+    if (publication && ["published", "superseded", "unchanged"].includes(publication.state)) {
+      onSaved?.(publication.contentCommit ?? publication.candidateCommit);
+    }
+  }, [publication?.state, publication?.contentCommit, publication?.candidateCommit, onSaved]);
 
   function change(values: Partial<SourceDraft>) {
     setDraft((current) => current ? { ...current, ...values, operation: "save", requestId: crypto.randomUUID() } : null);
@@ -219,7 +227,7 @@ export default function ManagedPostEditor({
             </select></label>
             <label>본문 Markdown<textarea aria-label="본문 Markdown" value={draft.markdown} rows={22} spellCheck={false} onChange={(event) => change({ markdown: event.target.value })} /></label>
             <label>첨부 추가<input type="file" onChange={(event) => { void attach(event.target.files?.[0]); event.target.value = ""; }} /></label>
-            <p>입력한 내용은 이 브라우저에 초안으로 저장합니다. 원본 저장을 누르면 게시 검증을 시작합니다.</p>
+            <p>입력한 내용은 이 브라우저에 초안으로 저장합니다. 원본 저장을 누르면 GitHub에 저장합니다.</p>
             <button className="dark-button" type="submit">{saving ? "저장 요청 중" : "원본 저장"}</button>
             {post ? <button className="quiet-button" type="button" onClick={() => setConfirmDelete(true)}>글 삭제</button> : null}
           </fieldset>

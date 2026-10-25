@@ -4,7 +4,7 @@ import test, { after } from "node:test";
 import { JSDOM } from "jsdom";
 import { loadComponent } from "./support/load-component.mjs";
 
-const dom = new JSDOM('<div id="root"></div>', {
+const dom = new JSDOM('<!doctype html><div id="root"></div>', {
   url: "https://blog.example/#/",
   pretendToBeVisual: true,
 });
@@ -34,10 +34,10 @@ const { default: App } = await loadComponent("src/app/App.tsx");
 test("App loads summaries then the selected body and handles an invalid index", async () => {
   const nativeFetch = globalThis.fetch;
   const requests = [];
-  const contentRequests = () => requests.filter(({ url }) => url.startsWith("/content/")).map(({ url }) => url);
+  const contentRequests = () => requests.filter(({ url }) => url.startsWith("/api/public?")).map(({ url }) => url);
   const pending = new Map();
   globalThis.fetch = (url, options) => {
-    requests.push({ url, signal: options.signal });
+    requests.push({ url, signal: options?.signal });
     return new Promise((resolve) => pending.set(url, resolve));
   };
   let root = createRoot(document.getElementById("root"));
@@ -56,13 +56,12 @@ test("App loads summaries then the selected body and handles an invalid index", 
   try {
     await act(async () => root.render(React.createElement(App)));
     assert.match(document.querySelector(".app-state").textContent, /불러오는 중/);
-    assert.deepEqual(contentRequests(), ["/content/index.json", "/content/categories.json"]);
+    assert.deepEqual(contentRequests(), ["/api/public?kind=index"]);
     assert.ok(requests.some(({ url }) => url === "/api/session"));
-    await respond("/content/categories.json", [{
+    await respond("/api/public?kind=index", { posts: [post], categories: [{
       id: "canonical", name: "정식 분류", parentId: null,
       order: 0, sources: ["canonical", "개발"],
-    }]);
-    await respond("/content/index.json", [post]);
+    }], contentCommit: "a".repeat(40) });
     assert.equal(document.querySelectorAll(".home-article-card").length, 1);
     for (const [selector, pageClass] of [
       ['.header-navigation a[href="#/records"]', ".records-page"],
@@ -71,25 +70,25 @@ test("App loads summaries then the selected body and handles an invalid index", 
       const link = document.querySelector(selector);
       assert.ok(link !== null, "expected navigation link: " + selector);
       await act(async () => {
-        const changed = once(dom.window, "hashchange");
+        const changed = once(dom.window, "hashchange", { signal: AbortSignal.timeout(2000) });
         link.click();
         await changed;
       });
       assert.ok(document.querySelector(pageClass) !== null);
-      assert.deepEqual(contentRequests(), ["/content/index.json", "/content/categories.json"]);
+      assert.deepEqual(contentRequests(), ["/api/public?kind=index"]);
     }
     await act(async () => {
-      const changed = once(dom.window, "hashchange");
+      const changed = once(dom.window, "hashchange", { signal: AbortSignal.timeout(2000) });
       dom.window.location.hash = "#/post/parent";
       await changed;
     });
     assert.deepEqual(contentRequests(), [
-      "/content/index.json", "/content/categories.json", "/content/posts/parent.json",
+      "/api/public?kind=index", "/api/public?kind=post&id=parent&commit=" + "a".repeat(40),
     ]);
     assert.equal(document.querySelector(".article-prose").getAttribute("aria-busy"), "true");
     assert.ok(!document.querySelector(".article-prose").textContent.includes("PREVIEW_ONLY"));
     assert.ok([...document.querySelectorAll(".article-actions button")].every((button) => button.disabled));
-    await respond("/content/posts/parent.json", {
+    await respond("/api/public?kind=post&id=parent&commit=" + "a".repeat(40), {
       ...post, markdown: "# 본문 검사\n\nFULL_BODY", bodyLoaded: true,
     });
     assert.match(document.querySelector(".article-prose").textContent, /FULL_BODY/);
@@ -103,8 +102,7 @@ test("App loads summaries then the selected body and handles an invalid index", 
     dom.window.history.replaceState(null, "", "/#/");
     root = createRoot(document.getElementById("root"));
     await act(async () => root.render(React.createElement(App)));
-    await respond("/content/categories.json", []);
-    await respond("/content/index.json", { invalid: true });
+    await respond("/api/public?kind=index", { posts: { invalid: true }, categories: [], contentCommit: "a".repeat(40) });
     assert.match(document.querySelector('[role="alert"]').textContent, /글 파일 형식/);
   } finally {
     await act(async () => root.unmount());
@@ -125,7 +123,7 @@ test("App loads distinct canonical categories sharing a display name", async () 
     markdown: "Body", excerpt: "Summary", path: "post-" + index + ".md", url: "",
   }));
   const responses = new Map([
-    ["/content/index.json", posts], ["/content/categories.json", categories],
+    ["/api/public?kind=index", { posts, categories, contentCommit: "a".repeat(40) }],
     ["/api/session", { state: "signed_out" }],
   ]);
   globalThis.fetch = async (url) => {
@@ -146,6 +144,137 @@ test("App loads distinct canonical categories sharing a display name", async () 
   } finally {
     await act(async () => root.unmount());
     globalThis.fetch = nativeFetch;
+  }
+});
+
+const managedId = "12345678-1234-8234-9234-123456789012";
+const managedPost = {
+  id: managedId, title: "저장 전 글", parentId: null, category: "notes", categoryId: "notes",
+  createdAt: "2026-10-22T00:00:00.000Z", updatedAt: "2026-10-22T00:00:00.000Z",
+  markdown: "저장 전 본문", excerpt: "요약", path: "posts/" + managedId + "/글.md", url: "",
+};
+const managedCategories = [{ id: "notes", name: "기록", parentId: null, order: 0, sources: ["notes"] }];
+const canonicalCategories = [{ id: "notes", name: "기록", parent_id: null, order: 0, sources: ["notes"] }];
+const readySession = { state: "ready", user: { id: 12, login: "owner" }, csrfToken: "csrf" };
+const reply = (data) => ({ ok: true, json: async () => data });
+
+for (const operation of ["update", "create", "delete"]) {
+  test(`App refreshes the public index after post ${operation} and reads the saved body after closing`, { timeout: 5000 }, async () => {
+    const previous = globalThis.fetch;
+    const requests = [];
+    const savedCommit = "c".repeat(40);
+    let saved = false;
+    globalThis.fetch = async (url, options = {}) => {
+      requests.push(url);
+      if (url === "/api/session") return reply(readySession);
+      if (url.startsWith("/api/public?kind=index")) return reply({
+        posts: saved
+          ? operation === "delete" ? [] : [{ ...managedPost, title: "저장한 글", markdown: "SUMMARY", bodyLoaded: false }]
+          : operation === "create" ? [] : [managedPost],
+        categories: managedCategories,
+        contentCommit: saved ? savedCommit : "b".repeat(40),
+      });
+      if (url.startsWith("/api/public?kind=post")) {
+        assert.equal(new URL(url, "https://blog.example").searchParams.get("commit"), savedCommit);
+        return reply({ ...managedPost, title: "저장한 글", markdown: "저장한 전체 본문", bodyLoaded: true });
+      }
+      if (url.startsWith("/api/content?")) return reply({
+        document: { metadata: { id: managedId, title: "저장한 글", category_id: "notes" }, markdown: "저장한 전체 본문" },
+        revision: operation === "create" ? null : "a".repeat(64), contentCommit: "b".repeat(40),
+        categories: canonicalCategories, assets: [],
+      });
+      assert.equal(url, "/api/content");
+      assert.equal(JSON.parse(options.body).operation.type, "post." + operation);
+      saved = true;
+      return reply({ requestId: "request", candidateCommit: savedCommit, contentCommit: savedCommit, state: "published" });
+    };
+    dom.window.history.replaceState(null, "", operation === "create" ? "/#/" : "/#/post/" + managedId);
+    const root = createRoot(document.getElementById("root"));
+    try {
+      await act(async () => root.render(React.createElement(App)));
+      const edit = operation === "create" ? document.querySelector("button.header-write")
+        : [...document.querySelectorAll(".article-actions button")].find((button) => button.textContent.includes("편집하기"));
+      assert.ok(edit !== null && edit !== undefined, "An authenticated reader can open the editor");
+      await act(async () => edit.click());
+      assert.ok(document.querySelector(".managed-editor") !== null);
+      if (operation === "delete") {
+        const remove = [...document.querySelectorAll("button")].find((button) => button.textContent === "글 삭제");
+        await act(async () => remove.click());
+        await act(async () => document.querySelector('[role="alertdialog"] button').click());
+      } else {
+        await act(async () => document.querySelector('button[type="submit"]').click());
+      }
+      assert.equal(document.querySelector('.publish-status [role="status"]').textContent, "게시 완료");
+      assert.ok(requests.includes("/api/public?kind=index&after=" + savedCommit), "The refresh must bypass an older cached index");
+      await act(async () => document.querySelector(".management-toolbar button").click());
+      assert.ok(document.querySelector(".managed-editor") === null);
+      if (operation === "create") {
+        assert.match(document.querySelector("main").textContent, /저장한 글/);
+        await act(async () => {
+          const changed = once(dom.window, "hashchange", { signal: AbortSignal.timeout(2000) });
+          dom.window.location.hash = "#/post/" + managedId;
+          await changed;
+        });
+      }
+      if (operation === "delete") {
+        assert.ok(document.querySelector(".article-prose") === null, "A deleted article must disappear immediately");
+        assert.doesNotMatch(document.querySelector("main").textContent, /저장 전 본문/);
+      } else {
+        assert.match(document.querySelector(".article-prose").textContent, /저장한 전체 본문/);
+        assert.doesNotMatch(document.querySelector(".article-prose").textContent, /SUMMARY|저장 전 본문/);
+      }
+      assert.equal(requests.some((url) => url.startsWith("/api/publish")), false, "Direct saves need no publication polling");
+    } finally {
+      await act(async () => root.unmount());
+      localStorage.clear();
+      dom.window.history.replaceState(null, "", "/#/");
+      globalThis.fetch = previous;
+    }
+  });
+}
+
+test("App refreshes public category names after saving canonical categories", { timeout: 5000 }, async () => {
+  const previous = globalThis.fetch;
+  const requests = [];
+  let saved = false;
+  globalThis.fetch = async (url) => {
+    requests.push(url);
+    if (url === "/api/session") return reply(readySession);
+    if (url.startsWith("/api/public?kind=index")) return reply({
+      posts: [managedPost],
+      categories: saved ? [{ ...managedCategories[0], name: "새 분류" }] : managedCategories,
+      contentCommit: (saved ? "c" : "b").repeat(40),
+    });
+    if (url === "/api/content?kind=categories") return reply({ categories: canonicalCategories, revision: "a".repeat(64), contentCommit: "b".repeat(40) });
+    assert.equal(url, "/api/content");
+    saved = true;
+    return reply({ state: "published", requestId: "request", candidateCommit: "c".repeat(40), contentCommit: "c".repeat(40) });
+  };
+  dom.window.history.replaceState(null, "", "/#/categories");
+  const root = createRoot(document.getElementById("root"));
+  try {
+    await act(async () => root.render(React.createElement(App)));
+    await act(async () => document.querySelector('button[aria-label="기록 수정"]').click());
+    const input = document.querySelector("#inline-name");
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(input, "새 분류");
+      input.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+    });
+    await act(async () => document.querySelector("#inline-form").dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true })));
+    await act(async () => document.querySelector("#save-all").click());
+    assert.ok(requests.includes("/api/public?kind=index&after=" + "c".repeat(40)));
+    await act(async () => {
+      const changed = once(dom.window, "hashchange", { signal: AbortSignal.timeout(2000) });
+      document.querySelector('.header-navigation a[href="#/records"]').click();
+      await changed;
+    });
+    assert.match(document.querySelector(".records-sidebar").textContent, /새 분류/);
+    assert.equal(document.querySelector(".post-meta span").textContent, "새 분류");
+  } finally {
+    await act(async () => root.unmount());
+    localStorage.clear();
+    dom.window.history.replaceState(null, "", "/#/");
+    globalThis.fetch = previous;
   }
 });
 

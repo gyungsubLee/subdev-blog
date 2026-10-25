@@ -11,9 +11,10 @@ export function createGitHubClient(token, fetcher = globalThis.fetch) {
     try {
       response = await fetcher(`https://api.github.com${path}`, {
         method,
+        signal: AbortSignal.timeout(15000),
         headers: {
           Accept: 'application/vnd.github+json',
-          Authorization: `Bearer ${token}`,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
           'X-GitHub-Api-Version': '2026-03-10',
           ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
           ...headers,

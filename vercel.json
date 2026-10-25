@@ -43,5 +43,11 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "server/content-catalog.json",
+      "excludeFiles": "{content,public,tests,docs}/**"
+    }
+  }
 }

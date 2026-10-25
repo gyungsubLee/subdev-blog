@@ -1,5 +1,6 @@
 import { copyFile, mkdir, mkdtemp, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { rewriteContentLinks } from "../src/shared/content-links.mjs";
 import { getContentProvenance, readContent, toPublicCategories, toPublicPosts } from "./content.mjs";
 
 const snapshot = await readContent(process.env.CONTENT_ROOT ?? "content");
@@ -65,5 +66,33 @@ try {
     }
   }
 }
+// Keep source summaries with their Git blob IDs so a cold server reads only changed files.
+const references = new Map(posts.map((post) => {
+  const ids = new Set();
+  const collect = (destination) => {
+    if (typeof destination === "string" && destination.startsWith("#/post/")) {
+      ids.add(destination.slice(7).split(/[?#]/)[0]);
+    }
+    return destination;
+  };
+  rewriteContentLinks(post.markdown, collect);
+  collect(post.cover);
+  collect(post.icon);
+  return [post.id, [...ids]];
+}));
+const catalog = {
+  version: 1,
+  documents: [...snapshot.documents.values()].map((entry) => ({
+    blobSha: entry.blobSha,
+    metadata: entry.metadata,
+    markdown: entry.markdown.slice(0, 1400),
+    filename: entry.filename,
+    revision: entry.revision,
+    assets: entry.allAssets.map((asset) => ({ name: asset.name })),
+    references: references.get(entry.metadata.id),
+  })),
+};
+await mkdir("server", { recursive: true });
+await writeFile("server/content-catalog.json", JSON.stringify(catalog));
 console.log("Prepared " + posts.length + " page summaries and separate article bodies.");
 console.log("Content root: " + snapshot.root + "; content commit: " + provenance.contentCommit + " (" + provenance.contentState + ").");

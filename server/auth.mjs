@@ -10,7 +10,6 @@ export function loadConfig(env = process.env) {
     adminUserId: Number(env.GITHUB_ADMIN_USER_ID),
     appId: Number(env.GITHUB_APP_ID),
     installationId: Number(env.GITHUB_INSTALLATION_ID),
-    workflow: 'publish-content.yml',
     app: {
       owner: 'gyungsubLee',
       repo: 'subdev-blog',
@@ -99,7 +98,7 @@ export async function checkConnection(token, config, fetcher) {
   const app = installations.installations?.find(item => item.id === config.installationId);
   const allowedPermissions = { contents: 'write', actions: 'write', metadata: 'read' };
   const permissions = app?.permissions || {};
-  const hasRequiredPermissions = permissions.contents === 'write' && permissions.actions === 'write';
+  const hasRequiredPermissions = permissions.contents === 'write';
   const hasExcessPermissions = Object.entries(permissions).some(([name, level]) => allowedPermissions[name] !== level);
   if (!app || app.app_id !== config.appId || app.suspended_at || !hasRequiredPermissions || hasExcessPermissions) {
     throw httpError(403, 'GitHub App installation is not ready');
@@ -146,11 +145,6 @@ export async function checkConnection(token, config, fetcher) {
   for (const path of ['categories.json', 'posts', 'CONTENT_SCHEMA.md']) {
     await github(`${contentBase}/contents/${path}?ref=${heads[1]}`);
   }
-  const workflow = await github(`${appBase}/actions/workflows/${config.workflow}`);
-  if (workflow.state !== 'active') {
-    throw httpError(403, 'Publishing workflow is inactive');
-  }
-  await github(`${appBase}/contents/.github/workflows/${config.workflow}?ref=${heads[0]}`);
   return {
     repository: `${config.content.owner}/${config.content.repo}`,
     branch: config.content.branch,

@@ -13,6 +13,7 @@ export async function handleRequest(request, { env = process.env, fetcher = glob
   const url = new URL(request.url);
   const path = url.pathname === '/api' ? `/api/${url.searchParams.get('path') || ''}` : url.pathname;
   const allowed = {
+    '/api/public': ['GET'],
     '/api/auth/github': ['GET'],
     '/api/auth/callback': ['GET'],
     '/api/session': ['GET'],
@@ -24,6 +25,13 @@ export async function handleRequest(request, { env = process.env, fetcher = glob
   if (!allowed[path]) return json({ error: 'Not found' }, 404);
   if (!allowed[path].includes(request.method)) return json({ error: 'Method not allowed' }, 405);
   try {
+    if (path === '/api/public') {
+      const { handlePublicRequest } = await import('./public-content.mjs');
+      const normalized = new URL(request.url);
+      normalized.pathname = path;
+      normalized.searchParams.delete('path');
+      return await handlePublicRequest(new Request(normalized, request), { env, fetcher });
+    }
     const config = loadConfig(env);
     if (path === '/api/auth/github') {
       const state = randomBytes(32).toString('base64url');

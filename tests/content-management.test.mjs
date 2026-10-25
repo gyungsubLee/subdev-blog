@@ -49,7 +49,8 @@ test("public articles render while authentication is pending and writing require
   const previous = globalThis.fetch;
   globalThis.fetch = async (url) => {
     if (url === "/api/session") return new Promise(() => {});
-    return reply(url === "/content/index.json" ? [post] : categories);
+    assert.equal(url, "/api/public?kind=index");
+    return reply({ posts: [post], categories, contentCommit: "b".repeat(40) });
   };
   try {
     await mounted(React.createElement(App), async () => {
@@ -74,7 +75,8 @@ test("category management is hidden when authentication is unavailable, includin
   const previous = globalThis.fetch;
   globalThis.fetch = async (url) => {
     if (url === "/api/session") throw new Error("offline");
-    return reply(url === "/content/index.json" ? [post] : categories);
+    assert.equal(url, "/api/public?kind=index");
+    return reply({ posts: [post], categories, contentCommit: "b".repeat(40) });
   };
   dom.window.history.replaceState(null, "", "/#/categories");
   try {
@@ -97,7 +99,8 @@ test("public records keep category filters and hide management links without log
   const previous = globalThis.fetch;
   globalThis.fetch = async (url) => {
     if (url === "/api/session") return reply({ state: "signed_out" });
-    return reply(url === "/content/index.json" ? [post] : categories);
+    assert.equal(url, "/api/public?kind=index");
+    return reply({ posts: [post], categories, contentCommit: "b".repeat(40) });
   };
   dom.window.history.replaceState(null, "", "/#/records");
   try {
@@ -116,7 +119,8 @@ test("logging out an expired session restores public controls and login", async 
   globalThis.fetch = async (url) => {
     if (url === "/api/session") return reply(ready);
     if (url === "/api/logout") return reply({ error: "Session expired" }, 401);
-    return reply(url === "/content/index.json" ? [post] : categories);
+    assert.equal(url, "/api/public?kind=index");
+    return reply({ posts: [post], categories, contentCommit: "b".repeat(40) });
   };
   try {
     await mounted(React.createElement(App), async () => {
@@ -132,46 +136,39 @@ test("logging out an expired session restores public controls and login", async 
   }
 });
 
-test("fresh publication responses clear stale alerts and retain current errors", { timeout: 5000 }, async (t) => {
+test("direct publication succeeds without polling and clears a stale retry error", { timeout: 5000 }, async (t) => {
   const { default: PublishStatus } = await loadComponent("src/features/content-management/PublishStatus.tsx");
   const previous = globalThis.fetch;
-  let polls = 0;
-  globalThis.fetch = async (_url, options = {}) => {
-    if (options.method === "POST") return reply({ state: "saved", runId: 2 });
-    polls++;
-    return reply(polls === 1
-      ? { state: "published" }
-      : { state: "pending", error: "Current workflow warning" });
+  const requests = [];
+  globalThis.fetch = async (url, options = {}) => {
+    requests.push({ url, method: options.method, body: JSON.parse(options.body) });
+    return reply(requests.length === 1
+      ? { state: "published", contentCommit: "c".repeat(40) }
+      : { state: "pending", error: "Current save warning" });
   };
   const initial = {
-    requestId: "request", candidateCommit: "c".repeat(40), runId: 1,
-    state: "pending", error: "Publication did not complete; resume this request.",
+    requestId: "request", candidateCommit: "c".repeat(40), state: "pending",
+    error: "The save response was lost; resume this request.",
   };
-  function PublicationStatus({ initial }) {
+  function PublicationStatus() {
     const [publication, setPublication] = React.useState(initial);
     return React.createElement(PublishStatus, { publication, csrfToken: "test-csrf", onChange: setPublication });
   }
   t.mock.timers.enable({ apis: ["setTimeout"] });
   try {
-    await mounted(React.createElement(PublicationStatus, { initial }), async (root) => {
+    await mounted(React.createElement(PublicationStatus), async (root) => {
       assert.equal(document.querySelector('[role="alert"]').textContent, initial.error);
       await act(async () => document.querySelector(".publish-status button").click());
-      assert.equal(document.querySelector('[role="status"]').textContent, "원본 저장 완료");
-      assert.ok(document.querySelector('[role="alert"]') === null, "A successful retry must clear the previous error");
-      await act(async () => root.render(React.createElement(PublicationStatus, {
-        key: "poll", initial: { ...initial, state: "saved" },
-      })));
-      assert.equal(document.querySelector('[role="alert"]').textContent, initial.error);
-      await act(async () => t.mock.timers.tick(1500));
-      assert.equal(polls, 1);
       assert.equal(document.querySelector('[role="status"]').textContent, "게시 완료");
-      assert.ok(document.querySelector('[role="alert"]') === null, "A successful poll must clear the previous error");
-      await act(async () => root.render(React.createElement(PublicationStatus, {
-        key: "new-error", initial: { ...initial, state: "saved" },
-      })));
-      await act(async () => t.mock.timers.tick(1500));
-      assert.equal(polls, 2);
-      assert.equal(document.querySelector('[role="alert"]').textContent, "Current workflow warning");
+      assert.ok(document.querySelector('[role="alert"]') === null, "A successful retry must clear the previous error");
+      await act(async () => t.mock.timers.tick(60000));
+      assert.deepEqual(requests, [{
+        url: "/api/publish", method: "POST",
+        body: { requestId: "request", candidateCommit: "c".repeat(40) },
+      }], "A direct success must not poll for an Actions run");
+      await act(async () => root.render(React.createElement(PublicationStatus, { key: "current-error" })));
+      await act(async () => document.querySelector(".publish-status button").click());
+      assert.equal(document.querySelector('[role="alert"]').textContent, "Current save warning", "The current response error must replace a stale error");
     });
   } finally {
     t.mock.timers.reset();
@@ -179,18 +176,21 @@ test("fresh publication responses clear stale alerts and retain current errors",
   }
 });
 
-test("publication polling preserves the first check, waits thirty seconds and stops after publication", { timeout: 5000 }, async (t) => {
+test("legacy publication checks resolve without an Actions run and stop after publication", { timeout: 5000 }, async (t) => {
   const { default: PublishStatus } = await loadComponent("src/features/content-management/PublishStatus.tsx");
   const previous = globalThis.fetch;
   let polls = 0;
   globalThis.fetch = async (url) => {
-    assert.ok(url.startsWith("/api/publish?"), "Polling must read publication status");
+    const params = new URL(url, "https://blog.example").searchParams;
+    assert.equal(params.get("requestId"), "request");
+    assert.equal(params.get("candidateCommit"), "c".repeat(40));
+    assert.equal(params.has("runId"), false, "A saved draft must not require an Actions run");
     polls++;
-    return reply({ state: polls === 1 ? "saved" : "published" });
+    return reply({ state: polls === 1 ? "saved" : "published", contentCommit: "c".repeat(40) });
   };
   function PublicationStatus() {
     const [publication, setPublication] = React.useState({
-      requestId: "request", candidateCommit: "c".repeat(40), runId: 1, state: "saved",
+      requestId: "request", candidateCommit: "c".repeat(40), state: "saved",
     });
     return React.createElement(PublishStatus, { publication, csrfToken: "test-csrf", onChange: setPublication });
   }
@@ -198,18 +198,16 @@ test("publication polling preserves the first check, waits thirty seconds and st
   try {
     await mounted(React.createElement(PublicationStatus), async () => {
       await act(async () => t.mock.timers.tick(1499));
-      assert.equal(polls, 0, "The first poll must wait 1.5 seconds");
+      assert.equal(polls, 0, "The first check must wait 1.5 seconds");
       await act(async () => t.mock.timers.tick(1));
       assert.equal(polls, 1);
-      await act(async () => t.mock.timers.tick(5000));
-      assert.equal(polls, 1, "Five seconds must not trigger another GitHub status check");
-      await act(async () => t.mock.timers.tick(24999));
-      assert.equal(polls, 1, "Recurring polls must wait the full thirty seconds");
+      await act(async () => t.mock.timers.tick(29999));
+      assert.equal(polls, 1, "Recurring checks must wait thirty seconds");
       await act(async () => t.mock.timers.tick(1));
       assert.equal(polls, 2);
       assert.equal(document.querySelector('[role="status"]').textContent, "게시 완료");
       await act(async () => t.mock.timers.tick(60000));
-      assert.equal(polls, 2, "Published requests must stop polling");
+      assert.equal(polls, 2, "Published requests must stop checking");
     });
   } finally {
     t.mock.timers.reset();
@@ -217,7 +215,7 @@ test("publication polling preserves the first check, waits thirty seconds and st
   }
 });
 
-test("canonical title edits send untouched Markdown and CSRF to a candidate publication", async () => {
+test("canonical title edits preserve Markdown and CSRF then refresh the published commit", async () => {
   const { default: Editor } = await loadComponent("src/features/content-management/ManagedPostEditor.tsx");
   const markdown = "\n# Keep H1\n\n<details>\n<summary>Keep HTML</summary>\nraw\n</details>\n";
   const requests = [];
@@ -229,11 +227,12 @@ test("canonical title edits send untouched Markdown and CSRF to a candidate publ
       revision: "a".repeat(64), contentCommit: "b".repeat(40),
       categories: [{ id: "notes", name: "기록", parent_id: null, order: 0, sources: ["notes"] }], assets: [],
     });
-    if (url === "/api/content") return reply({ requestId: "request", candidateCommit: "c".repeat(40), runId: 1, runUrl: "https://github.com/gyungsubLee/subdev-blog/actions/runs/1", state: "validating" });
+    if (url === "/api/content") return reply({ requestId: "request", candidateCommit: "c".repeat(40), contentCommit: "c".repeat(40), state: "published" });
     return reply({ state: "validating" });
   };
+  const refreshed = [];
   try {
-    await mounted(React.createElement(Editor, { post, session: ready, onClose() {} }), async () => {
+    await mounted(React.createElement(Editor, { post, session: ready, onClose() {}, onSaved: (commit) => refreshed.push(commit) }), async () => {
       const title = document.querySelector('input[aria-label="글 제목"]');
       await act(async () => {
         Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(title, "새 제목");
@@ -248,7 +247,8 @@ test("canonical title edits send untouched Markdown and CSRF to a candidate publ
       assert.equal(body.operation.markdown, markdown);
       assert.equal(body.operation.changes.title, "새 제목");
       assert.equal(body.baseCommit, "b".repeat(40));
-      assert.match(document.querySelector('[role="status"]').textContent, /검증 중/);
+      assert.equal(document.querySelector('[role="status"]').textContent, "게시 완료");
+      assert.deepEqual(refreshed, ["c".repeat(40)]);
     });
   } finally {
     globalThis.fetch = previous;
