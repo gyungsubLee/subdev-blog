@@ -1,5 +1,6 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { createGitHubClient, httpError } from './github.mjs';
+import { createManagementGitHubClient } from './management-read-cache.mjs';
 
 export function loadConfig(env = process.env) {
   const config = {
@@ -92,9 +93,11 @@ export async function authenticate(request, config, fetcher, { mutate = false } 
 }
 
 export async function checkConnection(token, config, fetcher) {
-  const github = createGitHubClient(token, fetcher);
-  const installation = await github(`/user/installations/${config.installationId}/repositories`);
-  const installations = await github('/user/installations');
+  const github = createManagementGitHubClient(token, config, fetcher);
+  const [installation, installations] = await Promise.all([
+    github(`/user/installations/${config.installationId}/repositories`),
+    github('/user/installations'),
+  ]);
   const app = installations.installations?.find(item => item.id === config.installationId);
   const allowedPermissions = { contents: 'write', actions: 'write', metadata: 'read' };
   const permissions = app?.permissions || {};
@@ -113,8 +116,7 @@ export async function checkConnection(token, config, fetcher) {
       (installation.total_count !== undefined && installation.total_count !== 2)) {
     throw httpError(403, 'GitHub App must select exactly the two configured repositories');
   }
-  const heads = [];
-  for (const repository of [config.app, config.content]) {
+  const heads = await Promise.all([config.app, config.content].map(async repository => {
     if (!installation.repositories?.some(item => item.id === repository.id)) {
       throw httpError(403, 'Repository is outside the installation');
     }
@@ -127,12 +129,14 @@ export async function checkConnection(token, config, fetcher) {
       throw httpError(403, 'Publishing requires the app repository default branch');
     }
     const branch = await github(`${base}/branches/${encodeURIComponent(repository.branch)}`);
-    heads.push(branch.commit.sha);
-  }
+    return branch.commit.sha;
+  }));
   const appBase = `/repos/${config.app.owner}/${config.app.repo}`;
   const contentBase = `/repos/${config.content.owner}/${config.content.repo}`;
-  const gitlink = await github(`${appBase}/contents/content?ref=${heads[0]}`);
-  const modules = await github(`${appBase}/contents/.gitmodules?ref=${heads[0]}`);
+  const [gitlink, modules] = await Promise.all([
+    github(`${appBase}/contents/content?ref=${heads[0]}`),
+    github(`${appBase}/contents/.gitmodules?ref=${heads[0]}`),
+  ]);
   const moduleText = Buffer.from(modules.content || '', 'base64').toString();
   const contentModule = moduleText.split(/(?=^\s*\[)/m).find(section => /^\s*\[submodule \"content\"\]/.test(section));
   const hasContentPath = contentModule && /^\s*path\s*=\s*content\s*$/m.test(contentModule);
@@ -142,9 +146,8 @@ export async function checkConnection(token, config, fetcher) {
   if (!hasSubmoduleType || !hasContentPath || !hasContentUrl || gitlink.submodule_git_url !== expectedUrl) {
     throw httpError(403, 'Content submodule configuration is invalid');
   }
-  for (const path of ['categories.json', 'posts', 'CONTENT_SCHEMA.md']) {
-    await github(`${contentBase}/contents/${path}?ref=${heads[1]}`);
-  }
+  await Promise.all(['categories.json', 'posts', 'CONTENT_SCHEMA.md'].map(path =>
+    github(`${contentBase}/contents/${path}?ref=${heads[1]}`)));
   return {
     repository: `${config.content.owner}/${config.content.repo}`,
     branch: config.content.branch,

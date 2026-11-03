@@ -51,7 +51,7 @@ function setup(options = {}) {
         const body = options.body ? JSON.parse(options.body) : undefined;
         const method = options.method || 'GET';
         calls.push({
-            path, method, body, repository, host:parsedUrl.host
+            path, method, body, repository, host:parsedUrl.host, recursive:parsedUrl.searchParams.get('recursive') === '1'
         });
         if (parsedUrl.host === 'raw.githubusercontent.com') {
             const [, , , commit, ...parts] = parsedUrl.pathname.split('/');
@@ -947,4 +947,18 @@ test('publish revalidates editor pairing and allows mutable editor settings on r
         assert.equal(result.status, paired ? 200 : 422);
         assert.equal(f.refs.get('heads/main'), paired ? candidateCommit : f.base);
     }
+});
+
+test('category reads avoid recursive trees and reuse the immutable source while checking head', { timeout: 5000 }, async () => {
+    const f = setup();
+    const first = await f.call('content?kind=categories');
+    assert.equal(first.status, 200);
+    assert.equal(first.categories[0].name, 'Other');
+    assert.equal(first.cacheControl, 'no-store');
+    const before = f.calls.length;
+    const second = await f.call('content?kind=categories');
+    assert.equal(second.revision, first.revision);
+    assert.equal(second.contentCommit, first.contentCommit);
+    assert.equal(f.calls.length - before, 1, 'Repeat reads must only resolve the current head');
+    assert.equal(f.calls.filter(call => call.path.startsWith('/git/trees/') && call.recursive).length, 0);
 });

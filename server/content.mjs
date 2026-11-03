@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { posix } from 'node:path';
 import { createGitHubClient, httpError } from './github.mjs';
+import { createManagementGitHubClient } from './management-read-cache.mjs';
 import { parseMarkdownDocument, serializeMarkdownDocument, mergeDocumentPatch, canonicalFilename } from '../src/shared/document.mjs';
 import { rewriteContentLinks } from '../src/shared/content-links.mjs';
 import { EDITOR_FILENAME, isEditorFilename, validateEditorDocument } from '../src/shared/editor-document.mjs';
@@ -95,7 +96,11 @@ function flatName(name) {
 }
 
 export async function handleContentRequest(request, { token, config, fetcher, connection, catalog }) {
-    const github = createGitHubClient(token, fetcher);
+    const categoryRead = request.method === 'GET' && new URL(request.url).pathname === '/api/content' &&
+        new URL(request.url).searchParams.get('kind') === 'categories';
+    const github = categoryRead
+        ? createManagementGitHubClient(token, config, fetcher)
+        : createGitHubClient(token, fetcher);
     const content = `/repos/${config.content.owner}/${config.content.repo}`;
     const call = (path, options) => github(content + path, options);
     const blob = async (sha) => {
@@ -104,9 +109,9 @@ export async function handleContentRequest(request, { token, config, fetcher, co
         return Buffer.from(value.content.replace(/\s/g, ''), 'base64');
     };
     const head = async () => commitSha((await call('/git/ref/heads/' + encodeURIComponent(config.content.branch))).object.sha);
-    const snapshot = async (commit) => {
+    const snapshot = async (commit, recursive = true) => {
         const record = await call('/git/commits/' + commitSha(commit));
-        const result = await call('/git/trees/' + record.tree.sha + '?recursive=1');
+        const result = await call('/git/trees/' + record.tree.sha + (recursive ? '?recursive=1' : ''));
         requireValue(!result.truncated && Array.isArray(result.tree), 'Repository tree is incomplete', 502);
         return {
             commit, treeSha: record.tree.sha, entries: result.tree
@@ -444,10 +449,11 @@ export async function handleContentRequest(request, { token, config, fetcher, co
             return json({ sha: await writeBlob(bytes), size: bytes.length });
         }
         if (url.pathname === '/api/content' && request.method === 'GET') {
-            const contentCommit = await head();
-            const tree = await snapshot(contentCommit);
-            const categories = await readCategories(tree);
             const kind = url.searchParams.get('kind');
+            const contentCommit = categoryRead && connection?.contentCommit
+                ? commitSha(connection.contentCommit) : await head();
+            const tree = await snapshot(contentCommit, !categoryRead);
+            const categories = await readCategories(tree);
             if (kind === 'categories')
                 return json({ ...categories, contentCommit });
             if (kind === 'new') {

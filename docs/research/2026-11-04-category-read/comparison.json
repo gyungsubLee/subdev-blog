@@ -1,0 +1,159 @@
+{
+  "mode": "Actual before/after handlers; identical simulated GitHub latency, no live production timing",
+  "latencyMs": 20,
+  "categoryCount": 48,
+  "recursiveTreeEntries": 10291,
+  "node": "v24.3.0",
+  "summary": [
+    {
+      "implementation": "baseline",
+      "phase": "cold",
+      "medianMs": 429.62,
+      "githubRequests": 16,
+      "maxConcurrent": 1
+    },
+    {
+      "implementation": "baseline",
+      "phase": "warm",
+      "medianMs": 373.43,
+      "githubRequests": 16,
+      "maxConcurrent": 1
+    },
+    {
+      "implementation": "improved",
+      "phase": "cold",
+      "medianMs": 207.67,
+      "githubRequests": 15,
+      "maxConcurrent": 3
+    },
+    {
+      "implementation": "improved",
+      "phase": "warm",
+      "medianMs": 92.8,
+      "githubRequests": 7,
+      "maxConcurrent": 2
+    }
+  ],
+  "results": [
+    {
+      "implementation": "baseline",
+      "sample": 0,
+      "phase": "cold",
+      "durationMs": 519.09,
+      "githubRequests": 16,
+      "maxConcurrent": 1,
+      "recursiveTree": true,
+      "responseSha256": "3fd930af4676d1aca977e66a6810753ed940c3d51aa4952b43959c06b6bc6b95"
+    },
+    {
+      "implementation": "baseline",
+      "sample": 0,
+      "phase": "warm",
+      "durationMs": 373.43,
+      "githubRequests": 16,
+      "maxConcurrent": 1,
+      "recursiveTree": true,
+      "responseSha256": "3fd930af4676d1aca977e66a6810753ed940c3d51aa4952b43959c06b6bc6b95"
+    },
+    {
+      "implementation": "baseline",
+      "sample": 1,
+      "phase": "cold",
+      "durationMs": 429.62,
+      "githubRequests": 16,
+      "maxConcurrent": 1,
+      "recursiveTree": true,
+      "responseSha256": "3fd930af4676d1aca977e66a6810753ed940c3d51aa4952b43959c06b6bc6b95"
+    },
+    {
+      "implementation": "baseline",
+      "sample": 1,
+      "phase": "warm",
+      "durationMs": 366.47,
+      "githubRequests": 16,
+      "maxConcurrent": 1,
+      "recursiveTree": true,
+      "responseSha256": "3fd930af4676d1aca977e66a6810753ed940c3d51aa4952b43959c06b6bc6b95"
+    },
+    {
+      "implementation": "baseline",
+      "sample": 2,
+      "phase": "cold",
+      "durationMs": 386.54,
+      "githubRequests": 16,
+      "maxConcurrent": 1,
+      "recursiveTree": true,
+      "responseSha256": "3fd930af4676d1aca977e66a6810753ed940c3d51aa4952b43959c06b6bc6b95"
+    },
+    {
+      "implementation": "baseline",
+      "sample": 2,
+      "phase": "warm",
+      "durationMs": 379.8,
+      "githubRequests": 16,
+      "maxConcurrent": 1,
+      "recursiveTree": true,
+      "responseSha256": "3fd930af4676d1aca977e66a6810753ed940c3d51aa4952b43959c06b6bc6b95"
+    },
+    {
+      "implementation": "improved",
+      "sample": 0,
+      "phase": "cold",
+      "durationMs": 204.33,
+      "githubRequests": 15,
+      "maxConcurrent": 3,
+      "recursiveTree": false,
+      "responseSha256": "3fd930af4676d1aca977e66a6810753ed940c3d51aa4952b43959c06b6bc6b95"
+    },
+    {
+      "implementation": "improved",
+      "sample": 0,
+      "phase": "warm",
+      "durationMs": 92.8,
+      "githubRequests": 7,
+      "maxConcurrent": 2,
+      "recursiveTree": false,
+      "responseSha256": "3fd930af4676d1aca977e66a6810753ed940c3d51aa4952b43959c06b6bc6b95"
+    },
+    {
+      "implementation": "improved",
+      "sample": 1,
+      "phase": "cold",
+      "durationMs": 212.79,
+      "githubRequests": 15,
+      "maxConcurrent": 3,
+      "recursiveTree": false,
+      "responseSha256": "3fd930af4676d1aca977e66a6810753ed940c3d51aa4952b43959c06b6bc6b95"
+    },
+    {
+      "implementation": "improved",
+      "sample": 1,
+      "phase": "warm",
+      "durationMs": 92.34,
+      "githubRequests": 7,
+      "maxConcurrent": 2,
+      "recursiveTree": false,
+      "responseSha256": "3fd930af4676d1aca977e66a6810753ed940c3d51aa4952b43959c06b6bc6b95"
+    },
+    {
+      "implementation": "improved",
+      "sample": 2,
+      "phase": "cold",
+      "durationMs": 207.67,
+      "githubRequests": 15,
+      "maxConcurrent": 3,
+      "recursiveTree": false,
+      "responseSha256": "3fd930af4676d1aca977e66a6810753ed940c3d51aa4952b43959c06b6bc6b95"
+    },
+    {
+      "implementation": "improved",
+      "sample": 2,
+      "phase": "warm",
+      "durationMs": 102.18,
+      "githubRequests": 7,
+      "maxConcurrent": 2,
+      "recursiveTree": false,
+      "responseSha256": "3fd930af4676d1aca977e66a6810753ed940c3d51aa4952b43959c06b6bc6b95"
+    }
+  ]
+}

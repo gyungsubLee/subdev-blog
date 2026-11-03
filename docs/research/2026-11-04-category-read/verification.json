@@ -1,0 +1,42 @@
+{
+  "node": "v24.3.0",
+  "currentHashes": {
+    "server/auth.mjs": "870786c1d786b60e02891a4fcbbe89566dbf84b39bac19810339f602e4d0de3a",
+    "server/content.mjs": "1918c88296a21df493300d6c937755db1db8ba0cd3320009213a41a5dd37e15f",
+    "server/management-read-cache.mjs": "c3806abe6669df5adf2251974001ca50398f1c1b3fe220f923e76ada04045b5f",
+    "server/handler.mjs": "1d1d50528ec98c7c33426377d4b8d40ed5b277deb05393457a86d499dba58001",
+    "server/github.mjs": "77aaa75f298090ed5377e7c1bfeaab733d25bfb31cce9ab99cbd199794aa8881",
+    "server/public-content.mjs": "1db232477f4ee6e42798e6116d7ce322521ce6a9f229ae58e0abf7e672e163fb",
+    "tests/management-read-cache.test.mjs": "f363d7fb20f40fc93b4e51688a24f3aa907a8ed3fe5f44313d2e5fa7424708a2",
+    "tests/management-category-read.test.mjs": "42ab23c49c80e3de0684912e4d639850c55e657f2452b610ac47776b9a63b919",
+    "tests/support/management-category-fixture.mjs": "f95249f4314fb90bb86723717ca0f71a3f6e852edaae01e15a94cd93ac208f70",
+    "tests/github-content.test.mjs": "eb05dca5ef1131de3419745f9766d104262038e118d9013db04f70c13d274399",
+    "package.json": "f5082f06c9b04f857761121be437feb67e14ff98348f347d5d6198a478b07a4b",
+    "package-lock.json": "6e4f60584ce2a92166d835f42821f842d6565dfd493882722d06c2ec2d2e67ff",
+    "docs/research/2026-11-04-category-read/compare.mjs": "92db57e17f4592c04cd7d5131b7833d59452f6ce99de9eb6160e507d4abdc36c"
+  },
+  "baselineHashes": {
+    "server/auth.mjs": "a5239518edb94b6b7d6995a3189e989a32f43351b914590de19d2cd33ad2fbaa",
+    "server/content.mjs": "29c4ec59a7b38ff8105b0f2ce16c504fb25094a1aad178fcb044ec17317ab78e",
+    "server/handler.mjs": "1d1d50528ec98c7c33426377d4b8d40ed5b277deb05393457a86d499dba58001",
+    "server/github.mjs": "77aaa75f298090ed5377e7c1bfeaab733d25bfb31cce9ab99cbd199794aa8881"
+  },
+  "evidenceHashes": {
+    ".tmp/category-targeted-green.log": "ab2e8558d4da4368e442d3c9d09b810eb16c6fbcc6fb632bd2f2009fcb8d597f",
+    ".tmp/category-integration-green.log": "48efbd3a404a0c9aaf8c2e7f119243ca0db76c7045beef18982ef2eaa7fb0370",
+    ".tmp/category-full-check.log": "5a4ec49a51fb893756dc8ab10bf8c8cc9542a7279d00b8a006e96c567d8c18e0",
+    ".tmp/category-runtime-check.log": "f50d166d50e6a9061c5e90876c8adf8cceca0bbc88339df4e28a33accbdc6a9d",
+    ".tmp/category-app-flow-baseline.log": "8c93fc560f48db43b2b59f188a6367f3c21b85199e29e21b36c37a66aefe821a",
+    "docs/research/2026-11-04-category-read/comparison.json": "09d88650f181634c8f1d9f1e92a03d44e1adb8f3e1a33c234494e536f44744c7"
+  },
+  "fullSuite": {
+    "total": 457,
+    "passed": 454,
+    "failed": 3
+  },
+  "isolatedRuntime": {
+    "total": 3,
+    "passed": 3
+  },
+  "remaining": "Existing frontend app-flow.test.mjs:257 failure reproduced against before-change backend."
+}

@@ -1,0 +1,81 @@
+{
+  "mode": "Actual handlers with mocked GitHub; not production latency",
+  "categoryCount": 48,
+  "categoryBytes": 7693,
+  "node": "v24.3.0",
+  "sourceHashes": {
+    "server/handler.mjs": "1d1d50528ec98c7c33426377d4b8d40ed5b277deb05393457a86d499dba58001",
+    "server/auth.mjs": "a5239518edb94b6b7d6995a3189e989a32f43351b914590de19d2cd33ad2fbaa",
+    "server/content.mjs": "29c4ec59a7b38ff8105b0f2ce16c504fb25094a1aad178fcb044ec17317ab78e",
+    "server/github.mjs": "77aaa75f298090ed5377e7c1bfeaab733d25bfb31cce9ab99cbd199794aa8881",
+    "src/features/content-management/ManagedCategories.tsx": "c472199180262c3bd9be094ebf01a46d7bce175105b59df1c63b3f8b26c3d9f4",
+    "src/features/content-management/useManagement.ts": "939c7c38e914a2be3e4ead9e006ab399a4ecc13c7302c83c535e52c6380045d9"
+  },
+  "runs": [
+    {
+      "path": "/api/session",
+      "githubRequests": 12,
+      "maxConcurrent": 1,
+      "calls": [
+        "/user",
+        "/user/installations/12/repositories",
+        "/user/installations",
+        "/repos/gyungsubLee/subdev-blog",
+        "/repos/gyungsubLee/subdev-blog/branches/main",
+        "/repos/gyungsubLee/subdev-blog-content",
+        "/repos/gyungsubLee/subdev-blog-content/branches/main",
+        "/repos/gyungsubLee/subdev-blog/contents/content",
+        "/repos/gyungsubLee/subdev-blog/contents/.gitmodules",
+        "/repos/gyungsubLee/subdev-blog-content/contents/categories.json",
+        "/repos/gyungsubLee/subdev-blog-content/contents/posts",
+        "/repos/gyungsubLee/subdev-blog-content/contents/CONTENT_SCHEMA.md"
+      ]
+    },
+    {
+      "path": "/api/content?kind=categories",
+      "githubRequests": 16,
+      "maxConcurrent": 1,
+      "calls": [
+        "/user",
+        "/user/installations/12/repositories",
+        "/user/installations",
+        "/repos/gyungsubLee/subdev-blog",
+        "/repos/gyungsubLee/subdev-blog/branches/main",
+        "/repos/gyungsubLee/subdev-blog-content",
+        "/repos/gyungsubLee/subdev-blog-content/branches/main",
+        "/repos/gyungsubLee/subdev-blog/contents/content",
+        "/repos/gyungsubLee/subdev-blog/contents/.gitmodules",
+        "/repos/gyungsubLee/subdev-blog-content/contents/categories.json",
+        "/repos/gyungsubLee/subdev-blog-content/contents/posts",
+        "/repos/gyungsubLee/subdev-blog-content/contents/CONTENT_SCHEMA.md",
+        "/repos/gyungsubLee/subdev-blog-content/git/ref/heads/main",
+        "/repos/gyungsubLee/subdev-blog-content/git/commits/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "/repos/gyungsubLee/subdev-blog-content/git/trees/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "/repos/gyungsubLee/subdev-blog-content/git/blobs/cccccccccccccccccccccccccccccccccccccccc"
+      ]
+    },
+    {
+      "path": "/api/content?kind=categories",
+      "githubRequests": 16,
+      "maxConcurrent": 1,
+      "calls": [
+        "/user",
+        "/user/installations/12/repositories",
+        "/user/installations",
+        "/repos/gyungsubLee/subdev-blog",
+        "/repos/gyungsubLee/subdev-blog/branches/main",
+        "/repos/gyungsubLee/subdev-blog-content",
+        "/repos/gyungsubLee/subdev-blog-content/branches/main",
+        "/repos/gyungsubLee/subdev-blog/contents/content",
+        "/repos/gyungsubLee/subdev-blog/contents/.gitmodules",
+        "/repos/gyungsubLee/subdev-blog-content/contents/categories.json",
+        "/repos/gyungsubLee/subdev-blog-content/contents/posts",
+        "/repos/gyungsubLee/subdev-blog-content/contents/CONTENT_SCHEMA.md",
+        "/repos/gyungsubLee/subdev-blog-content/git/ref/heads/main",
+        "/repos/gyungsubLee/subdev-blog-content/git/commits/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "/repos/gyungsubLee/subdev-blog-content/git/trees/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "/repos/gyungsubLee/subdev-blog-content/git/blobs/cccccccccccccccccccccccccccccccccccccccc"
+      ]
+    }
+  ]
+}
