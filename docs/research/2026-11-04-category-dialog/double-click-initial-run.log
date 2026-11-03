@@ -1,0 +1,63 @@
+✔ content workspace is reachable only after authorization (43.818125ms)
+✔ workspace keeps public content separate from recovery drafts and filters local edits (17.05625ms)
+✔ workspace migrates legacy draft status labels and preserves malformed recovery bytes (6.742083ms)
+✔ confirmed newly published recovery resolves to one public row without removing its backup (4.934042ms)
+✔ a published draft keeps its canonical identity and recovery key after further edits (5.710125ms)
+✔ workspace pages contain at most fifteen rows and filters restart from page one (57.41675ms)
+✔ category filters include descendants and preserve the empty state (22.994792ms)
+✔ workspace reuses category dialog and keeps category before search (20.062625ms)
+✔ unrecognized legacy categories agree with the unclassified count and filter (10.496875ms)
+✔ category dialog stays open in StrictMode and Escape preserves the filter (11.7965ms)
+✔ double-click confirms the clicked category immediately while expanders stay open (22.428584ms)
+✔ approved editor keeps draft save local and renders the two-state writing controls (115.3045ms)
+✔ new GitHub posts use the notebook editor and save one paired Markdown/block snapshot (59.467541ms)
+✔ GitHub editor JSON restores toggle children and code settings without browser drafts (289.271042ms)
+✔ legacy Markdown stays byte-for-byte unchanged until block conversion is chosen (12.02925ms)
+✔ malformed block recovery data stays intact and cannot silently become a new document (3.590625ms)
+✔ legacy conversion requires explicit confirmation and then saves both formats (46.993ms)
+✔ image uploads preview locally while the saved block and Markdown use a stable relative path (354.412625ms)
+✔ source image previews resolve against the content commit without changing stored URLs (36.364709ms)
+✔ closing editor shortcuts never submits an enclosing save form (10.917ms)
+✔ bare sibling image names resolve to the pinned source asset without rewriting the stored URL (34.136917ms)
+✔ simultaneous sibling uploads preserve every pending attachment (103.201458ms)
+✔ staggered sibling uploads preserve every pending attachment (106.187542ms)
+✔ invalid GitHub editor JSON permits exact original exports and blocks all fallback saves (6.754042ms)
+✔ recovery import restores metadata and pending/source attachments into the fresh target identity (106.377625ms)
+✔ recovery import rejects unsafe attachment ../outside.png 5 (26.066459ms)
+✔ recovery import rejects unsafe attachment %2565ditor.json 5 (24.743ms)
+✔ recovery import rejects unsafe attachment good.png 5 (25.1065ms)
+✔ recovery import rejects unsafe attachment good.png 6291456 (24.406041ms)
+✔ Cmd/Ctrl+S saves recovery data and prevents browser Save Page without posting to GitHub (27.946666ms)
+✔ a damaged remote editor cannot replace an existing unsaved local recovery document (18.687958ms)
+✔ tags, category cancellation and reader controls preserve local-only drafts (70.538209ms)
+✖ invalid imported tags preserve the current blocks and recovery bytes (22.191875ms)
+✔ a published local draft resumes with canonical identity and sends update (66.318792ms)
+✔ editor confirms a category double-click through the shared dialog without publishing (32.625167ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 34
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3993.507917
+
+✖ failing tests:
+
+test at tests/managed-block-editor.test.mjs:790:1
+✖ invalid imported tags preserve the current blocks and recovery bytes (22.191875ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /태그/. Input:
+  
+  ''
+  
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/managed-block-editor.test.mjs:794:12
+      at async mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/managed-block-editor.test.mjs:127:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/managed-block-editor.test.mjs:791:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '',
+    expected: /태그/,
+    operator: 'match'
+  }

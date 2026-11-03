@@ -1,0 +1,72 @@
+✖ content workspace is reachable only after authorization (64.309375ms)
+✔ workspace keeps public content separate from recovery drafts and filters local edits (24.798292ms)
+✔ workspace migrates legacy draft status labels and preserves malformed recovery bytes (19.45225ms)
+✔ confirmed newly published recovery resolves to one public row without removing its backup (8.06075ms)
+✔ a published draft keeps its canonical identity and recovery key after further edits (7.94975ms)
+✖ workspace pages contain at most fifteen rows and filters restart from page one (34.68275ms)
+✖ category filters include descendants and preserve the empty state (9.603791ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 4
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5874.717125
+
+✖ failing tests:
+
+test at tests/content-workspace.test.mjs:40:1
+✖ content workspace is reachable only after authorization (64.309375ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   '콘텐츠',
+  +   '공개 글 ↗'
+  -   '기록 관리',
+  -   '콘텐츠 관리',
+  -   '카테고리 관리'
+    ]
+  
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:44:12
+      at mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:32:11)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:41:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ '콘텐츠', '공개 글 ↗' ],
+    expected: [ '기록 관리', '콘텐츠 관리', '카테고리 관리' ],
+    operator: 'deepStrictEqual'
+  }
+
+test at tests/content-workspace.test.mjs:146:1
+✖ workspace pages contain at most fifteen rows and filters restart from page one (34.68275ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  47 !== 15
+  
+      at mounted.posts.posts (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:156:12)
+      at mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:32:11)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:153:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 47,
+    expected: 15,
+    operator: 'strictEqual'
+  }
+
+test at tests/content-workspace.test.mjs:189:1
+✖ category filters include descendants and preserve the empty state (9.603791ms)
+  TypeError [Error]: Cannot set properties of null (setting 'value')
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:193:44
+      at process.env.NODE_ENV.exports.act (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/react/cjs/react.development.js:890:22)
+      at choose (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:193:13)
+      at mounted.posts (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:195:11)
+      at mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:32:11)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:190:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7)

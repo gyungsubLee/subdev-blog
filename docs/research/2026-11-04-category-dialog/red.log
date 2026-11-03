@@ -1,0 +1,69 @@
+✔ content workspace is reachable only after authorization (49.7165ms)
+✔ workspace keeps public content separate from recovery drafts and filters local edits (14.050917ms)
+✔ workspace migrates legacy draft status labels and preserves malformed recovery bytes (9.493042ms)
+✔ confirmed newly published recovery resolves to one public row without removing its backup (4.780833ms)
+✔ a published draft keeps its canonical identity and recovery key after further edits (6.416041ms)
+✖ workspace pages contain at most fifteen rows and filters restart from page one (28.670291ms)
+✖ category filters include descendants and preserve the empty state (6.894625ms)
+✖ workspace reuses category dialog and keeps category before search (15.075292ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 5
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3277.74575
+
+✖ failing tests:
+
+test at tests/content-workspace.test.mjs:154:1
+✖ workspace pages contain at most fifteen rows and filters restart from page one (28.670291ms)
+  AssertionError [ERR_ASSERTION]: category row must exist: other
+      at chooseCategory (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:41:10)
+      at async mounted.posts.posts (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:173:5)
+      at async mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:32:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:161:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }
+
+test at tests/content-workspace.test.mjs:193:1
+✖ category filters include descendants and preserve the empty state (6.894625ms)
+  AssertionError [ERR_ASSERTION]: category row must exist: notes
+      at chooseCategory (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:41:10)
+      at async choose (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:195:36)
+      at async mounted.posts (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:196:5)
+      at async mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:32:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:194:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }
+
+test at tests/content-workspace.test.mjs:213:1
+✖ workspace reuses category dialog and keeps category before search (15.075292ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(toolbar.firstElementChild.classList.contains('workspace-category-filter'))
+  
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:216:12
+      at mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:32:11)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:214:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }

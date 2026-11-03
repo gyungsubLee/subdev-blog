@@ -1,0 +1,75 @@
+{
+  "baseline": {
+    "editTotalMs": {
+      "median": 308.6023760000003,
+      "min": 305.41650000000004,
+      "max": 311.53125200000045
+    },
+    "editMedianMs": {
+      "median": 15.03141699999992,
+      "min": 14.982500000000073,
+      "max": 15.039209000000028
+    },
+    "editMaxMs": {
+      "median": 27.432834000000184,
+      "min": 26.959958000000142,
+      "max": 28.07487500000002
+    },
+    "mountMs": {
+      "median": 95.63716599999998,
+      "min": 94.779583,
+      "max": 100.607166
+    },
+    "memoryRssBytes": {
+      "median": 270057472,
+      "min": 269926400,
+      "max": 270401536
+    },
+    "settleMs": {
+      "median": 220.7298330000001,
+      "min": 220.401834,
+      "max": 221.31954199999996
+    },
+    "allRecoveryParity": true,
+    "allPreviewParity": null,
+    "allOneSourceRequest": true,
+    "allTwentyRecoveryWrites": true
+  },
+  "current": {
+    "editTotalMs": {
+      "median": 322.5963760000002,
+      "min": 320.21283099999937,
+      "max": 355.5921250000001
+    },
+    "editMedianMs": {
+      "median": 16.551375000000007,
+      "min": 16.221874999999955,
+      "max": 17.722708999999895
+    },
+    "editMaxMs": {
+      "median": 20.208665999999994,
+      "min": 19.807416999999987,
+      "max": 23.35654199999999
+    },
+    "mountMs": {
+      "median": 130.45741599999997,
+      "min": 130.23566600000004,
+      "max": 133.58170900000005
+    },
+    "memoryRssBytes": {
+      "median": 295124992,
+      "min": 294731776,
+      "max": 295534592
+    },
+    "settleMs": {
+      "median": 253.81008300000008,
+      "min": 252.29662500000018,
+      "max": 254.72966700000006
+    },
+    "allRecoveryParity": true,
+    "allPreviewParity": true,
+    "allOneSourceRequest": true,
+    "allTwentyRecoveryWrites": true
+  },
+  "editTotalMedianIncreasePercent": 4.534637802010932
+}

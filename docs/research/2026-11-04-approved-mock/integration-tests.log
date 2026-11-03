@@ -1,0 +1,40 @@
+✔ article preserves local page links and removes executable HTML (31.524ms)
+✔ loading article never renders or exports its preview body (3.059708ms)
+✔ home shows article sections and keeps browser drafts in records (68.414ms)
+✔ header separates records and category routes while the wordmark opens home (59.156709ms)
+✔ direct article entry returns to home (9.815375ms)
+✔ block and heading anchors stay on the current article route (85.949375ms)
+✔ body-only Markdown keeps text between two horizontal rules (3.999ms)
+✔ large page tree only mounts expanded branches and keeps title links (53.432459ms)
+✔ original cover has priority over the first body image (2.947375ms)
+✔ reader resolves category labels by canonical ID (8.557708ms)
+✔ reader classifies attachment URLs before resolving article IDs (17.807459ms)
+✔ page explorer orders siblings by explicit order then ID regardless of update dates (16.495958ms)
+✔ reader resolves literal percent paths before UUIDs in ancestor folder names (9.810125ms)
+Warning: KaTeX doesn't work in quirks mode. Make sure your website has a suitable doctype.
+✔ home leaves browsing controls and search shortcuts to records (175.419334ms)
+✔ public articles render while authentication is pending and writing requires login (36.703958ms)
+✔ category management is hidden when authentication is unavailable, including direct entry (6.359583ms)
+✔ public records keep category filters and hide management links without login (17.799667ms)
+✔ logging out an expired session restores public controls and login (13.501916ms)
+✔ direct publication succeeds without polling and clears a stale retry error (17.261625ms)
+✔ legacy publication checks resolve without an Actions run and stop after publication (14.91625ms)
+✔ canonical title edits preserve Markdown and CSRF then refresh the published commit (82.927333ms)
+✔ a failed canonical save retains the edited source for reauthentication (43.594042ms)
+✔ new-post retries after reopening retain their original identity and request (222.683166ms)
+✔ existing-post retries after reopening retain their original identity and request (61.098333ms)
+✔ canonical category retries retain edits, original sources and request identity (43.969458ms)
+✔ a lost deletion response can be retried after the source has disappeared (54.533ms)
+✔ attachment names with parentheses produce an intact Markdown destination (46.464667ms)
+✔ TOC labels show semantic HTML heading text without literal tags (56.126958ms)
+✔ TOC labels decode exported punctuation after removing formatting (9.148667ms)
+✔ TOC labels keep existing Markdown emphasis behavior (7.159667ms)
+✔ TOC labels leave malformed or invalid entities readable without throwing (5.738625ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5710.976333

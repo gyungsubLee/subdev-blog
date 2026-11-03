@@ -248,6 +248,7 @@ export function parseMarkdownDocument(text) {
         ...(Object.hasOwn(metadata, "category_id")
           ? { category_id: metadata.category_id }
           : {}),
+        ...(Object.hasOwn(metadata, "tags") ? { tags: metadata.tags } : {}),
       },
       markdown,
     });
@@ -325,6 +326,10 @@ function validatePatch(patch) {
     if (Object.hasOwn(patch.changes, key))
       changes[key] = readString(patch.changes[key], key);
   }
+  if (Object.hasOwn(patch.changes, "tags")) {
+    validateKnownFields({ tags: patch.changes.tags });
+    changes.tags = [...patch.changes.tags];
+  }
   return {
     id: readUuid(patch.id, "id"),
     baseRevision: readRevision(patch.baseRevision),
@@ -358,7 +363,9 @@ export function mergeDocumentPatch(original, value, currentRevision) {
     throw new Error("원본 revision이 바뀌었습니다.");
   const bodyChanged = original.markdown !== patch.markdown;
   const metadataChanged = Object.entries(patch.changes).some(
-    ([key, value]) => metadata[key] !== value,
+    ([key, value]) => key === "tags"
+      ? JSON.stringify(metadata.tags) !== JSON.stringify(value)
+      : metadata[key] !== value,
   );
   return {
     metadata: {

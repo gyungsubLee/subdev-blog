@@ -1,0 +1,6 @@
+{
+  "src/features/post-category/CategorySelectionDialog.tsx": "333abfd02bb9d878df0358ba5ad28ffacd31b439fe38f0e19105aa6a5c8cbbf7",
+  "src/features/post-category/CategorySelectionDialog.css": "defeb8e86c4ab82f5c025cedb1a323bf577a82670544e6c87f09a7a020d97dab",
+  "tests/content-workspace.test.mjs": "902c656bbe5c62dd62e037699f5a016c98ead3b78190c74810bc8c06af6e3c82",
+  "tests/managed-block-editor.test.mjs": "3f0f275d0840745fddd131e58868639d1369bbc40902a2304a53567b18006287"
+}

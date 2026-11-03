@@ -1,0 +1,26 @@
+✖ category dialog stays open in StrictMode and Escape preserves the filter (55.499333ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1867.918459
+
+✖ failing tests:
+
+test at tests/content-workspace.test.mjs:249:1
+✖ category dialog stays open in StrictMode and Escape preserves the filter (55.499333ms)
+  AssertionError [ERR_ASSERTION]: StrictMode must not close a newly mounted dialog
+      at mounted.strict (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:260:14)
+      at async mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:34:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:256:5)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }

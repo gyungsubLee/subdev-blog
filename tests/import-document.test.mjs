@@ -93,6 +93,30 @@ const canonical = {
   markdown: '\r\n# 제목: 원문\r\n\r\n---\r\n\r\n```js\r\nconst x = "---";\r\n```\r\n',
 };
 
+test("tag-only patches round-trip and preserve untouched content metadata", () => {
+  const patch = {
+    id: documentId,
+    baseRevision: revision,
+    changes: { tags: ["BlockNote", "한국어"] },
+    markdown: canonical.markdown,
+  };
+  const restored = parseMarkdownDocument(serializeDocumentPatch(patch)).patch;
+  assert.deepEqual(restored.changes.tags, ["BlockNote", "한국어"]);
+  const result = mergeDocumentPatch(canonical, restored, revision);
+  assert.deepEqual(result.metadata.tags, ["BlockNote", "한국어"]);
+  assert.deepEqual(canonical.metadata.tags, ["css", "한국어"]);
+  assert.equal(result.markdown, canonical.markdown);
+  assert.equal(result.metadata.title, canonical.metadata.title);
+  assert.equal(result.metadata.review_status, "unreviewed");
+  const cleared = mergeDocumentPatch(canonical, { ...patch, changes: { tags: [] } }, revision);
+  assert.deepEqual(cleared.metadata.tags, []);
+  const unchanged = mergeDocumentPatch(canonical, { ...patch, changes: { tags: ["css", "한국어"] } }, revision);
+  assert.equal(unchanged.metadata.updated, canonical.metadata.updated);
+  for (const tags of ["invalid", null, [1], [{}]]) {
+    assert.throws(() => mergeDocumentPatch(canonical, { ...patch, changes: { tags } }, revision));
+  }
+});
+
 function fullHeader(fields = "", body = "\n# 본문\n") {
   return `---\nschema_version: 1\nid: ${documentId}\ntitle: 제목\nparent_id: null\ncreated: 2025-04-21T02:48:47.208Z\nupdated: 2025-04-21T06:22:27.987Z\n${fields}---\n${body}`;
 }

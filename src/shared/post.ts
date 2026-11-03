@@ -15,6 +15,7 @@ export type Post = {
   order?: number;
   revision?: string;
   draft?: boolean;
+  recoveryKey?: string;
   bodyLoaded?: boolean;
 };
 
@@ -78,7 +79,7 @@ export type EditorDocument = {
 export type DocumentPatch = {
   id: CanonicalDocumentId;
   baseRevision: string;
-  changes: { title?: string; category_id?: string };
+  changes: { title?: string; category_id?: string; tags?: string[] };
   markdown: string;
 };
 

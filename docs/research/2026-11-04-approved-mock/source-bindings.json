@@ -1,0 +1,24 @@
+{
+  "baseCommit": "5412c521a3a618586c38ab9f828ede0963c40e2e",
+  "sha256": {
+    "src/app/App.tsx": "adc71a56f00302db7a437c81ab49078404819bc70ef4b59bd14473dd58e2ecb1",
+    "src/app/BlogView.tsx": "e3bc27a1cbde8496324afa9eee25959b7f1a1ed650bde14b49a44aa3bbba5945",
+    "src/components/layout/SiteHeader.tsx": "a71779985d5c590388c5ac73cd528ae98ba0cc825aa20ba396fbb09471b42e4a",
+    "src/features/content-management/ContentWorkspace.tsx": "ed83f9f648fc08b7d8f13718892872def3d33089cc5b10650f1ae03586fb5926",
+    "src/features/content-management/ManagedPostEditor.tsx": "f8e4f722780ac64fa49a16fa7293afc70d8e42963b96b63f3b6f2c8e8a17c53e",
+    "src/features/content-management/ManagedEditorChrome.tsx": "2514590f567feff533277303f81b151aef3484d6ec592d0c3ea8f225ae8955e7",
+    "src/features/content-management/managed-writing.css": "578d827dc30270a47c76023126739fd031ea89a2753d587c665e09f2f4c331a6",
+    "src/features/content-management/workspace.css": "03224f0afb066f94fe59cfd20d60e293d78f8bf6a072c938f9624d9481053a4f",
+    "src/features/post-reader/MarkdownContent.tsx": "202e4676cb3b434a002175f9d87072a18008e0ce0de9f83962e6ad9781c79814",
+    "src/shared/document.mjs": "35c88a24ab119d0fde95e4c704ccc38baafdd2cc0b4343b961c14bf46893ab1e",
+    "src/shared/post.ts": "f48b2d544ab0be670699cd509efc7c94c54628f9269f65495e9c2389413b7622",
+    "src/shared/post-status.ts": "9a209c7e1462919875d7e49a0c2fc46eb483e46e72d064f6242c92831e1afada",
+    "src/shared/routes.ts": "617eace7be92f39821f832717e6ad69a82b55da768099371d91279c913555699",
+    "tests/managed-block-editor.test.mjs": "016ad602163be17da55b129449504e1cc06af25360b40cff5a1d17ed5c98faa4",
+    "tests/content-workspace.test.mjs": "23ea1e7d376d951f2a26e9d43bf92672d90d0e41c900c1f856ab7aab02ab91fc",
+    "tests/post-status.test.mjs": "cf43eb7671acce9931533fe3bfd92dad9dabcd1e11fde70a65cc71e2bb605e63",
+    "tests/import-document.test.mjs": "4e2f1cce1e6920892764cb95f68004afde6d2b07d93d93b7ce4e74c5359396af",
+    "tests/github-content.test.mjs": "1bda75c66f17571ee7455b851a6d0c209b5104b6e96b22a12581bf78171e853f",
+    "tests/management-api.test.mjs": "8134808a9f4f522e455fc6aa2a541ec2c959ae060488a742fe5539cdf2652f2e"
+  }
+}

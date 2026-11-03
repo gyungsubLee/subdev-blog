@@ -161,6 +161,22 @@ test('authenticated content errors also disable response caching', async () => {
     assert.equal(result.status, 400);
     assert.equal(result.cacheControl, 'no-store');
 });
+test('explicit publication persists tag edits without replacing body or hidden metadata', async () => {
+    const f = setup();
+    const result = await f.call('content', {
+        requestId, baseCommit: f.base, operation: {
+            type: 'post.update', id, baseRevision: revision(raw), changes: { tags: ['BlockNote', '한국어'] }
+        }
+    });
+    assert.equal(result.status, 200);
+    assert.equal(result.state, 'published');
+    const commit = f.commits.get(result.contentCommit);
+    const entry = f.trees.get(commit.tree.sha).find(item => item.path.endsWith('/Old.md'));
+    const updated = parseMarkdownDocument(f.blobs.get(entry.sha).toString());
+    assert.deepEqual(updated.metadata.tags, ['BlockNote', '한국어']);
+    assert.equal(updated.markdown, document.markdown);
+    assert.deepEqual(updated.metadata.opaque, { value: 7 });
+});
 test('direct save preserves body, opaque metadata and attachments; retry is idempotent', async () => {
     const f = setup();
     const payload = {

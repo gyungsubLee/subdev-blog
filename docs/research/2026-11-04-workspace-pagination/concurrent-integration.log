@@ -1,0 +1,62 @@
+✔ article preserves local page links and removes executable HTML (29.249709ms)
+✔ loading article never renders or exports its preview body (2.854417ms)
+✔ home shows article sections and keeps browser drafts in records (66.423291ms)
+✔ header separates records and category routes while the wordmark opens home (68.396541ms)
+✔ direct article entry returns to home (11.844ms)
+✖ block and heading anchors stay on the current article route (5.40225ms)
+✔ body-only Markdown keeps text between two horizontal rules (5.430459ms)
+✖ page exploration controls and dialog are absent (10.038958ms)
+✔ original cover has priority over the first body image (4.753083ms)
+✔ reader resolves category labels by canonical ID (9.656958ms)
+✔ reader classifies attachment URLs before resolving article IDs (17.460625ms)
+✔ reader resolves literal percent paths before UUIDs in ancestor folder names (84.106042ms)
+Warning: KaTeX doesn't work in quirks mode. Make sure your website has a suitable doctype.
+✔ home leaves browsing controls and search shortcuts to records (186.248333ms)
+✔ content workspace is reachable only after authorization (53.727167ms)
+✔ workspace keeps public content separate from recovery drafts and filters local edits (19.105875ms)
+✔ workspace migrates legacy draft status labels and preserves malformed recovery bytes (8.121167ms)
+✔ confirmed newly published recovery resolves to one public row without removing its backup (5.769083ms)
+✔ a published draft keeps its canonical identity and recovery key after further edits (8.3815ms)
+✔ workspace pages contain at most fifteen rows and filters restart from page one (70.861291ms)
+✔ category filters include descendants and preserve the empty state (11.566375ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 18
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1185.863291
+
+✖ failing tests:
+
+test at tests/blog.test.mjs:125:1
+✖ block and heading anchors stay on the current article route (5.40225ms)
+  ReferenceError [Error]: createRoot is not defined
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/blog.test.mjs:166:16)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1062:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:752:18)
+      at Test.postRun (node:internal/test_runner/test:1191:19)
+      at Test.run (node:internal/test_runner/test:1119:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7)
+
+test at tests/blog.test.mjs:255:1
+✖ page exploration controls and dialog are absent (10.038958ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/blog.test.mjs:260:14)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1062:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:752:18)
+      at Test.postRun (node:internal/test_runner/test:1191:19)
+      at Test.run (node:internal/test_runner/test:1119:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual'
+  }

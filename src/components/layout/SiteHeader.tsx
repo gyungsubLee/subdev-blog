@@ -1,4 +1,4 @@
-import { CATEGORIES_HREF, RECORDS_HREF } from "../../shared/routes";
+import { CATEGORIES_HREF, CONTENT_HREF, RECORDS_HREF } from "../../shared/routes";
 import Wordmark from "./Wordmark";
 import "./layout.css";
 import type { Management } from "../../features/content-management/useManagement";
@@ -26,6 +26,11 @@ export default function SiteHeader({
         >
           기록 관리
         </a>
+        {management?.session.state === "ready" ? (
+          <a href={CONTENT_HREF} aria-current={activeHref === CONTENT_HREF ? "page" : undefined}>
+            콘텐츠 관리
+          </a>
+        ) : null}
         {canWrite ? (
           <a
             href={CATEGORIES_HREF}

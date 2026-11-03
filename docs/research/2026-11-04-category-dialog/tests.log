@@ -1,0 +1,41 @@
+✔ content workspace is reachable only after authorization (48.487416ms)
+✔ workspace keeps public content separate from recovery drafts and filters local edits (15.374ms)
+✔ workspace migrates legacy draft status labels and preserves malformed recovery bytes (11.791ms)
+✔ confirmed newly published recovery resolves to one public row without removing its backup (5.118833ms)
+✔ a published draft keeps its canonical identity and recovery key after further edits (5.899459ms)
+✔ workspace pages contain at most fifteen rows and filters restart from page one (56.247125ms)
+✔ category filters include descendants and preserve the empty state (23.540625ms)
+✔ workspace reuses category dialog and keeps category before search (19.686833ms)
+✔ unrecognized legacy categories agree with the unclassified count and filter (13.273167ms)
+✔ category dialog stays open in StrictMode and Escape preserves the filter (18.229333ms)
+✔ approved editor keeps draft save local and renders the two-state writing controls (117.452625ms)
+✔ new GitHub posts use the notebook editor and save one paired Markdown/block snapshot (57.521167ms)
+✔ GitHub editor JSON restores toggle children and code settings without browser drafts (262.697208ms)
+✔ legacy Markdown stays byte-for-byte unchanged until block conversion is chosen (11.583708ms)
+✔ malformed block recovery data stays intact and cannot silently become a new document (3.438625ms)
+✔ legacy conversion requires explicit confirmation and then saves both formats (45.473667ms)
+✔ image uploads preview locally while the saved block and Markdown use a stable relative path (351.745958ms)
+✔ source image previews resolve against the content commit without changing stored URLs (32.772167ms)
+✔ closing editor shortcuts never submits an enclosing save form (14.665917ms)
+✔ bare sibling image names resolve to the pinned source asset without rewriting the stored URL (32.671333ms)
+✔ simultaneous sibling uploads preserve every pending attachment (105.961625ms)
+✔ staggered sibling uploads preserve every pending attachment (104.579708ms)
+✔ invalid GitHub editor JSON permits exact original exports and blocks all fallback saves (6.249709ms)
+✔ recovery import restores metadata and pending/source attachments into the fresh target identity (107.60725ms)
+✔ recovery import rejects unsafe attachment ../outside.png 5 (26.040458ms)
+✔ recovery import rejects unsafe attachment %2565ditor.json 5 (34.430708ms)
+✔ recovery import rejects unsafe attachment good.png 5 (34.596834ms)
+✔ recovery import rejects unsafe attachment good.png 6291456 (29.568625ms)
+✔ Cmd/Ctrl+S saves recovery data and prevents browser Save Page without posting to GitHub (26.092625ms)
+✔ a damaged remote editor cannot replace an existing unsaved local recovery document (17.81175ms)
+✔ tags, category cancellation and reader controls preserve local-only drafts (73.005ms)
+✔ invalid imported tags preserve the current blocks and recovery bytes (27.271125ms)
+✔ a published local draft resumes with canonical identity and sends update (57.512834ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4205.4655

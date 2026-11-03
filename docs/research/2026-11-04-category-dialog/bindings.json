@@ -1,0 +1,10 @@
+{
+  "src/features/post-category/CategorySelectionDialog.tsx": "d97cce8f49b523284f8ca04e1d829aa1f332ea50421c6730fa51484857b10bd8",
+  "src/features/post-category/CategorySelectionDialog.css": "defeb8e86c4ab82f5c025cedb1a323bf577a82670544e6c87f09a7a020d97dab",
+  "src/features/content-management/ContentWorkspace.tsx": "8eb1e468b6f735ecfcba9f324cbb40e0be4f187f1a8c47519c95ca4ca19f5b4c",
+  "src/features/content-management/ManagedPostEditor.tsx": "be7449d38fedf5e70be35e2d30ee94d951800eec82e39d54f68136292a7d9af6",
+  "src/features/content-management/workspace.css": "6bda3bac6f2a6c9f31a86a7f70cf31a2c36f932dc7f36adadff288ddcaebace0",
+  "src/features/content-management/managed-writing.css": "49f6fc51ac7e1c762d9630283822b4493455e8c5cdcc0bccc45e5addf5a7b0f9",
+  "tests/content-workspace.test.mjs": "aa8dd785be48976f4e842138d8e3d1347fed56490d3a2f1fef2e57b7d007fb33",
+  "tests/managed-block-editor.test.mjs": "4c4bbdef1befacdb4d3c69d1a4248612f8e639c29abab3b0d00885b3b41d5fef"
+}

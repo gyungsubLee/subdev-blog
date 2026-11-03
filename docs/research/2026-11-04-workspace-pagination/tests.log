@@ -1,0 +1,15 @@
+✔ content workspace is reachable only after authorization (53.426625ms)
+✔ workspace keeps public content separate from recovery drafts and filters local edits (16.809042ms)
+✔ workspace migrates legacy draft status labels and preserves malformed recovery bytes (8.624333ms)
+✔ confirmed newly published recovery resolves to one public row without removing its backup (6.949958ms)
+✔ a published draft keeps its canonical identity and recovery key after further edits (7.700333ms)
+✔ workspace pages contain at most fifteen rows and filters restart from page one (67.136417ms)
+✔ category filters include descendants and preserve the empty state (10.871584ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1077.261833

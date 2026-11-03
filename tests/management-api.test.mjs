@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { handleRequest } from '../server/handler.mjs';
+import { loadConfig, seal, setCookie } from '../server/auth.mjs';
 test('missing configuration blocks management without exposing secrets', async () => {
  const response = await handleRequest(new Request('https://blog.test/api/session'), { env: {} });
  assert.equal((await response.json()).state, 'blocked');
@@ -53,6 +54,46 @@ test('callback rejects state tampering, cancellation and other identities',async
 test('both direct and rewritten mutations reject unauthenticated callers',async()=>{
  for(const path of ['/api/content','/api?path=content','/api/assets','/api/publish']) {
   assert.equal((await handleRequest(new Request(`https://blog.test${path}`,{method:'POST'}),{env})).status,401);
+ }
+});
+
+test('content reads and mutations enforce owner access before repository work', async () => {
+ const config = loadConfig(env);
+ const cookie = setCookie(seal({ token: 'token', csrfToken: 'csrf', expires: Date.now() + 60000 }, config), config).split(';')[0];
+ for (const path of ['/api/content?kind=post&id=123', '/api?path=content&kind=new', '/api/publish?requestId=123']) {
+  const missing = await handleRequest(new Request('https://blog.test' + path), { env });
+  assert.equal(missing.status, 401);
+ }
+ for (const [path, method] of [['/api/content?kind=new', 'GET'], ['/api?path=content', 'POST'], ['/api/assets', 'POST'], ['/api/publish', 'POST']]) {
+  let calls = 0;
+  const response = await handleRequest(new Request('https://blog.test' + path, {
+   method, headers: { cookie, origin: env.CMS_ORIGIN, 'x-csrf-token': 'csrf' },
+  }), { env, fetcher: async url => {
+   calls++;
+   assert.equal(new URL(url).pathname, '/user');
+   return Response.json({ id: 99, login: 'other' });
+  } });
+  assert.equal(response.status, 403);
+  assert.equal(calls, 1, 'Unauthorized users must not reach repository reads or writes');
+ }
+});
+
+test('owner mutations require both matching origin and CSRF before repository work', async () => {
+ const config = loadConfig(env);
+ const cookie = setCookie(seal({ token: 'token', csrfToken: 'csrf', expires: Date.now() + 60000 }, config), config).split(';')[0];
+ for (const path of ['/api/content', '/api?path=content', '/api/assets', '/api/publish']) {
+  for (const headers of [{}, { origin: 'https://evil.test', 'x-csrf-token': 'csrf' }, { origin: env.CMS_ORIGIN, 'x-csrf-token': 'wrong' }]) {
+   let calls = 0;
+   const response = await handleRequest(new Request('https://blog.test' + path, {
+    method: 'POST', headers: { cookie, ...headers },
+   }), { env, fetcher: async url => {
+    calls++;
+    assert.equal(new URL(url).pathname, '/user');
+    return Response.json({ id: 42, login: 'owner' });
+   } });
+   assert.equal(response.status, 403);
+   assert.equal(calls, 1, 'Rejected mutation must not reach repository writes');
+  }
  }
 });
 

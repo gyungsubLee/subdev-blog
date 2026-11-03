@@ -33,10 +33,12 @@ export default function MarkdownContent({
   body,
   post,
   posts,
+  resolveImageUrl,
 }: {
   body: string;
   post: Post;
   posts: Post[];
+  resolveImageUrl?: (url: string) => string;
 }) {
   return (
     <ReactMarkdown
@@ -172,7 +174,7 @@ export default function MarkdownContent({
         },
         img: ({ src, alt }) =>
           src ? (
-            <img src={src} alt={alt || ""} loading="lazy" />
+            <img src={resolveImageUrl ? resolveImageUrl(src) : src} alt={alt || ""} loading="lazy" />
           ) : alt ? (
             <span className="missing-image">{alt}</span>
           ) : null,

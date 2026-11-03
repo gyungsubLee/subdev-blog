@@ -1,0 +1,45 @@
+✖ approved editor keeps draft save local and renders the two-state writing controls (94.376833ms)
+✔ new GitHub posts use the notebook editor and save one paired Markdown/block snapshot (50.759209ms)
+✔ GitHub editor JSON restores toggle children and code settings without browser drafts (286.016959ms)
+✔ legacy Markdown stays byte-for-byte unchanged until block conversion is chosen (7.62225ms)
+✔ malformed block recovery data stays intact and cannot silently become a new document (3.20925ms)
+✔ legacy conversion requires explicit confirmation and then saves both formats (39.246333ms)
+✔ image uploads preview locally while the saved block and Markdown use a stable relative path (68.513ms)
+✔ source image previews resolve against the content commit without changing stored URLs (34.049167ms)
+✔ closing editor shortcuts never submits an enclosing save form (16.26675ms)
+✔ bare sibling image names resolve to the pinned source asset without rewriting the stored URL (30.66275ms)
+✔ simultaneous sibling uploads preserve every pending attachment (104.467ms)
+✔ staggered sibling uploads preserve every pending attachment (97.118042ms)
+✔ invalid GitHub editor JSON permits exact original exports and blocks all fallback saves (5.381042ms)
+✔ recovery import restores metadata and pending/source attachments into the fresh target identity (127.839541ms)
+✔ recovery import rejects unsafe attachment ../outside.png 5 (34.020583ms)
+✔ recovery import rejects unsafe attachment %2565ditor.json 5 (22.523333ms)
+✔ recovery import rejects unsafe attachment good.png 5 (20.773916ms)
+✔ recovery import rejects unsafe attachment good.png 6291456 (25.279208ms)
+✔ Cmd/Ctrl+S saves recovery data and prevents browser Save Page without posting to GitHub (18.379417ms)
+✔ a damaged remote editor cannot replace an existing unsaved local recovery document (15.348917ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 19
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3901.52975
+
+✖ failing tests:
+
+test at tests/managed-block-editor.test.mjs:136:1
+✖ approved editor keeps draft save local and renders the two-state writing controls (94.376833ms)
+  AssertionError [ERR_ASSERTION]: draft action must exist
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/managed-block-editor.test.mjs:139:12
+      at mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/managed-block-editor.test.mjs:122:11)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/managed-block-editor.test.mjs:137:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }

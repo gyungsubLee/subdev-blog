@@ -1,0 +1,31 @@
+✔ approved editor keeps draft save local and renders the two-state writing controls (150.162542ms)
+✔ new GitHub posts use the notebook editor and save one paired Markdown/block snapshot (64.282958ms)
+✔ GitHub editor JSON restores toggle children and code settings without browser drafts (595.132667ms)
+✔ legacy Markdown stays byte-for-byte unchanged until block conversion is chosen (15.688083ms)
+✔ malformed block recovery data stays intact and cannot silently become a new document (8.247916ms)
+✔ legacy conversion requires explicit confirmation and then saves both formats (48.88275ms)
+✔ image uploads preview locally while the saved block and Markdown use a stable relative path (374.638583ms)
+✔ source image previews resolve against the content commit without changing stored URLs (39.861209ms)
+✔ closing editor shortcuts never submits an enclosing save form (110.12825ms)
+✔ bare sibling image names resolve to the pinned source asset without rewriting the stored URL (40.492709ms)
+✔ simultaneous sibling uploads preserve every pending attachment (122.580084ms)
+✔ staggered sibling uploads preserve every pending attachment (118.291708ms)
+✔ invalid GitHub editor JSON permits exact original exports and blocks all fallback saves (6.531959ms)
+✔ recovery import restores metadata and pending/source attachments into the fresh target identity (121.127834ms)
+✔ recovery import rejects unsafe attachment ../outside.png 5 (30.748875ms)
+✔ recovery import rejects unsafe attachment %2565ditor.json 5 (29.151792ms)
+✔ recovery import rejects unsafe attachment good.png 5 (43.514708ms)
+✔ recovery import rejects unsafe attachment good.png 6291456 (28.550708ms)
+✔ Cmd/Ctrl+S saves recovery data and prevents browser Save Page without posting to GitHub (29.439167ms)
+✔ a damaged remote editor cannot replace an existing unsaved local recovery document (18.743042ms)
+✔ tags, category cancellation and reader controls preserve local-only drafts (76.058125ms)
+✔ invalid imported tags preserve the current blocks and recovery bytes (39.299625ms)
+✔ a published local draft resumes with canonical identity and sends update (77.303666ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5086.183541

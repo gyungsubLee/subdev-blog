@@ -1,5 +1,6 @@
 import {
   CATEGORIES_HREF,
+  CONTENT_HREF,
   HOME_HREF,
   RECORDS_HREF,
   postIdFromHash,
@@ -17,6 +18,7 @@ import MissingPostPage from "../pages/post/MissingPostPage";
 import PostPage from "../pages/post/PostPage";
 import type { Post, PublicCategory } from "../shared/post";
 import type { Management } from "../features/content-management/useManagement";
+import ContentWorkspace from "../features/content-management/ContentWorkspace";
 import ManagedCategories from "../features/content-management/ManagedCategories";
 import { categoryNodesToGroups } from "../features/post-category/hierarchy";
 
@@ -27,6 +29,7 @@ type BlogViewProps = {
   onWrite: () => void;
   onEdit: (post: Post) => void;
   management?: Management;
+  draftVersion?: number;
   onContentSaved?: (contentCommit?: string) => void;
 };
 
@@ -38,13 +41,15 @@ export default function BlogView({
   onEdit,
   management,
   onContentSaved,
+  draftVersion,
 }: BlogViewProps) {
   const [backHref, setBackHref] = useState(HOME_HREF);
   const selectedId = postIdFromHash(hash);
   const selected = posts.find((post) => post.id === selectedId);
   const isRecords = hash === RECORDS_HREF;
+  const isContent = hash === CONTENT_HREF;
   const isCategories = hash === CATEGORIES_HREF;
-  const isHome = !selectedId && !isRecords && !isCategories;
+  const isHome = !selectedId && !isRecords && !isCategories && !isContent;
   const personalCatalog = useCategoryCatalog(posts, categories);
   const canonicalNodes = useMemo(() => [...(categories ?? [])]
     .sort((a, b) => a.order - b.order)
@@ -72,9 +77,10 @@ export default function BlogView({
     let title = site.homeTitle;
     if (selected) title = selected.title + " — " + site.name;
     else if (isRecords) title = "기록 — " + site.name;
+    else if (isContent) title = "콘텐츠 관리 — " + site.name;
     else if (isCategories) title = "카테고리 관리 — " + site.name;
     document.title = title;
-  }, [selected, isRecords, isCategories]);
+  }, [selected, isRecords, isCategories, isContent]);
 
   let page;
   if (selectedId) {
@@ -105,6 +111,15 @@ export default function BlogView({
         onWrite={onWrite}
         canManageCategories={!management || management.session.state === "ready"}
       />
+    );
+  } else if (isContent) {
+    page = management?.session.state === "ready" ? (
+      <ContentWorkspace posts={posts} categories={categories ?? []} onEdit={onEdit} draftVersion={draftVersion} />
+    ) : (
+      <main className="app-state" id="main-content" tabIndex={-1}>
+        <h1>로그인이 필요합니다</h1>
+        <p>콘텐츠 관리는 GitHub 로그인 후 이용할 수 있습니다.</p>
+      </main>
     );
   } else if (isCategories) {
     if (!management) {

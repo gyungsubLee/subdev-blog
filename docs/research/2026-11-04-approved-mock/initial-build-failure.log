@@ -1,0 +1,19 @@
+
+> second-brain@0.1.0 prebuild
+> npm run check:version && node scripts/prepare-site.mjs
+
+
+> second-brain@0.1.0 check:version
+> node scripts/check-version.mjs
+
+Version v0.1.0 is consistent.
+Prepared 3032 page summaries and separate article bodies.
+Content root: /Users/igyeongseob/Develop/10_harness/subdev-blog/content; content commit: 9f99941c6b650c70f363208cd97c7191ef785a46 (git-local).
+
+> second-brain@0.1.0 build
+> tsc -b && vite build
+
+src/features/content-management/ManagedPostEditor.tsx(856,35): error TS2339: Property 'metadata' does not exist on type 'ParsedDocument & { title?: string | undefined; category?: string | undefined; id?: string | undefined; sourceId?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; markdown: string; }'.
+  Property 'metadata' does not exist on type '{ documentMode: "patch"; patch: DocumentPatch; } & { title?: string | undefined; category?: string | undefined; id?: string | undefined; sourceId?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; markdown: string; }'.
+src/features/content-management/ManagedPostEditor.tsx(856,56): error TS2339: Property 'patch' does not exist on type 'ParsedDocument & { title?: string | undefined; category?: string | undefined; id?: string | undefined; sourceId?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; markdown: string; }'.
+  Property 'patch' does not exist on type 'ContentDocument & { documentMode: "full"; baseRevision?: string | undefined; } & { title?: string | undefined; category?: string | undefined; id?: string | undefined; sourceId?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; markdown: string; }'.

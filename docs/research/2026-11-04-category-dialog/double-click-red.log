@@ -1,0 +1,48 @@
+✖ double-click confirms the clicked category immediately while expanders stay open (57.214ms)
+✖ editor confirms a category double-click through the shared dialog without publishing (136.06075ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4366.89025
+
+✖ failing tests:
+
+test at tests/content-workspace.test.mjs:270:1
+✖ double-click confirms the clicked category immediately while expanders stay open (57.214ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(document.querySelector('dialog') === null)
+  
+      at mounted.posts (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:282:12)
+      at async mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:34:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content-workspace.test.mjs:271:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }
+
+test at tests/managed-block-editor.test.mjs:820:1
+✖ editor confirms a category double-click through the shared dialog without publishing (136.06075ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(document.querySelector('dialog') === null)
+  
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/managed-block-editor.test.mjs:829:12
+      at async mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/managed-block-editor.test.mjs:127:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/managed-block-editor.test.mjs:821:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }

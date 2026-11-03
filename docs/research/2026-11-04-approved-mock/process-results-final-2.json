@@ -1,0 +1,14 @@
+[
+  {
+    "mode": "baseline",
+    "exitCode": 0,
+    "elapsedSeconds": 1.825,
+    "log": "/tmp/approved-editor-benchmark/baseline-final-2.log"
+  },
+  {
+    "mode": "current",
+    "exitCode": 0,
+    "elapsedSeconds": 2.105,
+    "log": "/tmp/approved-editor-benchmark/current-final-2.log"
+  }
+]
