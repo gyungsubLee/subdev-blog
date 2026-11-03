@@ -1,7 +1,6 @@
 import { loadComponent } from "./support/load-component.mjs";
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { once } from "node:events";
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { JSDOM } from "jsdom";
@@ -254,95 +253,17 @@ test("body-only Markdown keeps text between two horizontal rules", () => {
   assert.ok(html.includes("뒤쪽 본문입니다."));
 });
 
-test("large page tree only mounts expanded branches and keeps title links", async () => {
-  const dom = new JSDOM(
-    '<!doctype html><html><body><div id="root"></div></body></html>',
-    {
-      url: "https://blog.example/#/",
-      pretendToBeVisual: true,
-    },
-  );
-  const previous = Object.fromEntries(
-    ["window", "document", "HTMLElement", "IS_REACT_ACT_ENVIRONMENT"].map(
-      (key) => [key, Object.getOwnPropertyDescriptor(globalThis, key)],
-    ),
-  );
-  dom.window.HTMLDialogElement.prototype.close = function () {
-    this.open = false;
-  };
-  dom.window.HTMLDialogElement.prototype.showModal = function () {
-    this.open = true;
-  };
-  dom.window.scrollTo = () => {};
-  for (const [key, value] of Object.entries({
-    window: dom.window,
-    document: dom.window.document,
-    HTMLElement: dom.window.HTMLElement,
-    IS_REACT_ACT_ENVIRONMENT: true,
-  }))
-    Object.defineProperty(globalThis, key, {
-      value,
-      configurable: true,
-      writable: true,
-    });
-  const posts = Array.from({ length: 3032 }, (_, index) => ({
-    ...base,
-    id: "p" + index,
-    title: "계층 페이지 " + index,
-    parentId: index ? "p" + Math.floor((index - 1) / 5) : null,
-    path: "p" + index + ".md",
-  }));
-  const root = createRoot(document.getElementById("root"));
-  try {
-    await act(async () =>
-      root.render(
-        React.createElement(Blog, { posts, onWrite() {}, onEdit() {} }),
-      ),
-    );
-    const explore = [
-      ...document.querySelectorAll(".header-navigation button"),
-    ].find((button) => button.textContent === "페이지 탐색");
-    await act(async () => explore.click());
-    assert.equal(document.querySelectorAll(".page-tree li").length, 6);
-    assert.equal(
-      document.querySelectorAll(".page-tree details[open]").length,
-      1,
-    );
-    const branch = document
-      .querySelector('.page-tree a[href="#/post/p1"]')
-      .closest("details");
-    await act(async () => {
-      const toggled = once(branch, "toggle");
-      branch.querySelector("summary").click();
-      await toggled;
-    });
-    assert.equal(document.querySelectorAll(".page-tree li").length, 11);
-    assert.equal(branch.open, true);
-    await act(async () => {
-      const toggled = once(branch, "toggle");
-      branch.querySelector("summary").click();
-      await toggled;
-    });
-    assert.equal(document.querySelectorAll(".page-tree li").length, 6);
-    assert.equal(branch.open, false);
-    await act(async () => {
-      // The URL changes before JSDOM dispatches the event that updates React.
-      const navigated = once(dom.window, "hashchange");
-      branch.querySelector('a[href="#/post/p1"]').click();
-      await navigated;
-    });
-    assert.equal(dom.window.location.hash, "#/post/p1");
-    assert.equal(
-      document.querySelector(".article-header h1").textContent,
-      "계층 페이지 1",
-    );
-    assert.equal(document.querySelector(".site-dialog").open, false);
-  } finally {
-    await act(async () => root.unmount());
-    dom.window.close();
-    for (const [key, descriptor] of Object.entries(previous)) {
-      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
-      else delete globalThis[key];
+test("page exploration controls and dialog are absent", () => {
+  for (const hash of ["#/", "#/records", "#/post/parent", "#/categories"]) {
+    const dom = new JSDOM(render([base], hash));
+    try {
+      const controls = [...dom.window.document.querySelectorAll("nav a, nav button")];
+      assert.equal(controls.some((control) => control.textContent.includes("페이지 탐색")), false);
+      assert.ok(dom.window.document.querySelector(".site-dialog") === null);
+      assert.ok(dom.window.document.querySelector(".page-tree") === null);
+      assert.ok(dom.window.document.querySelector('a[href="#/records"]') !== null);
+    } finally {
+      dom.window.close();
     }
   }
 });
@@ -383,21 +304,6 @@ test("reader classifies attachment URLs before resolving article IDs", async () 
   assert.equal(pageLink(`https://www.notion.so/Title-${id.replaceAll("-", "")}#block`, post, [post]), "#/post/" + id + "#block");
   assert.equal(pageLink("#heading", post, [post]), "#heading");
   assert.equal(pageLink("#/post/" + id + "#block", post, [post]), "#/post/" + id + "#block");
-});
-
-test("page explorer orders siblings by explicit order then ID regardless of update dates", async () => {
-  const { default: PageTree } = await loadComponent("src/features/page-explorer/PageTree.tsx");
-  const posts = [
-    { ...base, id: "root-b", order: 2, updatedAt: "2030-01-01" },
-    { ...base, id: "child-b", parentId: "root-a", order: 0 },
-    { ...base, id: "root-a", order: 1, updatedAt: "2020-01-01" },
-    { ...base, id: "child-a", parentId: "root-a", order: 0 },
-  ];
-  const html = renderToStaticMarkup(React.createElement(PageTree, { posts, onClose() {} }));
-  const document = new JSDOM(html).window.document;
-  assert.deepEqual([...document.querySelectorAll("a")].map((link) => link.getAttribute("href")), [
-    "#/post/root-a", "#/post/child-a", "#/post/child-b", "#/post/root-b",
-  ]);
 });
 
 test("reader resolves literal percent paths before UUIDs in ancestor folder names", async () => {

@@ -20,8 +20,6 @@ globalThis.cancelAnimationFrame = dom.window.cancelAnimationFrame.bind(dom.windo
 dom.window.scrollTo = () => {};
 dom.window.matchMedia = () => ({ matches: false });
 dom.window.HTMLElement.prototype.scrollIntoView = function () {};
-dom.window.HTMLDialogElement.prototype.close = function () { this.open = false; };
-dom.window.HTMLDialogElement.prototype.showModal = function () { this.open = true; };
 
 const { default: React, act } = await import("react");
 const { createRoot } = await import("react-dom/client");
@@ -94,11 +92,6 @@ test("records filters and visible count survive article and home roundtrips", { 
     assert.equal(document.querySelector('button[aria-label="리액트"]').getAttribute("aria-pressed"), "true");
     assert.equal(cards(), 24);
 
-    await click(button("페이지 탐색"));
-    assert.equal(document.querySelector(".site-dialog").open, true);
-    assert.equal(searchShortcut(), true, "an open dialog disables list search shortcuts");
-    await click(document.querySelector('[aria-label="창 닫기"]'));
-    assert.equal(searchShortcut(), false);
     await navigate(document.querySelector('.header-navigation a[href="#/categories"]'));
     assert.ok(document.querySelector(".categories-page"));
     assert.equal(document.title, "카테고리 관리 — Second Brain");

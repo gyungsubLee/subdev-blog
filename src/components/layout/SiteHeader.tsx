@@ -5,14 +5,12 @@ import type { Management } from "../../features/content-management/useManagement
 
 type SiteHeaderProps = {
   activeHref?: string;
-  onExplore: () => void;
   onWrite: () => void;
   management?: Management;
 };
 
 export default function SiteHeader({
   activeHref,
-  onExplore,
   onWrite,
   management,
 }: SiteHeaderProps) {
@@ -36,9 +34,6 @@ export default function SiteHeader({
             카테고리 관리
           </a>
         ) : null}
-        <button type="button" onClick={onExplore}>
-          페이지 탐색
-        </button>
       </nav>
       <div className="header-actions">
         {canWrite ? (

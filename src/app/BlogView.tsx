@@ -5,11 +5,9 @@ import {
   postIdFromHash,
 } from "../shared/routes";
 import { useEffect, useMemo, useState } from "react";
-import SiteDialog from "../components/dialog/SiteDialog";
 import SiteFooter from "../components/layout/SiteFooter";
 import SiteHeader from "../components/layout/SiteHeader";
 import { site } from "../config/site";
-import PageTree from "../features/page-explorer/PageTree";
 import { useCategoryCatalog } from "../features/post-category/useCategoryCatalog";
 import { useRecordsBrowser } from "../features/post-category/useRecordsBrowser";
 import HomePage from "../pages/home/HomePage";
@@ -41,7 +39,6 @@ export default function BlogView({
   management,
   onContentSaved,
 }: BlogViewProps) {
-  const [dialog, setDialog] = useState<"tree" | null>(null);
   const [backHref, setBackHref] = useState(HOME_HREF);
   const selectedId = postIdFromHash(hash);
   const selected = posts.find((post) => post.id === selectedId);
@@ -63,7 +60,7 @@ export default function BlogView({
     nodes: canonicalNodes,
     groups: canonicalGroups,
   } : personalCatalog;
-  const records = useRecordsBrowser(posts, catalog.groups, isRecords && !dialog);
+  const records = useRecordsBrowser(posts, catalog.groups, isRecords);
 
   useEffect(() => {
     if (isHome || isRecords) {
@@ -147,22 +144,11 @@ export default function BlogView({
       </a>
       <SiteHeader
         activeHref={hash}
-        onExplore={() => setDialog("tree")}
         onWrite={onWrite}
         management={management}
       />
       {page}
       <SiteFooter />
-      <SiteDialog
-        open={dialog !== null}
-        title="페이지 탐색"
-        onClose={() => setDialog(null)}
-      >
-        <p className="dialog-description">
-          원문의 페이지 구조를 따라 기록을 탐색합니다.
-        </p>
-        <PageTree posts={posts} onClose={() => setDialog(null)} />
-      </SiteDialog>
     </div>
   );
 }
