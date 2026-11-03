@@ -102,6 +102,25 @@
   background: #47463d;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.header-actions button {
+  gap: 8px;
+}
+
+.header-logout {
+  background: #b91c1c;
+}
+
+.header-logout:hover {
+  background: #991b1b;
+}
+
 .outline-button {
   border-color: #aca99e;
   color: var(--ink);
@@ -190,7 +209,7 @@
     margin-left: 0;
   }
 
-  .header-write {
+  .header-actions {
     margin-left: auto;
   }
 
@@ -230,8 +249,8 @@
     bottom: -5px;
   }
 
-  .header-write {
-    margin-left: auto;
+  .header-write,
+  .header-logout {
     padding: 9px 12px;
     font-size: 12px;
   }
