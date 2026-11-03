@@ -1,0 +1,58 @@
+{
+  "recordedAt": "2026-11-03T13:48:11.881078+00:00",
+  "baseline": "before-final.json",
+  "implementation": "after-verified.json",
+  "baselineSource": "temporary directory with original product files from HEAD, matched to handoff hashes; same script, shared github source/dependencies via symlinks; no checkout edits",
+  "inputHash": "3122cbf03986dc5b4d1d212836bdb982bd3229154bc3e7dc1bb6a5162586be00",
+  "environment": {
+    "node": "v24.3.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "os": "macOS-27.2-arm64-arm-64bit"
+  },
+  "responsesMatch": true,
+  "remoteCallCountsMatch": true,
+  "mediansMs": {
+    "cold": {
+      "samples": 5,
+      "before": 1052.0022500000005,
+      "after": 804.5775840000001
+    },
+    "warm": {
+      "samples": 10,
+      "before": 450.2362705000005,
+      "after": 0.444582999999966
+    }
+  },
+  "singleObservationsMs": {
+    "first-post": {
+      "before": 17.655500000000757,
+      "after": 13.033124999999927
+    },
+    "cached-post": {
+      "before": 6.44774999999936,
+      "after": 5.13591599999927
+    },
+    "after-save": {
+      "before": 1085.019624999999,
+      "after": 826.8922089999996
+    }
+  },
+  "retainedAccountingBytes": {
+    "before": {
+      "bytes": 8817818,
+      "snapshots": 1,
+      "blobBytes": 168
+    },
+    "after": {
+      "bytes": 23128344,
+      "snapshots": 1,
+      "blobBytes": 168
+    }
+  },
+  "limits": [
+    "Deterministic 1200-document replay, not production network latency or browser rendering.",
+    "Retained bytes are conservative accounting estimates, not measured heap/RSS.",
+    "after-save and each post phase have one sample."
+  ]
+}

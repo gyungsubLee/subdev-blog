@@ -228,8 +228,27 @@ function validateHierarchy(records, idOf, parentOf, label) {
   return byId;
 }
 
+// A copied snapshot must never inherit validated summary transforms.
+const validatedTransforms = new WeakMap();
+
+function transformContext(snapshot) {
+  return JSON.stringify([[...snapshot.documents.keys()], [...snapshot.paths]]);
+}
+
+export function getContentTransformBytes(snapshot) {
+  return validatedTransforms.get(snapshot)?.bytes ?? 0;
+}
+
+function transformsFor(snapshot) {
+  const cached = validatedTransforms.get(snapshot);
+  return cached && cached.assetUrl === snapshot.assetUrl &&
+    cached.allowUnresolvedLinks === snapshot.allowUnresolvedLinks &&
+    cached.context === transformContext(snapshot) ? cached.entries : undefined;
+}
+
 /** Validate documents and references; populate inherited category and asset projections. */
 export function validateContent(snapshot) {
+  validatedTransforms.delete(snapshot);
   if (!Array.isArray(snapshot.categories) || !(snapshot.documents instanceof Map))
     throw new Error("Content needs a category array and document map.");
   const entries = [...snapshot.documents.values()];
@@ -297,18 +316,29 @@ export function validateContent(snapshot) {
     }
   }
   snapshot.paths = paths;
+  const transforms = new Map();
+  let transformBytes = 0;
   for (const entry of entries) {
     const assets = new Map();
     const resolve = linkResolver(snapshot, entry, assets, externalDependencies);
-    rewriteContentLinks(entry.markdown, resolve);
+    const markdown = rewriteContentLinks(entry.markdown, resolve);
     for (const key of ["cover", "icon"]) {
       const value = entry.metadata[key];
       if (typeof value === "string" && !opaqueIcon(key, value))
         resolve(value, { kind: "image" });
     }
     entry.assets = [...assets.values()];
+    const inventory = JSON.stringify(entry.allAssets ?? entry.assets ?? []);
+    transforms.set(entry, { source: entry.markdown, filename: entry.filename, inventory, markdown });
+    transformBytes += (entry.markdown.length + markdown.length + inventory.length) * 2 + 128;
   }
   snapshot.externalDependencies = [...externalDependencies].sort();
+  const context = transformContext(snapshot);
+  validatedTransforms.set(snapshot, {
+    entries: transforms, context, assetUrl: snapshot.assetUrl,
+    allowUnresolvedLinks: snapshot.allowUnresolvedLinks,
+    bytes: transformBytes + context.length * 2,
+  });
 }
 
 function opaqueIcon(key, value) {
@@ -412,8 +442,9 @@ export function toPublicCategories(snapshot) {
 
 export function toPublicPosts(snapshot) {
   const categories = new Map(snapshot.categories.map((category) => [category.id, category]));
+  const transforms = transformsFor(snapshot);
   return [...snapshot.documents.values()]
-    .map((entry) => publicPost(snapshot, entry, categories))
+    .map((entry) => publicPost(snapshot, entry, categories, transforms))
     .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt) || a.id.localeCompare(b.id));
 }
 
@@ -422,16 +453,19 @@ export function toPublicPost(snapshot, id) {
   const entry = snapshot.documents.get(id);
   if (!entry) return undefined;
   const categories = new Map(snapshot.categories.map((category) => [category.id, category]));
-  return publicPost(snapshot, entry, categories);
+  return publicPost(snapshot, entry, categories, transformsFor(snapshot));
 }
 
-function publicPost(snapshot, entry, categories) {
+function publicPost(snapshot, entry, categories, transforms) {
   const metadata = entry.metadata;
   const categoryId = snapshot.effectiveCategories.get(metadata.id);
   const category = categories.get(categoryId);
   const legacyCategory = metadata.legacy_category;
   const resolve = linkResolver(snapshot, entry);
-  const markdown = rewriteContentLinks(entry.markdown, resolve);
+  const cached = transforms?.get(entry);
+  const markdown = cached?.source === entry.markdown && cached.filename === entry.filename &&
+    cached.inventory === JSON.stringify(entry.allAssets ?? entry.assets ?? [])
+    ? cached.markdown : rewriteContentLinks(entry.markdown, resolve);
   const publicImage = (key) => {
     const value = metadata[key];
     return typeof value === "string" && !opaqueIcon(key, value)

@@ -1,0 +1,58 @@
+{
+  "recordedAt": "2026-11-03T13:46:29.058993+00:00",
+  "baseline": "before.json",
+  "implementation": "after-final.json",
+  "inputHash": "3122cbf03986dc5b4d1d212836bdb982bd3229154bc3e7dc1bb6a5162586be00",
+  "environment": {
+    "node": "v24.3.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "os": "macOS-27.2-arm64-arm-64bit"
+  },
+  "responsesMatch": true,
+  "remoteCallCountsMatch": true,
+  "mediansMs": {
+    "cold": {
+      "samples": 5,
+      "before": 1097.7804999999998,
+      "after": 823.3339589999998
+    },
+    "warm": {
+      "samples": 10,
+      "before": 455.02487500000007,
+      "after": 0.39235399999961373
+    }
+  },
+  "singleObservationsMs": {
+    "first-post": {
+      "before": 15.254916000001685,
+      "after": 11.265832999999475
+    },
+    "cached-post": {
+      "before": 7.059750000000349,
+      "after": 4.679833000000144
+    },
+    "after-save": {
+      "before": 1091.1873749999995,
+      "after": 814.1423329999998
+    }
+  },
+  "retainedAccountingBytes": {
+    "before": {
+      "bytes": 8817818,
+      "snapshots": 1,
+      "blobBytes": 168
+    },
+    "after": {
+      "bytes": 23128344,
+      "snapshots": 1,
+      "blobBytes": 168
+    }
+  },
+  "limits": [
+    "Deterministic 1200-document local replay, not production network latency or browser rendering.",
+    "Retained bytes are conservative accounting estimates, not measured heap/RSS.",
+    "after-save and each post phase have one sample.",
+    "Script stdout uses upper-middle summary for even samples; this comparison uses statistics.median and separates post phases."
+  ]
+}

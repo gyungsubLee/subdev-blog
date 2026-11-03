@@ -1,0 +1,31 @@
+✔ public index reads canonical GitHub content without login or a token (104.949917ms)
+✔ public reads exclude editor source without fetching its private editing payload (4.568541ms)
+✔ public Markdown cannot publish editor source as an attachment (15.503291ms)
+✔ encoded aliases of the reserved editor filename fail public tree validation (0.681209ms)
+✔ body, cover, icon and attachments remain pinned to the list commit after head advances (6.02375ms)
+✔ a full SHA outside canonical history cannot expose a draft commit (0.663375ms)
+✔ an uncached canonical ancestor can be read after ancestry verification (2.253917ms)
+✔ after bypasses an old head cache and unchanged blobs are reused across commits (4.100708ms)
+✔ private or ambiguous repository metadata never exposes content even with a server token (1.1325ms)
+✔ invalid request parameters and repository overrides are rejected before network access (1.6535ms)
+✔ GitHub errors are visible and never become a successful empty index or stale snapshot (2.56025ms)
+✔ runtime retains missing authored links but rejects unsafe paths and URL schemes (10.119084ms)
+✔ raw reads are bounded in parallel and unsafe canonical trees fail before exposure (48.959875ms)
+✔ a raw file fetch failure is surfaced and request deadlines are finite (1.563166ms)
+✔ anonymous GitHub requests omit credentials and always carry an abort deadline (0.127417ms)
+✔ bootstrap summaries skip unchanged body downloads and a detail reads only its pinned body (8.719208ms)
+✔ content catalog records carry the exact Git blob hash of canonical source bytes (28.439792ms)
+✔ a cached snapshot is denied after canonical history is replaced (3.598875ms)
+✔ a cached ancestor proof is reused only for its current canonical head (3.093916ms)
+✔ production-size indexes use bounded gzip without losing records or summary search text (1268.348417ms)
+✔ explicit gzip rejection overrides wildcards and large identity responses stay bounded (9.404334ms)
+✔ small public responses remain ordinary JSON when gzip is rejected (4.604625ms)
+✔ repeated consumed index responses reuse JSON bytes and remain independently readable (2.195875ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1987.076916

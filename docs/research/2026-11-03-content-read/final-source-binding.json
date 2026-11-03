@@ -1,0 +1,11 @@
+{
+  "scripts/content.mjs": "63a3f556de68805c9e216465358252a8385bca3078df2f09c096cb639c4360bb",
+  "server/public-content.mjs": "1db232477f4ee6e42798e6116d7ce322521ce6a9f229ae58e0abf7e672e163fb",
+  "server/github.mjs": "77aaa75f298090ed5377e7c1bfeaab733d25bfb31cce9ab99cbd199794aa8881",
+  "tests/content.test.mjs": "930dddc7114a70b661252408386c705a71f59219f9fb9864f4e0d4c4c1b1b175",
+  "tests/public-content.test.mjs": "066f16d368d3d5afa5b35e66c106109fdc500a2a5c99b48e720122f513fed35d",
+  "tests/github-auth.test.mjs": "be39b4de79fcc1c491aaeda2eef2fc884c88670d132c621f78259c3d4f8486d4",
+  "vite.config.ts": "7e7336da6e735872fd7e302c2a7d67b52c9d9f57d44757dfdef8647e7651eb8b",
+  "package.json": "f5082f06c9b04f857761121be437feb67e14ff98348f347d5d6198a478b07a4b",
+  "package-lock.json": "6e4f60584ce2a92166d835f42821f842d6565dfd493882722d06c2ec2d2e67ff"
+}

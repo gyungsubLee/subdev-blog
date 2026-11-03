@@ -1,0 +1,7 @@
+{
+  "command": "node --test tests/management-runtime.test.mjs tests/native-preview.test.mjs",
+  "exitCode": 0,
+  "seconds": 2.219248332999996,
+  "deadlineSeconds": 180,
+  "environment": "outside filesystem/network sandbox for loopback listeners"
+}

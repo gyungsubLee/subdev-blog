@@ -1,0 +1,14 @@
+[
+  {
+    "command": "npm run check",
+    "deadlineSeconds": 300,
+    "exitCode": 1,
+    "seconds": 47.35046433399839
+  },
+  {
+    "command": "npm run build",
+    "exitCode": 0,
+    "seconds": 106.93598462499358,
+    "deadlineSeconds": 300
+  }
+]

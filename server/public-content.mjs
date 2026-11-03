@@ -4,7 +4,7 @@ import { readFile as readLocalFile } from 'node:fs/promises';
 import { createGitHubClient, httpError } from './github.mjs';
 import { canonicalFilename, parseMarkdownDocument } from '../src/shared/document.mjs';
 import { EDITOR_FILENAME, isEditorFilename } from '../src/shared/editor-document.mjs';
-import { validateContent, toPublicPosts, toPublicPost, toPublicCategories } from '../scripts/content.mjs';
+import { validateContent, getContentTransformBytes, toPublicPosts, toPublicPost, toPublicCategories } from '../scripts/content.mjs';
 
 const REPOSITORY = 'gyungsubLee/subdev-blog-content';
 const REPO_PATH = '/repos/' + REPOSITORY;
@@ -46,8 +46,8 @@ function acceptsGzip(header) {
   return gzip ?? wildcard;
 }
 
-function json(body, status = 200, acceptEncoding = null) {
-  let bytes = Buffer.from(JSON.stringify(body));
+function json(body, status = 200, acceptEncoding = null, encoded = {}) {
+  let bytes = encoded.identity ??= Buffer.from(JSON.stringify(body));
   const headers = {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-store',
@@ -55,7 +55,7 @@ function json(body, status = 200, acceptEncoding = null) {
   };
   if (bytes.length > COMPRESS_BYTES) {
     if (acceptsGzip(acceptEncoding)) {
-      bytes = gzipSync(bytes);
+      bytes = encoded.gzip ??= gzipSync(bytes);
       if (bytes.length > MAX_RESPONSE_BYTES) {
         return json({ error: 'Public content response exceeds the compressed size limit' }, 502, acceptEncoding);
       }
@@ -161,6 +161,14 @@ async function readFile(entry, commit, cache, fetcher) {
   return text;
 }
 
+function trimSnapshots(cache) {
+  while (cache.snapshots.size > 3 || cache.snapshotBytes > MAX_SNAPSHOT_BYTES) {
+    const oldest = cache.snapshots.keys().next().value;
+    cache.snapshotBytes -= cache.snapshots.get(oldest).bytes;
+    cache.snapshots.delete(oldest);
+  }
+}
+
 async function readSnapshot(commit, cache, github, fetcher, catalog) {
   if (cache.snapshots.has(commit)) return cache.snapshots.get(commit);
   if (cache.pending.has(commit)) return cache.pending.get(commit);
@@ -255,7 +263,7 @@ async function readSnapshot(commit, cache, github, fetcher, catalog) {
     validateContent(snapshot);
     const posts = toPublicPosts(snapshot);
     const result = { snapshot, posts, categories: toPublicCategories(snapshot), contentCommit: commit };
-    result.bytes = JSON.stringify(result.categories).length * 2;
+    result.bytes = JSON.stringify(result.categories).length * 2 + getContentTransformBytes(snapshot);
     for (const post of posts) {
       const entry = snapshot.documents.get(post.id);
       result.bytes += 1024 + JSON.stringify(entry.metadata).length * 2 + entry.markdown.length * 2;
@@ -267,11 +275,7 @@ async function readSnapshot(commit, cache, github, fetcher, catalog) {
     if (result.bytes <= MAX_SNAPSHOT_BYTES) {
       cache.snapshots.set(commit, result);
       cache.snapshotBytes += result.bytes;
-      while (cache.snapshots.size > 3 || cache.snapshotBytes > MAX_SNAPSHOT_BYTES) {
-        const oldest = cache.snapshots.keys().next().value;
-        cache.snapshotBytes -= cache.snapshots.get(oldest).bytes;
-        cache.snapshots.delete(oldest);
-      }
+      trimSnapshots(cache);
     }
     return result;
   })().finally(() => cache.pending.delete(commit));
@@ -305,11 +309,24 @@ export async function handlePublicRequest(request, { env = process.env, fetcher 
     }
     const snapshot = await readSnapshot(commit, cache, github, fetcher, catalog ?? await readCatalog());
     snapshot.validatedHead = head;
-    if (kind === 'index') return respond({
-      posts: snapshot.posts.map(post => ({ ...post, markdown: post.markdown.slice(0, 1400), bodyLoaded: false })),
-      categories: snapshot.categories,
-      contentCommit: commit,
-    });
+    if (kind === 'index') {
+      snapshot.encoded ??= {};
+      const previousBytes = (snapshot.encoded.identity?.length ?? 0) + (snapshot.encoded.gzip?.length ?? 0);
+      // Construct the projection only when serialization is needed; keep bytes, never Responses.
+      const body = snapshot.encoded.identity ? null : {
+        posts: snapshot.posts.map(post => ({ ...post, markdown: post.markdown.slice(0, 1400), bodyLoaded: false })),
+        categories: snapshot.categories,
+        contentCommit: commit,
+      };
+      const response = json(body, 200, request.headers.get('Accept-Encoding'), snapshot.encoded);
+      const addedBytes = snapshot.encoded.identity.length + (snapshot.encoded.gzip?.length ?? 0) - previousBytes;
+      snapshot.bytes += addedBytes;
+      if (cache.snapshots.get(commit) === snapshot) {
+        cache.snapshotBytes += addedBytes;
+        trimSnapshots(cache);
+      }
+      return response;
+    }
     const entry = snapshot.snapshot.documents.get(id);
     requireValue(entry, 'Post not found', 404);
     if (entry.fullBody) return respond(toPublicPost(snapshot.snapshot, id));

@@ -1,0 +1,27 @@
+✖ repeated consumed index responses reuse JSON bytes and remain independently readable (100.864458ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 311.253333
+
+✖ failing tests:
+
+test at tests/public-content.test.mjs:393:1
+✖ repeated consumed index responses reuse JSON bytes and remain independently readable (100.864458ms)
+  AssertionError [ERR_ASSERTION]: same snapshot should be encoded only once
+  
+  3 !== 1
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/public-content.test.mjs:407:12)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 3,
+    expected: 1,
+    operator: 'strictEqual'
+  }

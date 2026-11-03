@@ -688,3 +688,36 @@ test("content provenance rejects uninitialized submodules and external deploymen
     projectRoot: input.projectRoot, env: { CI: "true", CONTENT_COMMIT_SHA: input.sha },
   }), /CONTENT_ROOT|external|content root/i);
 });
+
+test('validated Markdown is reused only for the original snapshot and source', () => {
+  const entry = { ...document(), filename: `posts/${parentId}/Title.md`, markdown: '![image](./a.png)', allAssets: [{ name: 'a.png', path: 'a.png' }] };
+  let resolutions = 0;
+  const snapshot = { categories, documents: new Map([[parentId, entry]]), assetUrl: () => { resolutions++; return '/first.png'; } };
+  validateContent(snapshot);
+  assert.equal(resolutions, 1);
+  assert.equal(content.toPublicPost(snapshot, parentId).markdown, '![image](/first.png)');
+  assert.equal(resolutions, 1, 'projection must reuse the validated transform');
+  const detail = { ...snapshot, documents: new Map(snapshot.documents) };
+  detail.documents.set(parentId, { ...entry, markdown: entry.markdown + ' full body'.repeat(200) });
+  assert.ok(content.toPublicPost(detail, parentId).markdown.length > 1400);
+  const other = { ...snapshot, assetUrl: () => '/second.png' };
+  assert.equal(content.toPublicPost(other, parentId).markdown, '![image](/second.png)');
+  entry.markdown = '![changed](./a.png)';
+  assert.equal(content.toPublicPost(snapshot, parentId).markdown, '![changed](/first.png)');
+  validateContent(snapshot);
+  snapshot.assetUrl = () => '/third.png';
+  validateContent(snapshot);
+  assert.equal(content.toPublicPost(snapshot, parentId).markdown, '![changed](/third.png)');
+  assert.ok(content.getContentTransformBytes(snapshot) > 0);
+  entry.markdown = '[unsafe](javascript:alert)';
+  assert.throws(() => validateContent(snapshot), /Unsafe/);
+  assert.equal(content.getContentTransformBytes(snapshot), 0);
+  assert.throws(() => content.toPublicPost(snapshot, parentId), /Unsafe/);
+});
+
+test('attachment-free entries need no inventory fields for validation or projection', () => {
+  const entry = { ...document(), filename: `posts/${parentId}/Title.md` };
+  const snapshot = { categories, documents: new Map([[parentId, entry]]) };
+  validateContent(snapshot);
+  assert.equal(content.toPublicPost(snapshot, parentId).markdown, entry.markdown);
+});

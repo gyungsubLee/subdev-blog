@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { gunzipSync } from 'node:zlib';
-import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, rm, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { readContent } from '../scripts/content.mjs';
@@ -388,4 +388,82 @@ test('small public responses remain ordinary JSON when gzip is rejected', async 
   assert.equal(response.status, 200);
   assert.equal(response.headers.get('Content-Encoding'), null);
   assert.equal((await response.json()).posts[0].markdown, 'Original body');
+});
+
+test('repeated consumed index responses reuse JSON bytes and remain independently readable', async () => {
+  const f = fixture();
+  const stringify = JSON.stringify;
+  let encodings = 0;
+  JSON.stringify = function (value, ...args) {
+    if (value?.posts && value?.contentCommit === A) encodings++;
+    return stringify.call(this, value, ...args);
+  };
+  try {
+    for (let i = 0; i < 3; i++) {
+      const result = await f.call();
+      assert.equal(result.status, 200);
+      assert.equal(result.body.posts[0].markdown, 'Original body');
+    }
+    assert.equal(encodings, 1, 'same snapshot should be encoded only once');
+  } finally {
+    JSON.stringify = stringify;
+  }
+});
+
+// Inspect retention without exposing test-only controls from the production module.
+async function inspectedRuntime() {
+  const location = new URL('../server/public-content.mjs', import.meta.url);
+  const source = (await readFile(location, 'utf8')).replace('gzipSync(bytes)', '(gzipEncodings++, gzipSync(bytes))').replace(/from '([^']+)'/g, (match, name) =>
+    name.startsWith('.') ? `from '${new URL(name, location).href}'` : match);
+  return import('data:text/javascript;base64,' + Buffer.from(source + '\nlet gzipEncodings = 0; export const compressionCount = () => gzipEncodings; export const inspectCache = fetcher => cacheFor(fetcher, "main");').toString('base64'));
+}
+
+test('encoded bytes count toward the snapshot budget and trigger eviction on growth', async () => {
+  const inspected = await inspectedRuntime();
+  const f = largePublicFixture();
+  const fetcher = (...args) => f.fetcher(...args);
+  const call = encoding => inspected.handlePublicRequest(new Request('https://site.test/api/public?kind=index', {
+    headers: { 'Accept-Encoding': encoding },
+  }), { env: {}, fetcher, catalog: f.catalog });
+  const identity = await call('identity');
+  assert.equal(identity.status, 406);
+  await identity.json();
+  const cache = inspected.inspectCache(fetcher);
+  const snapshot = cache.snapshots.get(A);
+  assert.ok(snapshot.encoded.identity.length > 4 * 1024 * 1024);
+  assert.ok(snapshot.bytes > snapshot.encoded.identity.length);
+  assert.equal(cache.snapshotBytes, snapshot.bytes);
+  // Simulate other retained source data near the real 128 MiB limit.
+  snapshot.bytes = 128 * 1024 * 1024 - 100;
+  cache.snapshotBytes = snapshot.bytes;
+  const compressed = await call('gzip');
+  assert.equal(compressed.status, 200);
+  await compressed.arrayBuffer();
+  assert.equal(cache.snapshots.size, 0);
+  assert.equal(cache.snapshotBytes, 0);
+  const repeated = await call('gzip');
+  await repeated.arrayBuffer();
+  // The near-limit snapshot was evicted, so this request must rebuild once.
+  assert.equal(inspected.compressionCount(), 2);
+  const warm = await call('gzip');
+  await warm.arrayBuffer();
+  assert.equal(inspected.compressionCount(), 2, 'a retained gzip response must not be recompressed');
+  assert.ok(snapshot.encoded.gzip.length > 100);
+});
+
+test('retention never exceeds three snapshots after new commits', async () => {
+  const inspected = await inspectedRuntime();
+  const f = fixture({ nextFiles: {} });
+  const commits = [A, B, 'c'.repeat(40), 'e'.repeat(40)];
+  for (const commit of commits) {
+    f.versions.set(commit, f.versions.get(A));
+    f.controls.head = commit;
+    const response = await inspected.handlePublicRequest(new Request(`https://site.test/api/public?kind=index&after=${commit}`), { env: {}, fetcher: f.fetcher, catalog: {version: 1, documents: []} });
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).contentCommit, commit);
+  }
+  const cache = inspected.inspectCache(f.fetcher);
+  assert.equal(cache.snapshots.size, 3);
+  assert.equal(cache.snapshots.has(A), false);
+  assert.equal(cache.snapshotBytes, [...cache.snapshots.values()].reduce((total, snapshot) => total + snapshot.bytes, 0));
 });
