@@ -156,56 +156,40 @@ export async function ensurePublicPublication(options) {
   const existing = await findPublicPublication(options);
   if (existing) return verify(existing);
   const files = await generatePublicFiles(options);
-  // GitHub times out when thousands of inline blobs share one tree request.
-  // Upload bounded groups first; publish a ref only after the complete tree exists.
+  // GitHub times out even for large SHA-only trees. Extend a small tree at
+  // each step; only the final commit/ref makes the full publication visible.
   const batches = [];
   let batch = [];
-  let batchBytes = Buffer.byteLength('{"tree":[]}');
-  let separateBlobs = false;
+  const envelopeBytes = Buffer.byteLength(JSON.stringify({ base_tree: '0'.repeat(40), tree: [] }));
+  let batchBytes = envelopeBytes;
   for (const [path, bytes] of files) {
-    const entry = { path, mode: '100644', type: 'blob', content: bytes.toString('utf8') };
-    const entryBytes = Buffer.byteLength(JSON.stringify(entry));
-    if (entryBytes + Buffer.byteLength('{"tree":[]}') > 2 * 1024 * 1024) {
+    let entry = { path, mode: '100644', type: 'blob', content: bytes.toString('utf8') };
+    let entryBytes = Buffer.byteLength(JSON.stringify(entry));
+    if (entryBytes + envelopeBytes > 2 * 1024 * 1024) {
       const blob = await github('/git/blobs', {
         method: 'POST', body: { content: bytes.toString('base64'), encoding: 'base64' },
       });
       const expected = createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
       requirePublic(blob.sha === expected, 'Uploaded blob differs from generated file');
-      separateBlobs = true;
-      continue;
+      entry = { path, mode: '100644', type: 'blob', sha: blob.sha };
+      entryBytes = Buffer.byteLength(JSON.stringify(entry));
     }
     if (batch.length && (batch.length >= 200 || batchBytes + entryBytes + 1 > 2 * 1024 * 1024)) {
       batches.push(batch);
       batch = [];
-      batchBytes = Buffer.byteLength('{"tree":[]}');
+      batchBytes = envelopeBytes;
     }
     batch.push(entry);
     batchBytes += entryBytes + 1;
   }
   if (batch.length) batches.push(batch);
-  let cursor = 0;
-  let failure;
-  const uploaded = [];
-  await Promise.all(Array.from({ length: Math.min(4, batches.length) }, async () => {
-    while (cursor < batches.length && !failure) {
-      const entries = batches[cursor++];
-      try {
-        const result = await github('/git/trees', { method: 'POST', body: { tree: entries } });
-        requirePublic(SHA.test(result.sha), 'Invalid uploaded tree');
-        uploaded.push(result);
-      } catch (error) {
-        failure = error;
-      }
-    }
-  }));
-  if (failure) throw failure;
-  const tree = batches.length === 1 && !separateBlobs ? uploaded[0] : await github('/git/trees', {
-    method: 'POST',
-    body: { tree: [...files].map(([path, bytes]) => ({
-      path, mode: '100644', type: 'blob',
-      sha: createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex'),
-    })) },
-  });
+  let tree;
+  for (const entries of batches) {
+    tree = await github('/git/trees', {
+      method: 'POST', body: { ...(tree ? { base_tree: tree.sha } : {}), tree: entries },
+    });
+    requirePublic(SHA.test(tree.sha), 'Invalid generated tree');
+  }
   requirePublic(SHA.test(tree.sha), 'Invalid generated tree');
   const artifact = await github('/git/commits', { method: 'POST', body: { message: 'public-data:' + commit, tree: tree.sha, parents: [] } });
   requirePublic(SHA.test(artifact.sha), 'Invalid generated commit');
