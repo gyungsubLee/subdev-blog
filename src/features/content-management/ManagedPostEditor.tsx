@@ -9,6 +9,7 @@ import {
 import { useCreateBlockNote } from "@blocknote/react";
 import type { BlockNoteEditor, PartialBlock } from "@blocknote/core";
 import { ko } from "@blocknote/core/locales";
+import HeaderAction from "../../components/header-action/HeaderAction";
 import CategorySelectionDialog from "../post-category/CategorySelectionDialog";
 import type { EditorDocument, Post } from "../../shared/post";
 import {
@@ -202,6 +203,7 @@ export default function ManagedPostEditor({
   const [previewVisible, setPreviewVisible] = useState(true);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [saveDescription, setSaveDescription] = useState("");
+  const [saveState, setSaveState] = useState<"unsaved" | "saved">();
   const [publishedId, setPublishedId] = useState<string | null>(null);
   const isCanonical = Boolean((post && !post.draft) || publishedId);
   const [source, setSource] = useState<SourceDocument | null>(null);
@@ -281,6 +283,7 @@ export default function ManagedPostEditor({
           if (controller.signal.aborted) return;
           setSource(original);
           setDraft(value);
+          setSaveState("saved");
           setPublication(value.publication);
           if (original.editorError) {
             setDraftError(
@@ -425,12 +428,14 @@ export default function ManagedPostEditor({
         }),
       );
       if (explicit) {
+        setSaveState("saved");
         setSaveDescription(
           "초안을 저장했습니다. 다시 게시하기 전까지 공개 내용은 유지됩니다.",
         );
         onDraftSaved?.();
       }
     } catch {
+      setSaveState("unsaved");
       setDraftError(
         "초안을 저장하지 못했습니다. Markdown과 원본 백업을 내보내십시오.",
       );
@@ -491,6 +496,7 @@ export default function ManagedPostEditor({
       };
     });
     setSaveDescription("저장하지 않은 변경 사항이 있습니다.");
+    setSaveState("unsaved");
     setPublication(undefined);
   }
 
@@ -1012,26 +1018,10 @@ export default function ManagedPostEditor({
         {needsLogin ? <a href="/api/auth/github">GitHub 다시 로그인</a> : null}
         {blockMode && draft ? (
           <header className="mock-publication-header">
-            <div className="editor-category">
-              분류
-              <button
-                type="button"
-                className="mock-category-button"
-                aria-label="글 분류"
-                aria-haspopup="dialog"
-                disabled={busy}
-                aria-expanded={categoryOpen}
-                aria-controls="editor-category-selection"
-                onClick={() => setCategoryOpen(true)}
-              >
-                {categories.find((category) => category.id === draft.category)
-                  ?.name || "분류 없음"}{" "}
-                <span aria-hidden="true">⌄</span>
-              </button>
-            </div>
             <div className="mock-publication-state">
               <span
                 id="editor-status"
+                data-save-state={isCanonical ? undefined : saveState}
                 className={
                   "status-badge status-" +
                   (isCanonical
@@ -1050,6 +1040,23 @@ export default function ManagedPostEditor({
                     : "게시하기 전에는 공개되지 않습니다.")}
               </span>
             </div>
+            <div className="editor-category">
+              분류
+              <HeaderAction
+                type="button"
+                className="mock-category-button"
+                aria-label="글 분류"
+                aria-haspopup="dialog"
+                disabled={busy}
+                aria-expanded={categoryOpen}
+                aria-controls="editor-category-selection"
+                onClick={() => setCategoryOpen(true)}
+              >
+                {categories.find((category) => category.id === draft.category)
+                  ?.name || "분류 없음"}{" "}
+                <span aria-hidden="true">⌄</span>
+              </HeaderAction>
+            </div>
             <button
               type="button"
               className="mock-preview-toggle outline-button"
@@ -1062,6 +1069,7 @@ export default function ManagedPostEditor({
             <button
               type="button"
               className="editor-save outline-button"
+              data-save-state={saveState}
               disabled={busy}
               onClick={() => saveRecovery(true)}
             >

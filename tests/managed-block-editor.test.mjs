@@ -150,7 +150,20 @@ test(
           (item) => item.textContent === "초안 저장",
         );
         assert.ok(button !== undefined, "draft action must exist");
+        const editable = document.querySelector('.bn-editor[contenteditable="true"]');
+        const view = editable.editor.view;
+        await act(async () => view.dispatch(view.state.tr.insertText("Unsaved content")));
+        assert.equal(button.dataset.saveState, "unsaved");
+        assert.equal(document.querySelector('#editor-status').dataset.saveState, "unsaved");
         await act(async () => button.click());
+        assert.equal(button.dataset.saveState, "saved");
+        assert.equal(document.querySelector('#editor-status').dataset.saveState, "saved");
+        await act(async () => view.dispatch(view.state.tr.insertText(" More content")));
+        assert.equal(button.dataset.saveState, "unsaved");
+        await act(async () => window.dispatchEvent(new KeyboardEvent("keydown", {
+          key: "s", ctrlKey: true, bubbles: true, cancelable: true,
+        })));
+        assert.equal(button.dataset.saveState, "saved");
         assert.equal(requests.length, 0, "draft save cannot publish");
         assert.ok(
           document.querySelector("summary")?.textContent === "저장·내보내기",
@@ -165,6 +178,25 @@ test(
     );
   },
 );
+
+test("category action precedes preview and shows the assigned name or empty label", { timeout: 10000 }, async () => {
+  for (const [categoryId, label] of [[null, "분류 없음"], ["notes", "기록"]]) {
+    await mounted({ post: null }, source({
+      revision: null,
+      document: { metadata: { id, title: "New", category_id: categoryId }, markdown: "" },
+    }), async ({ requests }) => {
+      const category = document.querySelector('[aria-label="글 분류"]');
+      const preview = document.querySelector('.mock-preview-toggle');
+      assert.ok(category !== null);
+      assert.equal(category.textContent.replace("⌄", "").trim(), label);
+      assert.ok(category.classList.contains("header-action"), "reuse the shared button");
+      assert.ok(category.parentElement.nextElementSibling === preview, "category must sit immediately left of preview");
+      await act(async () => category.click());
+      assert.ok(document.querySelector('dialog') !== null, "keep the category picker");
+      assert.equal(requests.length, 0, "opening the picker cannot publish");
+    });
+  }
+});
 
 test("new GitHub posts use the notebook editor and save one paired Markdown/block snapshot", { timeout: 10000 }, async () => {
   await mounted({ post: null }, source({ revision: null, document: { metadata: { id, title: "New" }, markdown: "" } }), async ({ requests }) => {
@@ -767,11 +799,17 @@ test("tags, category cancellation and reader controls preserve local-only drafts
     const categoryButton = document.querySelector('[aria-label="글 분류"]');
     await act(async () => categoryButton.click());
     const child = () => [...document.querySelectorAll('.row-name')].find(item => item.textContent.includes("하위 분류"));
+    assert.ok(child() === undefined, "children start collapsed");
+    await act(async () => document.querySelector('dialog [data-id="notes"] .expander').click());
+    assert.ok(child() !== undefined, "expanding the parent reveals its child");
     await act(async () => child().click());
     const cancel = [...document.querySelectorAll('dialog button')].find(item => item.textContent === "취소");
     await act(async () => cancel.click());
     assert.ok(categoryButton.textContent.includes("기록"), "cancel must retain the current category");
     await act(async () => categoryButton.click());
+    assert.ok(child() === undefined, "reopening resets the collapsed tree");
+    await act(async () => document.querySelector('dialog [data-id="notes"] .expander').click());
+    assert.ok(child() !== undefined, "expanding the reopened parent reveals its child");
     await act(async () => child().click());
     await act(async () => document.querySelector('dialog button[type="submit"]').click());
     assert.ok(categoryButton.textContent.includes("하위 분류"));
@@ -825,7 +863,10 @@ test("editor confirms a category double-click through the shared dialog without 
   ] }), async ({ requests }) => {
     const trigger = document.querySelector('[aria-label="글 분류"]');
     await act(async () => trigger.click());
+    assert.ok(document.querySelector('dialog [data-id="child"]') === null, "children start collapsed");
+    await act(async () => document.querySelector('dialog [data-id="notes"] .expander').click());
     const child = document.querySelector('dialog [data-id="child"] .row-name');
+    assert.ok(child !== null, "expanding the parent reveals its child");
     await act(async () => child.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, detail: 2 })));
     assert.ok(document.querySelector('dialog') === null);
     assert.ok(trigger.textContent.includes('하위 분류'));

@@ -1,0 +1,36 @@
+.header-action,
+.editor-page .header-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+summary.header-action,
+.editor-page summary.header-action {
+  display: list-item;
+  list-style-position: inside;
+  align-content: center;
+}
+
+.header-action:hover,
+.editor-page .header-action:hover {
+  background: var(--soft);
+}
+
+.header-action:focus-visible,
+.editor-page .header-action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}

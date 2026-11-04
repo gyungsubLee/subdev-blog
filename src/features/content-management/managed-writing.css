@@ -126,6 +126,20 @@
   background: var(--soft);
 }
 
+.managed-writing .mock-publication-header .editor-save[data-save-state="unsaved"],
+.managed-writing #editor-status[data-save-state="unsaved"] {
+  border-color: #b42318;
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.managed-writing .mock-publication-header .editor-save[data-save-state="saved"],
+.managed-writing #editor-status[data-save-state="saved"] {
+  border-color: #166534;
+  background: #f0fdf4;
+  color: #166534;
+}
+
 .managed-writing .mock-publication-header .accent-button {
   background: var(--accent);
   color: var(--on-accent);
@@ -165,14 +179,8 @@
 }
 
 .managed-writing .mock-category-button {
-  display: inline-flex;
-  align-items: center;
   gap: 12px;
   max-width: 240px;
-  padding: 7px 10px;
-  border-radius: var(--radius);
-  background: var(--soft);
-  color: var(--ink);
 }
 
 .managed-writing .mock-tag-field {
