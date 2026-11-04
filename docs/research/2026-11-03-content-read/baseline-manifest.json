@@ -1,0 +1,99 @@
+{
+  "recordedAt": "2026-11-03T13:31:57.331185+00:00",
+  "kind": "diagnostic baseline, not final verification",
+  "measurementTime": "2026-11-03T12:58:57.590Z",
+  "head": "52c0a6ba77bf2966ee05feb1519cd1eff4ce1e41",
+  "branch": "codex/block-editor-storage",
+  "node": "v24.3.0",
+  "evidence": [
+    {
+      "path": "docs/research/2026-11-03-content-read/initial-profile.json",
+      "source": "/tmp/subdev-read-profile.json",
+      "bytes": 4619,
+      "sha256": "0aa3233d19a7cea46860266328e179f9f9d959b1e55686a9ba7be28aed7e7b68"
+    },
+    {
+      "path": "docs/research/2026-11-03-content-read/initial-profile-stages.json",
+      "source": "/tmp/subdev-read-profile-stages.json",
+      "bytes": 4604,
+      "sha256": "0b696afaaa91d99e04d6b322a6938f6ef16f7a632f155b215030de385e7f4b7c"
+    },
+    {
+      "path": "docs/research/2026-11-03-content-read/initial-stages.log",
+      "source": "/tmp/subdev-read-stages.log",
+      "bytes": 3856,
+      "sha256": "541a3a6b69853bc3a203ea278d5c89be494c9256a9e9cdfeae04ad6bb051c177"
+    },
+    {
+      "path": "docs/research/2026-11-03-content-read/initial-profile.mjs",
+      "source": "/tmp/subdev-read-profile.mjs",
+      "bytes": 3691,
+      "sha256": "c797c8dbf57a5385782612422cc3be33d7742cc54f4b8188f7de53a35f9fb2e6"
+    },
+    {
+      "path": "docs/research/2026-11-03-content-read/initial-profile-stages.mjs",
+      "source": "/tmp/subdev-read-profile-stages.mjs",
+      "bytes": 3666,
+      "sha256": "22f41dc8a2054fab171f755bfeedc40628f5d7b617ccc7e2266fc28bdcbe090d"
+    },
+    {
+      "path": "docs/research/2026-11-03-content-read/initial-public-content-instrumented.mjs",
+      "source": "/tmp/subdev-public-content-instrumented.mjs",
+      "bytes": 16140,
+      "sha256": "c678cc0331abb67ccbfb03db141b357a7d7b16884893d05df081d5cb2bda54dc"
+    }
+  ],
+  "sourceHashesAtHandoff": {
+    "scripts/content.mjs": {
+      "sha256": "c44471b841616dea469cc60033cb39b231885682e2288e1b5399afca77b2b233",
+      "bytes": 29160
+    },
+    "server/public-content.mjs": {
+      "sha256": "c49d619dee540bc9d67b31eebe648536ffc024c7d123fa97e6a1a22bec08f17c",
+      "bytes": 15544
+    },
+    "src/shared/content-links.mjs": {
+      "sha256": "430bba76fda839e3d4a7459c0846b9af3ad732b8a263054b95ccafa4e494baf0",
+      "bytes": 6437
+    },
+    "server/github.mjs": {
+      "sha256": "77aaa75f298090ed5377e7c1bfeaab733d25bfb31cce9ab99cbd199794aa8881",
+      "bytes": 1756
+    },
+    "tests/content.test.mjs": {
+      "sha256": "9ed7a22ab97063ac95fef2b64122e570f2203f365307f94dfb82dffc23523d02",
+      "bytes": 39771
+    },
+    "tests/public-content.test.mjs": {
+      "sha256": "3d2df9f1b62ffda30e0e1ab4f42de3eb11b7f0fe1a662ba43a3550013d68e39c",
+      "bytes": 20989
+    },
+    "package-lock.json": {
+      "sha256": "6e4f60584ce2a92166d835f42821f842d6565dfd493882722d06c2ec2d2e67ff",
+      "bytes": 194487
+    },
+    "server/content-catalog.json": {
+      "sha256": "81a6d6645261ea5591ca99da73f8222fe65839d6afb739e4ef5b2f6774dbe106",
+      "bytes": 8561302
+    }
+  },
+  "bindingLimit": "Hashes were captured at handoff, not at the original measurement. Recreate a bound before/after baseline for implementation verification. Existing live profile loads catalog in advance, buffers fetch bodies and writes /tmp outputs. Do not treat timings as browser render time or operating server attribution.",
+  "operatingHttpObservations": {
+    "source": "Transcribed from original curl tool outputs in source chat; each request returned HTTP200; no operating server internal timing captured.",
+    "indexFirst": {
+      "ttfbSeconds": 13.395101,
+      "totalSeconds": 14.479656,
+      "wireBytes": 1295161
+    },
+    "indexRepeat": {
+      "ttfbSeconds": 0.575887,
+      "totalSeconds": 1.659891,
+      "wireBytes": 1295161
+    },
+    "post": {
+      "ttfbSeconds": 0.916862,
+      "totalSeconds": 1.099131,
+      "wireBytes": 12611
+    }
+  }
+}
