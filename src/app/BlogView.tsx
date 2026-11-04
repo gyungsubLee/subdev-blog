@@ -95,9 +95,8 @@ export default function BlogView({
         }
         posts={posts}
         hash={hash}
-        onEdit={onEdit}
+        onEdit={management?.session.state === "ready" ? onEdit : undefined}
         backHref={backHref}
-        canEdit={!management || management.session.state === "ready"}
       />
     ) : (
       <MissingPostPage />
@@ -109,7 +108,6 @@ export default function BlogView({
         catalog={catalog}
         browser={records}
         onWrite={onWrite}
-        canManageCategories={!management || management.session.state === "ready"}
       />
     );
   } else if (isContent) {

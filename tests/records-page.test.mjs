@@ -91,7 +91,9 @@ test("sidebar browsing preserves category filters and visible count", { timeout:
     assert.ok(!button("섹션 보기"), "section view is no longer offered");
     assert.ok(document.querySelector('aside[aria-label="카테고리"]'));
     assert.equal(cardIds().length, 12);
-    assert.equal(document.querySelector('a[href="#/categories"]').textContent.trim(), "카테고리 관리");
+    assert.ok(document.querySelector('a[href="#/categories"]') === null, "category management link is removed");
+    assert.ok(document.querySelector(".records-heading .eyebrow") === null, "author byline is removed");
+    assert.ok(document.querySelector(".records-title-row input[type=search]") !== null, "search shares the title row");
     await click(button("스프링"));
     assert.equal(latest.categoryId, "java");
     assert.equal(latest.filteredPosts.length, 24);

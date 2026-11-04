@@ -1,5 +1,4 @@
 import { categoryMatches } from "../../features/post-category/hierarchy";
-import { site } from "../../config/site";
 import type {
   CategoryCatalog,
   CategoryGroup,
@@ -17,7 +16,6 @@ type RecordsPageProps = {
   catalog: CategoryCatalog;
   browser: ReturnType<typeof useRecordsBrowser>;
   onWrite: () => void;
-  canManageCategories?: boolean;
 };
 
 export default function RecordsPage({
@@ -25,7 +23,6 @@ export default function RecordsPage({
   catalog,
   browser,
   onWrite,
-  canManageCategories = true,
 }: RecordsPageProps) {
   const { groups } = catalog;
   const group = groups.find((item) => item.id === browser.groupId);
@@ -105,25 +102,19 @@ export default function RecordsPage({
   return (
     <main id="main-content" className="records-page" tabIndex={-1}>
       <header className="records-heading">
-        <div>
-          <p className="eyebrow">{site.author}</p>
+        <div className="records-title-row">
           <h1>
             기록 <span>{posts.length.toLocaleString()}</span>
           </h1>
-          <p className="records-description">개발하며 배운 내용을 주제별로 모았습니다.</p>
+          <PostSearch
+            query={browser.query}
+            inputRef={browser.inputRef}
+            onChange={browser.setQuery}
+            onClear={browser.clearQuery}
+          />
         </div>
+        <p className="records-description">개발하며 배운 내용을 주제별로 모았습니다.</p>
       </header>
-      <div className="records-toolbar">
-        <PostSearch
-          query={browser.query}
-          inputRef={browser.inputRef}
-          onChange={browser.setQuery}
-          onClear={browser.clearQuery}
-        />
-        {canManageCategories ? (
-          <a href="#/categories" className="outline-button">카테고리 관리</a>
-        ) : null}
-      </div>
       <div className="records-body records-layout-sidebar">
         <aside className="records-sidebar" aria-label="카테고리">
           <h2>카테고리</h2>
