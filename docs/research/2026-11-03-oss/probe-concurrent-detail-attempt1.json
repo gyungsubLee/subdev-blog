@@ -1,0 +1,7 @@
+{
+  "command": "node --max-old-space-size=128 docs/research/2026-11-03-oss/probe-concurrent-detail.mjs",
+  "deadlineSeconds": 20,
+  "exitCode": 1,
+  "stdout": "",
+  "stderr": "node:internal/modules/run_main:105\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n502 !== 200\n\n    at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/docs/research/2026-11-03-oss/probe-concurrent-detail.mjs:69:8 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 502,\n  expected: 200,\n  operator: 'strictEqual'\n}\n\nNode.js v24.3.0\n"
+}

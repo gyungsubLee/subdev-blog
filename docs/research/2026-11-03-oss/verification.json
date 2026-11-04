@@ -1,0 +1,38 @@
+{
+  "dateKST": "2026-11-03",
+  "checks": {
+    "documentLinksAndWhitespace": true,
+    "sourceDigestMatchesProbe": true,
+    "existingDirtyFilesPreserved": true
+  },
+  "existingDirtyFilesChecked": 8,
+  "probe": {
+    "concurrentRequests": 8,
+    "rawBodyReads": 8,
+    "additionalWarmReads": 0
+  },
+  "review": {
+    "owner": "decap research agent",
+    "method": "read-only independent plan review",
+    "finding": "Added saturation fallback duplicate-completion accounting regression case",
+    "resolved": true
+  },
+  "notRun": [
+    "product test suite",
+    "build",
+    "live GitHub login/save",
+    "browser UI comparison",
+    "production latency/memory benchmark"
+  ],
+  "filesSha256": {
+    "docs/research/2026-11-03-oss/README.md": "983ec5c52a46c8f9a44173bd826204ff6042029291dd468b833cb39e9413ca9b",
+    "docs/research/2026-11-03-oss/decap.md": "749a71b8f683c4ae335d30c8744fdf029253bd7404473f695a27275118a25c19",
+    "docs/research/2026-11-03-oss/pagescms-keystatic.md": "6d3aa1d0f31f37840b51003419d140d799ae5535e469911401abb39459afd6c3",
+    "docs/research/2026-11-03-oss/probe-concurrent-detail-attempt1.json": "b34cd88dfeac2cb126c208f42982daecfffcc06cb73d09e49767d2a2bc5160a4",
+    "docs/research/2026-11-03-oss/probe-concurrent-detail-result.json": "507809b0f014722001fff4428552fb754d984b370d300327c1232d59397bd76b",
+    "docs/research/2026-11-03-oss/probe-concurrent-detail.mjs": "778ca7ece71a8bd1dcaf7f7af9a8e2001f0895632298e6cf61b72f9e16ebb54f",
+    "docs/research/2026-11-03-oss/tina-notionnext.md": "46fefa3157942d0b1d172322f4e3ffe1b4382813db99593d33d9775621b2a961",
+    "docs/superpowers/plans/2026-11-03-oss-pattern-adoption.md": "99361bcd3071cd6afb11ccf354c9906305ed1b6441d9709e410c3a001cd83283"
+  },
+  "errors": []
+}
