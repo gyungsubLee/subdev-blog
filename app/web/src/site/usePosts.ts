@@ -73,7 +73,7 @@ export function usePosts(postId: string | undefined) {
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "초안을 읽지 못했습니다.");
     }
-  }, []);
+  }, [request]);
 
   useEffect(() => {
     const id = postId;
@@ -120,5 +120,5 @@ export function usePosts(postId: string | undefined) {
     };
   }, [postId, posts, contentCommit]);
 
-  return { posts, categories, drafts, error, loaded, setDrafts, reload };
+  return { posts, categories, contentCommit, drafts, error, loaded, setDrafts, reload };
 }

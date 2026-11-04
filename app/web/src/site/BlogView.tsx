@@ -5,10 +5,11 @@ import {
   RECORDS_HREF,
   postIdFromHash,
 } from "../shared/routes";
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import SiteFooter from "../components/layout/SiteFooter";
 import SiteHeader from "../components/layout/SiteHeader";
 import { site } from "../config/site";
+import { useRecordsCatalog } from "../features/post-category/useRecordsCatalog";
 import { useCategoryCatalog } from "../features/post-category/useCategoryCatalog";
 import { useRecordsBrowser } from "../features/post-category/useRecordsBrowser";
 import HomePage from "../pages/home/HomePage";
@@ -22,11 +23,15 @@ import ContentWorkspace from "../features/content-management/ContentWorkspace";
 import ManagedCategories from "../features/content-management/ManagedCategories";
 import { categoryNodesToGroups } from "../features/post-category/hierarchy";
 
+const PostDeleteDialog = lazy(
+  () => import("../features/content-management/PostDeleteDialog"),
+);
+
 type BlogViewProps = {
   posts: Post[];
   categories?: PublicCategory[];
   hash: string;
-  onWrite: () => void;
+  onWrite: (categoryId?: string, pendingCategories?: PublicCategory[]) => void;
   onEdit: (post: Post) => void;
   management?: Management;
   draftVersion?: number;
@@ -43,6 +48,7 @@ export default function BlogView({
   onContentSaved,
   draftVersion,
 }: BlogViewProps) {
+  const [deletingPost, setDeletingPost] = useState<Post | null>(null);
   const [backHref, setBackHref] = useState(HOME_HREF);
   const selectedId = postIdFromHash(hash);
   const selected = posts.find((post) => post.id === selectedId);
@@ -65,7 +71,8 @@ export default function BlogView({
     nodes: canonicalNodes,
     groups: canonicalGroups,
   } : personalCatalog;
-  const records = useRecordsBrowser(posts, catalog.groups, isRecords);
+  const recordsCatalog = useRecordsCatalog(catalog);
+  const records = useRecordsBrowser(posts, recordsCatalog.groups, isRecords);
 
   useEffect(() => {
     if (isHome || isRecords) {
@@ -105,9 +112,28 @@ export default function BlogView({
     page = (
       <RecordsPage
         posts={posts}
-        catalog={catalog}
+        catalog={recordsCatalog}
         browser={records}
-        onWrite={onWrite}
+        onEdit={management?.session.state === "ready" ? onEdit : undefined}
+        onDelete={management?.session.state === "ready" ? setDeletingPost : undefined}
+        onWrite={(id) => {
+          const node = recordsCatalog.nodes.find(item => item.id === id);
+          const canonical = canonicalNodes.find(item =>
+            item.id === id || item.sources.some(source => node?.sources.includes(source)),
+          );
+          const pending: PublicCategory[] = [];
+          let current = node;
+          while (current && !canonicalNodes.some(item => item.id === current!.id)) {
+            pending.unshift({
+              ...current,
+              order: recordsCatalog.nodes.indexOf(current),
+            });
+            current = recordsCatalog.nodes.find(
+              item => item.id === current!.parentId,
+            );
+          }
+          onWrite(canonical?.id ?? node?.id, pending);
+        }}
       />
     );
   } else if (isContent) {
@@ -157,10 +183,23 @@ export default function BlogView({
       </a>
       <SiteHeader
         activeHref={hash}
-        onWrite={onWrite}
+        onWrite={() => onWrite()}
         management={management}
       />
       {page}
+      {deletingPost && management?.session.state === "ready" ? (
+        <Suspense fallback={null}>
+          <PostDeleteDialog
+            post={deletingPost}
+            session={management.session}
+            onClose={() => setDeletingPost(null)}
+            onDeleted={(commit) => {
+              setDeletingPost(null);
+              onContentSaved?.(commit);
+            }}
+          />
+        </Suspense>
+      ) : null}
       <SiteFooter />
     </div>
   );

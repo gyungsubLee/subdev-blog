@@ -76,7 +76,7 @@ test("home leaves browsing controls and search shortcuts to records", async () =
     await navigate(document.querySelector('.header-navigation a[href="#/records"]'));
     assert.ok(document.querySelector(".records-page"));
     assert.ok(document.querySelector('input[type="search"]'));
-    assert.ok(document.querySelector('.records-sidebar[aria-label="카테고리"]'));
+    assert.ok(document.querySelector('.records-category-nav[aria-label="카테고리"]'));
     assert.equal(searchShortcut(), false);
     assert.ok(
       document.activeElement === document.querySelector('input[type="search"]'),
@@ -85,6 +85,7 @@ test("home leaves browsing controls and search shortcuts to records", async () =
     assert.equal(cards(), 12);
     await click(document.querySelector(".load-more button"));
     assert.equal(cards(), 24);
+    await click(document.querySelector('button[aria-label="프론트엔드"]'));
     await click(document.querySelector('button[aria-label="리액트"]'));
     assert.equal(document.querySelector('button[aria-label="리액트"]').getAttribute("aria-pressed"), "true");
     assert.equal(cards(), 12, "records category selection resets pagination");

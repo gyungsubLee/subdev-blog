@@ -12,14 +12,12 @@ export function useRecordsBrowser(
 ) {
   const search = usePostSearch(enabled);
   const pagination = usePostPagination();
-  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const categoryGroup = groups.find((group) =>
-    group.categories.some((category) => category.id === selectedCategoryId),
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const group = groups.find(item => item.id === selectedId) ?? groups.find(item =>
+    item.categories.some(category => category.id === selectedId),
   );
-  const group = categoryGroup ?? groups.find((item) => item.id === selectedGroupId);
-  const category = categoryGroup?.categories.find(
-    (item) => item.id === selectedCategoryId,
+  const category = group?.id === selectedId ? undefined : group?.categories.find(
+    item => item.id === selectedId,
   );
   const filteredPosts = posts.filter((post) => {
     const matchesCategory = category
@@ -34,17 +32,13 @@ export function useRecordsBrowser(
   }
 
   function selectGroup(id: string | null) {
-    setSelectedGroupId(id);
-    setSelectedCategoryId(null);
+    setSelectedId(id);
     pagination.reset();
   }
 
   function selectCategory(id: string) {
-    const owner = groups.find((item) =>
-      item.categories.some((category) => category.id === id),
-    );
-    setSelectedGroupId(owner?.id ?? null);
-    setSelectedCategoryId(owner ? id : null);
+    // Resolve on render so a move or undo can select an ID before new groups arrive.
+    setSelectedId(id);
     pagination.reset();
   }
 

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from "react";
-import type { Post } from "../shared/post";
+import type { Post, PublicCategory } from "../shared/post";
 import BlogView from "./BlogView";
 import ErrorBoundary from "./ErrorBoundary";
 import { useHashRoute } from "./useHashRoute";
@@ -12,16 +12,22 @@ const ManagedPostEditor = lazy(() => import("../features/content-management/Mana
 
 export default function App() {
   const { hash, postId } = useHashRoute();
-  const { posts, categories, drafts, error, loaded, reload } = usePosts(postId);
+  const { posts, categories, contentCommit, drafts, error, loaded, reload } = usePosts(postId);
   const [editing, setEditing] = useState<Post | null | undefined>(undefined);
+  const [pendingCategories, setPendingCategories] = useState<PublicCategory[]>([]);
   const [draftVersion, setDraftVersion] = useState(0);
   const management = useManagement();
 
-  function edit(post: Post | null) {
+  function edit(
+    post: Post | null,
+    categoryId?: string,
+    pending: PublicCategory[] = [],
+  ) {
     if (management.session.state !== "ready") return;
+    setPendingCategories(pending);
     setEditing(post ?? {
       id: "draft-" + crypto.randomUUID(), draft: true, title: "", markdown: "",
-      parentId: null, category: "", createdAt: new Date().toISOString(),
+      parentId: null, category: categoryId ?? "", categoryId, createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(), path: "", url: "", excerpt: "",
     });
     window.scrollTo(0, 0);
@@ -42,6 +48,11 @@ export default function App() {
             key={editing?.id ?? "new"}
             post={editing}
             posts={posts}
+            newPostContext={{
+              categories: [...categories, ...pendingCategories],
+              contentCommit,
+              pendingCategories,
+            }}
             session={management.session}
             onSaved={reload}
             onDraftSaved={() => setDraftVersion((current) => current + 1)}
@@ -56,7 +67,7 @@ export default function App() {
           posts={management.session.state === "ready" ? [...drafts, ...posts] : posts}
           categories={categories}
           hash={hash}
-          onWrite={() => edit(null)}
+          onWrite={(categoryId, pending) => edit(null, categoryId, pending)}
           onEdit={edit}
           management={management}
           onContentSaved={reload}

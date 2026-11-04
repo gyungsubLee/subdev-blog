@@ -3,6 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   readDrafts,
+  removePostDrafts,
   saveDraft,
   DRAFT_KEY,
 } from "../../app/web/src/shared/drafts.mjs";
@@ -63,4 +64,26 @@ test("Markdown export retains content and quotes frontmatter", () => {
   const output = markdownDocument(draft);
   assert.match(output, /title: "제목: 테스트"/);
   assert.match(output, /원문 \*\*강조\*\*/);
+});
+
+
+test("batch source deletion clears only matching canonical recovery aliases and legacy drafts", () => {
+  const values=new Map([
+    ["second-brain:canonical-draft:draft-first",JSON.stringify({sourceDocument:{document:{metadata:{id:"first"}}}})],
+    ["second-brain:canonical-draft:second",JSON.stringify({sourceDocument:{document:{metadata:{id:"second"}}}})],
+    ["second-brain:canonical-draft:unrelated","{broken"],
+    [DRAFT_KEY,JSON.stringify([{...draft,id:"draft-first"},{...draft,id:"draft-keep"}])],
+  ]);
+  const store={
+    get length(){return values.size;},
+    key(index){return [...values.keys()][index]??null;},
+    getItem(key){return values.get(key)??null;},
+    setItem(key,value){values.set(key,value);},
+    removeItem(key){values.delete(key);},
+  };
+  removePostDrafts(store,["first","second"]);
+  assert.equal(values.has("second-brain:canonical-draft:draft-first"),false);
+  assert.equal(values.has("second-brain:canonical-draft:second"),false);
+  assert.equal(values.get("second-brain:canonical-draft:unrelated"),"{broken");
+  assert.deepEqual(readDrafts(store).map(item=>item.id),["draft-keep"]);
 });

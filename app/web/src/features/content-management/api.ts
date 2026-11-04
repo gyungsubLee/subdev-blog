@@ -10,9 +10,15 @@ export async function requestApi<T>(path: string, options: RequestInit = {}): Pr
   return data as T;
 }
 
-export function sendApi<T>(path: string, value: unknown, csrfToken: string): Promise<T> {
+export function sendApi<T>(
+  path: string,
+  value: unknown,
+  csrfToken: string,
+  signal?: AbortSignal,
+): Promise<T> {
   return requestApi<T>(path, {
     method: "POST",
+    signal,
     headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken },
     body: JSON.stringify(value),
   });

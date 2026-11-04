@@ -68,3 +68,24 @@ test("record filtering includes the complete category branch and source-bearing 
     await act(async () => root.unmount());
   }
 });
+
+test("selected root follows its ID through nesting and promotion", async () => {
+  const root = createRoot(document.getElementById("root"));
+  try {
+    await act(async () => root.render(React.createElement(Harness)));
+    await act(async () => current.selectGroup("a-root"));
+    const original = [
+      { id: "a-root", name: "Empty source root", parentId: null, sources: [] },
+      { id: "spring", name: "Spring", parentId: "a-root", sources: ["Spring 원문"] },
+      { id: "b-root", name: "Destination", parentId: null, sources: [] },
+    ];
+    await act(async () => root.render(React.createElement(Harness, { items: original })));
+    await act(async () => current.selectGroup("a-root"));
+    await act(async () => root.render(React.createElement(Harness, { items: original.map(node => node.id === "a-root" ? { ...node, parentId: "b-root" } : node) })));
+    assert.equal(current.categoryId, "a-root");
+    assert.deepEqual(current.filteredPosts.map(post => post.id), ["b"]);
+    await act(async () => root.render(React.createElement(Harness, { items: original })));
+    assert.equal(current.groupId, "a-root");
+    assert.equal(current.categoryId, null);
+  } finally { await act(async () => root.unmount()); }
+});

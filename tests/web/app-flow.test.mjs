@@ -245,6 +245,13 @@ for (const operation of ["update", "create", "delete"]) {
         await act(async () => remove.click());
         await act(async () => document.querySelector('[role="alertdialog"] button').click());
       } else {
+        if (operation === "create") {
+          await act(async () => {
+            const input = document.querySelector('[aria-label="글 제목"]');
+            Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(input, "저장한 글");
+            input.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+          });
+        }
         await act(async () => document.querySelector('button[type="submit"]').click());
       }
       await waitFor(
@@ -315,7 +322,7 @@ test("App refreshes public category names after saving canonical categories", { 
       document.querySelector('.header-navigation a[href="#/records"]').click();
       await changed;
     });
-    assert.match(document.querySelector(".records-sidebar").textContent, /새 분류/);
+    assert.match(document.querySelector(".records-category-nav").textContent, /새 분류/);
     assert.equal(document.querySelector(".post-meta span").textContent, "새 분류");
   } finally {
     await act(async () => root.unmount());

@@ -175,6 +175,12 @@ export function moveCategoryNode(
   if (parentId !== null && categoryDescendants(nodes, id).has(parentId)) {
     throw new Error("자신이나 하위 분류 아래로 이동할 수 없습니다.");
   }
+  if (nodes.some(item =>
+    item.id !== id && item.parentId === parentId &&
+    item.name.toLocaleLowerCase() === node.name.toLocaleLowerCase(),
+  )) {
+    throw new Error("같은 이름의 하위 분류가 있습니다.");
+  }
   if (beforeId === id) return nodes;
   const next = nodes.filter((item) => item.id !== id);
   const index =

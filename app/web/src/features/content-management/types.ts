@@ -24,6 +24,7 @@ export type CanonicalCategory = {
 };
 
 export type SourceDocument = {
+  pendingCategories?: CanonicalCategory[];
   document: ContentDocument;
   editor?: EditorDocument | null;
   editorRevision?: string | null;
@@ -37,6 +38,7 @@ export type SourceDocument = {
 };
 
 export type Publication = {
+  deletedPostIds?: string[];
   requestId: string;
   state: "validating" | "saved" | "pending" | "published" | "failed" | "superseded" | "unchanged";
   candidateCommit?: string;

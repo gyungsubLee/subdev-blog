@@ -151,3 +151,12 @@ test("canonical category validation permits shared labels but rejects broken pub
     [categories[0], { ...categories[1], id: "notes-a" }],
   ]) assert.equal(tree.validatePublicCategories(invalid), false);
 });
+
+test("moving into a same-named sibling is rejected without changing either branch", () => {
+  const sameNames = [
+    ...nodes,
+    { id: "other-java", name: "java", parentId: "tools", sources: [] },
+  ];
+  assert.throws(() => tree.moveCategoryNode(sameNames, "java", "tools"), /이름/);
+  assert.equal(sameNames.find(node => node.id === "java").parentId, "backend");
+});

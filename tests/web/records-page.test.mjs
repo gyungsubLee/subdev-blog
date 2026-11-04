@@ -8,7 +8,7 @@ const dom = new JSDOM('<div id="root"></div>', {
   pretendToBeVisual: true,
 });
 test.after(() => dom.window.close());
-for (const name of ["window", "document", "navigator", "HTMLElement"]) {
+for (const name of ["window", "document", "navigator", "HTMLElement", "Element"]) {
   Object.defineProperty(globalThis, name, {
     value: name === "window" ? dom.window : dom.window[name],
     configurable: true,
@@ -48,11 +48,12 @@ function Harness({ visible = true, items = posts, categoryGroups = groups, categ
   return visible ? React.createElement(RecordsPage, {
     posts: items,
     catalog: {
-      nodes: categoryNodes ?? categoryGroups.flatMap((group) =>
-        group.categories.map((category) => ({
-          ...category, sources: category.sources ?? [category.source],
+      nodes: categoryNodes ?? categoryGroups.flatMap((group) => [
+        { id: group.id, name: group.name, parentId: null, sources: [] },
+        ...group.categories.map((category) => ({
+          ...category, parentId: group.id, sources: category.sources ?? [category.source],
         })),
-      ),
+      ]),
       groups: categoryGroups,
       error: "",
       save() { return true; },
@@ -85,7 +86,7 @@ test("sidebar browsing preserves category filters and visible count", { timeout:
   try {
     await act(async () => root.render(React.createElement(Harness)));
     assert.ok(document.querySelector(".records-view-control") === null, "view control is removed");
-    assert.ok(document.querySelector('[aria-label="사이드바 보기"]') === null, "sidebar view icon is removed");
+    assert.ok(document.querySelector('[aria-label="사이드바 보기"]') !== null, "sidebar view is available");
     assert.ok(!document.querySelector(".records-heading").textContent.includes("보기 방식"));
     assert.ok(!button("탭 보기"), "tab view is no longer offered");
     assert.ok(!button("섹션 보기"), "section view is no longer offered");
@@ -94,6 +95,7 @@ test("sidebar browsing preserves category filters and visible count", { timeout:
     assert.ok(document.querySelector('a[href="#/categories"]') === null, "category management link is removed");
     assert.ok(document.querySelector(".records-heading .eyebrow") === null, "author byline is removed");
     assert.ok(document.querySelector(".records-title-row input[type=search]") !== null, "search shares the title row");
+    await click(button("백엔드"));
     await click(button("스프링"));
     assert.equal(latest.categoryId, "java");
     assert.equal(latest.filteredPosts.length, 24);
@@ -127,21 +129,21 @@ test("sidebar group selection and pagination include every matching record once"
   const root = createRoot(document.getElementById("root"));
   try {
     await act(async () => root.render(React.createElement(Harness)));
-    await click(button("백엔드"));
+    await act(async () => button("백엔드").dispatchEvent(new dom.window.MouseEvent("dblclick", { bubbles: true })));
     assert.equal(latest.groupId, "backend");
     assert.equal(latest.filteredPosts.length, 27);
-    await click(document.querySelector('.records-sidebar > button'));
+    await click(document.querySelector('[data-record-all]'));
     assert.equal(cardIds().length, 12);
     await click(button("더 보기"));
     await click(button("더 보기"));
     assert.equal(cardIds().length, 28);
     assert.equal(new Set(cardIds()).size, 28);
     assert.ok(cardIds().includes("#/post/record-27"), "unclassified drafts remain reachable");
+    await click(button("미분류"));
     await click(button("새 초안"));
     assert.deepEqual(cardIds(), ["#/post/record-27"]);
     assert.match(document.querySelector(".result-count").textContent, /1개의 기록/);
-    const details = document.querySelector(".records-sidebar details");
-    assert.ok(details.querySelector("summary"), "groups use native expandable sections");
+    assert.equal(button("미분류").getAttribute("aria-expanded"), "true", "parent disclosure remains open");
   } finally {
     await act(async () => root.unmount());
   }
@@ -151,6 +153,7 @@ test("removed selections fall back to all records and an empty catalog offers wr
   const root = createRoot(document.getElementById("root"));
   try {
     await act(async () => root.render(React.createElement(Harness)));
+    await click(button("백엔드"));
     await click(button("스프링"));
     await act(async () => root.render(React.createElement(Harness, {
       categoryGroups: [groups[1]],
@@ -179,6 +182,7 @@ test("record cards use canonical ID labels while source filters include new and 
   ];
   try {
     await act(async () => root.render(React.createElement(Harness, { items, categoryGroups })));
+    await click(button("Root"));
     await click(button("Canonical label"));
     assert.equal(latest.filteredPosts.length, 4);
     assert.equal(cardIds().length, 4);
@@ -212,33 +216,22 @@ test("sidebar preserves managed hierarchy without duplicate roots or synthetic w
     await act(async () => root.render(React.createElement(Harness, {
       items, categoryGroups, categoryNodes,
     })));
-    const sidebar = document.querySelector(".records-sidebar");
-    const navigationNames = [...sidebar.querySelectorAll("button")]
-      .filter((control) => control !== sidebar.querySelector(":scope > button"))
-      .map((control) => control.getAttribute("aria-label") ?? control.textContent.trim());
-    assert.deepEqual(navigationNames, [
-      "미분류", "depth1", "depth2", "depth3", "depth4", "depth5", "안내",
-    ], "each managed category has one control and no synthetic whole-category row");
+    await click(button("사이드바 보기"));
+    for (const name of ["미분류", "depth1", "depth2", "depth3", "depth4"]) await click(button(name));
+    const sidebar = document.querySelector(".records-nav-sidebar");
+    const navigationNames = [...sidebar.querySelectorAll("[data-record-category]")].map(control => control.getAttribute("aria-label"));
+    assert.deepEqual(navigationNames, ["미분류", "depth1", "depth2", "depth3", "depth4", "depth5", "안내"], "every category appears once");
+    assert.equal(button("depth5").getAttribute("data-depth"), "6");
+    assert.ok(button("depth1").closest(".records-category-children") !== null, "children use a nested list");
+    assert.equal(button("안내").hasAttribute("aria-expanded"), false, "leaf roots have no disclosure");
 
-    const children = button("depth1").closest(".records-tree-children");
-    assert.ok(children, "depth1 belongs to the root's child list");
-    assert.ok(
-      children.closest("details").querySelector("summary button") === button("미분류"),
-      "the root button belongs to its branch",
-    );
-    assert.deepEqual(
-      ["depth1", "depth2", "depth3", "depth4", "depth5"].map((name) => button(name).style.paddingLeft),
-      ["12px", "28px", "44px", "60px", "76px"],
-    );
-    assert.ok(button("안내").closest("details") === null, "a leaf root has no disclosure");
-
-    await click(button("미분류"));
+    await act(async () => button("미분류").dispatchEvent(new dom.window.MouseEvent("dblclick", { bubbles: true })));
     assert.equal(latest.groupId, "unclassified");
     assert.equal(latest.categoryId, null, "the root selects its complete branch");
     assert.deepEqual(cardIds(), [
       "#/post/at-root", "#/post/at-depth1", "#/post/at-depth2", "#/post/at-depth5",
     ]);
-    await click(button("depth2"));
+    await act(async () => button("depth2").dispatchEvent(new dom.window.MouseEvent("dblclick", { bubbles: true })));
     assert.deepEqual(cardIds(), ["#/post/at-depth2", "#/post/at-depth5"]);
     await click(button("안내"));
     assert.equal(latest.groupId, "guide");

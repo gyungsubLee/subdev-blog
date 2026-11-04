@@ -33,3 +33,23 @@ export function saveDraft(storage, draft) {
   storage.setItem(DRAFT_KEY, JSON.stringify(next));
   return next;
 }
+
+export function removePostDrafts(storage, postIds, draftIds = []) {
+  const canonicalIds = new Set(postIds);
+  const keys = new Set([...postIds, ...draftIds].map(id => "second-brain:canonical-draft:" + id));
+  for (let index = 0; index < storage.length; index++) {
+    const key = storage.key(index);
+    if (!key?.startsWith("second-brain:canonical-draft:")) continue;
+    try {
+      const draft = JSON.parse(storage.getItem(key) ?? "null");
+      if (canonicalIds.has(draft?.sourceDocument?.document?.metadata?.id)) keys.add(key);
+    } catch {
+      // Unrelated malformed recovery data must retain its original bytes.
+    }
+  }
+  const removedIds = new Set([...keys].map(key => key.slice("second-brain:canonical-draft:".length)));
+  if (storage.getItem(DRAFT_KEY)) {
+    storage.setItem(DRAFT_KEY, JSON.stringify(readDrafts(storage).filter(draft => !removedIds.has(draft.id))));
+  }
+  for (const key of keys) storage.removeItem(key);
+}

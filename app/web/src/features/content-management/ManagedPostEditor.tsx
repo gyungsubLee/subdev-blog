@@ -11,7 +11,7 @@ import type { BlockNoteEditor, PartialBlock } from "@blocknote/core";
 import { ko } from "@blocknote/core/locales";
 import HeaderAction from "../../components/header-action/HeaderAction";
 import CategorySelectionDialog from "../post-category/CategorySelectionDialog";
-import type { EditorDocument, Post } from "../../shared/post";
+import type { EditorDocument, Post, PublicCategory } from "../../shared/post";
 import {
   isEditorFilename,
   validateEditorDocument,
@@ -34,6 +34,7 @@ import { serializeEditorMarkdown } from "../post-editor/document-markdown";
 import { notionExtension } from "../post-editor/notion-extension";
 import { syntaxHighlighting } from "../post-editor/syntax-highlighting";
 import { downloadFile } from "../../shared/download-file.mjs";
+import { ensureWriterCategory } from "./writer-category";
 import { requestApi, sendApi, uploadAttachment } from "./api";
 import PublishStatus from "./PublishStatus";
 import type { ManagementSession, Publication, SourceDocument } from "./types";
@@ -191,9 +192,15 @@ export default function ManagedPostEditor({
   onSaved,
   onDraftSaved,
   posts = EMPTY_POSTS,
+  newPostContext,
 }: {
   post: Post | null;
   posts?: Post[];
+  newPostContext?: {
+    categories: PublicCategory[];
+    contentCommit: string;
+    pendingCategories?: PublicCategory[];
+  };
   session: ManagementSession;
   onClose: () => void;
   onSaved?: (contentCommit?: string) => void;
@@ -305,9 +312,47 @@ export default function ManagedPostEditor({
           ? "kind=post&id=" + encodeURIComponent(publishedId ?? post.id)
           : "kind=new";
       try {
-        const data = await requestApi<SourceDocument>("/api/content?" + query, {
-          signal: controller.signal,
-        });
+        // New drafts reuse the loaded index; GitHub still validates the base on publish.
+        if (saved && !isCanonical && newPostContext) return;
+        const date = new Date().toISOString();
+        const data: SourceDocument = !isCanonical && newPostContext
+          ? {
+              document: {
+                metadata: {
+                  schema_version: 1,
+                  id: crypto.randomUUID(),
+                  title: "",
+                  category_id: post?.categoryId ?? undefined,
+                  parent_id: null,
+                  created: date,
+                  updated: date,
+                  order: 0,
+                  kind: "article",
+                  summary: "",
+                  tags: [],
+                  aliases: [],
+                  related_ids: [],
+                  source_ids: [],
+                  review_status: "unreviewed",
+                },
+                markdown: "",
+              },
+              editor: null,
+              editorRevision: null,
+              revision: null,
+              contentCommit: newPostContext.contentCommit,
+              categories: newPostContext.categories.map(({ parentId, ...category }) => ({
+                ...category,
+                parent_id: parentId,
+              })),
+              assets: [],
+              pendingCategories: newPostContext.pendingCategories?.map(
+                ({ parentId, ...category }) => ({ ...category, parent_id: parentId }),
+              ),
+            }
+          : await requestApi<SourceDocument>("/api/content?" + query, {
+              signal: controller.signal,
+            });
         if (controller.signal.aborted) return;
         if (data.editorError) {
           if (saved) {
@@ -580,11 +625,30 @@ export default function ManagedPostEditor({
               },
               assets: snapshot.assets,
             };
+      let publicationSource = source;
+      if (
+        !remove && snapshot.category &&
+        source.pendingCategories?.some(category => category.id === snapshot.category)
+      ) {
+        const contentCommit = await ensureWriterCategory(
+          snapshot.category, source.pendingCategories, csrfToken,
+        );
+        publicationSource = { ...source, contentCommit, pendingCategories: undefined };
+        setSource(publicationSource);
+        const recovery = {
+          ...snapshot,
+          operation: operationName,
+          requestId,
+          sourceDocument: publicationSource,
+        } as SourceDraft;
+        setDraft(recovery);
+        localStorage.setItem(draftKey, JSON.stringify(recovery));
+      }
       const next = await sendApi<Publication>(
         "/api/content",
         {
           requestId,
-          baseCommit: source.contentCommit,
+          baseCommit: publicationSource.contentCommit,
           operation,
         },
         csrfToken,
@@ -992,7 +1056,7 @@ export default function ManagedPostEditor({
             <button className="quiet-button" type="button" onClick={onClose}>
               ← 기록으로
             </button>
-            <h1>{post ? "원본 수정" : "새 글 작성"}</h1>
+            <h1>{isCanonical ? "원본 수정" : "새 글 작성"}</h1>
             <button
               className="quiet-button"
               type="button"
@@ -1100,7 +1164,9 @@ export default function ManagedPostEditor({
               <p>
                 {draftError
                   ? "보관한 초안을 내보낸 뒤 최신 원본을 다시 여십시오."
-                  : "원본을 불러오는 중입니다."}
+                  : isCanonical
+                    ? "원본을 불러오는 중입니다."
+                    : "편집기를 여는 중입니다."}
               </p>
             ) : (
               <>

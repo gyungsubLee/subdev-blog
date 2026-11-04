@@ -115,7 +115,7 @@ test("public records keep category filters and hide management links without log
   dom.window.history.replaceState(null, "", "/#/records");
   try {
     await mounted(React.createElement(App), async () => {
-      assert.ok(document.querySelector('.records-sidebar[aria-label="카테고리"]') !== null);
+      assert.ok(document.querySelector('.records-category-nav[aria-label="카테고리"]') !== null);
       assert.equal(document.querySelectorAll('a[href="#/categories"]').length, 0);
       assert.ok(document.querySelector('a.header-write[href="/api/auth/github"]') !== null);
     });
@@ -440,6 +440,111 @@ test("attachment names with parentheses produce an intact Markdown destination",
     clearTimeout(timer);
     globalThis.fetch = previous;
   }
+});
+
+test("writing opens an empty local draft without fetching a GitHub source", { timeout: 10000 }, async () => {
+  const previous = globalThis.fetch;
+  let sourceReads = 0;
+  let submitted;
+  globalThis.fetch = async (url, options = {}) => {
+    if (url === "/api/session") return reply(ready);
+    if (url === "/api/public?kind=index") {
+      return reply({ posts: [post], categories, contentCommit: "b".repeat(40) });
+    }
+    if (url.startsWith("/api/content?")) {
+      sourceReads++;
+      return reply({ error: "GitHub source unavailable" }, 503);
+    }
+    assert.equal(url, "/api/content");
+    submitted = JSON.parse(options.body);
+    return reply({ requestId: submitted.requestId, state: "unchanged" });
+  };
+  dom.window.history.replaceState(null, "", "/#/");
+  try {
+    await mounted(React.createElement(App), async () => {
+      await act(async () => document.querySelector("button.header-write").click());
+      const deadline = Date.now() + 3000;
+      while (!document.querySelector('.bn-editor[contenteditable="true"]')) {
+        assert.ok(Date.now() < deadline, "New writing must not wait for a GitHub source");
+        await act(async () => new Promise((resolve) => setTimeout(resolve, 10)));
+      }
+      assert.equal(sourceReads, 0, "Blank writing needs no source read");
+      assert.equal(document.querySelector('[aria-label="글 제목"]')?.value, "");
+      assert.doesNotMatch(document.body.textContent, /원본 수정|원본을 불러오는 중/);
+      await act(async () => document.querySelector('[aria-label="글 분류"]').click());
+      assert.match(document.querySelector('dialog[aria-label="분류 선택"]')?.textContent ?? "", /기록/);
+      await act(async () => {
+        const dialog = document.querySelector('dialog[aria-label="분류 선택"]');
+        [...dialog.querySelectorAll("button")].find((button) => button.textContent.includes("취소")).click();
+      });
+      const editable = document.querySelector('.bn-editor[contenteditable="true"]');
+      assert.equal(editable.textContent.trim(), "");
+      await act(async () => {
+        const input = document.querySelector('[aria-label="글 제목"]');
+        Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(input, "새 글");
+        input.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+      });
+      await act(async () => document.querySelector('button[type="submit"]').click());
+      assert.equal(submitted?.operation.type, "post.create");
+      assert.equal(submitted.baseCommit, "b".repeat(40));
+      assert.equal(submitted.operation.document.metadata.title, "새 글");
+      assert.match(submitted.operation.document.metadata.id, /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/);
+      assert.equal(submitted.operation.editor.documentId, submitted.operation.document.metadata.id);
+    });
+  } finally {
+    globalThis.fetch = previous;
+    localStorage.clear();
+  }
+});
+
+test("a new records category reaches the writer and is created only when its post is published", { timeout: 10000 }, async () => {
+  const previous = globalThis.fetch;
+  const mutations = [];
+  globalThis.fetch = async (url, options = {}) => {
+    if (url === "/api/session") return reply(ready);
+    if (url === "/api/public?kind=index") return reply({ posts: [post], categories, contentCommit: "b".repeat(40) });
+    if (url === "/api/content?kind=categories") return reply({ categories: categories.map(({ parentId, ...item }) => ({ ...item, parent_id: parentId })), revision: "r", contentCommit: "b".repeat(40) });
+    assert.equal(url, "/api/content");
+    const input = JSON.parse(options.body);
+    mutations.push(input);
+    return reply({ requestId: input.requestId, state: "published", contentCommit: "c".repeat(40) });
+  };
+  dom.window.history.replaceState(null, "", "/#/records");
+  const find = (label) => [...document.querySelectorAll("button")].find(button => button.textContent.trim() === label);
+  try {
+    await mounted(React.createElement(App), async () => {
+      await act(async () => document.querySelector(".records-body").dispatchEvent(new dom.window.MouseEvent("contextmenu", { bubbles: true, cancelable: true })));
+      await act(async () => find("카테고리 추가").click());
+      await act(async () => {
+        const input = document.querySelector('[name="categoryName"]');
+        Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(input, "새 주제");
+        input.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+      });
+      await act(async () => find("저장").click());
+      const category = document.querySelector('[data-record-category][aria-label="새 주제"]');
+      assert.ok(category !== null);
+      const categoryId = category.dataset.recordCategory;
+      await act(async () => category.dispatchEvent(new dom.window.MouseEvent("contextmenu", { bubbles: true, cancelable: true })));
+      await act(async () => find("글 추가").click());
+      const deadline = Date.now() + 3000;
+      while (!document.querySelector('.bn-editor[contenteditable="true"]')) {
+        assert.ok(Date.now() < deadline, "new category writer opens");
+        await act(async () => new Promise(resolve => setTimeout(resolve, 10)));
+      }
+      assert.equal(mutations.length, 0, "opening a draft never publishes categories");
+      assert.ok(document.querySelector('[aria-label="글 분류"]').textContent.includes("새 주제"));
+      await act(async () => {
+        const input = document.querySelector('[aria-label="글 제목"]');
+        Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(input, "새 주제의 글");
+        input.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+      });
+      await act(async () => document.querySelector('button[type="submit"]').click());
+      assert.deepEqual(mutations.map(item => item.operation.type), ["categories.save", "post.create"]);
+      assert.equal(mutations[0].operation.categories.find(item => item.id === categoryId).name, "새 주제");
+      assert.equal(mutations[1].operation.document.metadata.category_id, categoryId);
+      assert.equal(mutations[1].baseCommit, "c".repeat(40));
+    });
+  } finally { globalThis.fetch = previous; }
 });
 
 after(() => dom.window.close());
