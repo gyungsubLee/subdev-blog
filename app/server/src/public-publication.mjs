@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { gzipSync, gunzipSync } from 'node:zlib';
 import path from 'node:path';
 import { parseMarkdownDocument, canonicalFilename } from '../../shared/document.mjs';
 import { EDITOR_FILENAME, isEditorFilename } from '../../shared/editor-document.mjs';
@@ -14,11 +15,13 @@ const signature = value => createHash('sha256').update(JSON.stringify(value)).di
 const catalogSignature = catalog => signature((catalog?.documents ?? []).map(({ filename, blobSha }) => [filename, blobSha]).sort(([a], [b]) => a.localeCompare(b)));
 const postOrder = (a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt) || a.id.localeCompare(b.id);
 
-async function sourceTree({ commit, github }) {
+async function sourceTree({ commit, github, sourceSnapshot }) {
   requirePublic(SHA.test(commit), 'Invalid source commit', 400);
-  const record = await github('/git/commits/' + commit);
+  if (sourceSnapshot) requirePublic(sourceSnapshot.commit === commit, 'Source snapshot identity mismatch');
+  const record = sourceSnapshot?.record ?? await github('/git/commits/' + commit);
   requirePublic(record.sha === commit && SHA.test(record.tree?.sha), 'Invalid source commit');
-  const tree = await github('/git/trees/' + record.tree.sha + '?recursive=1');
+  const tree = sourceSnapshot ? { truncated: false, tree: sourceSnapshot.entries }
+    : await github('/git/trees/' + record.tree.sha + '?recursive=1');
   requirePublic(tree.truncated === false && Array.isArray(tree.tree), 'Incomplete source tree');
   const documents = new Map();
   const paths = new Set();
@@ -70,7 +73,16 @@ async function previousPublication(options, source) {
   if (!cachedFile) return null;
   const cachedBytes = await fetchPublicBytes(options.fetcher, rawContentUrl(options.repository, artifact, 'generation.json'), MAX_PUBLIC_FILE);
   requirePublic(blobSha(cachedBytes) === cachedFile.sha, 'Generation cache differs from inventory');
-  const generation = parsePublicJson(cachedBytes);
+  let generation = parsePublicJson(cachedBytes);
+  if (generation?.version === 2) {
+    requirePublic(generation.encoding === 'gzip+base64' && typeof generation.data === 'string', 'Invalid compressed generation cache');
+    const compressed = Buffer.from(generation.data, 'base64');
+    requirePublic(compressed.toString('base64') === generation.data, 'Invalid generation cache encoding');
+    let decoded;
+    try { decoded = gunzipSync(compressed, { maxOutputLength: MAX_PUBLIC_FILE }); }
+    catch { requirePublic(false, 'Invalid compressed generation cache'); }
+    generation = parsePublicJson(decoded);
+  }
   if (!generation || generation.version !== GENERATION_VERSION || generation.catalog !== catalogSignature(options.catalog)) return null;
   requirePublic(generation.documents && typeof generation.documents === 'object' && !Array.isArray(generation.documents), 'Invalid generation cache');
   requirePublic(Object.keys(generation.documents).length === previous.manifest.posts.length && Array.isArray(generation.categories) && SHA.test(generation.categorySha), 'Incomplete generation cache');
@@ -201,12 +213,15 @@ async function preparePublicFiles(options, incremental) {
   }));
   const generation = { version: GENERATION_VERSION, catalog: catalogSignature(options.catalog), categories: categories.map(({ id, name, parent_id, order, sources }) => ({ id, name, parent_id, order, sources })), categorySha: source.categories.sha, documents: state, generatedPosts: selected.size, reusedPosts: posts.length - selected.size };
   const generationBytes = Buffer.from(JSON.stringify(generation));
-  files.set('generation.json', generationBytes);
-  inventory['generation.json'] = { size: generationBytes.length, sha: blobSha(generationBytes) };
+  requirePublic(generationBytes.length <= MAX_PUBLIC_FILE, 'Generated file too large');
+  const cachedBytes = Buffer.from(JSON.stringify({ version: 2, encoding: 'gzip+base64', data: gzipSync(generationBytes).toString('base64') }));
+  files.set('generation.json', cachedBytes);
+  inventory['generation.json'] = { size: cachedBytes.length, sha: blobSha(cachedBytes) };
   const manifest = { version: PUBLIC_VERSION, sourceCommit: options.commit, posts: posts.map(post => post.id), files: inventory };
   files.set('manifest.json', Buffer.from(JSON.stringify(manifest)));
   requirePublic([...files.values()].every(bytes => bytes.length <= MAX_PUBLIC_FILE), 'Generated file too large');
-  requirePublic(Object.values(inventory).reduce((sum, file) => sum + file.size, files.get('manifest.json').length) <= MAX_SOURCE_BYTES, 'Generated publication too large');
+  const publicationBytes = Object.values(inventory).reduce((sum, file) => sum + file.size, files.get('manifest.json').length);
+  requirePublic(Math.max(publicationBytes, publicationBytes - cachedBytes.length + generationBytes.length) <= MAX_SOURCE_BYTES, 'Generated publication too large');
   return { files, baseTree: previous?.treeSha, removed: previous ? previous.manifest.posts.filter(id => !source.documents.has(id)).map(id => `posts/${id}.json`) : [] };
 }
 
@@ -268,6 +283,7 @@ export async function ensurePublicPublication(options) {
   // GitHub times out even for large SHA-only trees. Extend a small tree at
   // each step; only the final commit/ref makes the full publication visible.
   const batches = [];
+  const uploads = [];
   let batch = [];
   const envelopeBytes = Buffer.byteLength(JSON.stringify({ base_tree: '0'.repeat(40), tree: [] }));
   let batchBytes = envelopeBytes;
@@ -275,12 +291,10 @@ export async function ensurePublicPublication(options) {
     let entry = { path, mode: '100644', type: 'blob', content: bytes.toString('utf8') };
     let entryBytes = Buffer.byteLength(JSON.stringify(entry));
     if (entryBytes + envelopeBytes > 2 * 1024 * 1024) {
-      const blob = await github('/git/blobs', {
-        method: 'POST', body: { content: bytes.toString('base64'), encoding: 'base64' },
-      });
-      const expected = createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
-      requirePublic(blob.sha === expected, 'Uploaded blob differs from generated file');
-      entry = { path, mode: '100644', type: 'blob', sha: blob.sha };
+      const body = { content: bytes.toString('utf8'), encoding: 'utf-8' };
+      const base64 = { content: bytes.toString('base64'), encoding: 'base64' };
+      uploads.push({ body: Buffer.byteLength(JSON.stringify(body)) <= Buffer.byteLength(JSON.stringify(base64)) ? body : base64, sha: blobSha(bytes) });
+      entry = { path, mode: '100644', type: 'blob', sha: blobSha(bytes) };
       entryBytes = Buffer.byteLength(JSON.stringify(entry));
     }
     if (batch.length && (batch.length >= 200 || batchBytes + entryBytes + 1 > 2 * 1024 * 1024)) {
@@ -303,6 +317,18 @@ export async function ensurePublicPublication(options) {
     batchBytes += entryBytes + 1;
   }
   if (batch.length) batches.push(batch);
+  let cursor = 0;
+  let uploadError;
+  await Promise.all(Array.from({ length: Math.min(2, uploads.length) }, async () => {
+    while (cursor < uploads.length && !uploadError) {
+      const upload = uploads[cursor++];
+      try {
+        const blob = await github('/git/blobs', { method: 'POST', body: upload.body });
+        requirePublic(blob.sha === upload.sha, 'Uploaded blob differs from generated file');
+      } catch (error) { uploadError ??= error; }
+    }
+  }));
+  if (uploadError) throw uploadError;
   let tree = baseTree ? { sha: baseTree } : undefined;
   for (const entries of batches) {
     tree = await github('/git/trees', {
