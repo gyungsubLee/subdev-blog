@@ -34,14 +34,7 @@ export default function CategorySelectionDialog({
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [pending, setPending] = useState(value);
-  const [expandedIds, setExpandedIds] = useState(
-    () =>
-      new Set(
-        categories
-          .map((category) => category.parentId)
-          .filter((id): id is string => Boolean(id)),
-      ),
-  );
+  const [expandedIds, setExpandedIds] = useState(() => new Set<string>());
 
   useEffect(() => {
     const element = dialog.current;

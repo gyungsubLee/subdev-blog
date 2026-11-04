@@ -197,7 +197,10 @@ test("category filters include descendants and preserve the empty state", { time
     async function choose(value) { await chooseCategory(value); }
     await choose("notes");
     assert.equal(document.querySelectorAll('tbody tr').length, 2);
-    await choose("child");
+    await act(async () => document.querySelector('[aria-label="카테고리 필터"]').click());
+    await act(async () => document.querySelector('[data-id="notes"] .expander').click());
+    await act(async () => document.querySelector('[data-id="child"] .row-name').click());
+    await act(async () => document.querySelector('dialog button[type="submit"]').click());
     assert.equal(document.querySelectorAll('tbody tr').length, 1);
     assert.match(document.querySelector('tbody').textContent, /하위 글/);
     await choose("empty");
@@ -272,6 +275,9 @@ test("double-click confirms the clicked category immediately while expanders sta
     const trigger = document.querySelector('[aria-label="카테고리 필터"]');
     await act(async () => trigger.click());
     const parent = document.querySelector('[data-id="notes"]');
+    assert.equal(parent.querySelector('.expander').getAttribute('aria-expanded'), 'false');
+    assert.ok(document.querySelector('[data-id="child"]') === null);
+    await act(async () => parent.querySelector('.expander').click());
     await act(async () => parent.querySelector('.row-name').click());
     assert.ok(document.querySelector('dialog') !== null, 'single click only stages a selection');
     assert.ok(trigger.textContent.includes('모든 카테고리'));
@@ -283,6 +289,7 @@ test("double-click confirms the clicked category immediately while expanders sta
     assert.ok(trigger.textContent.includes('하위'));
     assert.equal(document.querySelectorAll('tbody tr').length, 1);
     await act(async () => trigger.click());
+    assert.ok(document.querySelector('[data-id="child"]') === null, 'reopening collapses all branches');
     await act(async () => document.querySelector('[data-id=""] .row-name').dispatchEvent(new MouseEvent('dblclick', { bubbles: true, detail: 2 })));
     assert.ok(document.querySelector('dialog') === null);
     assert.ok(trigger.textContent.includes('모든 카테고리'));
