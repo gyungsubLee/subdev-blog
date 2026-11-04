@@ -48,9 +48,24 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     process.exit(2);
   }, 180000);
   try {
-    console.log(JSON.stringify(await runPublicPublication(process.argv.slice(2))));
+    const fetcher = async (url, options = {}) => {
+      const started = Date.now();
+      const method = options.method ?? 'GET';
+      const path = new URL(url).pathname;
+      try {
+        const response = await fetch(url, options);
+        if (method === 'POST' || (!response.ok && response.status !== 404)) {
+          console.error(JSON.stringify({ method, path, requestBytes: Buffer.byteLength(options.body ?? ''), status: response.status, ms: Date.now() - started }));
+        }
+        return response;
+      } catch (error) {
+        console.error(JSON.stringify({ method, path, networkError: error.name, ms: Date.now() - started }));
+        throw error;
+      }
+    };
+    console.log(JSON.stringify(await runPublicPublication(process.argv.slice(2), { fetcher })));
   } catch (error) {
-    console.error(error.status ? `Public generation failed (HTTP ${error.status}).` : error.message);
+    console.error(error.status ? `Public generation failed (HTTP ${error.status}): ${error.message}` : error.message);
     process.exitCode = 1;
   } finally { clearTimeout(deadline); }
 }
