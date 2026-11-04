@@ -160,17 +160,29 @@ export async function ensurePublicPublication(options) {
   // Upload bounded groups first; publish a ref only after the complete tree exists.
   const batches = [];
   let batch = [];
-  let batchBytes = 0;
+  let batchBytes = Buffer.byteLength('{"tree":[]}');
+  let separateBlobs = false;
   for (const [path, bytes] of files) {
-    if (batch.length && (batch.length >= 200 || batchBytes + bytes.length > 2 * 1024 * 1024)) {
+    const entry = { path, mode: '100644', type: 'blob', content: bytes.toString('utf8') };
+    const entryBytes = Buffer.byteLength(JSON.stringify(entry));
+    if (entryBytes + Buffer.byteLength('{"tree":[]}') > 2 * 1024 * 1024) {
+      const blob = await github('/git/blobs', {
+        method: 'POST', body: { content: bytes.toString('base64'), encoding: 'base64' },
+      });
+      const expected = createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
+      requirePublic(blob.sha === expected, 'Uploaded blob differs from generated file');
+      separateBlobs = true;
+      continue;
+    }
+    if (batch.length && (batch.length >= 200 || batchBytes + entryBytes + 1 > 2 * 1024 * 1024)) {
       batches.push(batch);
       batch = [];
-      batchBytes = 0;
+      batchBytes = Buffer.byteLength('{"tree":[]}');
     }
-    batch.push({ path, mode: '100644', type: 'blob', content: bytes.toString('utf8') });
-    batchBytes += bytes.length;
+    batch.push(entry);
+    batchBytes += entryBytes + 1;
   }
-  batches.push(batch);
+  if (batch.length) batches.push(batch);
   let cursor = 0;
   let failure;
   const uploaded = [];
@@ -187,7 +199,7 @@ export async function ensurePublicPublication(options) {
     }
   }));
   if (failure) throw failure;
-  const tree = batches.length === 1 ? uploaded[0] : await github('/git/trees', {
+  const tree = batches.length === 1 && !separateBlobs ? uploaded[0] : await github('/git/trees', {
     method: 'POST',
     body: { tree: [...files].map(([path, bytes]) => ({
       path, mode: '100644', type: 'blob',
