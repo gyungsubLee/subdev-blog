@@ -131,6 +131,10 @@
 .records-nav-sidebar .records-category-row {
   border-radius: 22px;
 }
+.records-nav-sidebar .records-category-tree {
+  display: grid;
+  gap: 12px;
+}
 .records-category-children {
   margin: 7px 0 7px 12px;
   padding-left: 8px;
