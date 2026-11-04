@@ -1,0 +1,52 @@
+name: Generate public content
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      source_commit:
+        description: Full canonical source commit SHA to generate (empty uses this run commit)
+        required: false
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: public-content-${{ github.event.inputs.source_commit || github.sha }}
+  cancel-in-progress: false
+jobs:
+  generate:
+    if: github.repository == 'gyungsubLee/subdev-blog-content' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Require a pinned trusted generator
+        env:
+          APP_SHA: ${{ vars.PUBLIC_GENERATOR_APP_SHA }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          assert(/^[a-f0-9]{40}$/.test(process.env.APP_SHA ?? ''), 'Set PUBLIC_GENERATOR_APP_SHA to the reviewed full app commit SHA');
+          NODE
+      - name: Check out trusted application code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: gyungsubLee/subdev-blog
+          ref: ${{ vars.PUBLIC_GENERATOR_APP_SHA }}
+          persist-credentials: false
+          submodules: recursive
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install trusted dependencies
+        run: npm ci --ignore-scripts
+      - name: Prepare the trusted baseline catalog
+        run: node app/server/scripts/prepare-content.mjs
+      - name: Validate and publish immutable public files
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SOURCE_COMMIT: ${{ github.event.inputs.source_commit || github.sha }}
+        run: node app/content/scripts/publish-public-content.mjs --commit "$SOURCE_COMMIT" --publish
