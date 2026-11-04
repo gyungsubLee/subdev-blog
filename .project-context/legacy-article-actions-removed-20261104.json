@@ -1,0 +1,14 @@
+{
+  "task": "Remove legacy article download and edit buttons",
+  "status": "complete",
+  "scope": "PostPage controls, exclusive styles and props, impacted tests",
+  "preserved": "Existing dirty changes, content management editor, article layout height, reader data loading and cache",
+  "verification": {
+    "tests": "node --test --test-timeout=15000 tests/blog.test.mjs tests/app-flow.test.mjs: 18 passed",
+    "types": "npx tsc -b: passed",
+    "diff": "git diff --check: passed",
+    "browser": "Chrome 1490589915 on port 5174: legacy controls absent",
+    "limits": "No full suite or performance benchmark. Existing port 5173 serves an older build. Native app not rebuilt. STE-KO skill symlink is broken."
+  },
+  "next": "User review; no commit or deployment requested"
+}

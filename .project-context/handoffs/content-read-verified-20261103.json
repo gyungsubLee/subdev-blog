@@ -1,0 +1,17 @@
+{
+  "project_id": "3c410e99fe6f4523b60e0acd1f3307fe",
+  "root": "/Users/igyeongseob/Develop/10_harness/subdev-blog",
+  "goal": "READ-PERF-01: reuse validated Markdown transforms and encoded index responses; preserve public output, search, validation, bounded memory and after-save freshness; verify behavior and before/after performance.",
+  "authority": "2026-11-03 KST source chat 01a1a17b-8a9d-7361-bddd-d38f8ed274ac: user said 작업 문서 작성하고 이관해서 작업 처리해줘. Authorizes this task document, a new local chat and implementation/verification. No frontend redesign, search split, new shared cache service, deployment or unrelated fixes. Preserve existing dirty edits.",
+  "state": "READ-PERF-01 complete in delegated implementation chat. Owned edits: scripts/content.mjs, server/public-content.mjs, related content/public tests, scripts/measure-content-read.mjs and task evidence/status only. Existing github/vite/native dirty edits preserved. No commits, push, deploy or native app rebuild.",
+  "evidence": "targeted-fixed.log:84/84. final-check.log:424/426, 2 sandbox listen EPERM failures. listen-tests.log:3/3 in those files with loopback permission. final-build.log:exit0. verified-comparison.json: identical deterministic input, response JSON/gzip digests, sizes, statuses and call counts. cold median1052.0->804.6ms; warm450.2->0.4ms. Snapshot accounting8817818->23128344 bytes, unchanged3/128MiB limits. Independent review fixed missing attachment inventory regression, then no remaining findings.",
+  "blockers": "None for local scope. Production latency/cold-start cause, browser UI and actual heap/RSS unmeasured. Local timings are not operating server effects. No remote writes authorized or performed.",
+  "next_action": "User may review the local diff and completed plan; production deployment and operating measurements require a separate requested scope.",
+  "refs": [
+    "docs/superpowers/plans/2026-11-03-content-read-performance.md",
+    "docs/research/2026-11-03-content-read/verified-comparison.json",
+    "docs/research/2026-11-03-content-read/implementation-review.md",
+    "docs/research/2026-11-03-content-read/final-checks.json",
+    "docs/research/2026-11-03-content-read/listen-tests-result.json"
+  ]
+}
