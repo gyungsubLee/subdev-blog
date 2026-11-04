@@ -1,11 +1,10 @@
-node_modules
+node_modules/
 dist/
 .vercel/
 .tmp/
 .env*
 !.env.example
 *.tsbuildinfo
-.vercel
 content/raw/
 content/records.json
 content/manifest.json
@@ -15,5 +14,39 @@ content/web-assets-report.json
 content/migration-cleanup-report.json
 notion-root-response.json
 public/content/
+/public/.content-stage-*/
 
 server/content-catalog.json
+
+# Local agent state
+/.project-context/
+/.superpowers/
+
+# Python caches and virtual environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Test output and tool caches
+coverage/
+.coverage
+.coverage.*
+htmlcov/
+.cache/
+
+# Runtime logs (retain documented research evidence)
+*.log
+!/docs/research/**/*.log
+
+# OS and editor temporary files
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
