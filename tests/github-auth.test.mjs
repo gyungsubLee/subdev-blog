@@ -99,3 +99,39 @@ test('content management accepts Contents-only installations without any Actions
  assert.equal(connection.contentCommit, 'content-head');
  assert.equal(calls.some(path => path.includes('/actions/')), false);
 });
+
+test('connection readiness recovers from a transient GitHub content lookup failure', { timeout: 5000 }, async () => {
+  const upstream = connectedFetcher();
+  let categoryRequests = 0;
+  const connection = await checkConnection('token', connectedConfig, async (url, options) => {
+    if (new URL(url).pathname.endsWith('/contents/categories.json') && ++categoryRequests === 1) {
+      return Response.json({ message: 'Internal Server Error' }, { status: 500 });
+    }
+    return upstream(url, options);
+  });
+  assert.equal(connection.contentCommit, 'content-head');
+  assert.equal(categoryRequests, 2);
+});
+
+test('GitHub read retries are bounded and do not retry writes or access failures', { timeout: 5000 }, async () => {
+  for (const [method, status, expectedCalls] of [
+    ['GET', 503, 3],
+    ['GET', 401, 1],
+    ['GET', 403, 1],
+    ['GET', 404, 1],
+    ['GET', 429, 1],
+    ['POST', 500, 1],
+    ['PATCH', 502, 1],
+    ['DELETE', 504, 1],
+  ]) {
+    let calls = 0;
+    const github = createGitHubClient('token', async () => {
+      calls++;
+      return Response.json({ message: 'private upstream detail' }, { status });
+    });
+    await assert.rejects(github('/path', { method }), error =>
+      error.status === ([401, 403, 404].includes(status) ? status : 502) &&
+      !error.message.includes('private upstream detail'));
+    assert.equal(calls, expectedCalls, `${method} ${status} retry count`);
+  }
+});
