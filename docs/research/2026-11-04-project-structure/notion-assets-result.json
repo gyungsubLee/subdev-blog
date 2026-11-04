@@ -1,0 +1,15 @@
+{
+  "sourceRemoved": "app/web/public/notion",
+  "assetFiles": 6453,
+  "totalFiles": 6454,
+  "totalBytes": 343186180,
+  "parsedLegacyReferences": 0,
+  "postsScanned": 3032,
+  "buildCopiesRemoved": [
+    "dist/web/notion",
+    "dist/notion"
+  ],
+  "archive": ".tmp/notion-assets-cleanup/retired-public-notion",
+  "contentCommit": "9f99941c6b650c70f363208cd97c7191ef785a46",
+  "contentStatus": ""
+}

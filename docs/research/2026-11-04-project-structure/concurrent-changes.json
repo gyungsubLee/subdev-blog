@@ -1,0 +1,18 @@
+{
+  "changedBoundFiles": [
+    "app/web/src/main.tsx",
+    "app/web/src/features/post-editor/editor.css",
+    "app/web/src/features/content-management/managed-writing.css",
+    "app/web/src/features/content-management/ManagedEditorChrome.tsx",
+    "app/web/src/features/post-category/CategorySelectionDialog.css",
+    "app/web/src/features/post-category/CategoryManager.css",
+    "app/web/src/components/layout/SiteHeader.tsx",
+    "app/web/src/components/layout/layout.css"
+  ],
+  "newFiles": [
+    "app/web/src/features/theme-settings/theme-settings.css",
+    "app/web/src/features/theme-settings/SettingsButton.tsx",
+    "app/web/src/features/theme-settings/theme.ts",
+    "tests/web/theme-settings.test.mjs"
+  ]
+}

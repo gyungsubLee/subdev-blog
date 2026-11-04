@@ -1,0 +1,12 @@
+/var/folders/95/t8symb5521g2916cz4qtrsjc0000gn/T/secondbrain-native-fpsm_xjx/SecondBrain.iconset:Invalid Iconset.
+/var/folders/95/t8symb5521g2916cz4qtrsjc0000gn/T/secondbrain-native-fpsm_xjx/SecondBrain.iconset:Invalid Iconset.
+Traceback (most recent call last):
+  File "/Users/igyeongseob/Develop/10_harness/subdev-blog/app/native/build.py", line 101, in <module>
+    main()
+  File "/Users/igyeongseob/Develop/10_harness/subdev-blog/app/native/build.py", line 86, in main
+    run([
+  File "/Users/igyeongseob/Develop/10_harness/subdev-blog/app/native/build.py", line 44, in run
+    subprocess.run(arguments, check=True, timeout=180, stdout=subprocess.DEVNULL)
+  File "/Users/igyeongseob/.pyenv/versions/3.12.6/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/usr/bin/iconutil', '-c', 'icns', '/var/folders/95/t8symb5521g2916cz4qtrsjc0000gn/T/secondbrain-native-fpsm_xjx/SecondBrain.iconset', '-o', '/var/folders/95/t8symb5521g2916cz4qtrsjc0000gn/T/secondbrain-native-fpsm_xjx/Second Brain.app/Contents/Resources/SecondBrain.icns']' returned non-zero exit status 1.

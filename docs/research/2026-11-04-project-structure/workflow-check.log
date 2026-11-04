@@ -1,0 +1,26 @@
+✔ validates real commit and rejects noncontent changes and wrong parent (760.073959ms)
+✔ validates content when the inherited Git tree exceeds one MiB (1492.388167ms)
+✔ source promotion retries, preserves descendants and rejects divergence (1770.017917ms)
+✔ app gitlink moves forward and preserves concurrent app changes (2895.252ms)
+✔ pre-deletion snapshot blocks Notion inbound links even if candidate removes the link (721.794458ms)
+✔ rejects deleting unclassified and categories with original children or assignments (2309.196959ms)
+✔ deletes a post without inbound references and rejects symbolic links (1158.12875ms)
+✔ failed prospective app verification leaves the remote app branch unchanged (1363.021875ms)
+✔ source advance during verification supersedes the request before the app push (1706.650417ms)
+✔ a concurrent app push rebuilds and reverifies on the new app HEAD (2490.617292ms)
+✔ prospective verification can initialize the exact content submodule (2838.772916ms)
+✔ workflow installs trusted dependencies before running the publication CLI (6.758333ms)
+✔ workflow prepares project settings before source promotion without downloading runtime secrets (2.556583ms)
+✔ workflow uses permitted stored configuration names and preserves CLI environment names (2.763666ms)
+✔ workflow initializes the runner content path at step runtime (19.360875ms)
+✔ preview alias preflight accepts only the optional CMS preview namespace (461.98025ms)
+✔ native network diagnostics expose only bounded error codes and HTTP status (55.750041ms)
+✔ preview alias moves only after all deployed bytes pass verification (2973.290916ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 23253.734708

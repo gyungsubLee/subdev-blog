@@ -1,0 +1,125 @@
+{
+  "pairs": [
+    {
+      "pair": 0,
+      "identicalResponseRequestsAndCache": true
+    },
+    {
+      "pair": 1,
+      "identicalResponseRequestsAndCache": true
+    },
+    {
+      "pair": 2,
+      "identicalResponseRequestsAndCache": true
+    }
+  ],
+  "medianOfRunMediansMs": {
+    "before": {
+      "cold": 800.025083,
+      "warm": 0.3371039999997265
+    },
+    "after": {
+      "cold": 789.9238330000003,
+      "warm": 0.33750049999980547
+    }
+  },
+  "inputHash": "3122cbf03986dc5b4d1d212836bdb982bd3229154bc3e7dc1bb6a5162586be00",
+  "runs": [
+    {
+      "pair": 0,
+      "label": "before",
+      "summary": {
+        "inputHash": "3122cbf03986dc5b4d1d212836bdb982bd3229154bc3e7dc1bb6a5162586be00",
+        "mediansMs": {
+          "cold": 788.7783750000003,
+          "warm": 0.3648124999999709
+        },
+        "observationsMs": {
+          "firstPost": 11.635291999999936,
+          "cachedPost": 4.733874999999898,
+          "afterSave": 803.3837089999997
+        }
+      }
+    },
+    {
+      "pair": 0,
+      "label": "after",
+      "summary": {
+        "inputHash": "3122cbf03986dc5b4d1d212836bdb982bd3229154bc3e7dc1bb6a5162586be00",
+        "mediansMs": {
+          "cold": 791.9839580000003,
+          "warm": 0.33750049999980547
+        },
+        "observationsMs": {
+          "firstPost": 12.616750000000138,
+          "cachedPost": 4.661167000000205,
+          "afterSave": 806.3832910000001
+        }
+      }
+    },
+    {
+      "pair": 1,
+      "label": "after",
+      "summary": {
+        "inputHash": "3122cbf03986dc5b4d1d212836bdb982bd3229154bc3e7dc1bb6a5162586be00",
+        "mediansMs": {
+          "cold": 784.5715,
+          "warm": 0.3271669999999176
+        },
+        "observationsMs": {
+          "firstPost": 11.969458000000486,
+          "cachedPost": 4.477582999999868,
+          "afterSave": 804.4446660000003
+        }
+      }
+    },
+    {
+      "pair": 1,
+      "label": "before",
+      "summary": {
+        "inputHash": "3122cbf03986dc5b4d1d212836bdb982bd3229154bc3e7dc1bb6a5162586be00",
+        "mediansMs": {
+          "cold": 803.3615420000001,
+          "warm": 0.3147914999999557
+        },
+        "observationsMs": {
+          "firstPost": 11.763958000000457,
+          "cachedPost": 4.7453340000001845,
+          "afterSave": 807.9161250000006
+        }
+      }
+    },
+    {
+      "pair": 2,
+      "label": "before",
+      "summary": {
+        "inputHash": "3122cbf03986dc5b4d1d212836bdb982bd3229154bc3e7dc1bb6a5162586be00",
+        "mediansMs": {
+          "cold": 800.025083,
+          "warm": 0.3371039999997265
+        },
+        "observationsMs": {
+          "firstPost": 11.357458000000406,
+          "cachedPost": 4.528792000000067,
+          "afterSave": 800.6602499999999
+        }
+      }
+    },
+    {
+      "pair": 2,
+      "label": "after",
+      "summary": {
+        "inputHash": "3122cbf03986dc5b4d1d212836bdb982bd3229154bc3e7dc1bb6a5162586be00",
+        "mediansMs": {
+          "cold": 789.9238330000003,
+          "warm": 0.376021000000037
+        },
+        "observationsMs": {
+          "firstPost": 11.596415999999408,
+          "cachedPost": 4.60766699999931,
+          "afterSave": 803.2606660000001
+        }
+      }
+    }
+  ]
+}

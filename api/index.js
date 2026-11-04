@@ -1,3 +1,2 @@
-import { handleRequest } from '../server/handler.mjs';
-
-export default { fetch: handleRequest };
+// Vercel discovers functions at the repository root.
+export { default } from "../app/server/api/index.js";

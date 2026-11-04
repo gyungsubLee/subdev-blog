@@ -50,3 +50,8 @@ Desktop.ini
 *.swp
 *.swo
 *~
+
+# Product-area generated output
+/app/server/generated/
+/app/web/public/content/
+/app/web/public/.content-stage-*/

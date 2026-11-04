@@ -7,8 +7,8 @@
 배포 대상은 Vercel이다. 사용자 승인에 따라 프로젝트의 현재·향후 모든 배포에서 인증 보호를 해제했다.
 
 [배포한 블로그](https://notion2md-blog-ehkytcr6k-gyungsublees-projects.vercel.app)는 로그인 없이 공개하도록 설정했다.
-수집 결과와 검증 범위는 [수집·배포 기록](docs/MIGRATION.md)에 있다.
-기존 글의 서식 수정과 실행한 검사는 [Markdown 표시 수정 기록](docs/markdown-rendering-repair.md)에 있다.
+수집 결과와 검증 범위는 [수집·배포 기록](docs/guides/MIGRATION.md)에 있다.
+기존 글의 서식 수정과 실행한 검사는 [Markdown 표시 수정 기록](docs/research/markdown-rendering-repair.md)에 있다.
 
 ## 로컬 실행
 
@@ -80,7 +80,7 @@ JSON이 없는 기존 글은 원문 Markdown으로 편집한다. 블록 편집 �
 
 `npm run import:md`는 새 정식 Markdown을 콘텐츠 submodule에 게시하는 명령이 아니다.
 전환 뒤에는 기존 JSON 쓰기를 차단한다.
-기존 작성 기능의 설명은 [Notion 작성 UX](docs/notion-writing-ux.md)에 있다.
+기존 작성 기능의 설명은 [Notion 작성 UX](docs/guides/notion-writing-ux.md)에 있다.
 
 ## GitHub 로그인과 저장 초기 설정
 
@@ -111,10 +111,9 @@ JSON이 없는 기존 글은 원문 Markdown으로 편집한다. 블록 편집 �
 `content/`는 별도 콘텐츠 Git 저장소의 고정 커밋을 가리킨다.
 `categories.json`은 카테고리 계층을 정의한다. 각 글의 frontmatter는 ID·부모·순서·분류와 AI 메타데이터를 보관한다.
 분류나 부모가 바뀌어도 글 폴더와 형제 이미지를 이동하지 않는다.
-기존 브라우저 초안의 이미지 경로를 보존하려고 `public/notion/assets/`와 `public/notion/asset-map.json`을 유지한다.
-정식 글 조회는 글별 첨부를 사용한다. 옛 공개 첨부의 중복 정리는 후속 작업이다.
+정식 글 조회는 콘텐츠 서브모듈의 글별 첨부를 사용한다. 중복된 `public/notion` 자산과 매핑 파일은 제거했다.
 
-빌드는 frontmatter를 본문과 분리한 뒤 허용한 공개 필드만 출력한다.
+공개 API는 frontmatter를 본문과 분리한 뒤 허용한 공개 필드만 출력한다. 일반 빌드는 콘텐츠와 첨부파일의 정적 복사본을 생성하지 않는다.
 AI 메타데이터와 원문 확장 필드는 원본에 보존하며 공개 목록·본문·다운로드에 포함하지 않는다.
 공개 콘텐츠 저장소에서는 frontmatter를 읽을 수 있다. 비공개 메모와 로컬 LLM wiki는 저장소 밖에 둔다.
 LLM wiki의 색인·근거 계약은 콘텐츠 저장소 문서에 보관한다. 생성기와 AI 실행 기능은 구현하지 않는다.
@@ -132,7 +131,7 @@ GitHub 오류와 제한 초과는 화면에 오류로 표시한다. 이전 빌�
 토큰은 콘텐츠 저장소의 읽기 권한만 부여한다. 토큰을 프런트엔드 설정이나 번들에 넣지 않는다.
 토큰이 없으면 공개 읽기를 시도한다. 익명 한도 때문에 트래픽이 늘면 조회가 제한될 수 있다.
 
-빌드는 서버 전용 `server/content-catalog.json`에 원본 요약과 Git blob ID를 기록한다.
+빌드는 서버 전용 `app/server/generated/content-catalog.json`에 원본 요약과 Git blob ID를 기록한다.
 서버는 GitHub의 실제 트리와 이 기준을 비교해 바뀐 Markdown만 다시 읽는다. 본문은 요청한 글만 내려받는다.
 이 파일은 서버 함수의 입력이며 `public/`와 앱 Git에 넣지 않는다. 원본 메타데이터를 공개 응답으로 내보내지 않는다.
 함수 번들은 기준 목록만 포함한다. 원본 콘텐츠·공개 첨부·테스트·문서는 함수 번들에서 제외한다.
@@ -149,7 +148,7 @@ npm run build
 `check`는 TypeScript와 DOM 기반 동작 검사를 실행한다.
 `check:content`는 선택한 콘텐츠의 글·부모·분류·첨부를 실제로 읽고 검사한다.
 배포 빌드는 submodule이 없거나 커밋이 맞지 않으면 중단한다. 이전 JSON으로 자동 대체하지 않는다.
-실행한 검사와 검증 한계는 [이전 기록](docs/MIGRATION.md)에 구분해 적는다.
+실행한 검사와 검증 한계는 [이전 기록](docs/guides/MIGRATION.md)에 구분해 적는다.
 2026-10-24 KST에 새 체크아웃에서 검사 244개와 빌드를 통과했다. 글 3,032개·카테고리 47개·참조 첨부 7,255개를 확인했다.
 
 ## 버전과 빌드 산출물
@@ -162,36 +161,39 @@ npm run build
 태그 빌드는 산출물을 업로드한다. 이름에는 버전, 전체 커밋 SHA, 실행 ID와 재시도 번호가 들어간다.
 산출물은 7일 동안 보관한다.
 
-빌드는 `dist/build-info.json`에 버전과 빌드 출처를 기록한다.
+빌드는 `dist/web/build-info.json`에 버전과 빌드 출처를 기록한다.
 GitHub Actions에서는 커밋 SHA, 실행 ID, 실행 번호, 재시도 번호와 workflow 이름을 기록한다.
 출처에는 앱 커밋과 `contentCommit`을 구분해 기록한다.
 앱 밖 staging을 사용하는 로컬 검증의 콘텐츠 커밋은 `null`이다. Git 정보 없는 배포 입력은 `CONTENT_COMMIT_SHA`가 필요하다.
 
 앱 Git에는 코드·문서와 콘텐츠 submodule의 gitlink를 보관한다. 정식 Markdown과 형제 첨부는 콘텐츠 Git에 보관한다.
-생성한 `public/content/`, 수집 캐시, 임시 파일과 환경 파일은 앱 Git에서 제외한다.
+서버 생성 데이터, 빌드 결과, 수집 캐시, 임시 파일과 환경 파일은 앱 Git에서 제외한다.
 
 ## 구현
 
 소스는 화면 조립, 기능, 공통 컴포넌트와 공유 코드로 나눈다.
 
 ```text
-src/
-├── app/                 # 화면 전환, hash 구독, 데이터 요청과 상태 수명
-├── pages/               # home, records, categories, post, write 화면 조립
-├── features/
-│   ├── post-search/     # 검색 입력과 검색어 상태
-│   ├── post-category/   # 분류 선택과 분류 상태
-│   ├── post-pagination/ # 표시 개수, 결과 개수와 더 보기
-│   ├── post-list/       # 대표 글과 글 목록
-│   ├── post-reader/     # Markdown, 코드 표시와 내부 링크
-│   └── post-editor/     # 작성, 자동 저장과 문서 가져오기·내보내기
-├── components/          # 헤더·푸터, 그림과 아이콘
-├── shared/              # 글 타입, 초안 저장, 문서 형식과 다운로드
-├── config/              # 사이트 이름, 작성자와 소개 문구
-└── styles/              # 공통 CSS 변수와 기본 규칙
+app/
+├── web/            # React 웹 앱. src/site가 전체 화면과 라우팅을 조합한다.
+├── server/         # API, 인증, GitHub 연동, 캐시와 서버 생성 데이터
+├── content/        # 콘텐츠 검증, 변환, 저장과 CLI
+├── native/         # Swift macOS 앱과 빌드
+└── shared/         # 실행 환경 사이의 공용 문서 처리
+content/            # 글별 Markdown, 편집 데이터, 첨부파일 원본 서브모듈
+tests/              # web, server, content, native, support
+docs/               # 현재 구조, 실행 안내, 설계와 검증 기록
+scripts/            # 프로젝트 전체 버전 검사와 배포 조정
+dist/               # web, native 빌드 결과
 ```
 
-검색·분류·표시 개수의 상태는 `BlogView`에서 조합한다. 상세 화면을 열어도 이 상태를 유지한다.
+[폴더 구조 기준](docs/architecture/project-structure.md)과 [실행 안내](docs/guides/development.md)를 따른다.
+루트 `api/index.js`는 Vercel 탐색을 위한 연결 파일이다. 실제 진입점은 `app/server/api/index.js`다.
+서버용 목록은 `app/server/generated/`에 생성한다. `app/web/public/`에는 앱 자체의 정적 자산만 둔다.
+정적 콘텐츠 내보내기는 `npm run export:static`으로만 실행한다. 일반 개발 및 빌드는 이를 실행하지 않는다.
+
+
+검색·분류·표시 개수의 상태는 `site/BlogView`에서 조합한다. 상세 화면을 열어도 이 상태를 유지한다.
 CSS는 소유 페이지·기능·컴포넌트 옆에 둔다. 기능별 수치는 각 기능의 `config.ts`에 둔다.
 기본 CSS는 앱보다 먼저 불러온다. 앱 로딩·오류 CSS는 편집기를 열기 전에도 불러온다.
 공유 문서 코드는 DOM에 의존하지 않으므로 CLI에서도 사용한다.
@@ -203,4 +205,4 @@ CSS는 소유 페이지·기능·컴포넌트 옆에 둔다. 기능별 수치는
 - Markdown의 HTML은 sanitize를 통과한 뒤 표시한다. 수식은 KaTeX로 표시한다.
 - 초안이 손상됐거나 저장에 실패하면 기존 데이터를 덮어쓰지 않는다.
 
-[디자인 근거](docs/design-reference.md)는 Claude 공식 블로그의 정보 구조와 화면 검증 제한을 기록한다.
+[디자인 근거](docs/architecture/design-reference.md)는 Claude 공식 블로그의 정보 구조와 화면 검증 제한을 기록한다.

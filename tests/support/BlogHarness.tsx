@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
-import BlogView from "../../src/app/BlogView";
-import { useHashRoute } from "../../src/app/useHashRoute";
+import BlogView from "../../app/web/src/site/BlogView";
+import { useHashRoute } from "../../app/web/src/site/useHashRoute";
 
 export default function BlogHarness(
   props: Omit<ComponentProps<typeof BlogView>, "hash">,

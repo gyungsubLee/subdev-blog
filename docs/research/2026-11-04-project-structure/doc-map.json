@@ -1,0 +1,6 @@
+{
+  "docs/design-reference.md": "docs/architecture/design-reference.md",
+  "docs/notion-writing-ux.md": "docs/guides/notion-writing-ux.md",
+  "docs/MIGRATION.md": "docs/guides/MIGRATION.md",
+  "docs/markdown-rendering-repair.md": "docs/research/markdown-rendering-repair.md"
+}

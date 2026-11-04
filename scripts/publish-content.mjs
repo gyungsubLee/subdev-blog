@@ -4,8 +4,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createSign } from 'node:crypto';
-import { readContent, toPublicPosts } from './content.mjs';
-import { rewriteContentLinks } from '../src/shared/content-links.mjs';
+import { readContent, toPublicPosts } from '../app/content/src/content.mjs';
+import { rewriteContentLinks } from '../app/shared/content-links.mjs';
 const shaPattern = /^[a-f0-9]{40}$/;
 const uuid = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 

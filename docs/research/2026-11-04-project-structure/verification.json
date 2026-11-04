@@ -1,0 +1,192 @@
+{
+  "implementation": "complete",
+  "wholeCurrentWorkspaceVerified": false,
+  "baseline": {
+    "tests": 467,
+    "pass": 463,
+    "fail": 4,
+    "failures": "Two existing editor failures and two sandbox port failures. Three isolated runtime checks passed outside the sandbox."
+  },
+  "lastFullRun": {
+    "tests": 487,
+    "pass": 481,
+    "fail": 6,
+    "exit": 1,
+    "log": "full-check.log"
+  },
+  "knownEditorFailures": [
+    "tags, category cancellation and reader controls preserve local-only drafts",
+    "editor confirms a category double-click through the shared dialog without publishing"
+  ],
+  "concurrentThemeFailures": [
+    "theme preferences reject unknown or corrupt storage and tolerate blocked storage",
+    "palette and accent persist independently and leave layout tokens untouched",
+    "all offered palette/accent combinations retain readable text and buttons",
+    "shared trigger opens a native dialog, applies colors, reopens and resets without rerendering its parent"
+  ],
+  "migrationRegressions": "Passed in the last full run, including rollback and cleanup tests after restoring fixture parent-directory creation.",
+  "typescript": {
+    "exit": 0,
+    "log": "typecheck.log",
+    "limit": "Concurrent theme sources changed after this check."
+  },
+  "webBuild": {
+    "exit": 0,
+    "output": "dist/web",
+    "log": "web-build.log",
+    "limit": "Build predates subsequent concurrent theme integrations."
+  },
+  "nativeBuild": {
+    "exit": 0,
+    "output": "dist/native/Second Brain.app",
+    "log": "native-build.log",
+    "codesignVerified": true
+  },
+  "pythonTests": {
+    "tests": 2,
+    "pass": 2,
+    "log": "python-tests.log"
+  },
+  "content": {
+    "posts": 3032,
+    "categories": 48,
+    "referencedAttachments": 7255,
+    "errors": 0,
+    "commit": "9f99941c6b650c70f363208cd97c7191ef785a46"
+  },
+  "publicAssets": {
+    "files": 6455,
+    "missing": 0,
+    "changed": 0
+  },
+  "performance": {
+    "pairs": [
+      {
+        "pair": 0,
+        "identicalResponseRequestsAndCache": true
+      },
+      {
+        "pair": 1,
+        "identicalResponseRequestsAndCache": true
+      },
+      {
+        "pair": 2,
+        "identicalResponseRequestsAndCache": true
+      }
+    ],
+    "medianOfRunMediansMs": {
+      "before": {
+        "cold": 800.025083,
+        "warm": 0.3371039999997265
+      },
+      "after": {
+        "cold": 789.9238330000003,
+        "warm": 0.33750049999980547
+      }
+    },
+    "inputHash": "3122cbf03986dc5b4d1d212836bdb982bd3229154bc3e7dc1bb6a5162586be00",
+    "runs": [
+      {
+        "pair": 0,
+        "label": "before",
+        "summary": {
+          "inputHash": "3122cbf03986dc5b4d1d212836bdb982bd3229154bc3e7dc1bb6a5162586be00",
+          "mediansMs": {
+            "cold": 788.7783750000003,
+            "warm": 0.3648124999999709
+          },
+          "observationsMs": {
+            "firstPost": 11.635291999999936,
+            "cachedPost": 4.733874999999898,
+            "afterSave": 803.3837089999997
+          }
+        }
+      },
+      {
+        "pair": 0,
+        "label": "after",
+        "summary": {
+          "inputHash": "3122cbf03986dc5b4d1d212836bdb982bd3229154bc3e7dc1bb6a5162586be00",
+          "mediansMs": {
+            "cold": 791.9839580000003,
+            "warm": 0.33750049999980547
+          },
+          "observationsMs": {
+            "firstPost": 12.616750000000138,
+            "cachedPost": 4.661167000000205,
+            "afterSave": 806.3832910000001
+          }
+        }
+      },
+      {
+        "pair": 1,
+        "label": "after",
+        "summary": {
+          "inputHash": "3122cbf03986dc5b4d1d212836bdb982bd3229154bc3e7dc1bb6a5162586be00",
+          "mediansMs": {
+            "cold": 784.5715,
+            "warm": 0.3271669999999176
+          },
+          "observationsMs": {
+            "firstPost": 11.969458000000486,
+            "cachedPost": 4.477582999999868,
+            "afterSave": 804.4446660000003
+          }
+        }
+      },
+      {
+        "pair": 1,
+        "label": "before",
+        "summary": {
+          "inputHash": "3122cbf03986dc5b4d1d212836bdb982bd3229154bc3e7dc1bb6a5162586be00",
+          "mediansMs": {
+            "cold": 803.3615420000001,
+            "warm": 0.3147914999999557
+          },
+          "observationsMs": {
+            "firstPost": 11.763958000000457,
+            "cachedPost": 4.7453340000001845,
+            "afterSave": 807.9161250000006
+          }
+        }
+      },
+      {
+        "pair": 2,
+        "label": "before",
+        "summary": {
+          "inputHash": "3122cbf03986dc5b4d1d212836bdb982bd3229154bc3e7dc1bb6a5162586be00",
+          "mediansMs": {
+            "cold": 800.025083,
+            "warm": 0.3371039999997265
+          },
+          "observationsMs": {
+            "firstPost": 11.357458000000406,
+            "cachedPost": 4.528792000000067,
+            "afterSave": 800.6602499999999
+          }
+        }
+      },
+      {
+        "pair": 2,
+        "label": "after",
+        "summary": {
+          "inputHash": "3122cbf03986dc5b4d1d212836bdb982bd3229154bc3e7dc1bb6a5162586be00",
+          "mediansMs": {
+            "cold": 789.9238330000003,
+            "warm": 0.376021000000037
+          },
+          "observationsMs": {
+            "firstPost": 11.596415999999408,
+            "cachedPost": 4.60766699999931,
+            "afterSave": 803.2606660000001
+          }
+        }
+      }
+    ]
+  },
+  "browser": "Chrome discovery and dedicated task tab failed with native pipe closed before response; no structural before/after visual comparison.",
+  "concurrency": "Other chats changed deletion/UI/theme code during this task. Their files were preserved. Theme evidence was not reused because its recorded hashes no longer match current files.",
+  "legacyCompatibility": "Previous native/dist bundle and root dist artifacts retained for an already running old preview. Canonical new outputs are dist/web and dist/native.",
+  "contextReadiness": "The project-context check already failed at start because INDEX.md exceeded its entry-point size limit. Unrelated historical records were not rewritten.",
+  "noCommitOrDeployment": true
+}

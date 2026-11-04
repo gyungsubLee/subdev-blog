@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "outputDirectory": "dist/web",
   "framework": "vite",
   "git": {
     "deploymentEnabled": false
@@ -46,8 +46,8 @@
   ],
   "functions": {
     "api/index.js": {
-      "includeFiles": "server/content-catalog.json",
-      "excludeFiles": "{content,public,tests,docs}/**"
+      "includeFiles": "app/server/generated/content-catalog.json",
+      "excludeFiles": "{content,app/web,app/native,tests,docs}/**"
     }
   }
 }

@@ -20,7 +20,13 @@ content/wiki
 content/.wiki
 content/export-run.log
 public/content
+app/web/public/content
+app/native
 content/manifest.json
 content/*.log
 content/*.tmp*
 content/web-assets-report.json
+
+# Local task state and previous native build
+.project-context
+native

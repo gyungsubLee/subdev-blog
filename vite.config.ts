@@ -1,9 +1,9 @@
 import { defineConfig, loadEnv, type ViteDevServer, type PreviewServer } from "vite";
 import react from "@vitejs/plugin-react";
 import manifest from "./package.json";
-import { getContentProvenance } from "./scripts/content.mjs";
-import { handleRequest } from "./server/handler.mjs";
-import { createNativeAuth } from "./server/native-auth.mjs";
+import { getContentProvenance } from "./app/content/src/content.mjs";
+import { handleRequest } from "./app/server/src/handler.mjs";
+import { createNativeAuth } from "./app/server/src/native-auth.mjs";
 
 type ManagementRequest = {
   url?: string;
@@ -90,6 +90,9 @@ export default defineConfig(async ({ mode }) => {
   }
 
   return {
+    root: "app/web",
+    envDir: "../..",
+    build: { outDir: "../../dist/web", emptyOutDir: true },
     plugins: [
       react(),
       {

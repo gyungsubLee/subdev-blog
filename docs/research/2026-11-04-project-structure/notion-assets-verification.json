@@ -1,0 +1,42 @@
+{
+  "checks": [
+    {
+      "name": "typecheck",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "-b"
+      ],
+      "exit": 0,
+      "seconds": 5.151705708000009
+    },
+    {
+      "name": "guards",
+      "command": [
+        "node",
+        "--test",
+        "--test-name-pattern=refuses direct legacy writes|normal content preparation|product areas",
+        "tests/content/content.test.mjs",
+        "tests/server/project-structure.test.mjs"
+      ],
+      "exit": 0,
+      "seconds": 4.986171749999812
+    },
+    {
+      "name": "build",
+      "command": [
+        "node",
+        "node_modules/vite/bin/vite.js",
+        "build",
+        "--outDir",
+        "/Users/igyeongseob/Develop/10_harness/subdev-blog/.tmp/notion-assets-cleanup/web"
+      ],
+      "exit": 0,
+      "seconds": 6.016066082999714
+    }
+  ],
+  "sourceChangesDuringVerification": [],
+  "sourceNotionAbsent": true,
+  "builtNotionAbsent": true,
+  "buildOutput": ".tmp/notion-assets-cleanup/web"
+}

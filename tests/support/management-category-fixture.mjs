@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
-import { loadConfig, seal, setCookie } from '../../server/auth.mjs';
+import { loadConfig, seal, setCookie } from '../../app/server/src/auth.mjs';
 
 export function createManagementCategoryFixture({ latencyMs = 0, categories, recursiveEntries = [] } = {}) {
   const env = {

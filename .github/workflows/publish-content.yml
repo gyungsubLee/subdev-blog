@@ -130,7 +130,9 @@ jobs:
           const info = JSON.parse(fs.readFileSync('.vercel/output/static/build-info.json', 'utf8'));
           assert.equal(info.commit, process.env.APP_COMMIT);
           assert.equal(info.contentCommit, process.env.CANDIDATE_SHA);
-          assert(fs.statSync('.vercel/output/static/content/index.json').size > 2);
+          const catalog = JSON.parse(fs.readFileSync('app/server/generated/content-catalog.json', 'utf8'));
+          assert.equal(catalog.version, 1);
+          assert(catalog.documents.length > 0);
           NODE
           URL="$(NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--import=./scripts/vercel-network-diagnostics.mjs" npx --yes vercel@58.1.0 deploy --prebuilt --archive=tgz --token="$VERCEL_TOKEN")"
           export PREVIEW_URL="$URL"
@@ -165,20 +167,33 @@ jobs:
               await pause(Math.max((attempt + 1) * 1000, Number.isFinite(requestedDelay) ? requestedDelay : 0));
             }
           }
-          const info = JSON.parse(await readPreview('/build-info.json'));
+          const identityBytes = await readPreview('/build-info.json');
+          assert.ok(identityBytes.equals(fs.readFileSync('.vercel/output/static/build-info.json')), 'Preview build identity bytes mismatch');
+          const info = JSON.parse(identityBytes);
           assert.equal(info.commit, process.env.APP_COMMIT);
           assert.equal(info.contentCommit, process.env.CANDIDATE_SHA);
-          const root = '.vercel/output/static/content';
-          const files = fs.readdirSync(root, { recursive: true, withFileTypes: true }).filter(entry => entry.isFile());
+          const root = '.vercel/output/static';
+          const files = fs.readdirSync(root, { recursive: true, withFileTypes: true }).filter(entry => entry.isFile() && !(entry.parentPath === root && entry.name === 'build-info.json'));
           for (let offset = 0; offset < files.length; offset += 20) {
             await Promise.all(files.slice(offset, offset + 20).map(async entry => {
               const local = entry.parentPath + '/' + entry.name;
-              const pathname = '/content/' + local.slice(root.length + 1).split('/').map(encodeURIComponent).join('/');
+              const pathname = '/' + local.slice(root.length + 1).split('/').map(encodeURIComponent).join('/');
               const actualBuffer = await readPreview(pathname);
               const expectedBuffer = fs.readFileSync(local);
               assert.ok(actualBuffer.equals(expectedBuffer), 'Preview content mismatch: ' + pathname);
             }));
           }
+          const catalog = JSON.parse(fs.readFileSync('app/server/generated/content-catalog.json', 'utf8'));
+          const listing = JSON.parse(await readPreview('/api/public?kind=index'));
+          assert.equal(listing.contentCommit, process.env.CANDIDATE_SHA, 'Preview content commit mismatch');
+          const ids = new Set(listing.posts.map(post => post.id));
+          assert.equal(ids.size, catalog.documents.length, 'Preview post count mismatch');
+          assert.ok(catalog.documents.every(entry => ids.has(entry.metadata.id)), 'Preview post IDs mismatch');
+          const first = catalog.documents[0];
+          const query = new URLSearchParams({ kind: 'post', id: first.metadata.id, commit: process.env.CANDIDATE_SHA });
+          const article = JSON.parse(await readPreview('/api/public?' + query));
+          assert.equal(article.id, first.metadata.id);
+          assert.equal(article.revision, first.revision, 'Preview post revision mismatch');
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `Preview: ${url}\n\nApp: ${info.commit}\n\nContent: ${info.contentCommit}\n`);
           NODE
           if [ -n "$CMS_PREVIEW_ALIAS" ]; then
