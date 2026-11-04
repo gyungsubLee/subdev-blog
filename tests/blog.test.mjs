@@ -21,7 +21,7 @@ const base = {
   excerpt: "요약",
 };
 
-function render(posts, hash = "#/", categories = []) {
+function render(posts, hash = "#/", categories = [], management) {
   const previousWindow = globalThis.window;
   globalThis.window = { location: { hash } };
   try {
@@ -29,6 +29,7 @@ function render(posts, hash = "#/", categories = []) {
       React.createElement(Blog, {
         posts,
         categories,
+        management,
         onWrite() {},
         onEdit() {},
       }),
@@ -72,8 +73,30 @@ test("loading article never renders or exports its preview body", () => {
   );
   assert.match(html, /aria-busy="true"/);
   assert.ok(!html.includes("PRIVATE_PREVIEW_MARKER"));
-  assert.match(html, /disabled=""[^>]*>Markdown 내려받기/);
-  assert.match(html, /disabled=""[^>]*>편집하기/);
+  assert.ok(!html.includes("Markdown 내려받기"));
+  assert.ok(!html.includes("편집하기"));
+});
+
+test("article editing requires a ready session and a loaded body", () => {
+  for (const state of [undefined, "signed_out", "checking", "blocked", "ready"]) {
+    for (const bodyLoaded of [false, true]) {
+      const management = state ? {
+        session: { state }, refresh() {}, logout() {},
+      } : undefined;
+      const dom = new JSDOM(render([{ ...base, bodyLoaded }], "#/post/parent", [], management));
+      try {
+        const buttons = [...dom.window.document.querySelectorAll(".article-topline button")];
+        assert.equal(buttons.length, state === "ready" ? 1 : 0, `Edit visibility for ${state}`);
+        if (state === "ready") {
+          assert.equal(buttons[0].textContent.trim(), "편집하기");
+          assert.equal(buttons[0].disabled, !bodyLoaded);
+        }
+        assert.ok(!dom.window.document.querySelector(".article-topline").textContent.includes("Markdown 내려받기"));
+      } finally {
+        dom.window.close();
+      }
+    }
+  }
 });
 
 test("home shows article sections and keeps browser drafts in records", () => {

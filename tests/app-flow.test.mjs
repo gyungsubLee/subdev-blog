@@ -108,16 +108,21 @@ test("App loads summaries then the selected body and handles an invalid index", 
     ]);
     assert.equal(document.querySelector(".article-prose").getAttribute("aria-busy"), "true");
     assert.ok(!document.querySelector(".article-prose").textContent.includes("PREVIEW_ONLY"));
-    assert.ok([...document.querySelectorAll(".article-actions button")].every((button) => button.disabled));
+    assert.ok(document.querySelector(".article-edit") === null);
     await respond("/api/public?kind=post&id=parent&commit=" + "a".repeat(40), {
       ...post, markdown: "# 본문 검사\n\nFULL_BODY", bodyLoaded: true,
     });
     assert.match(document.querySelector(".article-prose").textContent, /FULL_BODY/);
     assert.match(document.querySelector(".breadcrumbs").textContent, /정식 분류/);
     assert.equal(document.querySelector(".article-prose").getAttribute("aria-busy"), "false");
-    const actions = [...document.querySelectorAll(".article-actions button")];
-    assert.equal(actions.find((button) => button.textContent.includes("내려받기")).disabled, false);
-    assert.equal(actions.find((button) => button.textContent.includes("편집하기")).disabled, true);
+    assert.ok(document.querySelector(".article-edit") === null);
+    await respond("/api/session", readySession);
+    const editButton = document.querySelector(".article-edit");
+    assert.ok(editButton !== null, "Verified authentication must reveal article editing");
+    assert.equal(editButton.disabled, false);
+    await act(async () => document.querySelector(".header-logout").click());
+    await respond("/api/logout", {});
+    assert.ok(document.querySelector(".article-edit") === null, "Signing out must hide article editing");
 
     await act(async () => root.unmount());
     dom.window.history.replaceState(null, "", "/#/");
@@ -221,8 +226,16 @@ for (const operation of ["update", "create", "delete"]) {
     const root = createRoot(document.getElementById("root"));
     try {
       await act(async () => root.render(React.createElement(App)));
+      if (operation === "delete") {
+        await act(async () => {
+          const changed = once(dom.window, "hashchange", { signal: AbortSignal.timeout(2000) });
+          dom.window.location.hash = "#/content";
+          await changed;
+        });
+      }
       const edit = operation === "create" ? document.querySelector("button.header-write")
-        : [...document.querySelectorAll(".article-actions button")].find((button) => button.textContent.includes("편집하기"));
+        : operation === "delete" ? document.querySelector(".workspace-table-wrap .row-action")
+        : document.querySelector(".article-topline button");
       assert.ok(edit !== null && edit !== undefined, "An authenticated reader can open the editor");
       await act(async () => edit.click());
       const editorSelector = operation === "create" ? ".editor-page.notebook-writing" : ".managed-editor";
@@ -242,7 +255,7 @@ for (const operation of ["update", "create", "delete"]) {
       const closeSelector = operation === "create" ? ".editor-back" : ".management-toolbar button";
       await act(async () => document.querySelector(closeSelector).click());
       assert.ok(document.querySelector(editorSelector) === null, "Closing returns to the public view");
-      if (operation === "create") {
+      if (operation !== "delete") {
         assert.match(document.querySelector("main").textContent, /저장한 글/);
         await act(async () => {
           const changed = once(dom.window, "hashchange", { signal: AbortSignal.timeout(2000) });

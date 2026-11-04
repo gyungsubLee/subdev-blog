@@ -3,18 +3,9 @@ import Arrow from "../../components/icons/Arrow";
 import { site } from "../../config/site";
 import PostReader from "../../features/post-reader/PostReader";
 import { WORDS_PER_MINUTE } from "../../features/post-reader/config";
-import { downloadFile } from "../../shared/download-file.mjs";
 import type { Post } from "../../shared/post";
 import { formatDate, getBody } from "../../shared/post-content";
 import "./PostPage.css";
-
-function downloadMarkdown(post: Post) {
-  downloadFile(
-    post.title + ".md",
-    post.markdown,
-    "text/markdown;charset=utf-8",
-  );
-}
 
 export default function PostPage({
   post,
@@ -23,15 +14,13 @@ export default function PostPage({
   hash,
   categoryName,
   backHref = HOME_HREF,
-  canEdit = true,
 }: {
   post: Post;
   posts: Post[];
-  onEdit: (post: Post) => void;
+  onEdit?: (post: Post) => void;
   hash: string;
   categoryName?: string;
   backHref?: string;
-  canEdit?: boolean;
 }) {
   const body = getBody(post);
   const ancestors: Post[] = [];
@@ -55,24 +44,16 @@ export default function PostPage({
         <a className="back-link" href={backHref}>
           <Arrow back /> 전체 글
         </a>
-        <div className="article-actions">
+        {onEdit ? (
           <button
-            className="quiet-button"
+            className="outline-button article-edit"
             type="button"
             disabled={post.bodyLoaded === false}
-            onClick={() => downloadMarkdown(post)}
-          >
-            Markdown 내려받기 <span aria-hidden="true">↓</span>
-          </button>
-          <button
-            className="outline-button"
-            type="button"
-            disabled={post.bodyLoaded === false || !canEdit}
             onClick={() => onEdit(post)}
           >
             편집하기
           </button>
-        </div>
+        ) : null}
       </div>
       <header className="article-header">
         <nav className="breadcrumbs" aria-label="페이지 경로">
