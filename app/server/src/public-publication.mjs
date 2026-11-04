@@ -156,7 +156,44 @@ export async function ensurePublicPublication(options) {
   const existing = await findPublicPublication(options);
   if (existing) return verify(existing);
   const files = await generatePublicFiles(options);
-  const tree = await github('/git/trees', { method: 'POST', body: { tree: [...files].map(([path, bytes]) => ({ path, mode: '100644', type: 'blob', content: bytes.toString('utf8') })) } });
+  // GitHub times out when thousands of inline blobs share one tree request.
+  // Upload bounded groups first; publish a ref only after the complete tree exists.
+  const batches = [];
+  let batch = [];
+  let batchBytes = 0;
+  for (const [path, bytes] of files) {
+    if (batch.length && (batch.length >= 200 || batchBytes + bytes.length > 2 * 1024 * 1024)) {
+      batches.push(batch);
+      batch = [];
+      batchBytes = 0;
+    }
+    batch.push({ path, mode: '100644', type: 'blob', content: bytes.toString('utf8') });
+    batchBytes += bytes.length;
+  }
+  batches.push(batch);
+  let cursor = 0;
+  let failure;
+  const uploaded = [];
+  await Promise.all(Array.from({ length: Math.min(4, batches.length) }, async () => {
+    while (cursor < batches.length && !failure) {
+      const entries = batches[cursor++];
+      try {
+        const result = await github('/git/trees', { method: 'POST', body: { tree: entries } });
+        requirePublic(SHA.test(result.sha), 'Invalid uploaded tree');
+        uploaded.push(result);
+      } catch (error) {
+        failure = error;
+      }
+    }
+  }));
+  if (failure) throw failure;
+  const tree = batches.length === 1 ? uploaded[0] : await github('/git/trees', {
+    method: 'POST',
+    body: { tree: [...files].map(([path, bytes]) => ({
+      path, mode: '100644', type: 'blob',
+      sha: createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex'),
+    })) },
+  });
   requirePublic(SHA.test(tree.sha), 'Invalid generated tree');
   const artifact = await github('/git/commits', { method: 'POST', body: { message: 'public-data:' + commit, tree: tree.sha, parents: [] } });
   requirePublic(SHA.test(artifact.sha), 'Invalid generated commit');
