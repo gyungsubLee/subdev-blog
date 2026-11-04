@@ -1,8 +1,20 @@
 :root {
-  --paper: #f5f4ed;
-  --ink: #292820;
-  --muted: #737168;
-  --accent: #c96442;
-  --line: #dcd9cd;
-  --display: Georgia, "Noto Serif KR", "AppleMyungjo", Batang, serif;
+  --paper: #ffffff;
+  --surface: #ffffff;
+  --soft: #f1f1ee;
+  --ink: #161616;
+  --muted: #626262;
+  --accent: #b82927;
+  --accent-hover: #972220;
+  --on-accent: #ffffff;
+  --line: #161616;
+  --line-soft: #d7d7d4;
+  --surface-overlay: #ffffffee;
+  --overlay: #16161680;
+  --row: var(--surface);
+  --radius: 0;
+  --border-strong: 2px solid var(--line);
+  --shadow: 4px 4px 0 var(--ink);
+  --heading-weight: 800;
+  --display: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
 }

@@ -7,14 +7,15 @@
 
 .featured-card {
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: #eeede5;
+  border: var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--soft);
+  box-shadow: var(--shadow);
 }
 
 .featured-card > .post-art {
   height: 292px;
-  background: #d9d9cb;
+  background: var(--soft);
 }
 
 .featured-copy {
@@ -32,14 +33,14 @@
 }
 
 .post-meta > span:first-child {
-  color: #785447;
+  color: var(--accent);
 }
 
 .featured-copy h2 {
   margin-top: 17px;
   font-family: var(--display);
   font-size: clamp(24px, 2.5vw, 32px);
-  font-weight: 500;
+  font-weight: var(--heading-weight);
   letter-spacing: -0.8px;
   line-height: 1.4;
   overflow-wrap: anywhere;
@@ -76,8 +77,10 @@
   grid-template-columns: 1.15fr 1fr;
   min-height: 225px;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  border: var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  background: var(--surface);
 }
 
 .secondary-copy {
@@ -90,7 +93,7 @@
   margin-top: 15px;
   font-family: var(--display);
   font-size: 21px;
-  font-weight: 500;
+  font-weight: var(--heading-weight);
   letter-spacing: -0.4px;
   line-height: 1.5;
   overflow-wrap: anywhere;
@@ -135,14 +138,14 @@
 .post-card > .post-art {
   height: 200px;
   margin-bottom: 23px;
-  border-radius: 7px;
+  border-radius: var(--radius);
 }
 
 .post-card h3 {
   margin-top: 11px;
   font-family: var(--display);
   font-size: 24px;
-  font-weight: 500;
+  font-weight: var(--heading-weight);
   letter-spacing: -0.6px;
   line-height: 1.45;
   overflow-wrap: anywhere;
@@ -180,10 +183,10 @@
 }
 
 .draft-badge {
-  border-radius: 3px;
+  border-radius: var(--radius);
   padding: 1px 6px;
-  color: #8f4e30;
-  background: #ecd9c4;
+  color: var(--accent);
+  background: var(--soft);
   font-size: 10px;
 }
 
@@ -195,7 +198,7 @@
 .empty-results h3 {
   font-family: var(--display);
   font-size: 26px;
-  font-weight: 500;
+  font-weight: var(--heading-weight);
 }
 
 .empty-results p {

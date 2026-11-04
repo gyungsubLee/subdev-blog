@@ -14,14 +14,14 @@
 .blog-intro h1 {
   font-family: var(--display);
   font-size: 48px;
-  font-weight: 500;
+  font-weight: var(--heading-weight);
   letter-spacing: -2px;
   line-height: 1.25;
   word-break: keep-all;
 }
 
 .blog-intro h1 span {
-  color: #858176;
+  color: var(--accent);
 }
 
 .blog-intro > p {
@@ -51,7 +51,7 @@
 .home-section-heading h2 {
   font-family: var(--display);
   font-size: 28px;
-  font-weight: 500;
+  font-weight: var(--heading-weight);
   letter-spacing: -1px;
 }
 
@@ -75,17 +75,20 @@
   flex-direction: column;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 9px;
+  border: var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  background: var(--surface);
 }
 
 .home-article-card > .post-art {
   height: 157px;
   flex-shrink: 0;
+  border-bottom: 1px solid var(--line);
 }
 
 .home-article-card > .post-art-0 {
-  background: #d9dccd;
+  background: var(--soft);
 }
 
 .home-article-copy {
@@ -104,7 +107,7 @@
   margin: 12px 0 10px;
   font-family: var(--display);
   font-size: 22px;
-  font-weight: 500;
+  font-weight: var(--heading-weight);
   letter-spacing: -0.6px;
   line-height: 1.5;
   overflow-wrap: anywhere;
@@ -149,7 +152,7 @@
 .home-sample-badge {
   padding: 5px 8px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--radius);
   color: var(--muted);
   font-size: 10px;
   white-space: nowrap;
@@ -189,7 +192,7 @@
 .home-popular-copy h3 {
   font-family: var(--display);
   font-size: 18px;
-  font-weight: 500;
+  font-weight: var(--heading-weight);
   letter-spacing: -0.3px;
   line-height: 1.6;
   overflow-wrap: anywhere;
@@ -215,8 +218,8 @@
   gap: 15px;
   margin-top: 29px;
   padding: 20px;
-  border-radius: 7px;
-  background: #eae7dc;
+  border-radius: var(--radius);
+  background: var(--soft);
 }
 
 .home-archive-link strong {
@@ -235,7 +238,7 @@
 .home-empty {
   padding: 50px 20px;
   border: 1px solid var(--line);
-  border-radius: 9px;
+  border-radius: var(--radius);
   color: var(--muted);
   font-size: 14px;
   line-height: 1.8;

@@ -8,7 +8,7 @@
 
 .category-tabs button {
   border: 1px solid transparent;
-  border-radius: 5px;
+  border-radius: var(--radius);
   padding: 9px 15px;
   color: var(--muted);
   background: transparent;
@@ -18,13 +18,13 @@
 }
 
 .category-tabs button:hover {
-  background: #eae8de;
+  background: var(--soft);
 }
 
 .category-tabs button[aria-pressed="true"] {
-  border-color: #bdb8ab;
+  border-color: var(--line);
   color: var(--ink);
-  background: #ebe8dd;
+  background: var(--soft);
 }
 
 @media (max-width: 720px) {

@@ -1,9 +1,6 @@
 .managed-writing {
-  --line: #e5e2d8;
-  --ink: #292820;
-  --muted: #706b61;
   --tag-color: var(--accent);
-  --tag-background: color-mix(in srgb, var(--accent) 10%, var(--paper));
+  --tag-background: var(--soft);
   font-family:
     Inter,
     -apple-system,
@@ -35,7 +32,7 @@
 }
 
 .managed-writing .mock-file-menu summary:focus-visible {
-  outline: 2px solid #bd5b3e;
+  outline: 2px solid var(--accent);
   outline-offset: 4px;
 }
 
@@ -49,22 +46,22 @@
   min-width: 170px;
   padding: 6px;
   border: 1px solid var(--editor-line);
-  border-radius: 6px;
+  border-radius: var(--radius);
   background: var(--editor-paper);
-  box-shadow: 0 8px 24px #29282018;
+  box-shadow: var(--shadow);
 }
 
 .managed-writing .mock-file-actions button,
 .managed-writing .mock-file-actions .editor-file {
   padding: 10px 12px;
-  border-radius: 3px;
+  border-radius: var(--radius);
   font-size: 12px;
   text-align: left;
 }
 
 .managed-writing .mock-file-actions button:hover,
 .managed-writing .mock-file-actions .editor-file:hover {
-  background: #eeece5;
+  background: var(--soft);
 }
 
 .managed-writing .editor-shortcuts {
@@ -83,7 +80,7 @@
   box-sizing: border-box;
   padding: 8px 24px;
   border-bottom: 1px solid var(--editor-line);
-  background: #faf9f5ee;
+  background: var(--surface-overlay);
   backdrop-filter: blur(8px);
 }
 
@@ -96,7 +93,7 @@
   min-height: 42px;
   padding: 11px 17px;
   border: 1px solid transparent;
-  border-radius: 5px;
+  border-radius: var(--radius);
   font-size: 13px;
   font-weight: 500;
   color: var(--ink);
@@ -122,20 +119,20 @@
 }
 
 .managed-writing .mock-publication-header .outline-button {
-  border-color: #bbb6a6;
+  border-color: var(--line);
 }
 
 .managed-writing .mock-publication-header .outline-button:hover {
-  background: #eae7dd;
+  background: var(--soft);
 }
 
 .managed-writing .mock-publication-header .accent-button {
   background: var(--accent);
-  color: #fffdf6;
+  color: var(--on-accent);
 }
 
 .managed-writing .mock-publication-header .accent-button:hover {
-  background: #48473c;
+  background: var(--accent-hover);
 }
 
 .managed-writing .mock-writing-split {
@@ -173,9 +170,9 @@
   gap: 12px;
   max-width: 240px;
   padding: 7px 10px;
-  border-radius: 3px;
-  background: #efede5;
-  color: #5a584e;
+  border-radius: var(--radius);
+  background: var(--soft);
+  color: var(--ink);
 }
 
 .managed-writing .mock-tag-field {
@@ -228,7 +225,7 @@
   align-items: center;
   gap: 10px;
   padding: 7px 15px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   background: var(--tag-background);
   color: var(--tag-color);
   font-size: 14px;
@@ -251,7 +248,7 @@
   height: 20px;
   padding: 0;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius);
   background: var(--paper);
   color: var(--accent);
   font-size: 16px;
@@ -275,7 +272,7 @@
   min-width: 0;
   overflow: auto;
   border-left: 1px solid var(--editor-line);
-  background: #e8e5dc;
+  background: var(--soft);
 }
 
 .managed-writing .mock-preview-controls {
@@ -288,9 +285,9 @@
   gap: 4px;
   margin: 12px 12px 0 auto;
   padding: 4px;
-  border: 1px solid #d8d4c8;
-  border-radius: 6px;
-  background: #faf9f5e6;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-overlay);
 }
 
 .managed-writing .mock-preview-controls button {
@@ -299,14 +296,14 @@
   width: 30px;
   height: 30px;
   padding: 6px;
-  border-radius: 4px;
-  color: #706b61;
+  border-radius: var(--radius);
+  color: var(--muted);
 }
 
 .managed-writing .mock-preview-controls button[aria-pressed="true"] {
-  color: #292820;
-  background: #fffdf8;
-  box-shadow: 0 1px 3px #29282015;
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: var(--shadow);
 }
 
 .managed-writing .mock-preview-sheet {
@@ -326,14 +323,15 @@
 }
 
 .managed-writing .mock-preview-category {
-  color: #9c644e;
+  color: var(--accent);
   font-size: 11px;
   margin: 0 0 18px;
 }
 
 .managed-writing .mock-preview-sheet > h1 {
   margin: 0 0 20px;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--display);
+  font-weight: var(--heading-weight);
   font-size: 30px;
   line-height: 1.35;
   overflow-wrap: anywhere;
@@ -349,14 +347,14 @@
 }
 
 .managed-writing .mock-preview-byline {
-  color: #706b61;
+  color: var(--muted);
   font-size: 11px;
   margin: 0 0 22px;
 }
 
 .managed-writing .mock-preview-divider {
   border: 0;
-  border-top: 1px solid #e5e2d8;
+  border-top: 1px solid var(--line);
   margin: 0 0 30px;
 }
 
@@ -394,13 +392,31 @@
   display: inline-block;
   white-space: nowrap;
   padding: 4px 8px;
-  background: #e7e6de;
-  color: #696559;
-  border-radius: 4px;
+  background: var(--soft);
+  color: var(--muted);
+  border-radius: var(--radius);
   font-size: 10px;
 }
 
 .managed-writing .status-published {
-  background: #e1e7dc;
-  color: #58694f;
+  background: var(--soft);
+  color: var(--accent);
+}
+
+@media (max-width: 680px) {
+  .managed-writing .editor-header {
+    height: auto;
+    min-height: 60px;
+    flex-wrap: wrap;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    row-gap: 12px;
+  }
+
+  .managed-writing .mock-header-actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-end;
+    gap: 18px;
+  }
 }

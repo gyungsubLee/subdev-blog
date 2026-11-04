@@ -2,7 +2,7 @@
   position: relative;
   overflow: hidden;
   min-width: 0;
-  background: #e6e4d8;
+  background: var(--soft);
 }
 
 .post-art img {
@@ -25,29 +25,29 @@
 }
 
 .art-page {
-  fill: #f4f1e5;
-  stroke: #727568;
+  fill: var(--soft);
+  stroke: var(--accent);
   stroke-width: 1.4px;
 }
 
 .art-branch {
-  stroke: #7f8573;
+  stroke: var(--accent);
   stroke-width: 1.5px;
 }
 
 .art-rule {
-  stroke: #a7a89c;
+  stroke: var(--accent);
   stroke-width: 2px;
   stroke-linecap: round;
 }
 
 .art-dot,
 .art-spark {
-  fill: #bd6247;
+  fill: var(--accent);
 }
 
 .post-art-1 {
-  background: #e4d4c4;
+  background: var(--soft);
 }
 
 .post-art-1 .notebook-art {
@@ -56,11 +56,11 @@
 
 .post-art-1 .art-branch,
 .post-art-1 .art-page {
-  stroke: #96755e;
+  stroke: var(--accent);
 }
 
 .post-art-2 {
-  background: #d9dee3;
+  background: var(--soft);
 }
 
 .post-art-2 .notebook-art {
@@ -69,5 +69,5 @@
 
 .post-art-2 .art-branch,
 .post-art-2 .art-page {
-  stroke: #6f7b85;
+  stroke: var(--accent);
 }

@@ -29,7 +29,7 @@
   width: 100%;
   padding: 0.7rem;
   border: 1px solid currentColor;
-  border-radius: 4px;
+  border-radius: var(--radius);
   color: inherit;
   background: transparent;
   font: inherit;
@@ -44,7 +44,7 @@
 .publish-status {
   margin-block: 1.5rem;
   padding: 1.25rem;
-  border: 1px solid #d7d2c8;
+  border: 1px solid var(--line);
 }
 
 .publish-status a {

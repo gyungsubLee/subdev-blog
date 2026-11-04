@@ -16,15 +16,16 @@
   margin: auto;
   box-sizing: border-box;
   padding: 24px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #faf9f5;
+  border: var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--paper);
   color: var(--ink);
   font: inherit;
+  box-shadow: var(--shadow);
 }
 
 .category-selection-dialog::backdrop {
-  background: #29282066;
+  background: var(--overlay);
 }
 
 .category-selection-dialog h2 {
@@ -33,10 +34,9 @@
 }
 
 .category-selection-dialog .category-selection-tree {
-  --line: #dcd9cd;
-  --row: #fcfbf7;
+  --row: var(--paper);
   padding: 9px;
-  background: #eae7de;
+  background: var(--soft);
   max-height: 50vh;
   overflow: auto;
 }
@@ -55,13 +55,13 @@
 
 .category-selection-dialog .category-selection-tree .category-row.selected {
   z-index: 1;
-  border-color: #b6a394;
-  background: #f5eee6;
+  border-color: var(--accent);
+  background: var(--soft);
 }
 
 .category-selection-dialog .category-selection-tree .category-row:hover {
   z-index: 2;
-  border-color: #b0a99b;
+  border-color: var(--line);
 }
 
 .category-selection-dialog .category-selection-tree .expander {
@@ -74,8 +74,8 @@
   border: 0;
   border-right: 1px solid var(--line);
   border-radius: 0;
-  background: #f8f6f0;
-  color: #999489;
+  background: var(--soft);
+  color: var(--muted);
 }
 
 .category-selection-dialog .category-selection-tree .expander:disabled {
@@ -87,7 +87,7 @@
   width: 35px;
   flex-shrink: 0;
   padding: 4px 0;
-  color: #a39e91;
+  color: var(--muted);
   font-size: 23px;
   text-align: center;
 }
@@ -106,7 +106,7 @@
 
 .category-selection-dialog .category-selection-tree .inline-count {
   margin-left: 6px;
-  color: #969084;
+  color: var(--muted);
   font-size: 12px;
   white-space: nowrap;
 }
@@ -120,11 +120,11 @@
 
 .category-selection-dialog .category-selection-actions button {
   padding: 8px 12px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   font-size: 13px;
 }
 
 .category-selection-dialog .category-selection-actions button[type="submit"] {
-  background: var(--ink);
-  color: #faf9f5;
+  background: var(--accent);
+  color: var(--on-accent);
 }

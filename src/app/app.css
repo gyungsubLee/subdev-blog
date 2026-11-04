@@ -7,7 +7,7 @@
 
 .app-warning {
   padding: 14px 4vw;
-  background: #f4e4d8;
+  background: var(--soft);
   font-size: 13px;
-  color: #763d29;
+  color: var(--accent);
 }

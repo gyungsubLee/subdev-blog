@@ -4,9 +4,9 @@
   top: -80px;
   left: 16px;
   padding: 12px 20px;
-  border-radius: 5px;
-  color: white !important;
-  background: var(--ink);
+  border-radius: var(--radius);
+  color: var(--on-accent) !important;
+  background: var(--accent);
 }
 
 .skip-link:focus {
@@ -33,7 +33,7 @@
   font-family: var(--display);
   font-size: 27px;
   letter-spacing: -1px;
-  font-weight: 600;
+  font-weight: var(--heading-weight);
 }
 
 .wordmark svg {
@@ -83,7 +83,7 @@
   justify-content: center;
   gap: 18px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius);
   padding: 12px 20px;
   font-size: 14px;
   font-weight: 500;
@@ -94,12 +94,12 @@
 }
 
 .dark-button {
-  color: #fffdf6;
-  background: var(--ink);
+  color: var(--on-accent);
+  background: var(--accent);
 }
 
 .dark-button:hover {
-  background: #47463d;
+  background: var(--accent-hover);
 }
 
 .header-actions {
@@ -114,22 +114,22 @@
 }
 
 .header-logout {
-  background: #b91c1c;
+  background: var(--accent);
 }
 
 .header-logout:hover {
-  background: #991b1b;
+  background: var(--accent-hover);
 }
 
 .outline-button {
-  border-color: #aca99e;
+  border-color: var(--line);
   color: var(--ink);
   background: transparent;
 }
 
 .outline-button:hover {
   border-color: var(--ink);
-  background: #eeece3;
+  background: var(--soft);
 }
 
 .quiet-button {
@@ -139,7 +139,7 @@
 
 .quiet-button:hover {
   color: var(--ink);
-  background: #eeece3;
+  background: var(--soft);
 }
 
 .blog-shell main {
@@ -170,7 +170,7 @@
 .footer-wordmark {
   font-family: var(--display);
   font-size: 23px;
-  font-weight: 500;
+  font-weight: var(--heading-weight);
   letter-spacing: -0.7px;
 }
 

@@ -1,5 +1,6 @@
 import { CATEGORIES_HREF, CONTENT_HREF, RECORDS_HREF } from "../../shared/routes";
 import Wordmark from "./Wordmark";
+import SettingsButton from "../../features/theme-settings/SettingsButton";
 import "./layout.css";
 import type { Management } from "../../features/content-management/useManagement";
 
@@ -88,6 +89,7 @@ export default function SiteHeader({
             로그아웃
           </button>
         ) : null}
+        <SettingsButton />
       </div>
     </header>
   );

@@ -2,6 +2,7 @@ import { memo, useRef, useState } from "react";
 import { site } from "../../config/site";
 import { editorConfig } from "../post-editor/config";
 import EditorShortcuts from "../post-editor/EditorShortcuts";
+import SettingsButton from "../theme-settings/SettingsButton";
 import MarkdownContent from "../post-reader/MarkdownContent";
 import type { Post } from "../../shared/post";
 import "../post-reader/post-reader.css";
@@ -54,6 +55,7 @@ export function ManagedEditorToolbar({
           {site.name} <span>/</span> {title || editorConfig.untitledTitle}
         </span>
         <div className="mock-header-actions">
+          <SettingsButton />
           <details ref={fileMenu} className="mock-file-menu">
             <summary>저장·내보내기</summary>
             <div

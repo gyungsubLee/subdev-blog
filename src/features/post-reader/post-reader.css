@@ -63,7 +63,7 @@
 
 .article-prose {
   min-width: 0;
-  color: #292820;
+  color: var(--ink);
   font-family: Inter,
     "Inter fallback",
     -apple-system,
@@ -107,7 +107,7 @@
   padding: 20px 0 3px;
   color: var(--ink);
   font-family: inherit;
-  font-weight: 700;
+  font-weight: var(--heading-weight);
   line-height: 1.5;
   scroll-margin-top: 35px;
 }
@@ -139,7 +139,7 @@
   max-width: 100%;
   height: auto;
   margin: 30px auto;
-  border-radius: 5px;
+  border-radius: var(--radius);
 }
 
 .article-prose ul,
@@ -172,9 +172,9 @@
 
 .article-prose blockquote {
   margin: 3px 0;
-  border-left: 2px solid #7d797a;
+  border-left: 3px solid var(--accent);
   padding: 0 0 0 16px;
-  color: #7d797a;
+  color: var(--muted);
 }
 
 .article-prose .article-toc {
@@ -204,9 +204,9 @@
   overflow: hidden;
   margin-left: 0;
   margin-right: 0;
-  border: 1px solid #363a34;
-  border-radius: 7px;
-  background: #292d27;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--soft);
 }
 
 .article-code figcaption {
@@ -214,9 +214,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  border-bottom: 1px solid #45483f;
+  border-bottom: 1px solid var(--line-soft);
   padding: 7px 15px;
-  color: #c1c5b7;
+  color: var(--muted);
   font-family: "SFMono-Regular", Consolas, monospace;
   font-size: 11px;
   line-height: 1.5;
@@ -224,23 +224,23 @@
 
 .article-code figcaption button {
   border: 1px solid transparent;
-  border-radius: 3px;
+  border-radius: var(--radius);
   padding: 4px 7px;
-  color: #d7d9cd;
+  color: var(--ink);
   background: transparent;
   font-family: inherit;
   font-size: 11px;
 }
 
 .article-code figcaption button:hover {
-  border-color: #686e60;
+  border-color: var(--accent);
 }
 
 .article-code pre {
   margin: 0;
   padding: 20px;
   overflow-x: auto;
-  color: #e5e8db;
+  color: var(--ink);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 12px;
   line-height: 1.8;
@@ -258,7 +258,7 @@
 
 .article-prose hr {
   border: 0;
-  border-top: 1px solid #7d797a;
+  border-top: 1px solid var(--muted);
   margin: 11px 0;
 }
 
@@ -276,14 +276,14 @@
 .article-prose th,
 .article-prose td {
   min-width: 110px;
-  border: 1px solid #d5d1c3;
+  border: 1px solid var(--line);
   padding: 10px 14px;
   text-align: left;
   vertical-align: top;
 }
 
 .article-prose th {
-  background: #eae7dd;
+  background: var(--soft);
 }
 
 .article-prose details {
@@ -313,7 +313,7 @@
     align-self: stretch;
     padding: 18px;
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: var(--radius);
   }
 
   .article-sidebar nav {

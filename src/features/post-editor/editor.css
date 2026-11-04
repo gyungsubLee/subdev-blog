@@ -1,11 +1,11 @@
 .editor-page {
-  --editor-paper: #faf9f5;
-  --editor-ink: #292820;
-  --editor-muted: #706b61;
-  --editor-line: #e5e2d8;
-  --editor-code-background: #efede6;
-  --editor-code-line: #e2ded3;
-  --editor-code-muted: #686154;
+  --editor-paper: var(--paper);
+  --editor-ink: var(--ink);
+  --editor-muted: var(--muted);
+  --editor-line: var(--line);
+  --editor-code-background: var(--syntax-paper, var(--soft));
+  --editor-code-line: var(--syntax-line, var(--line-soft));
+  --editor-code-muted: var(--syntax-muted, var(--muted));
   min-height: 100vh;
   background: var(--editor-paper);
   color: var(--editor-ink);
@@ -23,7 +23,7 @@
 .editor-page button:focus-visible,
 .editor-file:focus-within,
 .editor-page input:focus-visible {
-  outline: 2px solid #bd5b3e;
+  outline: 2px solid var(--accent);
   outline-offset: 4px;
 }
 
@@ -52,7 +52,7 @@
 
 .editor-breadcrumb span {
   margin: 0 12px;
-  color: #c3bfb3;
+  color: var(--line-soft);
 }
 
 .editor-help {
@@ -70,7 +70,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  background: #faf9f5ee;
+  background: var(--surface-overlay);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--editor-line);
   font-size: 12px;
@@ -84,23 +84,23 @@
 .editor-actions button,
 .editor-file {
   padding: 8px 10px;
-  border-radius: 5px;
+  border-radius: var(--radius);
   white-space: nowrap;
 }
 
 .editor-actions button:hover,
 .editor-file:hover {
-  background: #eeece5;
+  background: var(--soft);
 }
 
 .editor-actions .editor-save {
-  background: var(--editor-ink);
-  color: var(--editor-paper);
+  background: var(--accent);
+  color: var(--on-accent);
   padding: 10px 16px;
 }
 
 .editor-actions .editor-save:hover {
-  background: #4a473e;
+  background: var(--accent-hover);
 }
 
 .editor-file input {
@@ -120,7 +120,7 @@
 .editor-eyebrow {
   font-size: 11px;
   letter-spacing: 0.16em;
-  color: #9c644e;
+  color: var(--accent);
   margin-bottom: 24px;
 }
 
@@ -135,11 +135,11 @@
 .editor-category input {
   width: 160px;
   border: 0;
-  background: #efede5;
-  border-radius: 3px;
+  background: var(--soft);
+  border-radius: var(--radius);
   padding: 7px 10px;
   font: inherit;
-  color: #5a584e;
+  color: var(--ink);
 }
 
 .editor-title {
@@ -148,16 +148,16 @@
   background: transparent;
   border: 0;
   outline: none;
-  font-family: Georgia, "Noto Serif KR", serif;
+  font-family: var(--display);
   font-size: clamp(32px, 5vw, 50px);
-  font-weight: 500;
+  font-weight: var(--heading-weight);
   line-height: 1.4;
   color: var(--editor-ink);
   padding: 24px 0 8px;
 }
 
 .editor-title::placeholder {
-  color: #77756c;
+  color: var(--muted);
 }
 
 .editor-tip {
@@ -171,9 +171,27 @@
   margin: 0 -54px;
 }
 
-.editor-canvas .bn-container {
-  --bn-colors-editor-background: var(--editor-paper);
-  --bn-colors-editor-text: var(--editor-ink);
+.bn-root[data-color-scheme] {
+  --bn-colors-editor-background: var(--paper);
+  --bn-colors-editor-text: var(--ink);
+  --bn-colors-menu-background: var(--surface);
+  --bn-colors-menu-text: var(--ink);
+  --bn-colors-tooltip-background: var(--ink);
+  --bn-colors-tooltip-text: var(--surface);
+  --bn-colors-hovered-background: var(--soft);
+  --bn-colors-hovered-text: var(--ink);
+  --bn-colors-selected-background: var(--accent);
+  --bn-colors-selected-text: var(--on-accent);
+  --bn-colors-disabled-background: var(--soft);
+  --bn-colors-disabled-text: var(--muted);
+  --bn-colors-border: var(--line);
+  --bn-border-radius-small: var(--radius);
+  --bn-border-radius-medium: var(--radius);
+  --bn-border-radius-large: var(--radius);
+  --mantine-radius-default: var(--radius);
+  --popover-radius: var(--radius);
+  --bn-shadow-light: var(--shadow);
+  --bn-shadow-medium: var(--shadow);
   font-family: Inter,
     -apple-system,
     BlinkMacSystemFont,
@@ -203,8 +221,8 @@
 .editor-error {
   padding: 12px 4vw;
   margin: 0;
-  background: #f8e8e0;
-  color: #8a3520;
+  background: var(--soft);
+  color: var(--accent);
   font-size: 13px;
 }
 
@@ -215,10 +233,10 @@
   z-index: 40;
   width: min(440px, 92vw);
   padding: 25px;
-  background: #fffefb;
-  border: 1px solid #ddd8ca;
-  border-radius: 12px;
-  box-shadow: 0 16px 70px #2928201a;
+  background: var(--paper);
+  border: var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
   font-size: 12px;
 }
 
@@ -247,17 +265,19 @@
 
 .editor-shortcuts dd {
   margin: 0;
-  color: #747168;
+  color: var(--muted);
 }
 
 .editor-shortcuts a {
-  color: #9b5139;
+  color: var(--accent);
 }
 
 .notion-code {
+  color-scheme: light;
+  color: var(--syntax-ink, var(--ink));
   width: 100%;
   background: var(--editor-code-background);
-  border-radius: 6px;
+  border-radius: var(--radius);
   overflow: hidden;
 }
 
@@ -288,9 +308,9 @@
 }
 
 .notion-code-tools button[aria-pressed="true"] {
-  color: #a75236;
-  background: #e1d9c9;
-  border-radius: 3px;
+  color: var(--accent);
+  background: var(--soft);
+  border-radius: var(--radius);
 }
 
 .notion-code pre {
@@ -370,10 +390,10 @@
   max-width: 240px;
   padding: 7px 10px;
   border: 0;
-  border-radius: 3px;
-  background: #efede5;
+  border-radius: var(--radius);
+  background: var(--soft);
   font: inherit;
-  color: #5a584e;
+  color: var(--ink);
 }
 
 .editor-page .publish-status {
