@@ -17,6 +17,7 @@ export async function loadComponent(entry) {
       {
         name: "omit-test-css",
         setup(api) {
+          api.onResolve({ filter: /sync-store\.mjs$/ }, () => ({ path: resolve("tests/support/memory-sync-store.mjs") }));
           api.onResolve({ filter: /\.css$/ }, (args) => ({
             path: args.path,
             namespace: "empty-css",

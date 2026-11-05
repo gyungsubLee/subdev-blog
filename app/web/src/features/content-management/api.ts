@@ -1,9 +1,17 @@
 export async function requestApi<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(path, { credentials: "same-origin", ...options });
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch (cause) {
+    // Preserve access-denial status even when an intermediary returns HTML.
+    throw Object.assign(new Error("요청을 완료하지 못했습니다. 다시 확인하십시오.", { cause }), {
+      status: response.ok ? 502 : response.status,
+    });
+  }
   if (!response.ok) {
     throw Object.assign(
-      new Error(typeof data.error === "string" ? data.error : "요청을 완료하지 못했습니다. 다시 확인하십시오."),
+      new Error(typeof data?.error === "string" ? data.error : "요청을 완료하지 못했습니다. 다시 확인하십시오."),
       { status: response.status },
     );
   }
@@ -18,7 +26,7 @@ export function sendApi<T>(
 ): Promise<T> {
   return requestApi<T>(path, {
     method: "POST",
-    signal,
+    signal: signal ?? (path === "/api/content" ? AbortSignal.timeout(300000) : undefined),
     headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken },
     body: JSON.stringify(value),
   });

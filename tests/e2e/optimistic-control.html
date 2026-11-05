@@ -1,0 +1,118 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Durable optimistic GitHub measurement</title>
+<h1>Durable optimistic GitHub measurement</h1>
+<p>Production IndexedDB queue and background modules; real OAuth, CSRF and GitHub. Disposable post only.</p>
+<a href="/api/auth/github">Refresh GitHub login</a>
+<button id="session">Check session</button>
+<button id="create" disabled>Create disposable post</button>
+<button id="update" disabled>Save next title</button>
+<button id="delete" disabled>Delete disposable post</button>
+<button id="public" disabled>Check publication</button>
+<p id="local" role="status">No local save yet.</p>
+<pre id="status">Check session first.</pre>
+<script type="module">
+import {startContentSync,stopContentSync,enqueueContentSync,overlayContent,syncScope,SYNC_EVENT} from '/app/web/src/features/content-management/background-sync.mjs';
+import {syncStore} from '/app/web/src/features/content-management/sync-store.mjs';
+import {readPublicCache,writePublicCache} from '/app/web/src/site/public-cache.ts';
+const status=document.querySelector('#status'),local=document.querySelector('#local');
+let session,source,index,busy=false,activeSample;
+let id=sessionStorage.getItem('optimistic-measurement-id');
+let sample=Number(sessionStorage.getItem('optimistic-measurement-sample')??0);
+const prefix='Optimistic workflow measurement 20261105';
+const events=[];
+const buttons=[...document.querySelectorAll('button')];
+const emit=async event=>{events.push(event);await fetch('/__measure/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(event)});};
+async function api(path,input){
+  const response=await fetch('/api/'+path,{method:input?'POST':'GET',headers:input?{'Content-Type':'application/json','x-csrf-token':session.csrfToken}:{},body:input?JSON.stringify(input):undefined,signal:AbortSignal.timeout(120000)});
+  const data=await response.json();if(!response.ok)throw Object.assign(Error(`HTTP ${response.status}: ${data.error}`),{status:response.status});return data;
+}
+const paint=()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+const hex=bytes=>[...new Uint8Array(bytes)].map(byte=>byte.toString(16).padStart(2,'0')).join('');
+window.addEventListener(SYNC_EVENT,event=>{
+  const detail=event.detail;
+  if(activeSample&&detail.state==='queued'&&detail.item&&detail.item.target===id)activeSample.durableNotificationMs=performance.now()-activeSample.started;
+  if(activeSample&&detail.state==='sending')activeSample.sendingMs=performance.now()-activeSample.started;
+  if(detail.error)status.textContent='Background error: '+detail.error.message;
+});
+function enable(){
+  document.querySelector('#session').disabled=busy;
+  document.querySelector('#create').disabled=busy||!session||Boolean(id);
+  document.querySelector('#update').disabled=busy||!session||!source;
+  document.querySelector('#delete').disabled=busy||!session||!source;
+  document.querySelector('#public').disabled=busy||!session||!sessionStorage.getItem('optimistic-last-result');
+}
+async function refreshSource(){if(id)source=await api('content?kind=post&id='+id);}
+async function checkPublic(){
+  const saved=JSON.parse(sessionStorage.getItem('optimistic-last-result')??'null');if(!saved)return;
+  const publication=await api('publish?'+new URLSearchParams({requestId:saved.requestId,candidateCommit:saved.candidateCommit}));
+  index=await api('public?kind=index');
+  const actual=index.posts.find(post=>post.id===saved.id);
+  const expected=saved.action==='delete'?!actual:actual?.title===saved.title;
+  const event={event:'publication-observed',at:Date.now(),action:saved.action,sample:saved.sample,id:saved.id,sourceCommit:saved.contentCommit,publicCommit:index.contentCommit,state:publication.state,title:actual?.title,expected,elapsedSinceClickMs:Date.now()-saved.clickAt};
+  await emit(event);status.textContent=JSON.stringify(event,null,2);return event;
+}
+async function run(action){
+  if(busy)return;const actionStarted=performance.now(),actionClickAt=Date.now();busy=true;enable();
+  try{
+    if(action==='session'){
+      const value=await api('session');if(value.state!=='ready')throw Error('Real OAuth session is '+value.state);
+      session=value;startContentSync(session);index=await api('public?kind=index');await writePublicCache('/api/public?kind=index',index);if(id)await refreshSource();
+      const restored=await overlayContent(index);
+      const queue=await syncStore.read(syncScope(session));
+      const restoredTitle=id?restored.posts.find(post=>post.id===id)?.title:undefined;
+      if(restoredTitle)local.textContent=restoredTitle+' — recovered from production durable queue/cache';
+      const event={event:'session-recovery',session:'ready',posts:index.posts.length,publicCommit:index.contentCommit,sourceCommit:restored.sourceCommit,id,sample,restoredTitle,pending:queue.pending.length,active:Boolean(queue.active),history:queue.history.length};
+      status.textContent=JSON.stringify(event,null,2);await emit(event);
+    }else if(action==='public'){await checkPublic();}
+    else if(action==='delete'){
+      await refreshSource();const clickAt=Date.now(),started=performance.now();
+      const saved=await api('content',{requestId:crypto.randomUUID(),baseCommit:source.contentCommit,operation:{type:'post.delete',id,baseRevision:source.revision,baseEditorRevision:source.editorRevision}});
+      const event={event:'source-saved',action,sample,id,clickAt,sourceMs:performance.now()-started,...saved};
+      // Keep only non-sensitive identifiers/timing, never session or authored payloads.
+      sessionStorage.setItem('optimistic-last-result',JSON.stringify({action,sample,id,clickAt,...saved}));await emit(event);
+      local.textContent='Disposable source deleted; workflow publication pending.';status.textContent=JSON.stringify(event,null,2);
+      localStorage.removeItem('optimistic-measurement:'+id);id=null;source=null;sample=0;sessionStorage.removeItem('optimistic-measurement-id');sessionStorage.removeItem('optimistic-measurement-sample');
+    }else{
+      let operation;
+      if(action==='create'){
+        if(id)throw Error('Disposable post already exists');
+        id=crypto.randomUUID();sessionStorage.setItem('optimistic-measurement-id',id);
+        const categories=await api('content?kind=categories');
+        const markdown='Disposable optimistic workflow measurement.\n';
+        const markdownHash=hex(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(markdown)));
+        operation={type:'post.create',document:{metadata:{schema_version:1,id,title:`${prefix} ${id}`,parent_id:null,created:'2026-11-05',updated:'2026-11-05'},markdown},editor:{schemaVersion:1,documentId:id,markdownHash,blocks:[{type:'paragraph',content:[{type:'text',text:'Disposable optimistic workflow measurement.',styles:{}}]}]}};
+        source={contentCommit:categories.contentCommit,categories:categories.categories};
+      }else{
+        operation={type:'post.update',id,baseRevision:source.revision,baseEditorRevision:source.editorRevision,changes:{title:`${prefix} ${id} sample ${++sample}`,tags:source.document.metadata.tags??[],...(source.document.metadata.category_id?{category_id:source.document.metadata.category_id}:{})},markdown:source.document.markdown,assets:[],...(source.editor?{editor:source.editor}:{})};
+      }
+      const title=operation.document?.metadata.title??operation.changes.title;
+      const draftKey='optimistic-measurement:'+id,clientRequestId=crypto.randomUUID();
+      localStorage.setItem(draftKey,JSON.stringify({requestId:clientRequestId,sourceDocument:operation.type==='post.create'?undefined:source}));
+      activeSample={action,sample,id,title,clickAt:actionClickAt,started:actionStarted};
+      const queued=await enqueueContentSync({baseCommit:source.contentCommit,operation},session,draftKey,clientRequestId);
+      activeSample.enqueueMs=performance.now()-activeSample.started;
+      const state=await syncStore.read(syncScope(session));
+      const durable=[...state.pending,...(state.active?.items??[])].some(item=>item.target===id&&item.version===queued.version);
+      if(!durable)throw Error('Independent IndexedDB read did not find saved version');
+      activeSample.independentDurableReadMs=performance.now()-activeSample.started;
+      const overlaid=await overlayContent(await readPublicCache('/api/public?kind=index'));
+      if(overlaid.posts.find(post=>post.id===id)?.title!==title)throw Error('Production optimistic overlay title differs');
+      local.textContent=title+' — device saved, GitHub pending';await paint();
+      activeSample.uiPaintMs=performance.now()-activeSample.started;
+      await emit({event:'device-saved',...activeSample,started:undefined,durable,queueVersion:queued.version,queueBytes:new TextEncoder().encode(JSON.stringify(state)).length});
+      const saved=await queued.completion;
+      const event={event:'source-saved',...activeSample,started:undefined,sourceMs:performance.now()-activeSample.started,state:saved.state,requestId:saved.requestId,contentCommit:saved.contentCommit,candidateCommit:saved.candidateCommit};
+      event.remoteExcludingDebounceMs=event.sourceMs-(event.sendingMs??5000);
+      sessionStorage.setItem('optimistic-last-result',JSON.stringify({...event,action,sample,id,title}));sessionStorage.setItem('optimistic-measurement-sample',String(sample));await emit(event);
+      local.textContent=title+' — source saved, publication '+saved.state;
+      status.textContent=JSON.stringify(event,null,2);activeSample=null;
+      // Source preparation for the next click is deliberately outside the measured save interval.
+      await refreshSource();
+    }
+  }catch(error){status.textContent=action+': '+error.message;await emit({event:'measurement-error',action,message:error.message});}
+  finally{busy=false;enable();}
+}
+for(const button of buttons)button.addEventListener('click',()=>run(button.id));
+window.addEventListener('pagehide',stopContentSync);
+</script>

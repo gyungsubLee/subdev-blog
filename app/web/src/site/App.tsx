@@ -12,7 +12,7 @@ const ManagedPostEditor = lazy(() => import("../features/content-management/Mana
 
 export default function App() {
   const { hash, postId } = useHashRoute();
-  const { posts, categories, contentCommit, drafts, error, loaded, reload } = usePosts(postId);
+  const { posts, categories, sourceCommit, drafts, error, loaded, reload } = usePosts(postId);
   const [editing, setEditing] = useState<Post | null | undefined>(undefined);
   const [pendingCategories, setPendingCategories] = useState<PublicCategory[]>([]);
   const [draftVersion, setDraftVersion] = useState(0);
@@ -50,7 +50,7 @@ export default function App() {
             posts={posts}
             newPostContext={{
               categories: [...categories, ...pendingCategories],
-              contentCommit,
+              contentCommit:sourceCommit,
               pendingCategories,
             }}
             session={management.session}

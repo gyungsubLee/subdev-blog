@@ -73,7 +73,6 @@ export async function ensureWriterCategory(
       "/api/content",
       request,
       csrfToken,
-      AbortSignal.timeout(30000),
     );
   } catch (reason) {
     if (reason instanceof Error && "status" in reason && reason.status === 409) {

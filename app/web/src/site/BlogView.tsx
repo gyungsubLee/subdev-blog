@@ -138,7 +138,14 @@ export default function BlogView({
     );
   } else if (isContent) {
     page = management?.session.state === "ready" ? (
-      <ContentWorkspace posts={posts} categories={categories ?? []} onEdit={onEdit} draftVersion={draftVersion} />
+      <ContentWorkspace
+        posts={posts}
+        categories={categories ?? []}
+        onEdit={onEdit}
+        draftVersion={draftVersion}
+        session={management.session}
+        onDeleted={onContentSaved}
+      />
     ) : (
       <main className="app-state" id="main-content" tabIndex={-1}>
         <h1>로그인이 필요합니다</h1>

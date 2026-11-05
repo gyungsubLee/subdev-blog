@@ -8,9 +8,9 @@ export type ManagementSession = {
   connection?: {
     repository: string;
     branch: string;
-    contentCommit: string;
-    appContentCommit: string;
-    appCommit: string;
+    contentCommit?: string;
+    appContentCommit?: string;
+    appCommit?: string;
   };
 };
 
@@ -38,11 +38,15 @@ export type SourceDocument = {
 };
 
 export type Publication = {
+  background?: boolean;
+  publicationPending?: boolean;
+  affectedPostIds?: string[];
   deletedPostIds?: string[];
   requestId: string;
   state: "validating" | "saved" | "pending" | "published" | "failed" | "superseded" | "unchanged";
   candidateCommit?: string;
   contentCommit?: string;
+  publicCommit?: string;
   baseCommit?: string;
   runId?: number;
   runUrl?: string;

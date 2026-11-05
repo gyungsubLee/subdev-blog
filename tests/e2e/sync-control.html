@@ -1,0 +1,21 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><title>로컬 동기화 E2E 제어</title>
+<body><h1>폐기 가능한 E2E 저장소</h1><button id="read">상태 읽기</button><button id="cleanup">하루 정리 병렬 실행</button><button id="peer">보관 실패 알림 전송</button><pre id="result"></pre>
+<script>
+const scope='42:gyungsubLee/subdev-blog-content:main';
+const output=document.getElementById('result');
+function database(){return new Promise((resolve,reject)=>{const r=indexedDB.open('second-brain-sync-v1',1);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+async function state(edit){const db=await database();try{return await new Promise((resolve,reject)=>{const tx=db.transaction('queues',edit?'readwrite':'readonly'),s=tx.objectStore('queues'),r=s.get(scope);let v;r.onsuccess=()=>{v=r.result;if(edit){edit(v);s.put(v,scope);}};tx.oncomplete=()=>resolve(v);tx.onabort=()=>reject(tx.error);tx.onerror=()=>reject(tx.error);});}finally{db.close();}}
+function summary(s){return {pending:s?.pending?.length,active:s?.active?{attempts:s.active.attempts,blocked:s.active.blocked,operations:s.active.payload.operations.length}:null,history:s?.history?.map(b=>({id:b.payload.requestId,state:b.state,applied:b.applied,operations:b.payload.operations.length})),cleanedAt:s?.cleanedAt};}
+async function read(){const value=summary(await state());output.textContent=JSON.stringify(value,null,2);navigator.sendBeacon('/__e2e/metrics',new Blob([JSON.stringify({event:'sync-state',value})],{type:'application/json'}));}
+document.getElementById('peer').onclick=async()=>{try{const value=await state();const failed=value.history.find(batch=>batch.state==='failed');if(!failed)throw Error('No failed batch');const channel=new BroadcastChannel('second-brain:sync');channel.postMessage({scope,state:'failed',batchId:failed.payload.requestId});channel.close();output.textContent='실패 알림 전송 완료';navigator.sendBeacon('/__e2e/metrics',new Blob([JSON.stringify({event:'peer-failure-sent',requestId:failed.payload.requestId})],{type:'application/json'}));}catch(error){output.textContent=error.message;}};
+document.getElementById('read').onclick=()=>read().catch(error=>output.textContent=error.message);
+document.getElementById('cleanup').onclick=async()=>{let workers=[],frame;try{
+ await state(s=>{s.cleanedAt=Date.now()-86400001;s.cleanupLease=null;const base=s.history.find(b=>b.state==='confirmed'&&b.applied);if(!base)throw Error('No confirmed batch');for(const mode of ['failed','unapplied','mismatch','commit-mismatch']){const b=structuredClone(base);if(mode!=='commit-mismatch')b.payload.requestId=crypto.randomUUID();if(mode==='failed')b.state='failed';if(mode==='unapplied')b.applied=false;if(mode==='mismatch')b.receipt.payloadHash='wrong';if(mode==='commit-mismatch')b.receipt.contentCommit='f'.repeat(40);s.history.push(b);}});
+ const start=performance.now();let frames=0;const tick=()=>{frames++;frame=requestAnimationFrame(tick);};frame=requestAnimationFrame(tick);
+ workers=[new Worker(WORKER_URL,{type:'module'}),new Worker(WORKER_URL,{type:'module'})];
+ const results=await Promise.all(workers.map(worker=>new Promise((resolve,reject)=>{const timer=setTimeout(()=>{worker.terminate();reject(Error('Worker deadline'));},10000);worker.onmessage=event=>{clearTimeout(timer);resolve(event.data);};worker.onerror=event=>{clearTimeout(timer);reject(Error(event.message));};worker.postMessage({scope});})));
+ workers.forEach(worker=>worker.terminate());cancelAnimationFrame(frame);
+ const value={results,elapsedMs:performance.now()-start,frames,...summary(await state())};output.textContent=JSON.stringify(value,null,2);navigator.sendBeacon('/__e2e/metrics',new Blob([JSON.stringify({event:'cleanup-result',value})],{type:'application/json'}));
+}catch(error){output.textContent=error.message;}finally{workers.forEach(worker=>worker.terminate());cancelAnimationFrame(frame);}};
+read().catch(error=>output.textContent=error.message);
+</script></body></html>

@@ -6,6 +6,8 @@ import {
   UNCLASSIFIED_CATEGORY_ID,
 } from "../post-category/hierarchy";
 import CategorySelectionDialog from "../post-category/CategorySelectionDialog";
+import PostDeleteDialog from "./PostDeleteDialog";
+import type { ManagementSession } from "./types";
 import "./workspace.css";
 
 const PAGE_SIZE = 15;
@@ -21,23 +23,20 @@ type WorkspaceRow = {
 };
 
 function workspaceRows(posts: Post[]): { rows: WorkspaceRow[]; error: string } {
-  const rows = new Map(
-    posts.map((post) => [
-      post.id,
-      {
-        post,
-        title: post.title,
-        markdown: post.markdown,
-        categoryId: post.categoryId ?? post.category,
-        updatedAt: post.updatedAt,
-        status: post.draft ? PostStatus.Draft : PostStatus.Published,
-        dirty: false,
-      },
-    ]),
-  );
-  const publicIds = new Set(
-    posts.filter((post) => !post.draft).map((post) => post.id),
-  );
+  const rows = new Map<string, WorkspaceRow>();
+  const publicIds = new Set<string>();
+  for (const post of posts) {
+    rows.set(post.id, {
+      post,
+      title: post.title,
+      markdown: post.markdown,
+      categoryId: post.categoryId ?? post.category,
+      updatedAt: post.updatedAt,
+      status: post.draft ? PostStatus.Draft : PostStatus.Published,
+      dirty: false,
+    });
+    if (!post.draft) publicIds.add(post.id);
+  }
   let error = "";
   try {
     for (let index = 0; index < localStorage.length; index++) {
@@ -67,18 +66,19 @@ function workspaceRows(posts: Post[]): { rows: WorkspaceRow[]; error: string } {
           if (id !== metadata.id) rows.delete(id);
           continue;
         }
-        const rowId =
-          value.canonicalId === metadata.id && publicIds.has(metadata.id)
-            ? metadata.id
-            : id;
+        const canonicalId = value.canonicalId === metadata.id || publishedRecovery
+          ? metadata.id
+          : null;
+        const rowId = canonicalId ?? id;
         const existing = rows.get(rowId);
         const associatedPost =
           existing?.post && rowId !== id
             ? { ...existing.post, recoveryKey: id }
             : existing?.post;
         const post: Post = associatedPost ?? {
-          id,
-          draft: true,
+          id: rowId,
+          draft: !canonicalId,
+          ...(canonicalId ? { recoveryKey: id } : {}),
           title: value.title,
           markdown: value.markdown,
           category: value.category,
@@ -92,7 +92,7 @@ function workspaceRows(posts: Post[]): { rows: WorkspaceRow[]; error: string } {
           path: "",
           url: "",
         };
-        const published = Boolean(existing && !existing.post.draft);
+        const published = !post.draft;
         const dirty =
           published &&
           (value.title !== metadata.title ||
@@ -133,21 +133,38 @@ export default function ContentWorkspace({
   categories,
   onEdit,
   draftVersion = 0,
+  session,
+  onDeleted,
 }: {
   posts: Post[];
   categories: PublicCategory[];
   onEdit: (post: Post) => void;
   draftVersion?: number;
+  session?: ManagementSession;
+  onDeleted?: (contentCommit?: string) => void;
 }) {
+  const [deleting, setDeleting] = useState<Post | null>(null);
+  const [deletedIds, setDeletedIds] = useState(() => new Set<string>());
   const [status, setStatus] = useState<"all" | PostStatus>("all");
   const [query, setQuery] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [page, setPage] = useState(1);
   const { rows, error } = useMemo(
-    () => workspaceRows(posts),
-    [posts, draftVersion],
+    () => {
+      const result = workspaceRows(posts);
+      if (deletedIds.size === 0) return result;
+      return { ...result, rows: result.rows.filter((row) => !deletedIds.has(row.post.id)) };
+    },
+    [posts, draftVersion, deletedIds],
   );
+  const statusCounts = useMemo(() => {
+    let drafts = 0;
+    for (const row of rows) {
+      if (row.status === PostStatus.Draft) drafts++;
+    }
+    return { all: rows.length, draft: drafts, published: rows.length - drafts };
+  }, [rows]);
   const search = query.trim().toLocaleLowerCase();
   const categoryNames = useMemo(
     () => new Map(categories.map((category) => [category.id, category.name])),
@@ -254,11 +271,7 @@ export default function ContentWorkspace({
               >
                 {tab.label}
                 <span className="count">
-                  {
-                    rows.filter(
-                      (row) => tab.value === "all" || row.status === tab.value,
-                    ).length
-                  }
+                  {statusCounts[tab.value]}
                 </span>
               </button>
             ))}
@@ -342,6 +355,16 @@ export default function ContentWorkspace({
                       >
                         편집 ↗
                       </button>
+                      {session?.state === "ready" ? (
+                        <button
+                          type="button"
+                          className="row-action workspace-delete"
+                          aria-label={`${row.title || "제목 없음"} 삭제`}
+                          onClick={() => setDeleting({ ...row.post, title: row.title })}
+                        >
+                          삭제
+                        </button>
+                      ) : null}
                     </td>
                   </tr>
                 ))}
@@ -379,6 +402,18 @@ export default function ContentWorkspace({
           </nav>
         </section>
       </div>
+      {deleting && session ? (
+        <PostDeleteDialog
+          post={deleting}
+          session={session}
+          onClose={() => setDeleting(null)}
+          onDeleted={(commit) => {
+            setDeletedIds((previous) => new Set([...previous, deleting.id]));
+            setDeleting(null);
+            onDeleted?.(commit);
+          }}
+        />
+      ) : null}
       {categoryOpen ? (
         <CategorySelectionDialog
           id="workspace-category-selection"

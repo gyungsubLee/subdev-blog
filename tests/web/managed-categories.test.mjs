@@ -1,3 +1,4 @@
+import { bulkResponse } from '../support/bulk-response.mjs';
 import assert from 'node:assert/strict';
 import test, { after } from 'node:test';
 import { JSDOM } from 'jsdom';
@@ -26,7 +27,7 @@ const categories = [
 const source = {categories,revision:'a'.repeat(64),contentCommit:'b'.repeat(40)};
 const reply = (data,status=200) => ({ok:status<400,status,json:async()=>data});
 const row = name => [...document.querySelectorAll('.category-row')].find(item=>item.querySelector('.row-name').textContent.startsWith(name));
-async function click(element) { assert.ok(Boolean(element)); await act(async()=>element.click()); }
+async function click(element) { assert.ok(Boolean(element)); const save=element.id==="save-all"; await act(async()=>element.click()); if(save) await act(async()=>new Promise(resolve=>setTimeout(resolve,5100))); }
 async function rename(name,next) {
   await click(row(name).querySelector('[data-action="edit"]'));
   const field=document.querySelector('#inline-name');
@@ -36,14 +37,22 @@ async function rename(name,next) {
   });
   await act(async()=>document.querySelector('#inline-form').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true})));
 }
-async function mount(run,session=ready,posts=[]) {
+async function mount(run,session=ready,posts=[],failureStatus=401) {
   const originalFetch=globalThis.fetch;
   const calls=[];
   let failure=true;
   globalThis.fetch=async(url,options={})=>{
     calls.push({url,...options});
     if(url.startsWith('/api/content?'))return reply(source);
-    if(url==='/api/content')return failure?reply({error:'로그인이 필요합니다.'},401):reply({state:'unchanged',requestId:JSON.parse(options.body).requestId,contentCommit:source.contentCommit});
+    if(url==='/api/content') {
+      if(failure) return reply({error:failureStatus===409?'Canonical branch changed':'로그인이 필요합니다.'},failureStatus);
+      const input=JSON.parse(options.body);
+      if(input.operations)return reply(bulkResponse(input,{state:'unchanged',contentCommit:source.contentCommit},source));
+      const deletedPostIds=input.operation.mode==='delete'
+        ? posts.filter(post=>(post.categoryId??post.category)===input.operation.id).map(post=>post.id)
+        : [];
+      return reply({state:input.operation.type==='category.delete'?'published':'unchanged',requestId:input.requestId,contentCommit:source.contentCommit,deletedPostIds});
+    }
     throw Error('Unexpected '+url);
   };
   const root=createRoot(document.querySelector('#root'));
@@ -54,12 +63,13 @@ async function mount(run,session=ready,posts=[]) {
     await run({calls,root,succeed(){failure=false;}});
   } finally {
     await act(async()=>root.unmount());
+    dom.window.dispatchEvent(new dom.window.Event('pagehide'));
     localStorage.clear();
     globalThis.fetch=originalFetch;
   }
 }
 
-test('prior category tree UI renames canonical records and retries identical request after 401', {timeout:10000}, async()=>{
+test('prior category tree UI renames canonical records and retries identical request after 401', {timeout:20000}, async()=>{
   await mount(async({calls,succeed})=>{
     assert.ok(Boolean(row('수학')));
     assert.ok(Boolean(document.querySelector('#add-bottom')));
@@ -70,16 +80,19 @@ test('prior category tree UI renames canonical records and retries identical req
     const first=calls.find(call=>call.url==='/api/content');
     const payload=JSON.parse(first.body);
     assert.equal(payload.baseCommit,source.contentCommit);
-    assert.equal(payload.operation.baseRevision,source.revision);
-    const leaf=payload.operation.categories.find(category=>category.id==='leaf');
+    assert.equal((payload.operations?.[0]??payload.operation).baseRevision,source.revision);
+    const leaf=payload.operations[0].categories.find(category=>category.id==='leaf');
     assert.equal(leaf.name,'수학 변경');
     assert.equal(leaf.parent_id,'group:cs');
     assert.deepEqual(leaf.sources,['Math']);
     assert.deepEqual(leaf.opaque,{original:7});
     const persisted = JSON.parse(localStorage.getItem('second-brain:canonical-categories'));
-    assert.equal(persisted.requestId,payload.requestId);
+    const outbox=JSON.parse(localStorage.getItem('test-sync:owner:content:main'));
+    assert.equal(outbox.active.payload.requestId,payload.requestId);
+    assert.equal(outbox.active.items[0].clientRequestId,persisted.requestId);
+    assert.equal(JSON.stringify(outbox.active.payload),first.body);
     assert.equal(persisted.contentCommit,payload.baseCommit);
-    assert.equal(persisted.revision,payload.operation.baseRevision);
+    assert.equal(persisted.revision,payload.operations[0].baseRevision);
     assert.equal(localStorage.getItem('second-brain:categories:v2'),'personal-settings');
     succeed();
     await click(document.querySelector('#save-all'));
@@ -88,34 +101,56 @@ test('prior category tree UI renames canonical records and retries identical req
   });
 });
 
-test('canonical deletion protects parents, assigned leaves and unclassified without source redistribution', {timeout:10000}, async()=>{
+test('canonical deletion confirms then saves the original immediately, preserving protected records', {timeout:20000}, async()=>{
   await mount(async({calls,succeed})=>{
     assert.equal(row('CS').querySelector('[data-action="delete"]').disabled,true);
-    assert.equal(row('수학').querySelector('[data-action="delete"]').disabled,true);
+    assert.equal(row('수학').querySelector('[data-action="delete"]').disabled,false);
     assert.equal(row('미분류').querySelector('[data-action="delete"]').disabled,true);
     await click(row('빈 분류').querySelector('[data-action="delete"]'));
-    assert.doesNotMatch(document.querySelector('#delete-dialog').textContent,/한 단계 위|미분류에 유지/);
-    await click(document.querySelector('#confirm-delete'));
-    assert.ok(row('빈 분류') === undefined, 'Deleted category row must be absent');
-    await click(document.querySelector('#undo'));
-    assert.ok(Boolean(row('빈 분류')));
+    assert.match(document.querySelector('#delete-dialog').textContent,/원본/);
+    await click([...document.querySelectorAll('#delete-dialog button')].find(button=>button.textContent==='취소'));
+    assert.equal(calls.filter(call=>call.url==='/api/content').length,0);
+    assert.ok(row('빈 분류') !== undefined);
+    succeed();
     await click(row('빈 분류').querySelector('[data-action="delete"]'));
     await click(document.querySelector('#confirm-delete'));
-    succeed();
-    await click(document.querySelector('#save-all'));
-    const payload=JSON.parse(calls.find(call=>call.url==='/api/content').body);
-    assert.deepEqual(payload.operation.categories.find(category=>category.id==='group:unclassified').sources,[]);
+    const saves=calls.filter(call=>call.url==='/api/content');
+    assert.equal(saves.length,1,'modal confirmation persists canonical deletion');
+    const payload=JSON.parse(saves[0].body);
+    assert.equal(payload.operation.type,'category.delete');
+    assert.equal(payload.operation.id,'free');
+    assert.equal(payload.operation.mode,'move');
+    assert.equal((payload.operations?.[0]??payload.operation).baseRevision,source.revision);
+    assert.equal(payload.baseCommit,source.contentCommit);
+    assert.ok(row('빈 분류') === undefined);
   },ready,[{id:'post',categoryId:'leaf',category:'Math'}]);
 });
 
-test('signed out management renders nothing and never requests canonical content', {timeout:10000}, async()=>{
+test('failed category deletion retains the row and retries the same request', {timeout:20000}, async()=>{
+  await mount(async({calls,succeed,root})=>{
+    await click(row('빈 분류').querySelector('[data-action="delete"]'));
+    await click(document.querySelector('#confirm-delete'));
+    assert.ok(row('빈 분류') !== undefined);
+    assert.equal(document.querySelector('#delete-dialog').open,true);
+    const first=calls.find(call=>call.url==='/api/content').body;
+    await act(async()=>root.render(React.createElement(ManagedCategories,{key:'reopened',session:ready,categories:[]})));
+    assert.ok(row('빈 분류') !== undefined,'a failed deletion cannot hide the original after reopening');
+    await click(row('빈 분류').querySelector('[data-action="delete"]'));
+    succeed();
+    await click(document.querySelector('#confirm-delete'));
+    assert.equal(calls.filter(call=>call.url==='/api/content')[1].body,first);
+    assert.ok(row('빈 분류') === undefined);
+  });
+});
+
+test('signed out management renders nothing and never requests canonical content', {timeout:20000}, async()=>{
   await mount(async({calls})=>{
     assert.ok(document.querySelector('main') === null, 'signed out management must render no main element');
     assert.equal(calls.length,0);
   },{state:'signed_out'});
 });
 
-test('existing keyboard tree movement serializes canonical parent and sibling order', {timeout:10000}, async()=>{
+test('existing keyboard tree movement serializes canonical parent and sibling order', {timeout:20000}, async()=>{
   await mount(async({calls,succeed})=>{
     const grip = row('빈 분류').querySelector('.grip');
     await act(async()=>grip.dispatchEvent(new dom.window.KeyboardEvent('keydown',{
@@ -124,17 +159,17 @@ test('existing keyboard tree movement serializes canonical parent and sibling or
     succeed();
     await click(document.querySelector('#save-all'));
     const payload = JSON.parse(calls.find(call=>call.url==='/api/content').body);
-    const moved = payload.operation.categories.find(category=>category.id==='free');
+    const moved = payload.operations[0].categories.find(category=>category.id==='free');
     assert.equal(moved.parent_id,'group:cs');
     assert.equal(moved.order,1);
     assert.deepEqual(moved.sources,['free-source']);
-    const leaf = payload.operation.categories.find(category=>category.id==='leaf');
+    const leaf = payload.operations[0].categories.find(category=>category.id==='leaf');
     assert.equal(leaf.order,0);
     assert.deepEqual(leaf.opaque,{original:7});
   });
 });
 
-test('malformed saved canonical records keep their bytes and fall back to safe source nodes', {timeout:10000}, async()=>{
+test('malformed saved canonical records keep their bytes and fall back to safe source nodes', {timeout:20000}, async()=>{
   await mount(async({root})=>{
     const bytes = JSON.stringify({
       ...source,
@@ -149,7 +184,7 @@ test('malformed saved canonical records keep their bytes and fall back to safe s
   });
 });
 
-test('canonical counts include stable category IDs and aliases once without changing sources', {timeout:10000}, async()=>{
+test('canonical counts include stable category IDs and aliases once without changing sources', {timeout:20000}, async()=>{
   await mount(async()=>{
     assert.equal(row('수학').querySelector('.inline-count').textContent,'(2)');
     assert.equal(row('CS').querySelector('.inline-count').textContent,'(2)');
@@ -163,8 +198,9 @@ test('canonical counts include stable category IDs and aliases once without chan
   ]);
 });
 
-test('local drafts neither count nor block deletion of canonical categories', {timeout:10000}, async()=>{
-  await mount(async()=>{
+test('local drafts neither count nor block deletion of canonical categories', {timeout:20000}, async()=>{
+  await mount(async({succeed})=>{
+    succeed();
     assert.equal(row('빈 분류').querySelector('.inline-count').textContent,'(0)');
     assert.equal(row('빈 분류').querySelector('[data-action="delete"]').disabled,false);
     await click(row('빈 분류').querySelector('[data-action="delete"]'));
@@ -176,3 +212,47 @@ test('local drafts neither count nor block deletion of canonical categories', {t
 });
 
 after(() => dom.window.close());
+
+
+test('a rejected category deletion releases its request so a refreshed source can be retried', {timeout:20000}, async()=>{
+  await mount(async({calls,succeed})=>{
+    await click(row('빈 분류').querySelector('[data-action="delete"]'));
+    await click(document.querySelector('#confirm-delete'));
+    assert.equal(localStorage.getItem('second-brain:category-deletion:free:move'),null);
+    succeed();
+    await click(document.querySelector('#confirm-delete'));
+    const payloads=calls.filter(call=>call.url==='/api/content').map(call=>JSON.parse(call.body));
+    assert.equal(payloads.length,2);
+    assert.notEqual(payloads[0].requestId,payloads[1].requestId);
+    assert.ok(row('빈 분류') === undefined);
+  },ready,[],409);
+});
+
+
+for (const mode of ['move','delete']) {
+  test('assigned category deletion selects '+mode+' then requires a separate final confirmation', {timeout:20000}, async()=>{
+    await mount(async({calls,succeed})=>{
+      localStorage.setItem('second-brain:canonical-draft:draft-alias',JSON.stringify({sourceDocument:{document:{metadata:{id:'post'}}}}));
+      const trigger=row('수학').querySelector('[data-action="delete"]');
+      assert.equal(trigger.disabled,false);
+      await click(trigger);
+      assert.ok(document.querySelector('input[value="move"]') !== null);
+      assert.ok(document.querySelector('input[value="delete"]') !== null);
+      assert.ok(document.querySelector('#confirm-delete') === null,'choosing a mode cannot immediately delete');
+      await click(document.querySelector('input[value="'+mode+'"]'));
+      document.querySelector('#category-delete-next').focus();
+      await click(document.querySelector('#category-delete-next'));
+      assert.ok(document.activeElement === document.querySelector('#delete-dialog .modal-footer button'),'advancing must focus cancellation rather than deletion');
+      assert.equal(calls.filter(call=>call.url==='/api/content').length,0);
+      assert.match(document.querySelector('#delete-dialog').textContent,mode==='move'?/미분류/:/첨부/);
+      succeed();
+      await click(document.querySelector('#confirm-delete'));
+      const payload=JSON.parse(calls.find(call=>call.url==='/api/content').body);
+      assert.equal(payload.operation.type,'category.delete');
+      assert.equal(payload.operation.id,'leaf');
+      assert.equal(payload.operation.mode,mode);
+      assert.equal(localStorage.getItem('second-brain:canonical-draft:draft-alias')===null,mode==='delete');
+      assert.ok(!document.querySelector('.save-bar').textContent.includes('저장하지 않은'),'confirmed deletion must report saved state');
+    },ready,[{id:'post',categoryId:'leaf',category:'Math'}]);
+  });
+}

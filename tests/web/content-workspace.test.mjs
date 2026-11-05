@@ -303,3 +303,158 @@ test("double-click confirms the clicked category immediately while expanders sta
     ...categories, { id: 'child', name: '하위', parentId: 'notes', order: 1, sources: [] },
   ] });
 });
+
+
+const deletionSource = {
+  document: { metadata: { id: base.id, title: base.title }, markdown: base.markdown },
+  revision: "a".repeat(64), editorRevision: "c".repeat(64), contentCommit: "b".repeat(40),
+  categories: [], assets: [],
+};
+const response = (data, status = 200) => ({ ok: status < 400, status, json: async () => data });
+
+test("post deletion waits for modal confirmation and removes canonical source plus recovery", { timeout: 5000 }, async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  const saved = [];
+  localStorage.setItem('second-brain:canonical-draft:public', JSON.stringify({
+    title: base.title, markdown: base.markdown, category: 'notes',
+    sourceDocument: deletionSource,
+  }));
+  globalThis.fetch = async (url, options = {}) => {
+    calls.push({ url, ...options });
+    if (!options.method) return response(deletionSource);
+    return response({ state: 'published', requestId: JSON.parse(options.body).requestId, contentCommit: 'd'.repeat(40) });
+  };
+  try {
+    await mounted({ state: 'ready', csrfToken: 'csrf' }, async () => {
+      const trigger = document.querySelector('[aria-label="공개 제목 삭제"]');
+      assert.ok(trigger !== null, 'workspace exposes deletion');
+      await act(async () => trigger.click());
+      const modal = document.querySelector('dialog[open][aria-labelledby="post-delete-title"]');
+      assert.ok(modal !== null, 'deletion uses a modal');
+      assert.match(modal.textContent, /원본.*첨부/);
+      assert.equal(calls.length, 0, 'opening the dialog performs no repository work');
+      await act(async () => [...modal.querySelectorAll('button')].find(button => button.textContent === '취소').click());
+      assert.equal(calls.length, 0);
+      await act(async () => trigger.click());
+      await act(async () => document.querySelector('#confirm-post-delete').click());
+      assert.equal(calls.length, 2);
+      const payload = JSON.parse(calls[1].body);
+      assert.equal(payload.operation.type, 'post.delete');
+      assert.equal(payload.operation.id, 'public');
+      assert.equal(payload.operation.baseRevision, 'a'.repeat(64));
+      assert.equal(payload.operation.baseEditorRevision, 'c'.repeat(64));
+      assert.equal(payload.baseCommit, 'b'.repeat(40));
+      assert.equal(calls[1].headers['x-csrf-token'], 'csrf');
+      assert.equal(localStorage.getItem('second-brain:canonical-draft:public'), null);
+      assert.equal(document.querySelectorAll('tbody tr').length, 0);
+      assert.deepEqual(saved, ['d'.repeat(40)]);
+    }, { onContentSaved(commit) { saved.push(commit); } });
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test("failed deletion preserves content and retries identical request after reopening", { timeout: 5000 }, async () => {
+  const originalFetch = globalThis.fetch;
+  const requests = [];
+  let reads = 0;
+  globalThis.fetch = async (url, options = {}) => {
+    if (!options.method) { reads++; return response(deletionSource); }
+    requests.push(options.body);
+    if (requests.length === 1) throw Error('response lost');
+    return response({ state: 'published', requestId: JSON.parse(options.body).requestId, contentCommit: 'd'.repeat(40) });
+  };
+  try {
+    await mounted({ state: 'ready' }, async () => {
+      async function open() { await act(async () => document.querySelector('[aria-label="공개 제목 삭제"]').click()); }
+      await open();
+      await act(async () => document.querySelector('#confirm-post-delete').click());
+      assert.equal(document.querySelectorAll('tbody tr').length, 1);
+      assert.match(document.querySelector('dialog [role="alert"]').textContent, /response lost/);
+      await act(async () => [...document.querySelectorAll('dialog button')].find(button => button.textContent === '취소').click());
+      await open();
+      await act(async () => document.querySelector('#confirm-post-delete').click());
+      assert.equal(reads, 1, 'retry must work even after the source disappears');
+      assert.equal(requests.length, 2);
+      assert.equal(requests[1], requests[0]);
+      assert.equal(document.querySelectorAll('tbody tr').length, 0);
+    });
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test("local-only draft deletion clears stored draft without a canonical request", { timeout: 5000 }, async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => { calls++; throw Error('unexpected request'); };
+  const draft = { ...base, id: 'draft-local', title: '로컬 초안', draft: true, blocks: [] };
+  localStorage.setItem('second-brain:drafts:v1', JSON.stringify([draft]));
+  localStorage.setItem('second-brain:canonical-draft:draft-local', JSON.stringify({
+    title: draft.title, markdown: draft.markdown, category: 'notes', sourceDocument: deletionSource,
+  }));
+  try {
+    await mounted({ state: 'ready' }, async () => {
+      const trigger = document.querySelector('[aria-label="로컬 초안 삭제"]');
+      assert.ok(trigger !== null);
+      await act(async () => trigger.click());
+      await act(async () => document.querySelector('#confirm-post-delete').click());
+      assert.equal(calls, 0);
+      assert.equal(localStorage.getItem('second-brain:canonical-draft:draft-local'), null);
+      assert.deepEqual(JSON.parse(localStorage.getItem('second-brain:drafts:v1')), []);
+      assert.equal(document.querySelectorAll('tbody tr').length, 1);
+    }, { posts: [base, draft] });
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test("a newly published recovery deletes its canonical identity before the index catches up", { timeout: 5000 }, async () => {
+  const originalFetch = globalThis.fetch;
+  const sent = [];
+  localStorage.setItem('second-brain:canonical-draft:draft-local', JSON.stringify({
+    title: '새로 공개한 글', markdown: base.markdown, category: 'notes',
+    publication: { state: 'published' }, sourceDocument: deletionSource,
+  }));
+  globalThis.fetch = async (url, options = {}) => {
+    if (!options.method) return response(deletionSource);
+    sent.push(JSON.parse(options.body));
+    return response({ state: 'published', requestId: sent[0].requestId, contentCommit: 'd'.repeat(40) });
+  };
+  try {
+    await mounted({ state: 'ready' }, async () => {
+      const trigger = document.querySelector('[aria-label="새로 공개한 글 삭제"]');
+      assert.ok(trigger !== null);
+      await act(async () => trigger.click());
+      await act(async () => document.querySelector('#confirm-post-delete').click());
+      assert.equal(sent.length, 1, 'an accepted original must not be treated as a local-only draft');
+      assert.equal(sent[0].operation.id, 'public');
+      assert.equal(localStorage.getItem('second-brain:canonical-draft:draft-local'), null);
+      assert.equal(document.querySelectorAll('tbody tr').length, 0);
+    }, { posts: [] });
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test("delete modal blocks duplicate submission and Escape while the request is in flight", { timeout: 5000 }, async () => {
+  const originalFetch = globalThis.fetch;
+  let release;
+  let writes = 0;
+  const pending = new Promise(resolve => { release = resolve; });
+  globalThis.fetch = async (url, options = {}) => {
+    if (!options.method) return response(deletionSource);
+    writes++;
+    await pending;
+    return response({ state: 'published', requestId: JSON.parse(options.body).requestId, contentCommit: 'd'.repeat(40) });
+  };
+  try {
+    await mounted({ state: 'ready' }, async () => {
+      await act(async () => document.querySelector('[aria-label="공개 제목 삭제"]').click());
+      const modal = document.querySelector('dialog[open]');
+      await act(async () => document.querySelector('#confirm-post-delete').click());
+      assert.ok([...modal.querySelectorAll('button')].every(button => button.disabled));
+      await act(async () => {
+        modal.dispatchEvent(new dom.window.Event('cancel', { cancelable: true }));
+        document.querySelector('#confirm-post-delete').click();
+      });
+      assert.equal(modal.open, true);
+      assert.equal(writes, 1);
+      await act(async () => release());
+      assert.ok(document.querySelector('dialog') === null);
+    });
+  } finally { release(); globalThis.fetch = originalFetch; }
+});

@@ -34,7 +34,7 @@ import { serializeEditorMarkdown } from "../post-editor/document-markdown";
 import { notionExtension } from "../post-editor/notion-extension";
 import { syntaxHighlighting } from "../post-editor/syntax-highlighting";
 import { downloadFile } from "../../shared/download-file.mjs";
-import { ensureWriterCategory } from "./writer-category";
+import { enqueueContentSync, retryContentSync, discardContentConflict, SYNC_EVENT, syncScope } from "./background-sync.mjs";
 import { requestApi, sendApi, uploadAttachment } from "./api";
 import PublishStatus from "./PublishStatus";
 import type { ManagementSession, Publication, SourceDocument } from "./types";
@@ -54,6 +54,7 @@ type SourceDraft = {
   operation: "save" | "delete";
   sourceDocument?: SourceDocument;
   publication?: Publication;
+  syncVersion?: number;
   blocks?: EditorDocument["blocks"];
   markdownHash?: string;
   blockMode?: boolean;
@@ -222,6 +223,7 @@ export default function ManagedPostEditor({
   const [saving, setSaving] = useState(false);
   const [uploadCount, setUploadCount] = useState(0);
   const reservedUploadNames = useRef(new Set<string>());
+  const restoredRecovery = useRef<SourceDraft | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [generation, setGeneration] = useState(0);
   const blockEditor = useRef<NotebookEditor | null>(null);
@@ -232,7 +234,7 @@ export default function ManagedPostEditor({
   const accepted =
     publication && !["failed", "unchanged"].includes(publication.state);
   const uploading = uploadCount > 0;
-  const busy = saving || uploading || Boolean(accepted) || Boolean(draftError);
+  const busy = saving || uploading || Boolean(draftError) || Boolean(accepted && !publication?.background);
   const blockMode = Boolean(
     draft &&
     !source?.editorError &&
@@ -288,6 +290,7 @@ export default function ManagedPostEditor({
           value.status = normalizePostStatus(value.status);
           saved = value;
           if (controller.signal.aborted) return;
+          restoredRecovery.current = value;
           setSource(original);
           setDraft(value);
           setSaveState("saved");
@@ -313,9 +316,9 @@ export default function ManagedPostEditor({
           : "kind=new";
       try {
         // New drafts reuse the loaded index; GitHub still validates the base on publish.
-        if (saved && !isCanonical && newPostContext) return;
+        if (saved && generation === 0) return;
         const date = new Date().toISOString();
-        const data: SourceDocument = !isCanonical && newPostContext
+        const data: SourceDocument = !isCanonical && newPostContext?.contentCommit
           ? {
               document: {
                 metadata: {
@@ -353,6 +356,17 @@ export default function ManagedPostEditor({
           : await requestApi<SourceDocument>("/api/content?" + query, {
               signal: controller.signal,
             });
+        if (!isCanonical && !newPostContext?.contentCommit) {
+          data.document.metadata.category_id = post?.categoryId;
+          data.pendingCategories = newPostContext?.pendingCategories?.map(
+            ({ parentId, ...category }) => ({ ...category, parent_id: parentId }),
+          );
+          for (const category of data.pendingCategories ?? []) {
+            if (!data.categories.some(item => item.id === category.id)) {
+              data.categories.push(category);
+            }
+          }
+        }
         if (controller.signal.aborted) return;
         if (data.editorError) {
           if (saved) {
@@ -457,6 +471,7 @@ export default function ManagedPostEditor({
 
   function saveRecovery(explicit = false) {
     if (!draft || draftError || session.state !== "ready") return;
+    if (!explicit && draft === restoredRecovery.current && publication === draft.publication) return;
     try {
       // The paired recovery payload is one synchronous write, including before close.
       localStorage.setItem(
@@ -508,7 +523,7 @@ export default function ManagedPostEditor({
 
   useEffect(() => {
     if (
-      publication &&
+      publication && !publication.background &&
       ["published", "superseded", "unchanged"].includes(publication.state)
     ) {
       if (source) setPublishedId(source.document.metadata.id);
@@ -625,35 +640,15 @@ export default function ManagedPostEditor({
               },
               assets: snapshot.assets,
             };
-      let publicationSource = source;
-      if (
-        !remove && snapshot.category &&
-        source.pendingCategories?.some(category => category.id === snapshot.category)
-      ) {
-        const contentCommit = await ensureWriterCategory(
-          snapshot.category, source.pendingCategories, csrfToken,
-        );
-        publicationSource = { ...source, contentCommit, pendingCategories: undefined };
-        setSource(publicationSource);
-        const recovery = {
-          ...snapshot,
-          operation: operationName,
-          requestId,
-          sourceDocument: publicationSource,
-        } as SourceDraft;
-        setDraft(recovery);
-        localStorage.setItem(draftKey, JSON.stringify(recovery));
+      if (!remove) {
+        await enqueueContentSync({baseCommit:source.contentCommit,operation,
+          pendingCategories:source.pendingCategories},session,draftKey,requestId);
+        setPublication({state:"validating",requestId,background:true});
+        onDraftSaved?.();
+      } else {
+        const next = await sendApi<Publication>("/api/content",{requestId,baseCommit:source.contentCommit,operation},csrfToken);
+        setPublication(next);
       }
-      const next = await sendApi<Publication>(
-        "/api/content",
-        {
-          requestId,
-          baseCommit: publicationSource.contentCommit,
-          operation,
-        },
-        csrfToken,
-      );
-      setPublication(next);
       setConfirmDelete(false);
     } catch (reason) {
       setNeedsLogin(
@@ -669,6 +664,35 @@ export default function ManagedPostEditor({
     }
   }
 
+  useEffect(() => {
+    function changed(event: Event) {
+      const detail = (event as CustomEvent).detail;
+      if(detail?.scope!==syncScope(session) || !detail.batch?.items.some((item:{draftKey:string})=>item.draftKey===draftKey))return;
+      if(detail.state==="confirmed") {
+        const saved = JSON.parse(localStorage.getItem(draftKey) ?? "null") as SourceDraft | null;
+        const id = detail.batch.items.find((item:{draftKey:string})=>item.draftKey===draftKey).target;
+        const nextSource = detail.result.sources?.[id] ?? saved?.sourceDocument;
+        if(nextSource) {
+          setSource(nextSource);
+          setPublishedId(id);
+          setDraft(current=>current?{...current,revision:nextSource.revision,contentCommit:nextSource.contentCommit,sourceDocument:nextSource,syncVersion:saved?.syncVersion}:current);
+        }
+        if(detail.batch.items.some((item:{clientRequestId:string})=>item.clientRequestId===saved?.requestId)) {
+          setPublication({...detail.result,background:true});setError("");
+        }
+        if(detail.result.state!=="saved"&&!detail.result.publicationPending)onSaved?.(detail.result.contentCommit);
+      } else if(detail.state==="publication") {
+        const saved = JSON.parse(localStorage.getItem(draftKey) ?? "null") as SourceDraft | null;
+        if(detail.batch.items.some((item:{clientRequestId:string})=>item.clientRequestId===saved?.requestId))setPublication({...detail.result,background:true});
+      } else if(detail.state==="failed") {
+        setNeedsLogin(detail.error?.status===401);
+        setError(detail.error?.message ?? "저장하지 못했습니다. 초안은 유지합니다.");
+      }
+    }
+    window.addEventListener(SYNC_EVENT,changed);
+    return ()=>window.removeEventListener(SYNC_EVENT,changed);
+  },[draftKey,session.user?.id,onSaved]);
+
   function reopenSource() {
     if (saving || uploading) return;
     if (
@@ -681,6 +705,7 @@ export default function ManagedPostEditor({
     )
       return;
     try {
+      void discardContentConflict(session,source?.document.metadata.id).catch(reason=>setError(reason.message));
       localStorage.removeItem(draftKey);
     } catch {
       setDraftError(
@@ -1121,7 +1146,7 @@ export default function ManagedPostEditor({
                 <span aria-hidden="true">⌄</span>
               </HeaderAction>
             </div>
-            <button
+            <HeaderAction
               type="button"
               className="mock-preview-toggle outline-button"
               aria-controls="managed-reader-preview"
@@ -1129,8 +1154,8 @@ export default function ManagedPostEditor({
               onClick={() => setPreviewVisible(!previewVisible)}
             >
               {previewVisible ? "미리보기 숨기기" : "미리보기 표시"}
-            </button>
-            <button
+            </HeaderAction>
+            <HeaderAction
               type="button"
               className="editor-save outline-button"
               data-save-state={saveState}
@@ -1138,14 +1163,14 @@ export default function ManagedPostEditor({
               onClick={() => saveRecovery(true)}
             >
               초안 저장
-            </button>
-            <button
+            </HeaderAction>
+            <HeaderAction
               type="submit"
               className="dark-button accent-button"
               disabled={busy || session.state !== "ready"}
             >
               게시하기 ↗
-            </button>
+            </HeaderAction>
           </header>
         ) : null}
         <div
@@ -1395,6 +1420,7 @@ export default function ManagedPostEditor({
                 publication={publication}
                 csrfToken={csrfToken}
                 onChange={setPublication}
+                onRetry={()=>retryContentSync(session)}
               />
             ) : null}
             {!saving &&

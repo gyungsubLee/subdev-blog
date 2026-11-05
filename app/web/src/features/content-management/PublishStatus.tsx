@@ -1,3 +1,4 @@
+import Button from "../../components/button/Button";
 import { useEffect, useState } from "react";
 import { requestApi, sendApi } from "./api";
 import type { Publication } from "./types";
@@ -16,17 +17,19 @@ export default function PublishStatus({
   publication,
   csrfToken,
   onChange,
+  onRetry,
 }: {
   publication: Publication;
   csrfToken: string;
   onChange: (next: Publication) => void;
+  onRetry?: () => Promise<unknown>;
 }) {
   const [error, setError] = useState("");
   const [needsLogin, setNeedsLogin] = useState(false);
   const { requestId, candidateCommit, state } = publication;
 
   useEffect(() => {
-    if (!["validating", "saved"].includes(state) || !candidateCommit) return;
+    if (publication.background || !["validating", "saved"].includes(state) || !candidateCommit) return;
     let active = true;
     let timer: ReturnType<typeof setTimeout>;
     async function poll() {
@@ -48,11 +51,12 @@ export default function PublishStatus({
     }
     timer = setTimeout(poll, 1500);
     return () => { active = false; clearTimeout(timer); };
-  }, [requestId, candidateCommit, state, onChange]);
+  }, [requestId, candidateCommit, state, publication.background, onChange]);
 
   async function retry() {
     try {
       setError("");
+      if (publication.background && onRetry) { await onRetry(); return; }
       const next = await sendApi<Partial<Publication>>("/api/publish", { requestId, candidateCommit }, csrfToken);
       setNeedsLogin(false);
       onChange({ ...publication, error: undefined, ...next, state: next.state ?? "pending" });
@@ -70,7 +74,7 @@ export default function PublishStatus({
       {needsLogin ? <a href="/api/auth/github">GitHub 다시 로그인</a> : null}
       {publication.commitUrl?.startsWith("https://github.com/gyungsubLee/subdev-blog-content/commit/") ? <a href={publication.commitUrl} target="_blank" rel="noreferrer">원본 커밋</a> : null}
       {["pending", "failed"].includes(state) || error ? (
-        <button className="outline-button" type="button" onClick={retry}>저장 재시도</button>
+        <Button className="outline-button" type="button" onClick={retry}>저장 재시도</Button>
       ) : null}
     </section>
   );

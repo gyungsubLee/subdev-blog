@@ -37,6 +37,8 @@ type Props = {
   busy?: boolean;
   note?: ReactNode;
   footer?: ReactNode;
+  onDelete?: (id: string, mode: "move" | "delete") => Promise<boolean>;
+  deletionError?: string;
   deleteError?: (node: CategoryNode) => string | null;
 };
 
@@ -48,6 +50,8 @@ export default function CategoriesPage({
   note,
   footer,
   deleteError,
+  onDelete,
+  deletionError,
 }: Props) {
   const nodes = catalog.draftNodes;
   const byId = new Map(nodes.map((node) => [node.id, node]));
@@ -60,8 +64,11 @@ export default function CategoriesPage({
   const [expanded, setExpanded] = useState(() => new Set(["group:cs"]));
   const [editing, setEditing] = useState<Editing | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteMode, setDeleteMode] = useState<"move" | "delete">("move");
+  const [deleteStep, setDeleteStep] = useState<"choose" | "confirm">("choose");
   const [notice, setNotice] = useState("");
   const dialog = useRef<HTMLDialogElement>(null);
+  const cancelDeleteButton = useRef<HTMLButtonElement>(null);
   const children = (parentId: string | null) =>
     nodes.filter((node) => node.parentId === parentId);
   const directCounts = new Map<string, number>();
@@ -89,6 +96,10 @@ export default function CategoriesPage({
     if (deletingId !== null && dialog.current && !dialog.current.open)
       dialog.current.showModal();
   }, [deletingId]);
+
+  useEffect(() => {
+    if (deletingId !== null && deleteStep === "confirm") cancelDeleteButton.current?.focus();
+  }, [deletingId, deleteStep]);
 
   function reveal(parentId: string | null) {
     setExpanded((previous) => {
@@ -244,10 +255,11 @@ export default function CategoriesPage({
     }
   }
   function closeDelete() {
+    if (busy) return;
     dialog.current?.close();
     setDeletingId(null);
   }
-  function deleteCategory() {
+  async function deleteCategory() {
     if (deletingId === null) return;
     const node = byId.get(deletingId);
     if (!node) {
@@ -258,6 +270,15 @@ export default function CategoriesPage({
     if (blocked) {
       setNotice(blocked);
       closeDelete();
+      return;
+    }
+    if (onDelete) {
+      if (await onDelete(node.id, deleteMode)) {
+        setSelectedId(node.parentId);
+        setNotice("원본 카테고리를 삭제했습니다.");
+        dialog.current?.close();
+        setDeletingId(null);
+      }
       return;
     }
     const next = canonical
@@ -362,7 +383,11 @@ export default function CategoriesPage({
                     Boolean(deleteError?.(node))
                   }
                   title={deleteError?.(node) ?? undefined}
-                  onClick={() => setDeletingId(node.id)}
+                  onClick={() => {
+                    setDeleteMode("move");
+                    setDeleteStep("choose");
+                    setDeletingId(node.id);
+                  }}
                 >
                   삭제
                 </button>
@@ -378,6 +403,20 @@ export default function CategoriesPage({
         </div>
       );
     });
+  }
+
+  const assignedCount = counts.get(deletingId ?? "") ?? 0;
+  const choosingDeletion = canonical && assignedCount > 0 && deleteStep === "choose";
+  const deletingName = byId.get(deletingId ?? "")?.name ?? "";
+  let deletionQuestion = `'${deletingName}' 카테고리를 삭제하시겠습니까?`;
+  if (canonical && assignedCount > 0) {
+    if (choosingDeletion) {
+      deletionQuestion = `'${deletingName}' 카테고리의 글 ${assignedCount}개를 어떻게 처리하시겠습니까?`;
+    } else if (deleteMode === "move") {
+      deletionQuestion = `'${deletingName}' 카테고리를 삭제하고 글 ${assignedCount}개를 미분류로 이동하시겠습니까?`;
+    } else {
+      deletionQuestion = `'${deletingName}' 카테고리와 글 ${assignedCount}개를 모두 삭제하시겠습니까?`;
+    }
   }
 
   return (
@@ -498,32 +537,61 @@ export default function CategoriesPage({
         id="delete-dialog"
         ref={dialog}
         aria-labelledby="delete-title"
-        onCancel={() => setDeletingId(null)}
+        aria-describedby="delete-description"
+        onCancel={(event) => {
+          event.preventDefault();
+          closeDelete();
+        }}
       >
         <div className="modal-body">
           <h2 id="delete-title">분류 삭제</h2>
-          <p>
-            '{byId.get(deletingId ?? "")?.name}' 카테고리를 삭제하시겠습니까?
-          </p>
-          <p className="muted">
+          <p>{deletionQuestion}</p>
+          {choosingDeletion ? (
+            <fieldset className="category-delete-options" disabled={busy}>
+              <legend>포함된 글 처리</legend>
+              <label>
+                <input type="radio" name="category-delete-mode" value="move"
+                  checked={deleteMode === "move"} onChange={() => setDeleteMode("move")} />
+                <span>미분류로 이동 — 글과 첨부를 보존합니다.</span>
+              </label>
+              <label>
+                <input type="radio" name="category-delete-mode" value="delete"
+                  checked={deleteMode === "delete"} onChange={() => setDeleteMode("delete")} />
+                <span>전체 삭제 — 글 원본과 첨부도 함께 삭제합니다.</span>
+              </label>
+            </fieldset>
+          ) : null}
+          <p className="muted" id="delete-description">
             {canonical
-              ? "하위 분류와 배정한 글이 없는 분류만 삭제합니다."
+              ? choosingDeletion
+                ? "다음을 누르면 선택한 처리 방식과 삭제 범위를 다시 확인합니다."
+                : assignedCount === 0
+                  ? "원본 카테고리를 삭제합니다. 앱에서 되돌릴 수 없습니다."
+                  : deleteMode === "move"
+                    ? "카테고리만 삭제하고 글을 미분류로 이동합니다. 글 본문과 첨부 파일은 유지합니다."
+                    : "카테고리와 포함된 글 원본, 편집기 백업, 첨부 파일을 모두 삭제합니다. 앱에서 되돌릴 수 없습니다. 다른 분류의 글에서 참조하면 삭제할 수 없습니다."
               : "하위 분류는 한 단계 위로 옮깁니다. 기록은 미분류에 유지합니다."}
           </p>
         </div>
+        {deletionError ? <p role="alert">{deletionError}</p> : null}
         <div className="modal-footer">
-          <button type="button" onClick={closeDelete}>
+          <button ref={cancelDeleteButton} type="button" disabled={busy} onClick={closeDelete} autoFocus>
             취소
           </button>
-          <button
-            type="button"
-            id="confirm-delete"
-            className="dark"
-            disabled={busy}
-            onClick={deleteCategory}
-          >
-            삭제
-          </button>
+          {canonical && assignedCount > 0 && deleteStep === "confirm" ? (
+            <button type="button" disabled={busy} onClick={() => setDeleteStep("choose")}>이전</button>
+          ) : null}
+          {choosingDeletion ? (
+            <button key="next" type="button" id="category-delete-next" className="dark"
+              disabled={busy} onClick={() => setDeleteStep("confirm")}>
+              다음
+            </button>
+          ) : (
+            <button key="confirm" type="button" id="confirm-delete" className="dark"
+              disabled={busy} onClick={deleteCategory}>
+              {deleteMode === "move" && assignedCount > 0 ? "미분류로 이동 후 삭제" : "삭제 확정"}
+            </button>
+          )}
         </div>
       </dialog>
       <div id="drag-ghost" ref={drag.ghostRef} hidden />

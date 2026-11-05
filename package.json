@@ -21,7 +21,8 @@
     "check:server": "node --test tests/server/*.test.mjs",
     "check:native": "python3 -m unittest discover -s tests/native -p \"test_*.py\"",
     "build:native": "python3 app/native/build.py",
-    "export:static": "node app/web/scripts/export-static.mjs"
+    "export:static": "node app/web/scripts/export-static.mjs",
+    "check:e2e": "node --test tests/e2e/*.test.mjs"
   },
   "dependencies": {
     "@blocknote/core": "0.56.0",

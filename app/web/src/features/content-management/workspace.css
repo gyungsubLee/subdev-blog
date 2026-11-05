@@ -232,3 +232,7 @@
   opacity: 0.45;
   cursor: default;
 }
+
+.content-workspace .workspace-delete {
+  margin-left: 14px;
+}

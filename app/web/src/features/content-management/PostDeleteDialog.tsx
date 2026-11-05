@@ -109,7 +109,7 @@ export default function PostDeleteDialog({
         localStorage.setItem(requestKey, JSON.stringify(input));
       }
       const next = await sendApi<Publication>(
-        "/api/content", input, session.csrfToken ?? "", AbortSignal.timeout(30000),
+        "/api/content", input, session.csrfToken ?? "",
       );
       setPublication(next);
       if (["published", "superseded"].includes(next.state)) {

@@ -1,14 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Post, PublicCategory } from "../../shared/post";
 import { validatePublicCategories, type CategoryNode } from "../post-category/hierarchy";
 import CategoriesPage from "../post-category/CategoryManager";
+import { removePostDrafts } from "../../shared/drafts.mjs";
 import { downloadFile } from "../../shared/download-file.mjs";
 import { requestApi, sendApi } from "./api";
 import PublishStatus from "./PublishStatus";
+import { categorySourceKey, enqueueContentSync, retryContentSync, discardContentConflict, SYNC_EVENT, syncScope } from "./background-sync.mjs";
 import type { CanonicalCategory, ManagementSession, Publication } from "./types";
 import "./management.css";
 
 type CategoryDraft = {
+  syncVersion?: number;
   categories: CanonicalCategory[];
   revision: string;
   contentCommit: string;
@@ -37,32 +40,53 @@ function categoryNodes(categories: CanonicalCategory[]): CategoryNode[] {
     }));
 }
 
+type CategorySource = { syncVersion?: number; categories: CanonicalCategory[]; revision: string; contentCommit: string };
+function restoreCategories(key: string): {source?:CategorySource;draft?:CategoryDraft;publication?:Publication;error?:string} {
+  let source: CategorySource;
+  try {
+    source = JSON.parse(localStorage.getItem(key) ?? "null");
+    if (!source || !/^[a-f0-9]{64}$/.test(source.revision) || !/^[a-f0-9]{40}$/.test(source.contentCommit)) return {};
+    categoryNodes(source.categories);
+  } catch { return {}; }
+  const draft = {...source,requestId:crypto.randomUUID()};
+  try {
+    const saved = JSON.parse(localStorage.getItem(draftKey) ?? "null");
+    if (!saved) return {source,draft};
+    if(typeof saved.revision !== "string" || typeof saved.contentCommit !== "string" || typeof saved.requestId !== "string") throw Error();
+    categoryNodes(saved.categories);
+    return {source,draft:saved,publication:saved.publication};
+  } catch { return {source,draft,error:"보관한 편집 내용을 읽지 못했습니다. 기존 데이터를 유지합니다."}; }
+}
+
 export default function ManagedCategories({ session, posts = [], onSaved }: {
   categories: PublicCategory[];
   session: ManagementSession;
   posts?: Post[];
   onSaved?: (contentCommit?: string) => void;
 }) {
-  const [source, setSource] = useState<{ categories: CanonicalCategory[]; revision: string; contentCommit: string }>();
-  const [draft, setDraft] = useState<CategoryDraft>();
+  const savingRef = useRef(false);
+  const sourceKey = categorySourceKey(session);
+  const [initial] = useState(() => restoreCategories(sourceKey));
+  const [source, setSource] = useState<CategorySource | undefined>(initial.source);
+  const [draft, setDraft] = useState<CategoryDraft | undefined>(initial.draft);
   const [history, setHistory] = useState<CanonicalCategory[][]>([]);
-  const [publication, setPublication] = useState<Publication>();
+  const [publication, setPublication] = useState<Publication | undefined>(initial.publication);
   const [error, setError] = useState("");
-  const [draftError, setDraftError] = useState("");
+  const [draftError, setDraftError] = useState(initial.error ?? "");
   const [needsLogin, setNeedsLogin] = useState(false);
   const [saving, setSaving] = useState(false);
   const [generation, setGeneration] = useState(0);
   const ready = session.state === "ready";
-  const accepted = publication && !["failed", "unchanged"].includes(publication.state);
-  const busy = saving || Boolean(accepted);
+  const busy = saving || Boolean(draftError);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || (generation === 0 && initial.source && initial.draft)) return;
     const controller = new AbortController();
-    requestApi<{ categories: CanonicalCategory[]; revision: string; contentCommit: string }>("/api/content?kind=categories", { signal: controller.signal })
+    requestApi<{ categories: CanonicalCategory[]; revision: string; contentCommit: string }>(`/api/content?kind=categories${generation > 0 ? "&refresh=1" : ""}`, { signal: controller.signal })
       .then((data) => {
         categoryNodes(data.categories);
         setSource(data);
+        try { localStorage.setItem(sourceKey, JSON.stringify(data)); } catch { /* The downloaded source remains usable. */ }
         let initial: CategoryDraft = { ...data, requestId: crypto.randomUUID() };
         try {
           const bytes = localStorage.getItem(draftKey);
@@ -103,7 +127,7 @@ export default function ManagedCategories({ session, posts = [], onSaved }: {
   }, [draft, publication, draftError]);
 
   useEffect(() => {
-    if (publication && ["published", "superseded", "unchanged"].includes(publication.state)) {
+    if (publication && !publication.background && ["published", "superseded", "unchanged"].includes(publication.state)) {
       onSaved?.(publication.contentCommit ?? publication.candidateCommit);
     }
   }, [publication?.state, publication?.contentCommit, publication?.candidateCommit, onSaved]);
@@ -136,21 +160,98 @@ export default function ManagedCategories({ session, posts = [], onSaved }: {
     setPublication(undefined);
   }
 
+  useEffect(() => {
+    function changed(event: Event) {
+      const detail = (event as CustomEvent).detail;
+      if (detail?.scope !== syncScope(session) || !detail.batch?.items.some((item: {draftKey:string}) => item.draftKey === draftKey)) return;
+      if (detail.state === "confirmed") {
+        const next = detail.result as Publication & {categories?:CategorySource};
+        const fresh = restoreCategories(sourceKey).source ?? next.categories;
+        if(fresh) {
+          setSource(fresh);
+          setDraft(current => current ? {...current,revision:fresh.revision,contentCommit:fresh.contentCommit,syncVersion:fresh.syncVersion} : current);
+        }
+        const saved = JSON.parse(localStorage.getItem(draftKey) ?? "null");
+        if (detail.batch.items.some((item:{clientRequestId:string}) => item.clientRequestId === saved?.requestId)) {
+          setPublication({...next,background:true});
+          setError("");
+        }
+        if(next.state!=="saved"&&!next.publicationPending)onSaved?.(next.contentCommit);
+      } else if(detail.state === "publication") {
+        const saved = JSON.parse(localStorage.getItem(draftKey) ?? "null");
+        if(detail.batch.items.some((item:{clientRequestId:string})=>item.clientRequestId===saved?.requestId))setPublication({...detail.result,background:true});
+      } else if(detail.state === "failed") {
+        setNeedsLogin(detail.error?.status === 401);
+        setError(detail.error?.message ?? "분류를 저장하지 못했습니다. 편집 내용은 유지합니다.");
+      }
+    }
+    window.addEventListener(SYNC_EVENT,changed);
+    return () => window.removeEventListener(SYNC_EVENT,changed);
+  }, [session.user?.id,sourceKey,onSaved]);
+
   async function save() {
-    if (!source || !draft || !ready) return;
+    if (!source || !draft || !ready || savingRef.current) return;
+    savingRef.current = true;
     setSaving(true);
     setError("");
     try {
-      const next = await sendApi<Publication>("/api/content", {
-        requestId: draft.requestId,
-        baseCommit: draft.contentCommit,
-        operation: { type: "categories.save", baseRevision: draft.revision, categories: draft.categories },
-      }, session.csrfToken ?? "");
-      setPublication(next);
-    } catch (reason) {
-      setNeedsLogin(reason instanceof Error && "status" in reason && reason.status === 401);
+      localStorage.setItem(draftKey,JSON.stringify(draft));
+      await enqueueContentSync({baseCommit:draft.contentCommit,
+        operation:{type:"categories.save",baseRevision:draft.revision,categories:draft.categories}},session,draftKey,draft.requestId);
+      setPublication({state:"validating",requestId:draft.requestId,background:true});
+    } catch(reason) {
       setError(reason instanceof Error ? reason.message : "분류를 저장하지 못했습니다. 편집 내용은 유지합니다.");
+    } finally { savingRef.current=false;setSaving(false); }
+  }
+
+  async function deleteCategory(id: string, mode: "move" | "delete"): Promise<boolean> {
+    if (!source || !draft || !ready || savingRef.current || busy) return false;
+    const node = categoryNodes(draft.categories).find((item) => item.id === id);
+    if (!node || deleteError(node)) return false;
+    const nextDraft = {
+      ...draft,
+      categories: draft.categories.filter((category) => category.id !== id),
+      requestId: crypto.randomUUID(),
+    };
+    const requestKey = "second-brain:category-deletion:" + id + ":" + mode;
+    savingRef.current = true;
+    setSaving(true);
+    setError("");
+    try {
+      // Keep the exact deletion payload for retry after a lost response or reload.
+      const saved = localStorage.getItem(requestKey);
+      const input = saved ? JSON.parse(saved) : {
+        requestId: nextDraft.requestId,
+        baseCommit: nextDraft.contentCommit,
+        operation: { type: "category.delete", id, mode, baseRevision: nextDraft.revision },
+      };
+      if (input.operation?.type !== "category.delete" || input.operation.id !== id || input.operation.mode !== mode ||
+          typeof input.requestId !== "string" || typeof input.baseCommit !== "string") {
+        throw new Error("보관한 삭제 요청을 확인하십시오.");
+      }
+      localStorage.setItem(requestKey, JSON.stringify(input));
+      const next = await sendApi<Publication>(
+        "/api/content", input, session.csrfToken ?? "",
+      );
+      if (!["published", "superseded", "unchanged"].includes(next.state)) {
+        setError(next.error ?? "삭제 결과를 확인하지 못했습니다. 같은 삭제 요청을 다시 확인하십시오.");
+        return false;
+      }
+      if (mode === "delete") removePostDrafts(localStorage, next.deletedPostIds ?? []);
+      setPublication(next);
+      setDraft({ ...nextDraft, requestId: input.requestId });
+      setHistory([]);
+      localStorage.removeItem(requestKey);
+      return true;
+    } catch (reason) {
+      if (reason instanceof Error && "status" in reason && reason.status === 409) {
+        localStorage.removeItem(requestKey);
+      }
+      setNeedsLogin(reason instanceof Error && "status" in reason && reason.status === 401);
+      setError(reason instanceof Error ? reason.message : "카테고리를 삭제하지 못했습니다.");
+      return false;
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   }
@@ -159,6 +260,7 @@ export default function ManagedCategories({ session, posts = [], onSaved }: {
     if (!["published", "superseded", "unchanged"].includes(publication?.state ?? "") &&
         !window.confirm("보관한 편집 내용을 지우고 최신 원본을 엽니다. 필요한 내용은 먼저 JSON으로 내보내십시오.")) return;
     try {
+      void discardContentConflict(session,"categories").catch(reason=>setError(reason.message));
       localStorage.removeItem(draftKey);
     } catch {
       setDraftError("보관한 편집 내용을 지우지 못했습니다. JSON으로 내보내십시오.");
@@ -186,7 +288,7 @@ export default function ManagedCategories({ session, posts = [], onSaved }: {
           }}>JSON 내보내기</button>
         </div>
       ) : null}
-      {publication ? <PublishStatus publication={publication} csrfToken={session.csrfToken ?? ""} onChange={setPublication} /> : null}
+      {publication ? <PublishStatus publication={publication} csrfToken={session.csrfToken ?? ""} onChange={setPublication} onRetry={() => retryContentSync(session)} /> : null}
       {draft && !saving && (error || ["published", "superseded", "unchanged"].includes(publication?.state ?? "")) ? (
         <button className="outline-button" type="button" onClick={reopenSource}>최신 원본으로 다시 시작</button>
       ) : null}
@@ -202,18 +304,18 @@ export default function ManagedCategories({ session, posts = [], onSaved }: {
   }
 
   const nodes = categoryNodes(draft.categories);
+  const completed = ["published", "superseded", "unchanged"].includes(publication?.state ?? "");
+  const dirty = !completed && JSON.stringify(draft.categories) !== JSON.stringify(source.categories);
 
   function deleteError(node: CategoryNode) {
+    if (dirty || publication?.state === "validating") {
+      return "편집 중인 변경사항을 먼저 저장하십시오.";
+    }
     if (node.id === "group:unclassified") return "미분류는 삭제할 수 없습니다.";
     if (nodes.some((category) => category.parentId === node.id)) {
       return "하위 분류를 먼저 이동하십시오.";
     }
-    const assigned = posts.some((post) => {
-      if (post.draft) return false;
-      const category = post.categoryId ?? post.category;
-      return category === node.id || node.sources.includes(category);
-    });
-    return assigned ? "배정한 글을 먼저 이동하십시오." : null;
+    return null;
   }
 
   return <CategoriesPage
@@ -223,12 +325,14 @@ export default function ManagedCategories({ session, posts = [], onSaved }: {
     note="원본 카테고리를 수정합니다. 저장하면 공개 화면에 적용합니다."
     footer={footer}
     deleteError={deleteError}
+    onDelete={deleteCategory}
+    deletionError={error}
     catalog={{
       draftNodes: nodes,
       stage: stageNodes,
       undo,
       canUndo: history.length > 0,
-      dirty: JSON.stringify(draft.categories) !== JSON.stringify(source.categories),
+      dirty,
       error: "",
       saveNodes: () => {
         void save();

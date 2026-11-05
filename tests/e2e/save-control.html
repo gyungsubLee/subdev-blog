@@ -1,0 +1,87 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Actual GitHub save measurement</title>
+<h1>Actual GitHub save measurement</h1>
+<p>This disposable test uses the existing real session, CSRF checks and canonical content API.</p>
+<button id="session">Check session</button>
+<button id="create" disabled>Create disposable post</button>
+<button id="update" disabled>Update title</button>
+<button id="delete" disabled>Delete disposable post</button>
+<pre id="status" aria-live="polite">Check the session before starting.</pre>
+<script type="module">
+  const status = document.querySelector('#status');
+  const buttons = [...document.querySelectorAll('button')];
+  let csrfToken;
+  let id = sessionStorage.getItem('save-measurement-id');
+  let sample = Number(sessionStorage.getItem('save-measurement-sample') ?? 0);
+  let busy = false;
+  const prefix = 'Save optimization measurement 20261104';
+  async function request(path, input) {
+    const response = await fetch('/api/' + path, {
+      method: input ? 'POST' : 'GET',
+      headers: input ? {'Content-Type':'application/json','x-csrf-token':csrfToken} : {},
+      body: input ? JSON.stringify(input) : undefined,
+      signal: AbortSignal.timeout(240000),
+    });
+    const data = await response.json();
+    if (!response.ok) throw Error(`HTTP ${response.status}: ${data.error ?? 'Request failed'}`);
+    return data;
+  }
+  const hex = bytes => [...new Uint8Array(bytes)].map(byte=>byte.toString(16).padStart(2,'0')).join('');
+  async function run(action) {
+    if (busy) return;
+    busy = true;
+    buttons.forEach(button=>button.disabled=true);
+    status.textContent = `${action}: pending`;
+    try {
+      if (action === 'session') {
+        const session = await request('session');
+        if (session.state !== 'ready') throw Error('Real session is not ready');
+        csrfToken = session.csrfToken;
+        status.textContent = 'Real authenticated session ready. CSRF token retained in memory.';
+      } else {
+        let input;
+        if (action === 'create') {
+          if (id) throw Error('A disposable post is already recorded; clean it up first');
+          id = crypto.randomUUID();
+          sessionStorage.setItem('save-measurement-id',id);
+          const categories = await request('content?kind=categories');
+          const markdown = 'Disposable save optimization measurement.\n';
+          const markdownHash = hex(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(markdown)));
+          input = {requestId:crypto.randomUUID(),baseCommit:categories.contentCommit,operation:{
+            type:'post.create',document:{metadata:{schema_version:1,id,title:`${prefix} ${id}`,parent_id:null,created:'2026-11-04',updated:'2026-11-04'},markdown},
+            editor:{schemaVersion:1,documentId:id,markdownHash,blocks:[{type:'paragraph',content:[{type:'text',text:'Disposable save optimization measurement.',styles:{}}]}]},
+          }};
+        } else {
+          if (!id) throw Error('No disposable post has been created');
+          const source = await request('content?kind=post&id='+id);
+          input = {requestId:crypto.randomUUID(),baseCommit:source.contentCommit,operation:{
+            type:action==='delete'?'post.delete':'post.update',id,baseRevision:source.revision,baseEditorRevision:source.editorRevision,
+            ...(action==='update'?{changes:{title:`${prefix} ${id} sample ${++sample}`}}:{}),
+          }};
+        }
+        const started = performance.now();
+        const saved = await request('content',input);
+        sessionStorage.setItem('save-measurement-sample',String(sample));
+        const index = await request('public?kind=index&after='+saved.contentCommit);
+        const listed = index.posts.find(post=>post.id===id);
+        if ((action==='delete') === Boolean(listed)) throw Error('Public index does not match the saved operation');
+        if (action!=='delete' && listed.title!==input.operation.document?.metadata.title && listed.title!==input.operation.changes?.title) throw Error('Public title mismatch');
+        status.textContent = JSON.stringify({action,sample,id,state:saved.state,contentCommit:saved.contentCommit,elapsedIncludingPublicReadMs:performance.now()-started,posts:index.posts.length,title:listed?.title},null,2);
+        if (action==='delete') {
+          id=null;sample=0;
+          sessionStorage.removeItem('save-measurement-id');
+          sessionStorage.removeItem('save-measurement-sample');
+        }
+      }
+    } catch (error) { status.textContent = `${action}: ${error.message}`; }
+    finally {
+      busy=false;
+      document.querySelector('#session').disabled=false;
+      document.querySelector('#create').disabled=!csrfToken||Boolean(id);
+      document.querySelector('#update').disabled=!csrfToken||!id;
+      document.querySelector('#delete').disabled=!csrfToken||!id;
+    }
+  }
+  for (const button of buttons) button.addEventListener('click',()=>run(button.id));
+</script>
