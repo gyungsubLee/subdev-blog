@@ -273,6 +273,86 @@ export async function verifyPublicPublication(options, artifact) {
   return artifact;
 }
 
+export async function readReadyPublicSource(options) {
+  const { github, branch = 'main' } = options;
+  let ref;
+  try {
+    ref = await github('/git/ref/heads/' + encodeURIComponent('public-ready/' + branch));
+  } catch (error) {
+    if (error.status === 404) return null;
+    throw error;
+  }
+  requirePublic(ref.object?.type === 'commit' && SHA.test(ref.object.sha), 'Invalid ready source ref');
+  const sourceCommit = ref.object.sha;
+  const publicationOptions = { ...options, commit: sourceCommit };
+  const publicationCommit = await findPublicPublication(publicationOptions);
+  requirePublic(publicationCommit, 'Ready source publication is missing');
+  await verifyPublicPublication(publicationOptions, publicationCommit);
+  return { sourceCommit, publicationCommit };
+}
+
+export async function publishPublicSource(options) {
+  const { commit, github, branch = 'main' } = options;
+  requirePublic(SHA.test(commit), 'Invalid source commit', 400);
+  requirePublic(typeof branch === 'string' && branch.length > 0 && branch.length <= 255 && !/[\u0000-\u001f\u007f]/.test(branch), 'Invalid content branch', 400);
+  const canonicalPath = '/git/ref/heads/' + encodeURIComponent(branch);
+  async function requireCanonicalSource() {
+    const head = await github(canonicalPath);
+    requirePublic(head.object?.type === 'commit' && SHA.test(head.object.sha), 'Invalid content ref');
+    if (head.object.sha === commit) return;
+    const comparison = await github('/compare/' + commit + '...' + head.object.sha);
+    requirePublic(comparison.status === 'ahead', 'Source commit is outside the canonical branch', 409);
+  }
+  await requireCanonicalSource();
+  const publicationCommit = await ensurePublicPublication(options);
+  await verifyPublicPublication(options, publicationCommit);
+  // Generation can take minutes. Recheck source ancestry before exposing it.
+  await requireCanonicalSource();
+
+  const readyName = 'public-ready/' + branch;
+  async function readySource() {
+    try {
+      const ref = await github('/git/ref/heads/' + encodeURIComponent(readyName));
+      requirePublic(ref.object?.type === 'commit' && SHA.test(ref.object.sha), 'Invalid ready source ref');
+      return ref.object.sha;
+    } catch (error) {
+      if (error.status === 404) return null;
+      throw error;
+    }
+  }
+  let ready = await readySource();
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (ready === commit) return { sourceCommit: commit, publicationCommit, state: 'published' };
+    if (ready) {
+      const comparison = await github('/compare/' + commit + '...' + ready);
+      if (comparison.status === 'ahead') return { sourceCommit: commit, publicationCommit, state: 'superseded' };
+      requirePublic(comparison.status === 'behind', 'Ready source history conflict', 409);
+    }
+    try {
+      // The ref points at SOURCE ancestry, so Git enforces monotonic publication
+      // even if a slower old workflow finishes after a newer workflow.
+      if (ready) {
+        await github('/git/refs/heads/' + encodeURIComponent(readyName), {
+          method: 'PATCH', body: { sha: commit, force: false },
+        });
+      } else {
+        await github('/git/refs', { method: 'POST', body: { ref: 'refs/heads/' + readyName, sha: commit } });
+      }
+      return { sourceCommit: commit, publicationCommit, state: 'published' };
+    } catch (error) {
+      const recovered = await readySource();
+      if (recovered === commit) return { sourceCommit: commit, publicationCommit, state: 'published' };
+      if (recovered) {
+        const comparison = await github('/compare/' + commit + '...' + recovered);
+        if (comparison.status === 'ahead') return { sourceCommit: commit, publicationCommit, state: 'superseded' };
+      }
+      if (recovered === ready) throw error;
+      ready = recovered;
+      if (attempt === 2) throw error;
+    }
+  }
+}
+
 export async function ensurePublicPublication(options) {
   const { commit, github } = options;
   requirePublic(SHA.test(commit), 'Invalid source commit', 400);

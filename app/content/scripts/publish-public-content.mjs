@@ -1,6 +1,6 @@
 import { pathToFileURL } from 'node:url';
 import { createGitHubClient } from '../../server/src/github.mjs';
-import { ensurePublicPublication, generatePublicFiles } from '../../server/src/public-publication.mjs';
+import { publishPublicSource, generatePublicFiles } from '../../server/src/public-publication.mjs';
 import { SHA } from '../../server/src/public-files.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -31,7 +31,7 @@ export async function runPublicPublication(args, { env = process.env, fetcher = 
   try { catalog = JSON.parse(await (await import('node:fs/promises')).readFile(new URL('../../server/generated/content-catalog.json', import.meta.url), 'utf8')); }
   catch (error) { if (error.code !== 'ENOENT') throw error; }
   const options = { commit, repository, github, fetcher, catalog };
-  if (publish) return { sourceCommit: commit, publicationCommit: await ensurePublicPublication(options) };
+  if (publish) return publishPublicSource(options);
   const files = await generatePublicFiles(options);
   // A partial directory is not a published ref and must never be used as a readiness signal.
   for (const [filename, bytes] of files) {
@@ -52,14 +52,68 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       const started = Date.now();
       const method = options.method ?? 'GET';
       const path = new URL(url).pathname;
+      const call = { method, host: new URL(url).host, path, startedAt: started, requestBytes: Buffer.byteLength(options.body ?? ''), responseBytes: 0, bodyComplete: false };
+      let logged = false;
+      const record = () => {
+        if (logged) return;
+        logged = true;
+        console.error(JSON.stringify({ ...call, ms: Date.now() - started }));
+      };
       try {
         const response = await fetch(url, options);
-        if (method === 'POST' || (!response.ok && response.status !== 404)) {
-          console.error(JSON.stringify({ method, path, requestBytes: Buffer.byteLength(options.body ?? ''), status: response.status, ms: Date.now() - started }));
+        call.status = response.status;
+        if (!response.body) {
+          call.bodyComplete = true;
+          record();
+          return response;
         }
-        return response;
+        const reader = response.body.getReader();
+        if (!response.ok) {
+          // GitHub callers discard error bodies. Drain a bounded diagnostic body
+          // here so misses and denied requests are still included in the trace.
+          try {
+            while (call.responseBytes <= 64 * 1024) {
+              const { done, value } = await reader.read();
+              if (done) { call.bodyComplete = true; break; }
+              call.responseBytes += value.byteLength;
+            }
+          } finally {
+            await reader.cancel().catch(() => {});
+            reader.releaseLock();
+            record();
+          }
+          return new Response(null, { status: response.status, statusText: response.statusText, headers: response.headers });
+        }
+        const stream = new ReadableStream({
+          async pull(controller) {
+            try {
+              const { done, value } = await reader.read();
+              if (done) {
+                call.bodyComplete = true;
+                record();
+                reader.releaseLock();
+                controller.close();
+              } else {
+                call.responseBytes += value.byteLength;
+                controller.enqueue(value);
+              }
+            } catch (error) {
+              call.bodyError = error.name;
+              record();
+              reader.releaseLock();
+              controller.error(error);
+            }
+          },
+          async cancel(reason) {
+            call.cancelled = true;
+            try { await reader.cancel(reason); }
+            finally { reader.releaseLock(); record(); }
+          },
+        });
+        return new Response(stream, { status: response.status, statusText: response.statusText, headers: response.headers });
       } catch (error) {
-        console.error(JSON.stringify({ method, path, networkError: error.name, ms: Date.now() - started }));
+        call.networkError = error.name;
+        record();
         throw error;
       }
     };
