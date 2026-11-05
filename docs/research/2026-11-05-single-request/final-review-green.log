@@ -1,0 +1,48 @@
+✔ prepared atomic save uses one CAS mutation and local source receipt (57.016625ms)
+✔ lost mutation response and retry reconcile without duplicate apply (13.019291ms)
+✔ successful receipt primes the next prepared title save (7.24075ms)
+✔ fresh remote advance conflicts and never overwrites canonical source (4.452708ms)
+✔ mutation permissions stop immediately without recovery reads (3.2ms)
+✔ large exact authored bytes stay in the single mutation (47.844291ms)
+✔ a request ID cannot be reused against its successful source commit (3.612125ms)
+✔ durable request marker rejects reuse after unrelated descendants and a new cache scope (6.367458ms)
+✔ retry source revision uses accepted bytes rather than regenerated timestamp (21.777542ms)
+✔ recovery rejects tampered durable receipt and never reapplies (5.203292ms)
+✔ trusted immutable cache remains entry bounded and credential scoped (0.647083ms)
+✔ large source inventory drops unused API URLs within existing cache budget (41.371125ms)
+✔ atomic authored no-op reserves its ID with only a durable marker (3.004084ms)
+✔ atomic category no-op preserves the original compact bytes (1.761125ms)
+✔ atomic transient GraphQL errors leave the queue retryable (3.931208ms)
+✔ recovery read errors preserve their transient status after CAS rejection (6.055791ms)
+✔ durable retry reconciles before sending another mutation (4.530125ms)
+✔ reconciliation permits first dispatch only when the marker is absent at the unchanged base (4.118958ms)
+✔ mixed batches retain compact bytes for their unchanged category operation (3.297ms)
+✔ atomic save rejects a legacy request namespace before writes (0.553417ms)
+✔ atomic receipt rejects merge provenance with a second parent (3.341209ms)
+✔ large repeated asset references use bounded SHA tree writes (15.364875ms)
+✔ cache replacement accounts a pending GET and prime of the same identity once (14.693708ms)
+✔ reconciliation reports superseded even when the descendant deleted the authored post (4.148ms)
+✔ read-only recovery rejects two-parent provenance (3.166667ms)
+✔ 5-second debounce coalesces unsent versions and sends one immutable bulk request (16.998625ms)
+✔ another coordinator cannot duplicate an in-flight batch, and later edits survive old response (1.4035ms)
+✔ a lost response retains the same payload and resumes after reload without duplicate identity (2.696125ms)
+✔ daily cleanup verifies receipts and never deletes failed, pending or mismatched data (4.116375ms)
+✔ daily cleanup preserves a record whose receipt commit differs from its saved result (2.602042ms)
+✔ discarding one conflict retains other documents as blocked recoverable saves (1.76025ms)
+✔ cleanup preserves remotely confirmed payloads until their local recovery state is applied (2.498042ms)
+✔ repeated saves coalesce without growing callback or pending queues; capacity rejects only the new request (32.391416ms)
+✔ transient retry schedule is5,15,60 seconds and then stops; manual retry reuses the frozen batch (2.316083ms)
+✔ a superseded lost-response retry cannot attach the latest revision to an older operation (0.581292ms)
+✔ oversized saves and a full retained history stop new work without deleting older requests (21.301208ms)
+✔ a verified source save confirms the queue before public generation and retains its overlay (2.753208ms)
+✔ a source save with a mismatched receipt stays recoverable rather than confirming (0.865625ms)
+✔ authorization and conflict failures never automatically resend a source batch (0.978167ms)
+✔ cleanup retains unchanged source receipts only while their flagged publication is pending (2.179167ms)
+ℹ tests 40
+ℹ suites 0
+ℹ pass 40
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 589.68225

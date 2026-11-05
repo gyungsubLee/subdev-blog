@@ -1,0 +1,11 @@
+✔ Vercel configuration routes nested API requests and disables automatic Git deployment (2.667458ms)
+Port 5173 is in use, trying another one...
+✔ Vite serves management requests with their method, body and separate cookies (813.803542ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1112.84425

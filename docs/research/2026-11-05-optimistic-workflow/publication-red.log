@@ -1,0 +1,94 @@
+✖ workflow exposes a verified source only after its immutable publication is complete (1.357709ms)
+✖ an older workflow cannot roll back a newer ready source (0.676125ms)
+✖ lost ready-ref response recovers without generating duplicate public commits (0.273417ms)
+✖ a pending or failed new source keeps the last ready public index readable on a cold reader (40.319459ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 0
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 572.636334
+
+✖ failing tests:
+
+test at tests/server/public-publication.test.mjs:12:1
+✖ workflow exposes a verified source only after its immutable publication is complete (1.357709ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:13:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1062:25)
+      at Test.start (node:internal/test_runner/test:959:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:332:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual'
+  }
+
+test at tests/server/public-publication.test.mjs:25:1
+✖ an older workflow cannot roll back a newer ready source (0.676125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:26:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1062:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:752:18)
+      at Test.postRun (node:internal/test_runner/test:1191:19)
+      at Test.run (node:internal/test_runner/test:1119:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual'
+  }
+
+test at tests/server/public-publication.test.mjs:38:1
+✖ lost ready-ref response recovers without generating duplicate public commits (0.273417ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:39:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1062:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:752:18)
+      at Test.postRun (node:internal/test_runner/test:1191:19)
+      at Test.run (node:internal/test_runner/test:1119:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual'
+  }
+
+test at tests/server/public-publication.test.mjs:56:1
+✖ a pending or failed new source keeps the last ready public index readable on a cold reader (40.319459ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  503 !== 200
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:65:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 503,
+    expected: 200,
+    operator: 'strictEqual'
+  }

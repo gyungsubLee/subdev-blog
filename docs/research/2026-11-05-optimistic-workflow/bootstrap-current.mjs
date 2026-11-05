@@ -1,0 +1,12 @@
+import { execFileSync } from 'node:child_process';
+import { readFile, writeFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
+const folder=new URL('./',import.meta.url);
+const before=JSON.parse(await readFile(new URL('state-before.json',folder),'utf8'));
+const head=JSON.parse(execFileSync('gh',['api','repos/gyungsubLee/subdev-blog-content/git/ref/heads/main'],{encoding:'utf8',timeout:30000})).object.sha;
+if(head!==before.head)throw Error('Canonical changed before measurement; capture baseline again');
+const token=execFileSync('gh',['auth','token'],{encoding:'utf8',timeout:15000}).trim();
+const result=spawnSync('node',['app/content/scripts/publish-public-content.mjs','--commit',head,'--publish'],{env:{...process.env,GITHUB_TOKEN:token},encoding:'utf8',timeout:200000,maxBuffer:2*1024*1024});
+await writeFile(new URL('bootstrap.log',folder),result.stderr+'\n'+result.stdout);
+if(result.status!==0)throw Error('Bootstrap failed; inspect credential-free bootstrap.log');
+console.log(result.stdout.trim());

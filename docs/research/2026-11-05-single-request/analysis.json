@@ -1,0 +1,1001 @@
+{
+  "complete": true,
+  "issues": [],
+  "scope": "Real GitHub/OAuth/CSRF; production IndexedDB/background modules on a disposable browser control page. Control-page paint is not a full editor interaction benchmark.",
+  "samples": [
+    {
+      "action": "update",
+      "sample": 1,
+      "requestId": "atomic-bed214fd-cbf7-433f-9970-f03e3fb75f3f",
+      "id": "cef22cd7-268d-46f3-b866-5affa0dd4cd5",
+      "sourceCommit": "e7cf97a32afcb712295edd7c623442ee7231c17a",
+      "sourceState": "saved",
+      "clickAt": 1793851596239,
+      "durable": true,
+      "durableNotificationMs": 4.699999999254942,
+      "independentDurableReadMs": 210.69999999925494,
+      "enqueueMs": 206.19999999925494,
+      "uiPaintMs": 269.19999999925494,
+      "queueBytes": 3944,
+      "queueIncludingDebounceMs": 5101.799999999814,
+      "preSendingBeyondNominalDebounceMs": 101.79999999981374,
+      "nominalDebounceMs": 5000,
+      "clickToSourceMs": 6682,
+      "remoteExcludingDebounceMs": 1580.2000000001863,
+      "clickToSourceWithoutNominalDebounceMs": 1682,
+      "serverPost": {
+        "requests": 1,
+        "ms": 1573.646624999994,
+        "individualMs": [
+          1573.646624999994
+        ],
+        "statuses": [
+          200
+        ],
+        "browserRequestBytes": 860,
+        "browserResponseBytes": 6549,
+        "requestsBeforeUiPaint": 0,
+        "github": {
+          "calls": 1,
+          "apiCalls": 1,
+          "rawReads": 0,
+          "writes": 1,
+          "readOnlyPosts": 0,
+          "requestBytes": 1923,
+          "decodedResponseBytes": 377,
+          "unfinishedBodies": 0,
+          "notFoundCalls": 0,
+          "failedCalls": 0
+        }
+      },
+      "publication": {
+        "workflow": {
+          "complete": true,
+          "id": 41965737952,
+          "attempt": 1,
+          "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41965737952",
+          "headSha": "e7cf97a32afcb712295edd7c623442ee7231c17a",
+          "status": "completed",
+          "conclusion": "success",
+          "createdAt": "2026-11-05T04:06:44Z",
+          "startedAt": "2026-11-05T04:06:44Z",
+          "updatedAt": "2026-11-05T04:07:52Z",
+          "watchExit": 0,
+          "publisherResult": {
+            "sourceCommit": "e7cf97a32afcb712295edd7c623442ee7231c17a",
+            "publicationCommit": "e93ea4b173c5eee7dcd0d102722da6f3a7aab38f",
+            "state": "published"
+          },
+          "generatorShas": [
+            "e763d9adf0e07f77a1b0177895674f08922f9122"
+          ],
+          "malformedTraceLines": 0,
+          "github": {
+            "calls": 23,
+            "apiCalls": 18,
+            "rawReads": 5,
+            "writes": 5,
+            "readOnlyPosts": 0,
+            "requestBytes": 6903386,
+            "decodedResponseBytes": 12430407,
+            "unfinishedBodies": 0,
+            "notFoundCalls": 1,
+            "failedCalls": 1
+          },
+          "readyResponse": {
+            "startedAt": 1793851669525,
+            "responseAt": 1793851670070,
+            "ms": 545
+          },
+          "runnerGenerationStartedAt": 1793851659718
+        },
+        "runnerReadyResponseSinceBrowserClickMs": 73831,
+        "browserObservedUpperBoundMs": 105633,
+        "browserObservedAt": 1793851701872,
+        "workflowCreatedSinceClickMs": 7761,
+        "workflowStartedSinceClickMs": 7761,
+        "workflowUpdatedSinceClickMs": 75761
+      }
+    },
+    {
+      "action": "update",
+      "sample": 2,
+      "requestId": "atomic-d00088da-1d9d-4ae5-897a-420266e7e2a0",
+      "id": "cef22cd7-268d-46f3-b866-5affa0dd4cd5",
+      "sourceCommit": "d97b526fd9837d7a5bf9ab7ef85b026f65eb69b0",
+      "sourceState": "saved",
+      "clickAt": 1793851731897,
+      "durable": true,
+      "durableNotificationMs": 9.799999999813735,
+      "independentDurableReadMs": 92.5,
+      "enqueueMs": 92.09999999962747,
+      "uiPaintMs": 132,
+      "queueBytes": 6992,
+      "queueIncludingDebounceMs": 5018,
+      "preSendingBeyondNominalDebounceMs": 18,
+      "nominalDebounceMs": 5000,
+      "clickToSourceMs": 7085,
+      "remoteExcludingDebounceMs": 2067,
+      "clickToSourceWithoutNominalDebounceMs": 2085,
+      "serverPost": {
+        "requests": 1,
+        "ms": 2058.8039160000044,
+        "individualMs": [
+          2058.8039160000044
+        ],
+        "statuses": [
+          200
+        ],
+        "browserRequestBytes": 860,
+        "browserResponseBytes": 6549,
+        "requestsBeforeUiPaint": 0,
+        "github": {
+          "calls": 1,
+          "apiCalls": 1,
+          "rawReads": 0,
+          "writes": 1,
+          "readOnlyPosts": 0,
+          "requestBytes": 1932,
+          "decodedResponseBytes": 377,
+          "unfinishedBodies": 0,
+          "notFoundCalls": 0,
+          "failedCalls": 0
+        }
+      },
+      "publication": {
+        "workflow": {
+          "complete": true,
+          "id": 41965984059,
+          "attempt": 1,
+          "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41965984059",
+          "headSha": "d97b526fd9837d7a5bf9ab7ef85b026f65eb69b0",
+          "status": "completed",
+          "conclusion": "success",
+          "createdAt": "2026-11-05T04:09:00Z",
+          "startedAt": "2026-11-05T04:09:00Z",
+          "updatedAt": "2026-11-05T04:10:11Z",
+          "watchExit": 0,
+          "publisherResult": {
+            "sourceCommit": "d97b526fd9837d7a5bf9ab7ef85b026f65eb69b0",
+            "publicationCommit": "c32ef74fe8dd3531aeaeb6bc9056168f810e58f7",
+            "state": "published"
+          },
+          "generatorShas": [
+            "e763d9adf0e07f77a1b0177895674f08922f9122"
+          ],
+          "malformedTraceLines": 0,
+          "github": {
+            "calls": 23,
+            "apiCalls": 18,
+            "rawReads": 5,
+            "writes": 5,
+            "readOnlyPosts": 0,
+            "requestBytes": 6903386,
+            "decodedResponseBytes": 12430763,
+            "unfinishedBodies": 0,
+            "notFoundCalls": 1,
+            "failedCalls": 1
+          },
+          "readyResponse": {
+            "startedAt": 1793851808646,
+            "responseAt": 1793851809205,
+            "ms": 559
+          },
+          "runnerGenerationStartedAt": 1793851801273
+        },
+        "runnerReadyResponseSinceBrowserClickMs": 77308,
+        "browserObservedUpperBoundMs": 121721,
+        "browserObservedAt": 1793851853618,
+        "workflowCreatedSinceClickMs": 8103,
+        "workflowStartedSinceClickMs": 8103,
+        "workflowUpdatedSinceClickMs": 79103
+      }
+    },
+    {
+      "action": "update",
+      "sample": 3,
+      "requestId": "atomic-aced19b6-046a-471d-94c5-cd3026a72d7b",
+      "id": "cef22cd7-268d-46f3-b866-5affa0dd4cd5",
+      "sourceCommit": "da120cc94884bd0bbd33006a5bfddc29c406154a",
+      "sourceState": "saved",
+      "clickAt": 1793851890046,
+      "durable": true,
+      "durableNotificationMs": 6.2999999998137355,
+      "independentDurableReadMs": 110.40000000037253,
+      "enqueueMs": 109.40000000037253,
+      "uiPaintMs": 151.20000000018626,
+      "queueBytes": 10040,
+      "queueIncludingDebounceMs": 5012.9000000003725,
+      "preSendingBeyondNominalDebounceMs": 12.900000000372529,
+      "nominalDebounceMs": 5000,
+      "clickToSourceMs": 6623.9000000003725,
+      "remoteExcludingDebounceMs": 1611,
+      "clickToSourceWithoutNominalDebounceMs": 1623.9000000003725,
+      "serverPost": {
+        "requests": 1,
+        "ms": 1599.125999999931,
+        "individualMs": [
+          1599.125999999931
+        ],
+        "statuses": [
+          200
+        ],
+        "browserRequestBytes": 860,
+        "browserResponseBytes": 6549,
+        "requestsBeforeUiPaint": 0,
+        "github": {
+          "calls": 1,
+          "apiCalls": 1,
+          "rawReads": 0,
+          "writes": 1,
+          "readOnlyPosts": 0,
+          "requestBytes": 1932,
+          "decodedResponseBytes": 377,
+          "unfinishedBodies": 0,
+          "notFoundCalls": 0,
+          "failedCalls": 0
+        }
+      },
+      "publication": {
+        "workflow": {
+          "complete": true,
+          "id": 41966266774,
+          "attempt": 1,
+          "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41966266774",
+          "headSha": "da120cc94884bd0bbd33006a5bfddc29c406154a",
+          "status": "completed",
+          "conclusion": "success",
+          "createdAt": "2026-11-05T04:11:38Z",
+          "startedAt": "2026-11-05T04:11:38Z",
+          "updatedAt": "2026-11-05T04:12:46Z",
+          "watchExit": 0,
+          "publisherResult": {
+            "sourceCommit": "da120cc94884bd0bbd33006a5bfddc29c406154a",
+            "publicationCommit": "ef971eccb2f9c0e234e6d298407be04d380a5321",
+            "state": "published"
+          },
+          "generatorShas": [
+            "e763d9adf0e07f77a1b0177895674f08922f9122"
+          ],
+          "malformedTraceLines": 0,
+          "github": {
+            "calls": 23,
+            "apiCalls": 18,
+            "rawReads": 5,
+            "writes": 5,
+            "readOnlyPosts": 0,
+            "requestBytes": 6903386,
+            "decodedResponseBytes": 12431047,
+            "unfinishedBodies": 0,
+            "notFoundCalls": 1,
+            "failedCalls": 1
+          },
+          "readyResponse": {
+            "startedAt": 1793851963349,
+            "responseAt": 1793851963953,
+            "ms": 604
+          },
+          "runnerGenerationStartedAt": 1793851954030
+        },
+        "runnerReadyResponseSinceBrowserClickMs": 73907,
+        "browserObservedUpperBoundMs": 199604,
+        "browserObservedAt": 1793852089650,
+        "workflowCreatedSinceClickMs": 7954,
+        "workflowStartedSinceClickMs": 7954,
+        "workflowUpdatedSinceClickMs": 75954
+      }
+    }
+  ],
+  "operations": [
+    {
+      "action": "create",
+      "sample": 0,
+      "requestId": "atomic-f32295ba-a8e1-4f49-829b-fd0f5a891cd2",
+      "id": "cef22cd7-268d-46f3-b866-5affa0dd4cd5",
+      "sourceCommit": "9a6362b245e2d1a6f310a9ec2518c22ee8bb7b2a",
+      "sourceState": "saved",
+      "clickAt": 1793851455681,
+      "durable": true,
+      "durableNotificationMs": 963,
+      "independentDurableReadMs": 3374.4000000003725,
+      "enqueueMs": 3372.600000000559,
+      "uiPaintMs": 3755.600000000559,
+      "queueBytes": 1002,
+      "queueIncludingDebounceMs": 6086.600000000559,
+      "preSendingBeyondNominalDebounceMs": 1086.6000000005588,
+      "nominalDebounceMs": 5000,
+      "clickToSourceMs": 13366.400000000373,
+      "remoteExcludingDebounceMs": 7279.799999999814,
+      "clickToSourceWithoutNominalDebounceMs": 8366.400000000373,
+      "serverPost": {
+        "requests": 1,
+        "ms": 7258.601458999998,
+        "individualMs": [
+          7258.601458999998
+        ],
+        "statuses": [
+          200
+        ],
+        "browserRequestBytes": 755,
+        "browserResponseBytes": 6526,
+        "requestsBeforeUiPaint": 0,
+        "github": {
+          "calls": 4,
+          "apiCalls": 4,
+          "rawReads": 0,
+          "writes": 1,
+          "readOnlyPosts": 0,
+          "requestBytes": 2349,
+          "decodedResponseBytes": 3764538,
+          "unfinishedBodies": 0,
+          "notFoundCalls": 0,
+          "failedCalls": 0
+        }
+      },
+      "publication": {
+        "workflow": {
+          "complete": true,
+          "id": 41965497446,
+          "attempt": 1,
+          "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41965497446",
+          "headSha": "9a6362b245e2d1a6f310a9ec2518c22ee8bb7b2a",
+          "status": "completed",
+          "conclusion": "success",
+          "createdAt": "2026-11-05T04:04:30Z",
+          "startedAt": "2026-11-05T04:04:30Z",
+          "updatedAt": "2026-11-05T04:05:58Z",
+          "watchExit": 0,
+          "publisherResult": {
+            "sourceCommit": "9a6362b245e2d1a6f310a9ec2518c22ee8bb7b2a",
+            "publicationCommit": "0548032724deb706cbaf05ce13d5873ceffb3409",
+            "state": "published"
+          },
+          "generatorShas": [
+            "e763d9adf0e07f77a1b0177895674f08922f9122"
+          ],
+          "malformedTraceLines": 0,
+          "github": {
+            "calls": 23,
+            "apiCalls": 18,
+            "rawReads": 5,
+            "writes": 5,
+            "readOnlyPosts": 0,
+            "requestBytes": 6903282,
+            "decodedResponseBytes": 12427739,
+            "unfinishedBodies": 0,
+            "notFoundCalls": 1,
+            "failedCalls": 1
+          },
+          "readyResponse": {
+            "startedAt": 1793851554641,
+            "responseAt": 1793851555375,
+            "ms": 734
+          },
+          "runnerGenerationStartedAt": 1793851543295
+        },
+        "runnerReadyResponseSinceBrowserClickMs": 99694,
+        "browserObservedUpperBoundMs": null,
+        "browserObservedAt": null,
+        "workflowCreatedSinceClickMs": 14319,
+        "workflowStartedSinceClickMs": 14319,
+        "workflowUpdatedSinceClickMs": 102319
+      }
+    },
+    {
+      "action": "update",
+      "sample": 1,
+      "requestId": "atomic-bed214fd-cbf7-433f-9970-f03e3fb75f3f",
+      "id": "cef22cd7-268d-46f3-b866-5affa0dd4cd5",
+      "sourceCommit": "e7cf97a32afcb712295edd7c623442ee7231c17a",
+      "sourceState": "saved",
+      "clickAt": 1793851596239,
+      "durable": true,
+      "durableNotificationMs": 4.699999999254942,
+      "independentDurableReadMs": 210.69999999925494,
+      "enqueueMs": 206.19999999925494,
+      "uiPaintMs": 269.19999999925494,
+      "queueBytes": 3944,
+      "queueIncludingDebounceMs": 5101.799999999814,
+      "preSendingBeyondNominalDebounceMs": 101.79999999981374,
+      "nominalDebounceMs": 5000,
+      "clickToSourceMs": 6682,
+      "remoteExcludingDebounceMs": 1580.2000000001863,
+      "clickToSourceWithoutNominalDebounceMs": 1682,
+      "serverPost": {
+        "requests": 1,
+        "ms": 1573.646624999994,
+        "individualMs": [
+          1573.646624999994
+        ],
+        "statuses": [
+          200
+        ],
+        "browserRequestBytes": 860,
+        "browserResponseBytes": 6549,
+        "requestsBeforeUiPaint": 0,
+        "github": {
+          "calls": 1,
+          "apiCalls": 1,
+          "rawReads": 0,
+          "writes": 1,
+          "readOnlyPosts": 0,
+          "requestBytes": 1923,
+          "decodedResponseBytes": 377,
+          "unfinishedBodies": 0,
+          "notFoundCalls": 0,
+          "failedCalls": 0
+        }
+      },
+      "publication": {
+        "workflow": {
+          "complete": true,
+          "id": 41965737952,
+          "attempt": 1,
+          "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41965737952",
+          "headSha": "e7cf97a32afcb712295edd7c623442ee7231c17a",
+          "status": "completed",
+          "conclusion": "success",
+          "createdAt": "2026-11-05T04:06:44Z",
+          "startedAt": "2026-11-05T04:06:44Z",
+          "updatedAt": "2026-11-05T04:07:52Z",
+          "watchExit": 0,
+          "publisherResult": {
+            "sourceCommit": "e7cf97a32afcb712295edd7c623442ee7231c17a",
+            "publicationCommit": "e93ea4b173c5eee7dcd0d102722da6f3a7aab38f",
+            "state": "published"
+          },
+          "generatorShas": [
+            "e763d9adf0e07f77a1b0177895674f08922f9122"
+          ],
+          "malformedTraceLines": 0,
+          "github": {
+            "calls": 23,
+            "apiCalls": 18,
+            "rawReads": 5,
+            "writes": 5,
+            "readOnlyPosts": 0,
+            "requestBytes": 6903386,
+            "decodedResponseBytes": 12430407,
+            "unfinishedBodies": 0,
+            "notFoundCalls": 1,
+            "failedCalls": 1
+          },
+          "readyResponse": {
+            "startedAt": 1793851669525,
+            "responseAt": 1793851670070,
+            "ms": 545
+          },
+          "runnerGenerationStartedAt": 1793851659718
+        },
+        "runnerReadyResponseSinceBrowserClickMs": 73831,
+        "browserObservedUpperBoundMs": 105633,
+        "browserObservedAt": 1793851701872,
+        "workflowCreatedSinceClickMs": 7761,
+        "workflowStartedSinceClickMs": 7761,
+        "workflowUpdatedSinceClickMs": 75761
+      }
+    },
+    {
+      "action": "update",
+      "sample": 2,
+      "requestId": "atomic-d00088da-1d9d-4ae5-897a-420266e7e2a0",
+      "id": "cef22cd7-268d-46f3-b866-5affa0dd4cd5",
+      "sourceCommit": "d97b526fd9837d7a5bf9ab7ef85b026f65eb69b0",
+      "sourceState": "saved",
+      "clickAt": 1793851731897,
+      "durable": true,
+      "durableNotificationMs": 9.799999999813735,
+      "independentDurableReadMs": 92.5,
+      "enqueueMs": 92.09999999962747,
+      "uiPaintMs": 132,
+      "queueBytes": 6992,
+      "queueIncludingDebounceMs": 5018,
+      "preSendingBeyondNominalDebounceMs": 18,
+      "nominalDebounceMs": 5000,
+      "clickToSourceMs": 7085,
+      "remoteExcludingDebounceMs": 2067,
+      "clickToSourceWithoutNominalDebounceMs": 2085,
+      "serverPost": {
+        "requests": 1,
+        "ms": 2058.8039160000044,
+        "individualMs": [
+          2058.8039160000044
+        ],
+        "statuses": [
+          200
+        ],
+        "browserRequestBytes": 860,
+        "browserResponseBytes": 6549,
+        "requestsBeforeUiPaint": 0,
+        "github": {
+          "calls": 1,
+          "apiCalls": 1,
+          "rawReads": 0,
+          "writes": 1,
+          "readOnlyPosts": 0,
+          "requestBytes": 1932,
+          "decodedResponseBytes": 377,
+          "unfinishedBodies": 0,
+          "notFoundCalls": 0,
+          "failedCalls": 0
+        }
+      },
+      "publication": {
+        "workflow": {
+          "complete": true,
+          "id": 41965984059,
+          "attempt": 1,
+          "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41965984059",
+          "headSha": "d97b526fd9837d7a5bf9ab7ef85b026f65eb69b0",
+          "status": "completed",
+          "conclusion": "success",
+          "createdAt": "2026-11-05T04:09:00Z",
+          "startedAt": "2026-11-05T04:09:00Z",
+          "updatedAt": "2026-11-05T04:10:11Z",
+          "watchExit": 0,
+          "publisherResult": {
+            "sourceCommit": "d97b526fd9837d7a5bf9ab7ef85b026f65eb69b0",
+            "publicationCommit": "c32ef74fe8dd3531aeaeb6bc9056168f810e58f7",
+            "state": "published"
+          },
+          "generatorShas": [
+            "e763d9adf0e07f77a1b0177895674f08922f9122"
+          ],
+          "malformedTraceLines": 0,
+          "github": {
+            "calls": 23,
+            "apiCalls": 18,
+            "rawReads": 5,
+            "writes": 5,
+            "readOnlyPosts": 0,
+            "requestBytes": 6903386,
+            "decodedResponseBytes": 12430763,
+            "unfinishedBodies": 0,
+            "notFoundCalls": 1,
+            "failedCalls": 1
+          },
+          "readyResponse": {
+            "startedAt": 1793851808646,
+            "responseAt": 1793851809205,
+            "ms": 559
+          },
+          "runnerGenerationStartedAt": 1793851801273
+        },
+        "runnerReadyResponseSinceBrowserClickMs": 77308,
+        "browserObservedUpperBoundMs": 121721,
+        "browserObservedAt": 1793851853618,
+        "workflowCreatedSinceClickMs": 8103,
+        "workflowStartedSinceClickMs": 8103,
+        "workflowUpdatedSinceClickMs": 79103
+      }
+    },
+    {
+      "action": "update",
+      "sample": 3,
+      "requestId": "atomic-aced19b6-046a-471d-94c5-cd3026a72d7b",
+      "id": "cef22cd7-268d-46f3-b866-5affa0dd4cd5",
+      "sourceCommit": "da120cc94884bd0bbd33006a5bfddc29c406154a",
+      "sourceState": "saved",
+      "clickAt": 1793851890046,
+      "durable": true,
+      "durableNotificationMs": 6.2999999998137355,
+      "independentDurableReadMs": 110.40000000037253,
+      "enqueueMs": 109.40000000037253,
+      "uiPaintMs": 151.20000000018626,
+      "queueBytes": 10040,
+      "queueIncludingDebounceMs": 5012.9000000003725,
+      "preSendingBeyondNominalDebounceMs": 12.900000000372529,
+      "nominalDebounceMs": 5000,
+      "clickToSourceMs": 6623.9000000003725,
+      "remoteExcludingDebounceMs": 1611,
+      "clickToSourceWithoutNominalDebounceMs": 1623.9000000003725,
+      "serverPost": {
+        "requests": 1,
+        "ms": 1599.125999999931,
+        "individualMs": [
+          1599.125999999931
+        ],
+        "statuses": [
+          200
+        ],
+        "browserRequestBytes": 860,
+        "browserResponseBytes": 6549,
+        "requestsBeforeUiPaint": 0,
+        "github": {
+          "calls": 1,
+          "apiCalls": 1,
+          "rawReads": 0,
+          "writes": 1,
+          "readOnlyPosts": 0,
+          "requestBytes": 1932,
+          "decodedResponseBytes": 377,
+          "unfinishedBodies": 0,
+          "notFoundCalls": 0,
+          "failedCalls": 0
+        }
+      },
+      "publication": {
+        "workflow": {
+          "complete": true,
+          "id": 41966266774,
+          "attempt": 1,
+          "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41966266774",
+          "headSha": "da120cc94884bd0bbd33006a5bfddc29c406154a",
+          "status": "completed",
+          "conclusion": "success",
+          "createdAt": "2026-11-05T04:11:38Z",
+          "startedAt": "2026-11-05T04:11:38Z",
+          "updatedAt": "2026-11-05T04:12:46Z",
+          "watchExit": 0,
+          "publisherResult": {
+            "sourceCommit": "da120cc94884bd0bbd33006a5bfddc29c406154a",
+            "publicationCommit": "ef971eccb2f9c0e234e6d298407be04d380a5321",
+            "state": "published"
+          },
+          "generatorShas": [
+            "e763d9adf0e07f77a1b0177895674f08922f9122"
+          ],
+          "malformedTraceLines": 0,
+          "github": {
+            "calls": 23,
+            "apiCalls": 18,
+            "rawReads": 5,
+            "writes": 5,
+            "readOnlyPosts": 0,
+            "requestBytes": 6903386,
+            "decodedResponseBytes": 12431047,
+            "unfinishedBodies": 0,
+            "notFoundCalls": 1,
+            "failedCalls": 1
+          },
+          "readyResponse": {
+            "startedAt": 1793851963349,
+            "responseAt": 1793851963953,
+            "ms": 604
+          },
+          "runnerGenerationStartedAt": 1793851954030
+        },
+        "runnerReadyResponseSinceBrowserClickMs": 73907,
+        "browserObservedUpperBoundMs": 199604,
+        "browserObservedAt": 1793852089650,
+        "workflowCreatedSinceClickMs": 7954,
+        "workflowStartedSinceClickMs": 7954,
+        "workflowUpdatedSinceClickMs": 75954
+      }
+    },
+    {
+      "action": "delete",
+      "sample": 3,
+      "requestId": "atomic-795d3b6e-3530-469e-8466-bbdac45c8dca",
+      "id": "cef22cd7-268d-46f3-b866-5affa0dd4cd5",
+      "sourceCommit": "e372601f49becb56792093c584822451f678a2ae",
+      "sourceState": "saved",
+      "clickAt": 1793852132436,
+      "durable": false,
+      "durableNotificationMs": null,
+      "independentDurableReadMs": null,
+      "enqueueMs": null,
+      "uiPaintMs": null,
+      "queueBytes": null,
+      "queueIncludingDebounceMs": null,
+      "preSendingBeyondNominalDebounceMs": null,
+      "nominalDebounceMs": 0,
+      "clickToSourceMs": 2620.899999999441,
+      "remoteExcludingDebounceMs": null,
+      "clickToSourceWithoutNominalDebounceMs": 2620.899999999441,
+      "serverPost": {
+        "requests": 1,
+        "ms": 2615.847084000008,
+        "individualMs": [
+          2615.847084000008
+        ],
+        "statuses": [
+          200
+        ],
+        "browserRequestBytes": 384,
+        "browserResponseBytes": 291,
+        "requestsBeforeUiPaint": null,
+        "github": {
+          "calls": 1,
+          "apiCalls": 1,
+          "rawReads": 0,
+          "writes": 1,
+          "readOnlyPosts": 0,
+          "requestBytes": 1333,
+          "decodedResponseBytes": 377,
+          "unfinishedBodies": 0,
+          "notFoundCalls": 0,
+          "failedCalls": 0
+        }
+      },
+      "publication": {
+        "workflow": {
+          "complete": true,
+          "id": 41966688217,
+          "attempt": 1,
+          "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41966688217",
+          "headSha": "e372601f49becb56792093c584822451f678a2ae",
+          "status": "completed",
+          "conclusion": "success",
+          "createdAt": "2026-11-05T04:15:36Z",
+          "startedAt": "2026-11-05T04:15:36Z",
+          "updatedAt": "2026-11-05T04:16:46Z",
+          "watchExit": 0,
+          "publisherResult": {
+            "sourceCommit": "e372601f49becb56792093c584822451f678a2ae",
+            "publicationCommit": "99acdfe59b2e2ebee9540aa326457ccc317de188",
+            "state": "published"
+          },
+          "generatorShas": [
+            "e763d9adf0e07f77a1b0177895674f08922f9122"
+          ],
+          "malformedTraceLines": 0,
+          "github": {
+            "calls": 22,
+            "apiCalls": 18,
+            "rawReads": 4,
+            "writes": 5,
+            "readOnlyPosts": 0,
+            "requestBytes": 6901629,
+            "decodedResponseBytes": 12429650,
+            "unfinishedBodies": 0,
+            "notFoundCalls": 1,
+            "failedCalls": 1
+          },
+          "readyResponse": {
+            "startedAt": 1793852203264,
+            "responseAt": 1793852203905,
+            "ms": 641
+          },
+          "runnerGenerationStartedAt": 1793852193911
+        },
+        "runnerReadyResponseSinceBrowserClickMs": 71469,
+        "browserObservedUpperBoundMs": 131857,
+        "browserObservedAt": 1793852264293,
+        "workflowCreatedSinceClickMs": 3564,
+        "workflowStartedSinceClickMs": 3564,
+        "workflowUpdatedSinceClickMs": 73564
+      }
+    }
+  ],
+  "inventory": {
+    "complete": true,
+    "beforeCommit": "fc5e526e770990ad3e294bf126b850a6ac00e6d0",
+    "afterCommit": "e372601f49becb56792093c584822451f678a2ae",
+    "beforeFiles": 10292,
+    "afterFiles": 10297,
+    "beforePosts": 3032,
+    "afterPosts": 3032,
+    "allOriginalFileShasMatch": true,
+    "postCountMatches": true,
+    "differenceCount": 5,
+    "differencePaths": [
+      ".cms/requests/atomic-795d3b6e-3530-469e-8466-bbdac45c8dca.json",
+      ".cms/requests/atomic-aced19b6-046a-471d-94c5-cd3026a72d7b.json",
+      ".cms/requests/atomic-bed214fd-cbf7-433f-9970-f03e3fb75f3f.json",
+      ".cms/requests/atomic-d00088da-1d9d-4ae5-897a-420266e7e2a0.json",
+      ".cms/requests/atomic-f32295ba-a8e1-4f49-829b-fd0f5a891cd2.json"
+    ],
+    "beforeReady": "fc5e526e770990ad3e294bf126b850a6ac00e6d0",
+    "afterReady": "e372601f49becb56792093c584822451f678a2ae",
+    "afterGenerator": "e763d9adf0e07f77a1b0177895674f08922f9122",
+    "afterPin": "e763d9adf0e07f77a1b0177895674f08922f9122",
+    "retainedTaskReceipts": [
+      ".cms/requests/atomic-795d3b6e-3530-469e-8466-bbdac45c8dca.json",
+      ".cms/requests/atomic-aced19b6-046a-471d-94c5-cd3026a72d7b.json",
+      ".cms/requests/atomic-bed214fd-cbf7-433f-9970-f03e3fb75f3f.json",
+      ".cms/requests/atomic-d00088da-1d9d-4ae5-897a-420266e7e2a0.json",
+      ".cms/requests/atomic-f32295ba-a8e1-4f49-829b-fd0f5a891cd2.json"
+    ],
+    "changedOriginals": [],
+    "receiptCleanupVerified": true
+  },
+  "sourceBindings": {
+    "files": 18,
+    "changedPaths": [],
+    "missingPaths": [],
+    "matches": true
+  },
+  "traffic": {
+    "sourcePosts": {
+      "appRequests": 5,
+      "appRequestBytes": 3719,
+      "appResponseBytes": 26464,
+      "github": {
+        "calls": 8,
+        "apiCalls": 8,
+        "rawReads": 0,
+        "writes": 5,
+        "readOnlyPosts": 0,
+        "requestBytes": 9469,
+        "decodedResponseBytes": 3766046,
+        "unfinishedBodies": 0,
+        "notFoundCalls": 0,
+        "failedCalls": 0
+      }
+    },
+    "publicationPolling": {
+      "appRequests": 81,
+      "appRequestBytes": 0,
+      "appResponseBytes": 15840,
+      "github": {
+        "calls": 447,
+        "apiCalls": 366,
+        "rawReads": 81,
+        "writes": 0,
+        "readOnlyPosts": 0,
+        "requestBytes": 0,
+        "decodedResponseBytes": 45561270,
+        "unfinishedBodies": 0,
+        "notFoundCalls": 0,
+        "failedCalls": 0
+      }
+    },
+    "publicReads": {
+      "appRequests": 5,
+      "appRequestBytes": 0,
+      "appResponseBytes": 6486373,
+      "github": {
+        "calls": 20,
+        "apiCalls": 10,
+        "rawReads": 10,
+        "writes": 0,
+        "readOnlyPosts": 0,
+        "requestBytes": 0,
+        "decodedResponseBytes": 30108877,
+        "unfinishedBodies": 0,
+        "notFoundCalls": 0,
+        "failedCalls": 0
+      }
+    },
+    "sourcePreparationReads": {
+      "appRequests": 6,
+      "appRequestBytes": 0,
+      "appResponseBytes": 38326,
+      "github": {
+        "calls": 6,
+        "apiCalls": 6,
+        "rawReads": 0,
+        "writes": 0,
+        "readOnlyPosts": 1,
+        "requestBytes": 856,
+        "decodedResponseBytes": 10924,
+        "unfinishedBodies": 0,
+        "notFoundCalls": 0,
+        "failedCalls": 0
+      }
+    },
+    "sessionAndAuth": {
+      "appRequests": 4,
+      "appRequestBytes": 0,
+      "appResponseBytes": 434,
+      "github": {
+        "calls": 13,
+        "apiCalls": 12,
+        "rawReads": 0,
+        "writes": 1,
+        "readOnlyPosts": 0,
+        "requestBytes": 244,
+        "decodedResponseBytes": 1157122,
+        "unfinishedBodies": 0,
+        "notFoundCalls": 0,
+        "failedCalls": 0
+      }
+    }
+  },
+  "medians": {
+    "durableNotificationMs": 6.2999999998137355,
+    "independentDurableReadMs": 110.40000000037253,
+    "enqueueMs": 109.40000000037253,
+    "uiPaintMs": 151.20000000018626,
+    "queueIncludingDebounceMs": 5018,
+    "clickToSourceMs": 6682,
+    "remoteExcludingDebounceMs": 1611
+  },
+  "publicationMedians": {
+    "runnerReadyResponseSinceBrowserClickMs": 73907,
+    "browserObservedUpperBoundMs": 121721
+  },
+  "sourcePostComparison": {
+    "before": {
+      "medianMs": 6122.268457999977,
+      "calls": 12,
+      "writes": 4,
+      "requestBytes": 1275,
+      "decodedResponseBytes": 3770349
+    },
+    "after": {
+      "medianMs": 1599.125999999931,
+      "representativeSample": 3,
+      "github": {
+        "calls": 1,
+        "apiCalls": 1,
+        "rawReads": 0,
+        "writes": 1,
+        "readOnlyPosts": 0,
+        "requestBytes": 1932,
+        "decodedResponseBytes": 377,
+        "unfinishedBodies": 0,
+        "notFoundCalls": 0,
+        "failedCalls": 0
+      }
+    },
+    "measuredImprovementPercent": 73.88017185181825
+  },
+  "notes": [
+    "Source POST baseline is server HTTP time; it is not a click-to-device or click-to-screen baseline.",
+    "Each local/queue median is selected independently. Source POST calls/bytes use the sample with the median POST time.",
+    "remoteExcludingDebounceMs is the browser sending-notification-to-source-ACK interval; it excludes the entire pre-send queue. clickToSourceWithoutNominalDebounceMs subtracts only the nominal 5000 ms.",
+    "Ready response completion is publisher startedAt + measured ms. Subtracting browser clickAt compares runner and browser wall clocks; no clock synchronization or skew bound was measured.",
+    "Browser publication checks are polling upper bounds. Workflow updatedAt includes post-publication job cleanup.",
+    "Workflow traffic covers instrumented publisher GitHub/raw calls only; checkout, npm, Actions log retrieval, watch polling and capture-state diagnostic requests are excluded.",
+    "Source preparation classifies only POST /graphql within the bound GET /api/content?kind=categories trace as the explicit readOnly ReadCategories query; other GraphQL POSTs remain writes. Calls and byte totals retain the query.",
+    "Unfinished source POST response bodies are preserved in the counts; the expected request-ref 404 probes may leave these bodies unfinished. No complete-body or compressed-wire claim is made.",
+    "Traffic failedCalls includes expected GitHub 404 misses; it does not by itself indicate a failed save or workflow.",
+    "Workflow traffic is separate from source POST and application publication polling/read traffic. Request bytes exclude HTTP/TLS headers; decoded response bytes are not compressed wire bytes.",
+    "Browser large-queue memory safety and the full editor save interaction are outside these small disposable control-page samples.",
+    "Missing evidence remains incomplete; no zero-valued timing or original inventory is inferred for absent files.",
+    "Comparison baseline is previous actual12call source POST6.122268s, not the older26call18.613s baseline."
+  ],
+  "receiptProofs": [
+    {
+      "path": ".cms/requests/atomic-f32295ba-a8e1-4f49-829b-fd0f5a891cd2.json",
+      "baseCommit": "fc5e526e770990ad3e294bf126b850a6ac00e6d0",
+      "payloadHash": "72cf93bc6119d2a8381fb3c36d36414ff5e2321b36942f640541809b2a9b73b8",
+      "expected": "88c009c6d0f0344a7edc94300dec0138a19c98c1",
+      "actual": "88c009c6d0f0344a7edc94300dec0138a19c98c1",
+      "matches": true
+    },
+    {
+      "path": ".cms/requests/atomic-bed214fd-cbf7-433f-9970-f03e3fb75f3f.json",
+      "baseCommit": "9a6362b245e2d1a6f310a9ec2518c22ee8bb7b2a",
+      "payloadHash": "5d7a9f3e62ee1f8112d78964569a7922fe12bf304020aa8bcaea446e238634de",
+      "expected": "738953ec730039b54562a72a4face7ac61421600",
+      "actual": "738953ec730039b54562a72a4face7ac61421600",
+      "matches": true
+    },
+    {
+      "path": ".cms/requests/atomic-d00088da-1d9d-4ae5-897a-420266e7e2a0.json",
+      "baseCommit": "e7cf97a32afcb712295edd7c623442ee7231c17a",
+      "payloadHash": "0ed15bf2135b400b2d048ae8d21c197c45e21a204d1bb722282145f85f5826a1",
+      "expected": "8d50e05c674159a4bae97680924ccd612b6547ce",
+      "actual": "8d50e05c674159a4bae97680924ccd612b6547ce",
+      "matches": true
+    },
+    {
+      "path": ".cms/requests/atomic-aced19b6-046a-471d-94c5-cd3026a72d7b.json",
+      "baseCommit": "d97b526fd9837d7a5bf9ab7ef85b026f65eb69b0",
+      "payloadHash": "09348912b982cd67171d434092528c92be8868da34aa843e3f43155a1d370be2",
+      "expected": "6cca4c488df744504bf1f7958a09db36cd45352a",
+      "actual": "6cca4c488df744504bf1f7958a09db36cd45352a",
+      "matches": true
+    },
+    {
+      "path": ".cms/requests/atomic-795d3b6e-3530-469e-8466-bbdac45c8dca.json",
+      "baseCommit": "da120cc94884bd0bbd33006a5bfddc29c406154a",
+      "payloadHash": "6d068a76f36d6e30e5728f9d40680ebcc5d615e20ca9ea82f63fb138617bf0b3",
+      "expected": "602c3593bce0f88a947a25df0ffb5aafcbca5d21",
+      "actual": "602c3593bce0f88a947a25df0ffb5aafcbca5d21",
+      "matches": true
+    }
+  ],
+  "recoveryEvidence": {
+    "event": {
+      "event": "actual-recovery",
+      "requestId": "atomic-aced19b6-046a-471d-94c5-cd3026a72d7b",
+      "expectedCommit": "da120cc94884bd0bbd33006a5bfddc29c406154a",
+      "actualCommit": "da120cc94884bd0bbd33006a5bfddc29c406154a",
+      "sameCommit": true,
+      "state": "saved",
+      "ms": 4464.700000000186
+    },
+    "status": 200,
+    "githubCalls": 8,
+    "readOnlyGraphqlRequestBytes": 738,
+    "mutationRequests": 0,
+    "canonicalHeadAfter": "da120cc94884bd0bbd33006a5bfddc29c406154a",
+    "sourceUnchanged": true,
+    "classification": "Known bound RecoverAtomicSave query has exact738-byte body; other requests are GET. Raw trace preserved."
+  },
+  "singleRequestVerified": true
+}

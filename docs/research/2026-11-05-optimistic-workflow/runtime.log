@@ -1,0 +1,225 @@
+✔ Vercel configuration routes nested API requests and disables automatic Git deployment (3.374084ms)
+11:48:54 AM [vite] (client) Re-optimizing dependencies because vite config has changed
+Port 5173 is in use, trying another one...
+(!) Failed to run dependency scan. Skipping dependency pre-bundling. Error:   Failed to scan for dependencies from entries:
+  /Users/igyeongseob/Develop/10_harness/subdev-blog/app/web/index.html
+
+  [31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    node_modules/esbuild/lib/main.js:1502:27:
+[37m      1502 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:28810:32)
+    at EnvironmentPluginContainer.resolveId (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:28942:65)
+    at resolveId (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31751:38)
+    at resolve$4 (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31756:22)
+    at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31881:28
+    at requestCallbacks.on-resolve (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1502:28)
+    at handleRequest (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:911:17)
+    at handleIncomingPacket (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:936:7)
+    at Socket.readFromStdout (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:864:7)
+    at Socket.emit (node:events:507:28)
+
+  This error came from the "onResolve" callback registered here:
+
+    node_modules/esbuild/lib/main.js:1426:20:
+[37m      1426 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31878:12)
+    at handlePlugins (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1426:21)
+    at buildOrContextImpl (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1139:5)
+    at Object.buildOrContext (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:963:5)
+    at /Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:2329:68
+    at new Promise (<anonymous>)
+    at Object.context (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:2329:27)
+    at Object.context (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:2171:58)
+    at prepareEsbuildScanner (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31705:23)
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    app/web/src/main.tsx:1:18:
+[37m      1 │ import React from [32m"react"[37m;
+        ╵                   [32m~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    node_modules/esbuild/lib/main.js:1502:27:
+[37m      1502 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:28810:32)
+    at EnvironmentPluginContainer.resolveId (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:28942:65)
+    at resolveId (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31751:38)
+    at resolve$4 (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31756:22)
+    at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31881:28
+    at requestCallbacks.on-resolve (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1502:28)
+    at handleRequest (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:911:17)
+    at handleIncomingPacket (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:936:7)
+    at Socket.readFromStdout (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:864:7)
+    at Socket.emit (node:events:507:28)
+
+  This error came from the "onResolve" callback registered here:
+
+    node_modules/esbuild/lib/main.js:1426:20:
+[37m      1426 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31878:12)
+    at handlePlugins (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1426:21)
+    at buildOrContextImpl (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1139:5)
+    at Object.buildOrContext (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:963:5)
+    at /Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:2329:68
+    at new Promise (<anonymous>)
+    at Object.context (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:2329:27)
+    at Object.context (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:2171:58)
+    at prepareEsbuildScanner (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31705:23)
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    app/web/src/main.tsx:2:21:
+[37m      2 │ import ReactDOM from [32m"react-dom/client"[37m;
+        ╵                      [32m~~~~~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    node_modules/esbuild/lib/main.js:1502:27:
+[37m      1502 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:28810:32)
+    at EnvironmentPluginContainer.resolveId (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:28942:65)
+    at resolveId (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31751:38)
+    at resolve$4 (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31756:22)
+    at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31909:28
+    at requestCallbacks.on-resolve (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1502:28)
+    at handleRequest (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:911:17)
+    at handleIncomingPacket (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:936:7)
+    at Socket.readFromStdout (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:864:7)
+    at Socket.emit (node:events:507:28)
+
+  This error came from the "onResolve" callback registered here:
+
+    node_modules/esbuild/lib/main.js:1426:20:
+[37m      1426 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31908:12)
+    at handlePlugins (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1426:21)
+    at buildOrContextImpl (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1139:5)
+    at Object.buildOrContext (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:963:5)
+    at /Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:2329:68
+    at new Promise (<anonymous>)
+    at Object.context (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:2329:27)
+    at Object.context (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:2171:58)
+    at prepareEsbuildScanner (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31705:23)
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    app/web/src/main.tsx:4:16:
+[37m      4 │ import App from [32m"./site/App"[37m;
+        ╵                 [32m~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    node_modules/esbuild/lib/main.js:1502:27:
+[37m      1502 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:28810:32)
+    at EnvironmentPluginContainer.resolveId (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:28942:65)
+    at resolveId (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31751:38)
+    at resolve$4 (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31756:22)
+    at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31909:28
+    at requestCallbacks.on-resolve (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1502:28)
+    at handleRequest (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:911:17)
+    at handleIncomingPacket (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:936:7)
+    at Socket.readFromStdout (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:864:7)
+    at Socket.emit (node:events:507:28)
+
+  This error came from the "onResolve" callback registered here:
+
+    node_modules/esbuild/lib/main.js:1426:20:
+[37m      1426 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31908:12)
+    at handlePlugins (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1426:21)
+    at buildOrContextImpl (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1139:5)
+    at Object.buildOrContext (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:963:5)
+    at /Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:2329:68
+    at new Promise (<anonymous>)
+    at Object.context (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:2329:27)
+    at Object.context (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:2171:58)
+    at prepareEsbuildScanner (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31705:23)
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    app/web/src/main.tsx:5:32:
+[37m      5 │ import { initializeTheme } from [32m"./features/theme-settings/theme"[37m;
+        ╵                                 [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mThe server is being restarted or closed. Request is outdated[0m [1m[35m[plugin vite:dep-scan][0m
+
+    node_modules/esbuild/lib/main.js:1502:27:
+[37m      1502 │         let result = await [32m[37mcallback({
+           ╵                            [32m^[0m
+
+    at throwClosedServerError (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:28810:32)
+    at EnvironmentPluginContainer.resolveId (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:28942:65)
+    at resolveId (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31751:38)
+    at resolve$4 (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31756:22)
+    at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31881:28
+    at requestCallbacks.on-resolve (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1502:28)
+    at handleRequest (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:911:17)
+    at handleIncomingPacket (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:936:7)
+    at Socket.readFromStdout (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:864:7)
+    at Socket.emit (node:events:507:28)
+
+  This error came from the "onResolve" callback registered here:
+
+    node_modules/esbuild/lib/main.js:1426:20:
+[37m      1426 │       let promise = [32m[37msetup({
+           ╵                     [32m^[0m
+
+    at setup (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31878:12)
+    at handlePlugins (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1426:21)
+    at buildOrContextImpl (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1139:5)
+    at Object.buildOrContext (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:963:5)
+    at /Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:2329:68
+    at new Promise (<anonymous>)
+    at Object.context (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:2329:27)
+    at Object.context (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:2171:58)
+    at prepareEsbuildScanner (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/vite/dist/node/chunks/config.js:31705:23)
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    app/web/src/main.tsx:11:4:
+[37m      11 │     [32m[37m<App />
+         ╵     [32m^[0m
+
+
+    at failureErrorWithLog (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1752:15)
+    at /Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1211:25
+    at runOnEndCallbacks (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1592:45)
+    at buildResponseToResult (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1209:7)
+    at /Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1221:9
+    at new Promise (<anonymous>)
+    at requestCallbacks.on-end (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:1220:54)
+    at handleRequest (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:911:17)
+    at handleIncomingPacket (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:936:7)
+    at Socket.readFromStdout (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/esbuild/lib/main.js:864:7)
+✔ Vite serves management requests with their method, body and separate cookies (1171.119709ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1620.723625

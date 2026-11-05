@@ -1,0 +1,21 @@
+{
+  "root": "/Users/igyeongseob/Develop/10_harness/subdev-blog",
+  "sha256": {
+    "app/server/src/auth.mjs": "1c8187efed7421d31d504091464c96547d9335825bec5052789ba7e474079ef0",
+    "app/server/src/handler.mjs": "47f5fd955a887dbd6788eae408d1c2563c67fd5049b7e83d54a6fe340d304783",
+    "app/server/src/native-auth.mjs": "7aecb92efa8b8f6b7ea9cbf26ebd2f02943b1f4a433bfc4dd03c7b1705af797f",
+    "app/server/src/content.mjs": "dcbc5b8b75ee2262ce78e7e7c2dff90231a730a5fd7773db0814d728ce9df943",
+    "app/server/src/management-read-cache.mjs": "c3806abe6669df5adf2251974001ca50398f1c1b3fe220f923e76ada04045b5f",
+    "app/native/SecondBrain.swift": "6a81d62919a68b879e524e51cdb08c0075fa01177b79739f0b3f26327c68eebf",
+    "app/web/src/features/content-management/types.ts": "8e5693222d461a289dedb2e3591e76131f07125cb1601dbb0db8acf489f41092",
+    "tests/server/session-hour.test.mjs": "5ddb535542380ec58c1a969b3d284a8f3d068ea17ddfb431f7e6dea4a91d4d2e",
+    "tests/support/authorized-session.mjs": "510e14137042f7f00d4d5c37b6eb78cf4597e406a538ed4b82657fcc3f2f3c8c",
+    "tests/server/management-category-read.test.mjs": "b0f0ebeb46a8e8eee9122fff97cee77482f496624ea80ec4ddf47aacf2d49afc",
+    "tests/native/native-auth.test.mjs": "965eff67f1f424d9e2e0e99bd9109e34f89822870657bc7dd3ce24a4c50855f9",
+    "package-lock.json": "6e4f60584ce2a92166d835f42821f842d6565dfd493882722d06c2ec2d2e67ff",
+    "dist/web/build-info.json": "4e66f08d3910553500d20561acff6dea12afd1f4df5c89e57f1b45898291f99f",
+    "dist/native/Second Brain.app/Contents/MacOS/SecondBrain": "f79d0ee8aafe951efc6011a0d292f2a55fd4cfacc83db5be71e4d6e041131cff",
+    "docs/research/2026-11-04-github-auth/session-hour/compare-live.mjs": "7ee3e9d58535c00fc2cb7f7029902b5c4a0da9522011b19db37b61706b16238f",
+    "docs/research/2026-11-04-github-auth/session-hour/compare-live-cold.mjs": "cd28949cb534e72ba180662d469c0d7c556df09cecca6691d519c0b2173dbcfc"
+  }
+}

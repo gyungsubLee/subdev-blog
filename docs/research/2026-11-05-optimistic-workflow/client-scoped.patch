@@ -1,0 +1,608 @@
+--- a/app/web/src/features/content-management/ManagedCategories.tsx
++++ b/app/web/src/features/content-management/ManagedCategories.tsx
+@@ -177,7 +177,10 @@
+           setPublication({...next,background:true});
+           setError("");
+         }
+-        onSaved?.(next.contentCommit);
++        if(next.state!=="saved"&&!next.publicationPending)onSaved?.(next.contentCommit);
++      } else if(detail.state === "publication") {
++        const saved = JSON.parse(localStorage.getItem(draftKey) ?? "null");
++        if(detail.batch.items.some((item:{clientRequestId:string})=>item.clientRequestId===saved?.requestId))setPublication({...detail.result,background:true});
+       } else if(detail.state === "failed") {
+         setNeedsLogin(detail.error?.status === 401);
+         setError(detail.error?.message ?? "분류를 저장하지 못했습니다. 편집 내용은 유지합니다.");
+--- a/app/web/src/features/content-management/ManagedPostEditor.tsx
++++ b/app/web/src/features/content-management/ManagedPostEditor.tsx
+@@ -681,7 +681,10 @@
+         if(detail.batch.items.some((item:{clientRequestId:string})=>item.clientRequestId===saved?.requestId)) {
+           setPublication({...detail.result,background:true});setError("");
+         }
+-        onSaved?.(detail.result.contentCommit);
++        if(detail.result.state!=="saved"&&!detail.result.publicationPending)onSaved?.(detail.result.contentCommit);
++      } else if(detail.state==="publication") {
++        const saved = JSON.parse(localStorage.getItem(draftKey) ?? "null") as SourceDraft | null;
++        if(detail.batch.items.some((item:{clientRequestId:string})=>item.clientRequestId===saved?.requestId))setPublication({...detail.result,background:true});
+       } else if(detail.state==="failed") {
+         setNeedsLogin(detail.error?.status===401);
+         setError(detail.error?.message ?? "저장하지 못했습니다. 초안은 유지합니다.");
+--- a/app/web/src/features/content-management/PublishStatus.tsx
++++ b/app/web/src/features/content-management/PublishStatus.tsx
+@@ -29,7 +29,7 @@
+   const { requestId, candidateCommit, state } = publication;
+ 
+   useEffect(() => {
+-    if (!["validating", "saved"].includes(state) || !candidateCommit) return;
++    if (publication.background || !["validating", "saved"].includes(state) || !candidateCommit) return;
+     let active = true;
+     let timer: ReturnType<typeof setTimeout>;
+     async function poll() {
+@@ -51,7 +51,7 @@
+     }
+     timer = setTimeout(poll, 1500);
+     return () => { active = false; clearTimeout(timer); };
+-  }, [requestId, candidateCommit, state, onChange]);
++  }, [requestId, candidateCommit, state, publication.background, onChange]);
+ 
+   async function retry() {
+     try {
+--- a/app/web/src/features/content-management/background-sync.mjs
++++ b/app/web/src/features/content-management/background-sync.mjs
+@@ -1,5 +1,5 @@
+ import { syncStore } from './sync-store.mjs';
+-import { createSyncEngine, DAY_MS, syncTarget, payloadHash } from './sync-core.mjs';
++import { createSyncEngine, DAY_MS, syncTarget, payloadHash, isSourcePending } from './sync-core.mjs';
+ import { requestApi, sendApi } from './api';
+ import { readPublicCache, writePublicCache } from '../../site/public-cache';
+ 
+@@ -13,6 +13,9 @@
+ let started = false;
+ let channel;
+ let cacheWork = Promise.resolve();
++let publicationTimer;
++let checkingPublications;
++let publicationController;
+ const serializeCache = work => { const next=cacheWork.then(work);cacheWork=next.catch(()=>{});return next; };
+ 
+ function emit(detail) {
+@@ -54,12 +57,31 @@
+ }
+ export async function overlayContent(index) {
+   if (!context) return index;
+-  const state=await syncStore.read(syncScope(context));
++  const scope=syncScope(context);
++  const state=await syncStore.read(scope);
++  const reflected=state.history.filter(batch=>batch.state==='confirmed'&&isSourcePending(batch.result)&&
++    !batch.publicApplied&&batch.publication?.state==='published'&&batch.publication.publicCommit===index.contentCommit);
++  if(reflected.length)await syncStore.update(scope,current=>{
++    for(const batch of current.history) {
++      if(reflected.some(value=>value.payload.requestId===batch.payload.requestId)&&
++        batch.publication?.state==='published'&&batch.publication.publicCommit===index.contentCommit)batch.publicApplied=true;
++    }
++  });
++  const saved=state.history.filter(batch=>batch.state==='confirmed'&&isSourcePending(batch.result)&&
++    !batch.publicApplied&&!reflected.includes(batch));
+   const latest=new Map();
+-  for(const item of [...(state.active?.items??[]),...state.pending]) {
++  for(const item of [...saved.flatMap(batch=>batch.items),...(state.active?.items??[]),...state.pending]) {
+     if(!latest.has(item.target)||latest.get(item.target).version<item.version)latest.set(item.target,item);
+   }
+-  return applyOperations(index,[...latest.values()].map(item=>item.operation));
++  let confirmed;
++  let confirmedVersion=-1;
++  for(const batch of saved) {
++    const version=Math.max(...batch.items.map(item=>item.version));
++    if(version>confirmedVersion){confirmed=batch;confirmedVersion=version;}
++  }
++  const sourceCommit=confirmed?.result.contentCommit??index.contentCommit;
++  return {...applyOperations(index,[...latest.values()].map(item=>item.operation)),
++    sourceCommit};
+ }
+ 
+ async function recordReceipt(event) {
+@@ -102,12 +124,12 @@
+     localStorage.setItem(item.draftKey,JSON.stringify({
+       ...draft, syncVersion:item.version, revision:baseline.revision,contentCommit:baseline.contentCommit,
+       ...(source ? {sourceDocument:source,canonicalId:source.document.metadata.id} : {}),
+-      publication:same?{state:result.state,requestId:result.requestId,candidateCommit:result.candidateCommit,contentCommit:result.contentCommit,commitUrl:result.commitUrl,background:true}:undefined,
++      publication:same?{state:result.state,requestId:result.requestId,candidateCommit:result.candidateCommit,contentCommit:result.contentCommit,commitUrl:result.commitUrl,publicationPending:result.publicationPending,background:true}:undefined,
+     }));
+   }
+   const index = await readPublicCache('/api/public?kind=index');
+   if (index && Array.isArray(index.posts) && (index.syncVersion??0)<=batchVersion) {
+-    await writePublicCache('/api/public?kind=index',{...index,contentCommit:result.contentCommit,syncVersion:batchVersion});
++    await writePublicCache('/api/public?kind=index',{...index,syncVersion:batchVersion});
+   }
+ }
+ async function applyConfirmation(event) {
+@@ -125,7 +147,7 @@
+       if(!stored)return;
+       stored.applied=true;
+       const result=stored.result;
+-      stored.result={state:result.state,requestId:result.requestId,contentCommit:result.contentCommit,candidateCommit:result.candidateCommit,commitUrl:result.commitUrl,receipt:result.receipt};
++      stored.result={state:result.state,requestId:result.requestId,contentCommit:result.contentCommit,candidateCommit:result.candidateCommit,commitUrl:result.commitUrl,receipt:result.receipt,publicationPending:result.publicationPending};
+     });
+   });
+   // Native Web Locks serialize receipt/cache application across open tabs.
+@@ -141,6 +163,59 @@
+       try { await applyConfirmation({scope,batch,result:batch.result}); }
+       catch(error) { emit({scope,error}); }
+     }
++  }
++}
++function schedulePublications(scope,delay=1500,explicit=false) {
++  clearTimeout(publicationTimer);
++  if(!started)return;
++  publicationTimer=setTimeout(()=>{publicationTimer=undefined;void checkPublications(scope,explicit).catch(error=>emit({scope,error}));},delay);
++  publicationTimer?.unref?.();
++}
++async function checkPublications(scope,explicit) {
++  if(checkingPublications)return;
++  checkingPublications=true;
++  const controller=new AbortController();
++  publicationController=controller;
++  try {
++    const state=await syncStore.read(scope);
++    const waiting=state.history.filter(batch=>batch.state==='confirmed'&&batch.applied&&isSourcePending(batch.result)&&!batch.publicApplied&&
++      (explicit||(!batch.publicationBlocked&&batch.publication?.state!=='failed')));
++    for(const batch of waiting) {
++      if(!started||controller.signal.aborted||!context||syncScope(context)!==scope)break;
++      try {
++        const sourceOnly=batch.result.state==='unchanged';
++        const params=new URLSearchParams(sourceOnly?{sourceCommit:batch.result.contentCommit}:
++          {requestId:batch.payload.requestId,candidateCommit:batch.result.candidateCommit??batch.result.contentCommit});
++        const result=await requestApi('/api/publish?'+params,{signal:AbortSignal.any([controller.signal,AbortSignal.timeout(30000)])});
++        const matchesSource=sourceOnly?result.sourceCommit===batch.result.contentCommit:
++          result.requestId===batch.payload.requestId&&result.candidateCommit===(batch.result.candidateCommit??batch.result.contentCommit);
++        if(!matchesSource||
++          !['saved','published','failed','superseded'].includes(result.state)||
++          (result.state==='published'&&!/^[a-f0-9]{40}$/.test(result.publicCommit??'')))throw new Error('공개 반영을 확인하지 못했습니다.');
++        await syncStore.update(scope,current=>{
++          const saved=current.history.find(item=>item.payload.requestId===batch.payload.requestId&&item.hash===batch.hash);
++          if(saved){saved.publication=result;saved.publicationBlocked=false;}
++        });
++        for(const item of batch.items) {
++          const draft=JSON.parse(localStorage.getItem(item.draftKey)??'null');
++          if(draft?.requestId===item.clientRequestId)localStorage.setItem(item.draftKey,JSON.stringify({...draft,publication:{...batch.result,...result,background:true}}));
++        }
++        emit({scope,state:'publication',batch,result:{...batch.result,...result,background:true}});
++      } catch(error) {
++        if(controller.signal.aborted)break;
++        const blocked=[401,403,409].includes(Number(error.status));
++        await syncStore.update(scope,current=>{
++          const saved=current.history.find(item=>item.payload.requestId===batch.payload.requestId&&item.hash===batch.hash);
++          if(saved){saved.publicationBlocked=blocked;saved.publicationError=error.message;}
++        });
++        emit({scope,state:'publication',batch,result:{...batch.result,background:true,error:error.message}});
++      }
++    }
++    const current=await syncStore.read(scope);
++    if(current.history.some(batch=>batch.state==='confirmed'&&isSourcePending(batch.result)&&!batch.publicApplied&&!batch.publicationBlocked&&batch.publication?.state!=='failed'))schedulePublications(scope,30000);
++  } finally {
++    checkingPublications=false;
++    if(publicationController===controller)publicationController=undefined;
+   }
+ }
+ const engine = createSyncEngine({
+@@ -176,7 +251,10 @@
+   },
+   notify:event=>{
+     void (async()=>{
+-      if (event.state === 'confirmed') await applyConfirmation(event);
++      if (event.state === 'confirmed') {
++        await applyConfirmation(event);
++        if(isSourcePending(event.result))schedulePublications(event.scope);
++      }
+       if(event.state==='confirmed') {
+         const sources={};
+         for(const item of event.batch.items) {
+@@ -234,11 +312,13 @@
+     }
+   }
+   void recoverConfirmations(syncScope(session)).then(()=>engine.resume(syncScope(session),Boolean(changedLogin)))
+-    .then(()=>{emit({scope:syncScope(session),state:'restored'});if(!worker&&!cleanupTimer)runCleanup();}).catch(error=>emit({error}));
++    .then(()=>{emit({scope:syncScope(session),state:'restored'});schedulePublications(syncScope(session),1500,Boolean(changedLogin));if(!worker&&!cleanupTimer)runCleanup();}).catch(error=>emit({error}));
+ }
+ export function stopContentSync() {
+   started = false;
+   engine.stop();
++  clearTimeout(publicationTimer);publicationTimer=undefined;
++  publicationController?.abort();
+   clearTimeout(cleanupTimer);clearTimeout(workerDeadline);
+   cleanupTimer=undefined;workerDeadline=undefined;
+   worker?.terminate();worker=undefined;
+@@ -259,6 +339,7 @@
+ }
+ export function retryContentSync(session) {
+   startContentSync(session);
++  void checkPublications(syncScope(session),true).catch(error=>emit({error}));
+   return engine.resume(syncScope(session),true);
+ }
+ 
+--- a/app/web/src/features/content-management/sync-core.mjs
++++ b/app/web/src/features/content-management/sync-core.mjs
+@@ -6,6 +6,7 @@
+ const MAX_BATCH_BYTES = 4 * 1024 * 1024;
+ const encoder = new TextEncoder();
+ export const syncTarget = operation => operation.type === 'categories.save' ? 'categories' : operation.id ?? operation.document?.metadata?.id;
++export const isSourcePending = result => result?.state === 'saved' || (result?.state === 'unchanged' && result.publicationPending === true);
+ export const storageBytes = value => encoder.encode(JSON.stringify(value)).length;
+ export async function payloadHash(payload) {
+   const bytes = await crypto.subtle.digest('SHA-256', encoder.encode(JSON.stringify(payload)));
+@@ -154,7 +155,7 @@
+         throw Object.assign(new Error('저장 후 원격 내용이 다시 바뀌었습니다. 편집 내용은 보관합니다. 최신 원본을 확인하십시오.'), {status:409});
+       }
+       const receipt = result.receipt;
+-      if (!['published','unchanged'].includes(result.state) || receipt?.requestId !== batch.payload.requestId ||
++      if (!['saved','published','unchanged'].includes(result.state) || receipt?.requestId !== batch.payload.requestId ||
+           receipt?.payloadHash !== batch.hash || receipt?.contentCommit !== result.contentCommit || !/^[a-f0-9]{40}$/.test(result.contentCommit)) {
+         throw Object.assign(new Error('원격 반영을 확인하지 못했습니다. 전송 데이터는 보관합니다.'),{status:502});
+       }
+@@ -234,7 +235,8 @@
+     if(state.cleanedAt && now-state.cleanedAt<DAY_MS)return {skipped:true,retryAfterMs:DAY_MS-(now-state.cleanedAt),removed:0};
+     if(state.cleanupLease&&state.cleanupLease.expires>now)return {skipped:true,retryAfterMs:state.cleanupLease.expires-now+1,removed:0};
+     state.cleanupLease={owner,expires:now+60000};
+-    return state.history.filter(batch=>batch.state==='confirmed'&&batch.applied===true);
++    return state.history.filter(batch=>batch.state==='confirmed'&&batch.applied===true&&
++      (!isSourcePending(batch.result)||batch.publicApplied===true));
+   });
+   if(!Array.isArray(snapshot))return snapshot;
+   let removed=0;
+@@ -246,7 +248,8 @@
+         state.cleanupLease.expires=Date.now()+60000;
+         const before=state.history.length;
+         state.history=state.history.filter(batch=>!verified.some(value=>value.batch.payload.requestId===batch.payload.requestId&&
+-          JSON.stringify(batch.payload)===JSON.stringify(value.batch.payload)&&batch.state==='confirmed'&&batch.applied===true&&batch.receipt?.requestId===batch.payload.requestId&&batch.receipt?.payloadHash===value.hash&&
++          JSON.stringify(batch.payload)===JSON.stringify(value.batch.payload)&&batch.state==='confirmed'&&batch.applied===true&&
++          (!isSourcePending(batch.result)||batch.publicApplied===true)&&batch.receipt?.requestId===batch.payload.requestId&&batch.receipt?.payloadHash===value.hash&&
+           batch.hash===value.hash&&batch.receipt?.contentCommit===batch.result?.contentCommit&&
+           /^[a-f0-9]{40}$/.test(batch.receipt?.contentCommit??'')&&Number.isFinite(batch.confirmedAt)));
+         removed+=before-state.history.length;
+--- a/app/web/src/features/content-management/types.ts
++++ b/app/web/src/features/content-management/types.ts
+@@ -39,12 +39,14 @@
+ 
+ export type Publication = {
+   background?: boolean;
++  publicationPending?: boolean;
+   affectedPostIds?: string[];
+   deletedPostIds?: string[];
+   requestId: string;
+   state: "validating" | "saved" | "pending" | "published" | "failed" | "superseded" | "unchanged";
+   candidateCommit?: string;
+   contentCommit?: string;
++  publicCommit?: string;
+   baseCommit?: string;
+   runId?: number;
+   runUrl?: string;
+--- a/app/web/src/site/App.tsx
++++ b/app/web/src/site/App.tsx
+@@ -12,7 +12,7 @@
+ 
+ export default function App() {
+   const { hash, postId } = useHashRoute();
+-  const { posts, categories, contentCommit, drafts, error, loaded, reload } = usePosts(postId);
++  const { posts, categories, sourceCommit, drafts, error, loaded, reload } = usePosts(postId);
+   const [editing, setEditing] = useState<Post | null | undefined>(undefined);
+   const [pendingCategories, setPendingCategories] = useState<PublicCategory[]>([]);
+   const [draftVersion, setDraftVersion] = useState(0);
+@@ -50,7 +50,7 @@
+             posts={posts}
+             newPostContext={{
+               categories: [...categories, ...pendingCategories],
+-              contentCommit,
++              contentCommit:sourceCommit,
+               pendingCategories,
+             }}
+             session={management.session}
+--- a/app/web/src/site/usePosts.ts
++++ b/app/web/src/site/usePosts.ts
+@@ -6,10 +6,11 @@
+ import type { Post, PublicCategory } from "../shared/post";
+ 
+ export function usePosts(postId: string | undefined) {
+-  const [{ posts, categories, contentCommit }, setContent] = useState<{
++  const [{ posts, categories, contentCommit, sourceCommit }, setContent] = useState<{
+     posts: Post[];
+     categories: PublicCategory[];
+     contentCommit: string;
++    sourceCommit?: string;
+   }>({ posts: [], categories: [], contentCommit: "" });
+   const [request, setRequest] = useState({ generation: 0, afterCommit: "" });
+   const [drafts, setDrafts] = useState<Post[]>([]);
+@@ -96,6 +97,10 @@
+     let active = true;
+     async function localChange(event: Event) {
+       const detail = (event as CustomEvent).detail;
++      if(detail?.state==='publication'&&detail.result?.state==='published') {
++        reload(detail.result.publicCommit);
++        return;
++      }
+       const cached = await readPublicCache("/api/public?kind=index") as {posts:Post[];categories:PublicCategory[];contentCommit:string} | null;
+       if (active && cached && Array.isArray(cached.posts) && validatePublicCategories(cached.categories)) {
+         setContent(await overlayContent(cached));
+@@ -105,7 +110,7 @@
+     }
+     window.addEventListener(SYNC_EVENT, localChange);
+     return () => {active=false;window.removeEventListener(SYNC_EVENT,localChange);};
+-  }, []);
++  }, [reload]);
+ 
+   useEffect(() => {
+     const id = postId;
+@@ -156,5 +161,5 @@
+     };
+   }, [postId, posts, contentCommit]);
+ 
+-  return { posts, categories, contentCommit, drafts, error, loaded, setDrafts, reload };
++  return { posts, categories, contentCommit, sourceCommit:sourceCommit??contentCommit, drafts, error, loaded, setDrafts, reload };
+ }
+--- a/tests/web/content-management.test.mjs
++++ b/tests/web/content-management.test.mjs
+@@ -235,6 +235,22 @@
+   }
+ });
+ 
++test("background source completion keeps the existing saved label without duplicate publication polling", {timeout:5000}, async t => {
++  const {default:PublishStatus}=await loadComponent("app/web/src/features/content-management/PublishStatus.tsx");
++  const previous=globalThis.fetch;
++  let requests=0;
++  globalThis.fetch=async()=>{requests++;return reply({state:"published"});};
++  t.mock.timers.enable({apis:["setTimeout"]});
++  try {
++    await mounted(React.createElement(PublishStatus,{publication:{state:"saved",requestId:"request",candidateCommit:"c".repeat(40),background:true},csrfToken:"test-csrf",onChange(){}}),async()=>{
++      assert.equal(document.querySelector('.publish-status [role="status"]').textContent,"원본 저장 완료");
++      await act(async()=>t.mock.timers.tick(60000));
++      assert.equal(requests,0,"the durable background tracker owns publication polling");
++      assert.equal(document.querySelector('.publish-status [role="status"]').textContent,"원본 저장 완료");
++    });
++  } finally {t.mock.timers.reset();globalThis.fetch=previous;}
++});
++
+ test("canonical title edits preserve Markdown and CSRF then refresh the published commit", {timeout:15000}, async () => {
+   const { default: Editor } = await loadComponent("app/web/src/features/content-management/ManagedPostEditor.tsx");
+   const markdown = "\n# Keep H1\n\n<details>\n<summary>Keep HTML</summary>\nraw\n</details>\n";
+--- a/tests/web/sync-core.test.mjs
++++ b/tests/web/sync-core.test.mjs
+@@ -139,3 +139,64 @@
+  assert.equal((await f.store.read('scope')).pending.length,1);
+  engine.stop();
+ });
++
++test('a verified source save confirms the queue before public generation and retains its overlay', {timeout:3000}, async () => {
++ const f=fixture();
++ const response=f.options.send;
++ f.options.send=async payload=>({...await response(payload),state:'saved',candidateCommit:next});
++ const engine=createSyncEngine(f.options);
++ try {
++  const queued=await engine.stage('scope',input('saved title'));
++  f.advance(5000);await engine.flush('scope');
++  const state=await f.store.read('scope');
++  assert.ok(state.active===null,'a valid source receipt ends source transmission');
++  assert.equal(state.history[0].result.state,'saved','source completion must not claim public completion');
++  assert.equal((await queued.completion).state,'saved');
++  await f.store.update('scope',current=>{current.history[0].applied=true;});
++  assert.equal((await cleanupConfirmed(f.store,'scope',f.now+DAY_MS)).removed,0,'unpublished local overlays remain recoverable');
++  await f.store.update('scope',current=>{current.history[0].publicApplied=true;});
++  assert.equal((await cleanupConfirmed(f.store,'scope',f.now+DAY_MS*2)).removed,1);
++ } finally {engine.stop();}
++});
++
++test('a source save with a mismatched receipt stays recoverable rather than confirming', {timeout:3000}, async () => {
++ const f=fixture();
++ f.options.send=async payload=>({state:'saved',candidateCommit:next,contentCommit:next,receipt:{requestId:payload.requestId,payloadHash:'wrong',contentCommit:next}});
++ const engine=createSyncEngine(f.options);
++ try {
++  await engine.stage('scope',input('kept'));f.advance(5000);await engine.flush('scope');
++  const state=await f.store.read('scope');
++  assert.equal(state.history.length,0);
++  assert.equal(state.active.items[0].operation.changes.title,'kept');
++  assert.equal(state.active.errorStatus,502);
++ } finally {engine.stop();}
++});
++
++test('authorization and conflict failures never automatically resend a source batch', {timeout:3000}, async () => {
++ for(const status of [401,403,409]) {
++  const f=fixture();let sends=0;
++  f.options.send=async()=>{sends++;throw Object.assign(Error('blocked'),{status});};
++  const engine=createSyncEngine(f.options);
++  try {
++   await engine.stage('scope',input('kept'));f.advance(5000);await engine.flush('scope');
++   f.advance(DAY_MS);await engine.flush('scope');
++   const state=await f.store.read('scope');
++   assert.equal(sends,1);
++   assert.equal(state.active.errorStatus,status);
++   assert.equal(state.active.items[0].operation.changes.title,'kept');
++  } finally {engine.stop();}
++ }
++});
++
++test('cleanup retains unchanged source receipts only while their flagged publication is pending', {timeout:3000}, async () => {
++ const f=fixture();const response=f.options.send;
++ f.options.send=async payload=>({...await response(payload),state:'unchanged',publicationPending:true});
++ const engine=createSyncEngine(f.options);
++ try {
++  await engine.stage('scope',input('same source'));f.advance(5000);await engine.flush('scope');
++  await f.store.update('scope',state=>{state.history[0].applied=true;});
++  assert.equal((await cleanupConfirmed(f.store,'scope',f.now)).removed,0,'no-op source completion is not public completion');
++  await f.store.update('scope',state=>{state.history[0].publicApplied=true;});
++  assert.equal((await cleanupConfirmed(f.store,'scope',f.now+DAY_MS)).removed,1);
++ } finally {engine.stop();}
++});
+--- a/tests/web/sync-recovery.test.mjs
++++ b/tests/web/sync-recovery.test.mjs
+@@ -52,7 +52,7 @@
+     assert.equal(saved.contentCommit,commit(2));
+     assert.equal(saved.syncVersion,2);
+     assert.equal(JSON.parse(localStorage.getItem(service.categorySourceKey(session))).categories[0].name,'C2');
+-    assert.equal(JSON.parse(localStorage.getItem('second-brain:public:v1:/api/public?kind=index')).contentCommit,commit(2));
++    assert.equal(JSON.parse(localStorage.getItem('second-brain:public:v1:/api/public?kind=index')).contentCommit,commit(0));
+     assert.equal(networkCalls,0);
+     const history=(await syncStore.read(scope)).history;
+     assert.ok(history.slice(0,2).every(batch=>!batch.result.sources),'applied receipts shed reconstruction data');
+@@ -117,3 +117,165 @@
+     globalThis.BroadcastChannel=previous.channel;
+   }
+ });
++
++test('source confirmation preserves the public snapshot identity and overlays an older public index after restart', {timeout:3000}, async () => {
++  const currentDom=new JSDOM('',{url:'https://source-recovery.test'});
++  const previous={window:globalThis.window,storage:globalThis.localStorage,fetch:globalThis.fetch};
++  let currentService;
++  globalThis.window=currentDom.window;
++  globalThis.localStorage=currentDom.window.localStorage;
++  globalThis.fetch=async()=>{throw Error('source recovery must not wait for a download');};
++  try {
++    currentService=await loadComponent('app/web/src/features/content-management/background-sync.mjs');
++    const currentScope=currentService.syncScope(session);
++    const index={posts:[{id:'p',title:'Old public title',markdown:'old body',categoryId:'c'}],categories:[],contentCommit:commit(0)};
++    localStorage.setItem('second-brain:public:v1:/api/public?kind=index',JSON.stringify(index));
++    localStorage.setItem(draftKey,JSON.stringify({requestId:'client1',title:'Title1',markdown:'Body1',
++      sourceDocument:{document:{metadata:{id:'p',title:'Original'},markdown:'Original'},assets:[]}}));
++    const batch=await confirmed(1);
++    batch.result.state='saved';batch.result.candidateCommit=commit(1);
++    await syncStore.update(currentScope,state=>{state.history=[batch];});
++    currentService.startContentSync(session);
++    const deadline=Date.now()+2000;
++    while (!(await syncStore.read(currentScope)).history[0].applied) {
++      assert.ok(Date.now()<deadline,'source confirmation replay deadline');
++      await new Promise(resolve=>setTimeout(resolve,10));
++    }
++    const cached=JSON.parse(localStorage.getItem('second-brain:public:v1:/api/public?kind=index'));
++    assert.equal(cached.contentCommit,commit(0),'public body identities remain pinned to generated artifacts');
++    const overlaid=await currentService.overlayContent(index);
++    assert.equal(overlaid.posts[0].title,'Title1','confirmed source edits remain visible while the workflow is pending');
++    assert.equal(overlaid.posts[0].markdown,'Body1');
++    assert.equal(overlaid.contentCommit,commit(0));
++    assert.equal(overlaid.sourceCommit,commit(1));
++    const saved=JSON.parse(localStorage.getItem(draftKey));
++    assert.equal(saved.sourceDocument.contentCommit,commit(1),'subsequent saves use the acknowledged source baseline');
++    assert.equal(saved.publication.state,'saved');
++    await syncStore.update(currentScope,state=>{state.history[0].publication={state:'published',publicCommit:commit(1)};});
++    const ready=await currentService.overlayContent({...index,contentCommit:commit(1),posts:[{...index.posts[0],title:'Published title'}]});
++    assert.equal(ready.posts[0].title,'Published title','the matching public snapshot retires its local overlay');
++    assert.equal(ready.sourceCommit,commit(1));
++    assert.equal((await syncStore.read(currentScope)).history[0].publicApplied,true);
++  } finally {
++    currentService?.stopContentSync();currentDom.window.close();
++    globalThis.window=previous.window;globalThis.localStorage=previous.storage;globalThis.fetch=previous.fetch;
++  }
++});
++
++test('background publication checks survive navigation and retire overlays only at the verified public commit', {timeout:5000}, async t => {
++  const currentDom=new JSDOM('',{url:'https://publication-recovery.test'});
++  const previous={window:globalThis.window,storage:globalThis.localStorage,fetch:globalThis.fetch};
++  let currentService;
++  globalThis.window=currentDom.window;
++  globalThis.localStorage=currentDom.window.localStorage;
++  const queries=[];
++  globalThis.fetch=async path=>{
++    queries.push(path);
++    return Response.json({state:'published',requestId:'request1',candidateCommit:commit(1),contentCommit:commit(1),publicCommit:commit(2)});
++  };
++  try {
++    currentService=await loadComponent('app/web/src/features/content-management/background-sync.mjs');
++    const currentScope=currentService.syncScope(session);
++    const batch=await confirmed(1);
++    batch.applied=true;batch.result.state='saved';batch.result.candidateCommit=commit(1);
++    await syncStore.update(currentScope,state=>{state.history=[batch];});
++    localStorage.setItem(draftKey,JSON.stringify({requestId:'client1',publication:{state:'saved',requestId:'request1',candidateCommit:commit(1),background:true}}));
++    let eventDeadline;
++    const published=new Promise((resolve,reject)=>{
++      eventDeadline=setTimeout(()=>resolve(null),2200);
++      t.signal.addEventListener('abort',()=>reject(new Error('publication check deadline')),{once:true});
++      currentDom.window.addEventListener(currentService.SYNC_EVENT,event=>{
++        if(event.detail.state==='publication')resolve(event.detail.result.publicCommit);
++      });
++    });
++    t.after(()=>clearTimeout(eventDeadline));
++    currentService.startContentSync(session);
++    assert.equal(await published,commit(2));
++    assert.equal(queries.length,1);
++    assert.ok(queries[0].startsWith('/api/publish?'));
++    assert.equal(new URL(queries[0],'https://blog.test').searchParams.get('candidateCommit'),commit(1));
++    const index={posts:[{id:'p',title:'Old public title',markdown:'old body',categoryId:'c'}],categories:[],contentCommit:commit(0)};
++    assert.equal((await currentService.overlayContent(index)).posts[0].title,'Title1','a stale index cannot retire a published overlay');
++    assert.equal((await currentService.overlayContent({...index,contentCommit:commit(2),posts:[{...index.posts[0],title:'Latest public title'}]})).posts[0].title,'Latest public title');
++    assert.equal((await syncStore.read(currentScope)).history[0].publicApplied,true);
++    assert.equal(JSON.parse(localStorage.getItem(draftKey)).publication.state,'published');
++  } finally {
++    currentService?.stopContentSync();currentDom.window.close();
++    globalThis.window=previous.window;globalThis.localStorage=previous.storage;globalThis.fetch=previous.fetch;
++  }
++});
++
++for(const publicationState of ['published','unchanged'])test('retained '+publicationState+' receipts cannot replace a fresher public source baseline', {timeout:3000}, async () => {
++  const currentDom=new JSDOM('',{url:'https://fresh-source.test'});
++  const previous={window:globalThis.window,storage:globalThis.localStorage};
++  let currentService;
++  globalThis.window=currentDom.window;
++  globalThis.localStorage=currentDom.window.localStorage;
++  try {
++    currentService=await loadComponent('app/web/src/features/content-management/background-sync.mjs');
++    const currentScope=currentService.syncScope(session);
++    currentService.startContentSync(session);
++    const batch=await confirmed(1);
++    batch.applied=true;batch.result.state=publicationState;
++    await syncStore.update(currentScope,current=>{current.history=[batch];});
++    const index={posts:[],categories:[],contentCommit:commit(2)};
++    assert.equal((await currentService.overlayContent(index)).sourceCommit,commit(2),publicationState+' history must not regress the source baseline');
++  } finally {
++    currentService?.stopContentSync();currentDom.window.close();
++    globalThis.window=previous.window;globalThis.localStorage=previous.storage;
++  }
++});
++
++test('an unchanged source awaiting publication survives recovery and retires at the verified public snapshot', {timeout:5000}, async t => {
++  const currentDom=new JSDOM('',{url:'https://unchanged-publication.test'});
++  const previous={window:globalThis.window,storage:globalThis.localStorage,fetch:globalThis.fetch};
++  let currentService,eventDeadline;
++  globalThis.window=currentDom.window;
++  globalThis.localStorage=currentDom.window.localStorage;
++  const queries=[];
++  globalThis.fetch=async path=>{
++    queries.push(path);
++    return Response.json({state:'published',sourceCommit:commit(1),contentCommit:commit(1),publicCommit:commit(2)});
++  };
++  try {
++    currentService=await loadComponent('app/web/src/features/content-management/background-sync.mjs');
++    const currentScope=currentService.syncScope(session);
++    const batch=await confirmed(1);
++    batch.result.state='unchanged';batch.result.publicationPending=true;
++    await syncStore.update(currentScope,state=>{state.history=[batch];});
++    localStorage.setItem(draftKey,JSON.stringify({requestId:'client1',title:'Title1',markdown:'Body1',
++      sourceDocument:{document:{metadata:{id:'p',title:'Original'},markdown:'Original'},assets:[]}}));
++    const published=new Promise((resolve,reject)=>{
++      eventDeadline=setTimeout(()=>resolve(null),2200);
++      t.signal.addEventListener('abort',()=>reject(new Error('unchanged publication deadline')),{once:true});
++      currentDom.window.addEventListener(currentService.SYNC_EVENT,event=>{
++        if(event.detail.state==='publication')resolve(event.detail.result.publicCommit);
++      });
++    });
++    published.catch(()=>{});
++    currentService.startContentSync(session);
++    const deadline=Date.now()+1000;
++    while(!(await syncStore.read(currentScope)).history[0].applied) {
++      assert.ok(Date.now()<deadline,'unchanged source replay deadline');
++      await new Promise(resolve=>setTimeout(resolve,10));
++    }
++    const index={posts:[{id:'p',title:'Old public title',markdown:'old body',categoryId:'c'}],categories:[],contentCommit:commit(0)};
++    const overlay=await currentService.overlayContent(index);
++    assert.equal(overlay.posts[0].title,'Title1','a no-op source response still preserves unpublished device content');
++    assert.equal(overlay.contentCommit,commit(0));
++    assert.equal(overlay.sourceCommit,commit(1));
++    assert.equal((await syncStore.read(currentScope)).history[0].result.publicationPending,true,'receipt compaction keeps pending-public identity');
++    assert.equal(await published,commit(2));
++    assert.equal(queries.length,1);
++    const query=new URL(queries[0],'https://blog.test').searchParams;
++    assert.equal(query.get('sourceCommit'),commit(1));
++    assert.equal(query.has('candidateCommit'),false,'no-op source checks do not invent candidate provenance');
++    const fresh=await currentService.overlayContent({...index,contentCommit:commit(2),posts:[{...index.posts[0],title:'Latest public title'}]});
++    assert.equal(fresh.posts[0].title,'Latest public title');
++    assert.equal(fresh.sourceCommit,commit(2));
++    assert.equal((await syncStore.read(currentScope)).history[0].publicApplied,true);
++  } finally {
++    clearTimeout(eventDeadline);currentService?.stopContentSync();currentDom.window.close();
++    globalThis.window=previous.window;globalThis.localStorage=previous.storage;globalThis.fetch=previous.fetch;
++  }
++});

@@ -1,0 +1,197 @@
+{
+  "complete": true,
+  "singleRequestVerified": true,
+  "checks": [
+    {
+      "owner": "implementation worker",
+      "target": "atomic-save.test.mjs + sync-core.test.mjs",
+      "passed": 40,
+      "log": "final-review-green.log",
+      "scope": "Final atomic/CAS/provenance/namespace/cache/resource/header checks; last aggregate-only fix separately covered."
+    },
+    {
+      "owner": "implementation worker",
+      "target": "bounded64documentcategorymove aggregateinline regression",
+      "passed": 1,
+      "log": "aggregate-green.log"
+    },
+    {
+      "owner": "implementation worker",
+      "target": "sync-recovery.test.mjs management-recovery.test.mjs content-api.test.mjs",
+      "passed": 14,
+      "log": "client-contract-final.log",
+      "deadlineSeconds": 60
+    },
+    {
+      "owner": "implementation worker",
+      "target": "earlier source/client regressions",
+      "passed": 53,
+      "log": "final-focused.log",
+      "stage": "Before independent review fixes; do not treat as final whole suite."
+    },
+    {
+      "owner": "implementation worker",
+      "target": "github-content management-api management-runtime category-response-cache",
+      "passed": 80,
+      "failed": 1,
+      "log": "server-regression.log",
+      "failure": "Vite listen EPERM in sandbox; exact runtime target handled by root after process exited."
+    },
+    {
+      "owner": "root",
+      "command": "node --test tests/server/management-runtime.test.mjs",
+      "passed": 2,
+      "log": "runtime.log",
+      "deadlineSeconds": 60
+    },
+    {
+      "owner": "root",
+      "command": "node --test tests/e2e/atomic-http.test.mjs tests/e2e/save-trace.test.mjs",
+      "passed": 2,
+      "log": "http-atomic.log",
+      "deadlineSeconds": 60,
+      "transport": "Local HTTP and disposable GitHub protocol fixture; distinct from real GitHub samples."
+    },
+    {
+      "owner": "root",
+      "command": "npm run build",
+      "exitCode": 0,
+      "log": "build-final.log",
+      "deadlineSeconds": 180,
+      "binding": "Final frontend/API/header bytes; later changes were server-only oversized fallback, separately checked and exercised through real server."
+    }
+  ],
+  "doNotSumOverlappingTests": true,
+  "review": "review.md",
+  "actual": {
+    "sourceMutations": 5,
+    "titleSamples": 3,
+    "titleGitHubCalls": [
+      1,
+      1,
+      1
+    ],
+    "titleServerMs": [
+      1573.646624999994,
+      2058.8039160000044,
+      1599.125999999931
+    ],
+    "sourceMedianMs": 1599.125999999931,
+    "workflowSuccesses": 5,
+    "realOAuthCsrfOwner": true,
+    "acceptedRequestRecovery": "recovery.json"
+  },
+  "inventory": {
+    "complete": true,
+    "beforeCommit": "fc5e526e770990ad3e294bf126b850a6ac00e6d0",
+    "afterCommit": "e372601f49becb56792093c584822451f678a2ae",
+    "beforeFiles": 10292,
+    "afterFiles": 10297,
+    "beforePosts": 3032,
+    "afterPosts": 3032,
+    "allOriginalFileShasMatch": true,
+    "postCountMatches": true,
+    "differenceCount": 5,
+    "differencePaths": [
+      ".cms/requests/atomic-795d3b6e-3530-469e-8466-bbdac45c8dca.json",
+      ".cms/requests/atomic-aced19b6-046a-471d-94c5-cd3026a72d7b.json",
+      ".cms/requests/atomic-bed214fd-cbf7-433f-9970-f03e3fb75f3f.json",
+      ".cms/requests/atomic-d00088da-1d9d-4ae5-897a-420266e7e2a0.json",
+      ".cms/requests/atomic-f32295ba-a8e1-4f49-829b-fd0f5a891cd2.json"
+    ],
+    "beforeReady": "fc5e526e770990ad3e294bf126b850a6ac00e6d0",
+    "afterReady": "e372601f49becb56792093c584822451f678a2ae",
+    "afterGenerator": "e763d9adf0e07f77a1b0177895674f08922f9122",
+    "afterPin": "e763d9adf0e07f77a1b0177895674f08922f9122",
+    "retainedTaskReceipts": [
+      ".cms/requests/atomic-795d3b6e-3530-469e-8466-bbdac45c8dca.json",
+      ".cms/requests/atomic-aced19b6-046a-471d-94c5-cd3026a72d7b.json",
+      ".cms/requests/atomic-bed214fd-cbf7-433f-9970-f03e3fb75f3f.json",
+      ".cms/requests/atomic-d00088da-1d9d-4ae5-897a-420266e7e2a0.json",
+      ".cms/requests/atomic-f32295ba-a8e1-4f49-829b-fd0f5a891cd2.json"
+    ],
+    "changedOriginals": [],
+    "receiptCleanupVerified": true
+  },
+  "durableReceiptProofs": [
+    {
+      "path": ".cms/requests/atomic-f32295ba-a8e1-4f49-829b-fd0f5a891cd2.json",
+      "baseCommit": "fc5e526e770990ad3e294bf126b850a6ac00e6d0",
+      "payloadHash": "72cf93bc6119d2a8381fb3c36d36414ff5e2321b36942f640541809b2a9b73b8",
+      "expected": "88c009c6d0f0344a7edc94300dec0138a19c98c1",
+      "actual": "88c009c6d0f0344a7edc94300dec0138a19c98c1",
+      "matches": true
+    },
+    {
+      "path": ".cms/requests/atomic-bed214fd-cbf7-433f-9970-f03e3fb75f3f.json",
+      "baseCommit": "9a6362b245e2d1a6f310a9ec2518c22ee8bb7b2a",
+      "payloadHash": "5d7a9f3e62ee1f8112d78964569a7922fe12bf304020aa8bcaea446e238634de",
+      "expected": "738953ec730039b54562a72a4face7ac61421600",
+      "actual": "738953ec730039b54562a72a4face7ac61421600",
+      "matches": true
+    },
+    {
+      "path": ".cms/requests/atomic-d00088da-1d9d-4ae5-897a-420266e7e2a0.json",
+      "baseCommit": "e7cf97a32afcb712295edd7c623442ee7231c17a",
+      "payloadHash": "0ed15bf2135b400b2d048ae8d21c197c45e21a204d1bb722282145f85f5826a1",
+      "expected": "8d50e05c674159a4bae97680924ccd612b6547ce",
+      "actual": "8d50e05c674159a4bae97680924ccd612b6547ce",
+      "matches": true
+    },
+    {
+      "path": ".cms/requests/atomic-aced19b6-046a-471d-94c5-cd3026a72d7b.json",
+      "baseCommit": "d97b526fd9837d7a5bf9ab7ef85b026f65eb69b0",
+      "payloadHash": "09348912b982cd67171d434092528c92be8868da34aa843e3f43155a1d370be2",
+      "expected": "6cca4c488df744504bf1f7958a09db36cd45352a",
+      "actual": "6cca4c488df744504bf1f7958a09db36cd45352a",
+      "matches": true
+    },
+    {
+      "path": ".cms/requests/atomic-795d3b6e-3530-469e-8466-bbdac45c8dca.json",
+      "baseCommit": "da120cc94884bd0bbd33006a5bfddc29c406154a",
+      "payloadHash": "6d068a76f36d6e30e5728f9d40680ebcc5d615e20ca9ea82f63fb138617bf0b3",
+      "expected": "602c3593bce0f88a947a25df0ffb5aafcbca5d21",
+      "actual": "602c3593bce0f88a947a25df0ffb5aafcbca5d21",
+      "matches": true
+    }
+  ],
+  "measuredSourceBindings": {
+    "files": 18,
+    "changedPaths": [],
+    "missingPaths": [],
+    "matches": true
+  },
+  "publicFilesUnchangedFromPreviousVerifiedTask": {
+    "app/server/src/public-publication.mjs": true,
+    "app/server/src/public-content.mjs": true,
+    "app/content/scripts/publish-public-content.mjs": true
+  },
+  "workflowPinUnchanged": "e763d9adf0e07f77a1b0177895674f08922f9122",
+  "cleanup": {
+    "ownedServerPid": 9078,
+    "serverExited": true,
+    "callbackListenerClosed": true,
+    "taskTabsClosed": [
+      "1490590972",
+      "1490590974"
+    ],
+    "temporaryStaticRecoveryPageRemoved": true,
+    "normalLoginPreserved": true,
+    "otherPreviewAndTabsUntouched": true
+  },
+  "limits": [
+    "One call applies to prepared normal saves. Cold preparation, reconciliation, oversized fallback and public workflow are separately measured.",
+    "Full React editor paint and browser large-queue memory safety remain unverified; previous Node43.2MiB/1.31GiBRSS limit unresolved.",
+    "Existing INDEX oversized, duplicate updatedAt and bundle chunk warnings remain. Full suite not repeated; earlier editor2failures not claimed fixed.",
+    "Workflow ready timestamps compare runner/browser clocks without a measured skew bound."
+  ],
+  "notes": [
+    "Initial recovery HTML custom-Vite path404; used owned public static file then deleted it.",
+    "New .cms receipt files persist as recovery history; every original pathSHA matches; do not claim total filecountunchanged."
+  ],
+  "diffCheck": {
+    "ownedPathsExitCode": 0,
+    "wholeDiff": "Unowned app/server/src/public-files.mjs:50 new blank line at EOF; not edited by this task and preserved."
+  },
+  "checkpoint": ".project-context/handoffs/single-request-save-verified-20261105.json"
+}

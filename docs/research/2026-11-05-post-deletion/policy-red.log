@@ -1,0 +1,49 @@
+✖ deleted post IDs remain readable in metadata and body links (29.352708ms)
+✖ post deletion preserves surviving document relations and links while deleting the target (118.937ms)
+✖ publication permits deleting a target while keeping inbound ID links (1386.305917ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 0
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1702.906333
+
+✖ failing tests:
+
+test at tests/content/content.test.mjs:745:2
+✖ deleted post IDs remain readable in metadata and body links (29.352708ms)
+  Error: Missing post parent: 12345678-1234-8234-9234-123456789012
+      at validateHierarchy (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/app/content/src/content.mjs:223:15)
+      at validateContent (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/app/content/src/content.mjs:286:16)
+      at readContent (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/app/content/src/content.mjs:202:3)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/content/content.test.mjs:747:20)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3)
+
+test at tests/server/github-content.test.mjs:489:1
+✖ post deletion preserves surviving document relations and links while deleting the target (118.937ms)
+  AssertionError [ERR_ASSERTION]: Deleted post has inbound references from: 98765432-1234-1234-1234-123456789abc
+  + actual - expected
+  
+  + undefined
+  - 'saved'
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/github-content.test.mjs:503:16)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'saved',
+    operator: 'strictEqual'
+  }
+
+test at tests/server/publish-content.test.mjs:152:1
+✖ publication permits deleting a target while keeping inbound ID links (1386.305917ms)
+  Error: Deleted post has inbound references: 22345678-1234-8234-9234-123456789012
+      at validateCandidate (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/scripts/publish-content.mjs:73:17)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/publish-content.test.mjs:164:21)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3)

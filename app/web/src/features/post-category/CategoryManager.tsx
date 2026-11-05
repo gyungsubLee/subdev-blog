@@ -1,3 +1,4 @@
+import Button from "../../components/button/Button";
 import {
   useEffect,
   useRef,
@@ -314,7 +315,7 @@ export default function CategoriesPage({
               style={{ "--depth": depth } as React.CSSProperties}
               data-id={node.id}
             >
-              <button
+              <Button
                 type="button"
                 className="expander"
                 disabled={!hasChildren}
@@ -330,8 +331,8 @@ export default function CategoriesPage({
                 }
               >
                 {hasChildren ? (expanded.has(node.id) ? "⌄" : "›") : "·"}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 className="grip"
                 aria-label={`${node.name} 끌어서 이동`}
@@ -340,8 +341,8 @@ export default function CategoriesPage({
                 onKeyDown={(event) => keyboardMove(event, node)}
               >
                 ≡
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 className="row-name"
                 aria-pressed={selectedId === node.id}
@@ -353,9 +354,9 @@ export default function CategoriesPage({
                 <span className="inline-count">
                   ({(counts.get(node.id) ?? 0).toLocaleString()})
                 </span>
-              </button>
+              </Button>
               <div className="row-actions">
-                <button
+                <Button
                   type="button"
                   data-action="add"
                   aria-label={`${node.name} 하위 추가`}
@@ -363,8 +364,8 @@ export default function CategoriesPage({
                   onClick={() => startEditing("add", node)}
                 >
                   추가
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   data-action="edit"
                   aria-label={`${node.name} 수정`}
@@ -372,8 +373,8 @@ export default function CategoriesPage({
                   onClick={() => startEditing("edit", node)}
                 >
                   수정
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   data-action="delete"
                   aria-label={`${node.name} 삭제`}
@@ -390,7 +391,7 @@ export default function CategoriesPage({
                   }}
                 >
                   삭제
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -449,17 +450,17 @@ export default function CategoriesPage({
                 <span>
                   {nodes.length + (editing?.mode === "add" ? 1 : 0)} / 500
                 </span>
-                <button
+                <Button
                   type="button"
                   onClick={() =>
                     setExpanded(new Set(nodes.map((node) => node.id)))
                   }
                 >
                   전체 펼치기
-                </button>
-                <button type="button" onClick={() => setExpanded(new Set())}>
+                </Button>
+                <Button type="button" onClick={() => setExpanded(new Set())}>
                   전체 접기
-                </button>
+                </Button>
               </div>
             </div>
             <div className="tree-frame">
@@ -475,7 +476,7 @@ export default function CategoriesPage({
                   : null}
                 {rows(null)}
               </div>
-              <button
+              <Button
                 type="button"
                 id="add-bottom"
                 className="add-bottom"
@@ -486,7 +487,7 @@ export default function CategoriesPage({
                 <span>
                   {nodes.length + (editing?.mode === "add" ? 1 : 0)} / 500
                 </span>
-              </button>
+              </Button>
             </div>
             <div className="save-bar">
               <div>
@@ -495,7 +496,7 @@ export default function CategoriesPage({
                     ? "저장하지 않은 변경사항이 있습니다."
                     : "저장한 상태입니다."}
                 </p>
-                <button
+                <Button
                   type="button"
                   id="undo"
                   disabled={!catalog.canUndo || Boolean(editing)}
@@ -505,9 +506,9 @@ export default function CategoriesPage({
                   }}
                 >
                   실행 취소
-                </button>
+                </Button>
               </div>
-              <button
+              <Button
                 type="button"
                 className="dark"
                 id="save-all"
@@ -519,7 +520,7 @@ export default function CategoriesPage({
                 }}
               >
                 변경사항 저장
-              </button>
+              </Button>
             </div>
           </section>
         </div>
@@ -575,22 +576,22 @@ export default function CategoriesPage({
         </div>
         {deletionError ? <p role="alert">{deletionError}</p> : null}
         <div className="modal-footer">
-          <button ref={cancelDeleteButton} type="button" disabled={busy} onClick={closeDelete} autoFocus>
+          <Button ref={cancelDeleteButton} type="button" disabled={busy} onClick={closeDelete} autoFocus>
             취소
-          </button>
+          </Button>
           {canonical && assignedCount > 0 && deleteStep === "confirm" ? (
-            <button type="button" disabled={busy} onClick={() => setDeleteStep("choose")}>이전</button>
+            <Button type="button" disabled={busy} onClick={() => setDeleteStep("choose")}>이전</Button>
           ) : null}
           {choosingDeletion ? (
-            <button key="next" type="button" id="category-delete-next" className="dark"
+            <Button key="next" type="button" id="category-delete-next" className="dark"
               disabled={busy} onClick={() => setDeleteStep("confirm")}>
               다음
-            </button>
+            </Button>
           ) : (
-            <button key="confirm" type="button" id="confirm-delete" className="dark"
+            <Button key="confirm" type="button" id="confirm-delete" className="dark"
               disabled={busy} onClick={deleteCategory}>
               {deleteMode === "move" && assignedCount > 0 ? "미분류로 이동 후 삭제" : "삭제 확정"}
-            </button>
+            </Button>
           )}
         </div>
       </dialog>
@@ -655,15 +656,15 @@ function InlineCategoryForm({
           }}
           placeholder="카테고리 이름"
         />
-        <button type="button" onClick={onCancel}>
+        <Button type="button" onClick={onCancel}>
           취소
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
           disabled={!normalizeCategoryName(name) || name === editing.name}
         >
           확인
-        </button>
+        </Button>
       </form>
       {error ? (
         <div id="inline-error" className="inline-error" role="alert">

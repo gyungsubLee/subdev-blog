@@ -1,0 +1,99 @@
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ a remounted public view renders stored data without waiting for or repeating the index download (41.759416ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ restart applies confirmed recovery data, and late older receipts cannot overwrite a newer baseline (23.474208ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ a delayed peer failure cannot announce an archived failed batch as confirmed (22.613875ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ source confirmation preserves the public snapshot identity and overlays an older public index after restart (34.905208ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ background publication checks survive navigation and retire overlays only at the verified public commit (1543.482667ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ retained published receipts cannot replace a fresher public source baseline (29.680875ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ retained unchanged receipts cannot replace a fresher public source baseline (18.539541ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2442.720292

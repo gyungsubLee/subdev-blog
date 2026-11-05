@@ -3,12 +3,13 @@ import { createServer } from 'node:http';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { performance } from 'node:perf_hooks';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { createServer as createVite, loadEnv } from 'vite';
 import { handleRequest } from '../../app/server/src/handler.mjs';
 import { traceRequest, profileFetch } from './save-trace.mjs';
 const root=path.resolve(import.meta.dirname,'../..');
-const folder=path.join(root,'docs/research/2026-11-05-optimistic-workflow');
+const folder=path.resolve(root,process.env.MEASURE_FOLDER??'docs/research/2026-11-05-optimistic-workflow');
 await mkdir(folder,{recursive:true});
 const env=loadEnv('development',root,['CMS_','GITHUB_']);
 env.GITHUB_PUBLIC_TOKEN=execFileSync('gh',['auth','token'],{encoding:'utf8',timeout:15000}).trim();
@@ -30,7 +31,7 @@ const requestHandler=async(incoming,response)=>{
       if(url.pathname==='/__measure/report') {response.setHeader('Content-Type','application/json');response.end(JSON.stringify({origin,rows,browser}));return;}
       if(url.pathname==='/__measure/control') {
         response.setHeader('Content-Type','text/html; charset=utf-8');response.setHeader('Cache-Control','no-store');
-        response.end(await readFile(path.join(root,'tests/e2e/optimistic-control.html')));return;
+        response.end(await readFile(path.resolve(root,process.env.MEASURE_CONTROL??'tests/e2e/optimistic-control.html')));return;
       }
       if(url.pathname.startsWith('/api/')) {
         const headers=new Headers(incoming.headers);headers.delete('host');
@@ -41,7 +42,7 @@ const requestHandler=async(incoming,response)=>{
         }));
         const result=measured.result,bytes=Buffer.from(await result.arrayBuffer());
         let identity;
-        if(url.pathname==='/api/content'&&incoming.method==='POST'&&result.ok){const data=JSON.parse(bytes);identity={state:data.state,contentCommit:data.contentCommit,candidateCommit:data.candidateCommit,requestId:data.requestId};}
+        if(url.pathname==='/api/content'&&incoming.method==='POST'&&result.ok){const data=JSON.parse(bytes);identity={state:data.state,contentCommit:data.contentCommit,candidateCommit:data.candidateCommit,requestId:data.requestId,payloadHash:createHash('sha256').update(JSON.stringify(JSON.parse(body))).digest('hex')};}
         rows.push({path:url.pathname+(url.pathname.startsWith('/api/auth/')?'':url.search),method:incoming.method,status:result.status,at,ms:performance.now()-started,requestBytes:body?.length??0,responseBytes:bytes.length,...identity,trace:measured.trace});
         for(const[name,value]of result.headers)if(name!=='set-cookie')response.setHeader(name,value);
         const cookies=result.headers.getSetCookie();if(cookies.length)response.setHeader('Set-Cookie',cookies);

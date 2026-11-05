@@ -1,0 +1,149 @@
+Window: "Second Brain", App: Second Brain.
+0 standard window Second Brain, Secondary Actions: Raise
+	1 scroll area
+		2 HTML content Description: 카테고리 관리 — Second Brain, URL: 127.0.0.1:5173/#/categories
+			3 text Public content is not ready for this commit
+			4 link 본문으로 이동, Value: 127.0.0.1:5173/#main-content
+			5 container
+				6 link Second Brain 홈, Value: 127.0.0.1:5173/#/
+				7 container 주 메뉴
+					8 link 기록 관리, Value: 127.0.0.1:5173/#/records
+					9 link 콘텐츠 관리, Value: 127.0.0.1:5173/#/content
+					10 link 카테고리 관리, Value: 127.0.0.1:5173/#/categories
+				11 button 글 쓰기
+				12 button 로그아웃
+				13 pop up button 설정
+			14 container
+				15 text 기록 관리
+				16 heading 카테고리 관리, Value: 1
+					17 text 카테고리 관리
+				18 text 원본 카테고리를 수정합니다. 저장하면 공개 화면에 적용합니다.
+				19 container 카테고리 목록 관리
+					20 text 카테고리 순서와 계층을 정리합니다.
+					21 text 끌어서 순서와 깊이를 바꾸고, 행 안에서 분류를 편집합니다.
+					22 text 48 / 500
+					23 button 전체 펼치기
+					24 button 전체 접기
+					25 text 분류 전체보기
+					26 container 분류 계층
+						27 button (expanded) CS 접기, Secondary Actions: Collapse
+						28 button CS 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						29 toggle button CS(0), Value: off
+						30 button CS 하위 추가
+						31 button CS 수정
+						32 button (disabled) CS 삭제, Help: 하위 분류를 먼저 이동하십시오.
+						33 button (disabled) 수학 펼치기
+						34 button 수학 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						35 toggle button 수학(0), Value: off
+						36 button 수학 하위 추가
+						37 button 수학 수정
+						38 button 수학 삭제
+						39 button (disabled) 구조적인 문제 해결을 위한 컴퓨터공학 펼치기
+						40 button 구조적인 문제 해결을 위한 컴퓨터공학 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						41 toggle button 구조적인 문제 해결을 위한 컴퓨터공학(0), Value: off
+						42 button 구조적인 문제 해결을 위한 컴퓨터공학 하위 추가
+						43 button 구조적인 문제 해결을 위한 컴퓨터공학 수정
+						44 button 구조적인 문제 해결을 위한 컴퓨터공학 삭제
+						45 button (disabled) 논리적 문제 해결을 위한 컴퓨터과학 펼치기
+						46 button 논리적 문제 해결을 위한 컴퓨터과학 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						47 toggle button 논리적 문제 해결을 위한 컴퓨터과학(0), Value: off
+						48 button 논리적 문제 해결을 위한 컴퓨터과학 하위 추가
+						49 button 논리적 문제 해결을 위한 컴퓨터과학 수정
+						50 button 논리적 문제 해결을 위한 컴퓨터과학 삭제
+						51 button (disabled) 네트워크(입문) 펼치기
+						52 button 네트워크(입문) 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						53 toggle button 네트워크(입문)(0), Value: off
+						54 button 네트워크(입문) 하위 추가
+						55 button 네트워크(입문) 수정
+						56 button 네트워크(입문) 삭제
+						57 button (disabled) 디자인패턴 펼치기
+						58 button 디자인패턴 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						59 toggle button 디자인패턴(0), Value: off
+						60 button 디자인패턴 하위 추가
+						61 button 디자인패턴 수정
+						62 button 디자인패턴 삭제
+						63 button (disabled) 알고리즘 펼치기
+						64 button 알고리즘 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						65 toggle button 알고리즘(0), Value: off
+						66 button 알고리즘 하위 추가
+						67 button 알고리즘 수정
+						68 button 알고리즘 삭제
+						69 button (disabled) 자료구조 펼치기
+						70 button 자료구조 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						71 toggle button 자료구조(0), Value: off
+						72 button 자료구조 하위 추가
+						73 button 자료구조 수정
+						74 button 자료구조 삭제
+						75 button (disabled) 기술 면접 준비 펼치기
+						76 button 기술 면접 준비 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						77 toggle button 기술 면접 준비(0), Value: on
+						78 button 기술 면접 준비 하위 추가
+						79 button 기술 면접 준비 수정
+						80 button 기술 면접 준비 삭제
+						81 button (disabled) 테스트용 카테고리 추가 펼치기
+						82 button 테스트용 카테고리 추가 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						83 toggle button 테스트용 카테고리 추가(0), Value: off
+						84 button 테스트용 카테고리 추가 하위 추가
+						85 button 테스트용 카테고리 추가 수정
+						86 button 테스트용 카테고리 추가 삭제
+						87 button (collapsed) 백엔드 펼치기, Secondary Actions: Expand
+						88 button 백엔드 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						89 toggle button 백엔드(0), Value: off
+						90 button 백엔드 하위 추가
+						91 button 백엔드 수정
+						92 button (disabled) 백엔드 삭제, Help: 하위 분류를 먼저 이동하십시오.
+						93 button (collapsed) 프론트엔드 펼치기, Secondary Actions: Expand
+						94 button 프론트엔드 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						95 toggle button 프론트엔드(0), Value: off
+						96 button 프론트엔드 하위 추가
+						97 button 프론트엔드 수정
+						98 button (disabled) 프론트엔드 삭제, Help: 하위 분류를 먼저 이동하십시오.
+						99 button (collapsed) 인프라 펼치기, Secondary Actions: Expand
+						100 button 인프라 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						101 toggle button 인프라(0), Value: off
+						102 button 인프라 하위 추가
+						103 button 인프라 수정
+						104 button (disabled) 인프라 삭제, Help: 하위 분류를 먼저 이동하십시오.
+						105 button (collapsed) AI·데이터 펼치기, Secondary Actions: Expand
+						106 button AI·데이터 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						107 toggle button AI·데이터(0), Value: off
+						108 button AI·데이터 하위 추가
+						109 button AI·데이터 수정
+						110 button (disabled) AI·데이터 삭제, Help: 하위 분류를 먼저 이동하십시오.
+						111 button (collapsed) 학습·도구 펼치기, Secondary Actions: Expand
+						112 button 학습·도구 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						113 toggle button 학습·도구(0), Value: off
+						114 button 학습·도구 하위 추가
+						115 button 학습·도구 수정
+						116 button (disabled) 학습·도구 삭제, Help: 하위 분류를 먼저 이동하십시오.
+						117 button (collapsed) 미분류 펼치기, Secondary Actions: Expand
+						118 button 미분류 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						119 toggle button 미분류(0), Value: off
+						120 button 미분류 하위 추가
+						121 button 미분류 수정
+						122 button (disabled) 미분류 삭제, Help: 미분류는 삭제할 수 없습니다.
+					123 button ＋　카테고리 추가 48 / 500
+					124 text 저장한 상태입니다.
+					125 button (disabled) 실행 취소
+					126 button (disabled) 변경사항 저장
+				127 button JSON 내보내기
+			128 container
+				129 link Second Brain., Value: 127.0.0.1:5173/#/
+				130 text 배운 것을 기록하고, 기록한 것을 연결합니다.
+				131 button 맨 위로 ↑
+		132 scroll bar (settable, float) 0
+	133 toolbar
+		134 button Description: 뒤로, Secondary Actions: Move next, Remove from toolbar
+		135 button (disabled) Description: 앞으로, Secondary Actions: Move previous, Move next, Remove from toolbar
+		136 button Description: 홈, Secondary Actions: Move previous, Move next, Remove from toolbar
+		137 button Description: 새로고침, Secondary Actions: Move previous, Remove from toolbar
+	138 text Second Brain
+	139 menu button Window sharing
+140 menu bar
+	141 Second Brain
+	142 파일
+	143 편집
+	144 보기
+	145 윈도우
+
+The focused UI element is 10 link 카테고리 관리, Value: 127.0.0.1:5173/#/categories

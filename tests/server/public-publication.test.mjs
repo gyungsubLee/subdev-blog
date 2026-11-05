@@ -523,15 +523,22 @@ test('renamed aliases preserve resolved links while removed aliases invalidate d
   await assertFullParity(f,c,third);
 });
 
-test('reused graph facts still reject cycles, missing references and unsafe changed content before publication', async () => {
+test('reused graph facts permit deleted IDs while rejecting cycles and unsafe changed content', async () => {
   for (const kind of ['cycle','reference','unsafe']) {
     const f=publicRepository({[`posts/${OTHER}/Other.md`]:document('child',{title:'Other',parent_id:ID,related_ids:kind==='reference'?[ID]:[]},OTHER)});
     await publication.ensurePublicPublication(options(f));
     if(kind==='cycle') nextSource(f,B,A,{[`posts/${ID}/Title.md`]:document('root',{parent_id:OTHER})});
     if(kind==='reference') nextSource(f,B,A,{},[`posts/${ID}/Title.md`]);
     if(kind==='unsafe') nextSource(f,B,A,{[`posts/${ID}/Title.md`]:document('[bad](javascript:alert)')});
-    await assert.rejects(publication.ensurePublicPublication({...options(f),commit:B}));
-    assert.equal(f.refs.has('public-data/'+B),false);
+    if (kind === 'reference') {
+      const published = await publication.ensurePublicPublication({...options(f),commit:B});
+      assert.equal(artifactFile(f,published,`posts/${ID}.json`), undefined);
+      assert.equal(artifactFile(f,published,`posts/${OTHER}.json`).value.parentId, ID);
+      await assertFullParity(f,B,published);
+    } else {
+      await assert.rejects(publication.ensurePublicPublication({...options(f),commit:B}));
+      assert.equal(f.refs.has('public-data/'+B),false);
+    }
   }
 });
 

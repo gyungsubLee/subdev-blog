@@ -1,0 +1,14 @@
+✔ session reads share an in-flight request in StrictMode and manual refresh (24.627791ms)
+✔ temporary network loss recovers once; permission failures are not retried (354.495417ms)
+✔ online and focus recover blocked sessions with event throttling and cleanup (2.253792ms)
+✔ logout invalidates a delayed ready response (1.919583ms)
+✔ HTML and null access denials keep their status and never retry (1408.539625ms)
+✔ deadline during retry backoff leaves checking and cleanup aborts owned requests (2.417833ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2508.69425

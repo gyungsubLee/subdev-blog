@@ -1,0 +1,157 @@
+{
+  "measuredAt": "2026-11-04T10:54:43.845Z",
+  "sessionRemainingSeconds": 3589,
+  "samples": [
+    {
+      "sample": 1,
+      "state": "ready",
+      "ms": 2770,
+      "calls": [
+        {
+          "path": "/user",
+          "status": 200,
+          "ms": 407
+        },
+        {
+          "path": "/user/installations/174706865/repositories",
+          "status": 200,
+          "ms": 365
+        },
+        {
+          "path": "/user/installations",
+          "status": 200,
+          "ms": 431
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content",
+          "status": 200,
+          "ms": 369
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog",
+          "status": 200,
+          "ms": 407
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog/branches/main",
+          "status": 200,
+          "ms": 336
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/branches/main",
+          "status": 200,
+          "ms": 495
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog/contents/.gitmodules",
+          "status": 200,
+          "ms": 245
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog/contents/content",
+          "status": 200,
+          "ms": 246
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/contents/CONTENT_SCHEMA.md",
+          "status": 200,
+          "ms": 340
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/contents/categories.json",
+          "status": 200,
+          "ms": 362
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/contents/posts",
+          "status": 200,
+          "ms": 388
+        }
+      ]
+    },
+    {
+      "sample": 2,
+      "state": "ready",
+      "ms": 1701,
+      "calls": [
+        {
+          "path": "/user",
+          "status": 200,
+          "ms": 271
+        },
+        {
+          "path": "/user/installations/174706865/repositories",
+          "status": 200,
+          "ms": 423
+        },
+        {
+          "path": "/user/installations",
+          "status": 200,
+          "ms": 677
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content",
+          "status": 200,
+          "ms": 352
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog",
+          "status": 200,
+          "ms": 393
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/branches/main",
+          "status": 200,
+          "ms": 359
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog/branches/main",
+          "status": 200,
+          "ms": 357
+        }
+      ]
+    },
+    {
+      "sample": 3,
+      "state": "ready",
+      "ms": 1499,
+      "calls": [
+        {
+          "path": "/user",
+          "status": 200,
+          "ms": 314
+        },
+        {
+          "path": "/user/installations/174706865/repositories",
+          "status": 200,
+          "ms": 328
+        },
+        {
+          "path": "/user/installations",
+          "status": 200,
+          "ms": 341
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog",
+          "status": 200,
+          "ms": 365
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content",
+          "status": 200,
+          "ms": 434
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog/branches/main",
+          "status": 200,
+          "ms": 405
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/branches/main",
+          "status": 200,
+          "ms": 408
+        }
+      ]
+    }
+  ]
+}

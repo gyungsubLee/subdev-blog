@@ -1,0 +1,24 @@
+✖ generation cache excludes arbitrary category metadata as well as document metadata (32.045333ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 182.144292
+
+✖ failing tests:
+
+test at tests/server/public-publication.test.mjs:268:1
+✖ generation cache excludes arbitrary category metadata as well as document metadata (32.045333ms)
+  AssertionError [ERR_ASSERTION]: No generated file may copy private category extensions
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:272:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }

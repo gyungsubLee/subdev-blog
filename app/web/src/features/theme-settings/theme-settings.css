@@ -1,26 +1,7 @@
-button.settings-trigger,
-.editor-page button.settings-trigger {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+.header-action.settings-trigger {
   width: 44px;
   height: 44px;
   padding: 0;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
-  color: var(--ink);
-  font: inherit;
-  font-size: 13px;
-  line-height: 1.5;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-button.settings-trigger:hover,
-.editor-page button.settings-trigger:hover {
-  background: var(--soft);
 }
 
 .theme-settings-dialog {

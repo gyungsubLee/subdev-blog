@@ -1,0 +1,25 @@
+{
+  "phase": "bootstrap",
+  "at": "2026-11-04T12:50:17.420Z",
+  "contentCommit": "99497b73108215436bc42461f5c43d0cf09ba224",
+  "publicationCommit": "8ba4fe6deba57e3926e005ea05ddd12f364b43a6",
+  "postCount": 3034,
+  "testPosts": [
+    {
+      "id": "0a9063d1-6227-42f3-93ef-799d23435d29",
+      "title": "E2E 증분 초기화 20261104 1248"
+    }
+  ],
+  "publicationVerified": true,
+  "generation": {
+    "generatedPosts": 3034,
+    "reusedPosts": 0,
+    "cacheBytes": 2650485
+  },
+  "actualInventory": {
+    "reusedBodies": 1847,
+    "changedBodies": 1187,
+    "removedBodies": 0
+  },
+  "bodyVerified": true
+}

@@ -1,0 +1,26 @@
+✔ generation projects safe public files and full bodies before publishing an immutable ref (35.0255ms)
+✔ unsafe source fails before the ready ref is created (12.4265ms)
+✔ generation rewrites pinned assets and inherited category without exposing original metadata (2.626292ms)
+✔ the reader serves generated files without touching source Markdown or trees (6.577542ms)
+✔ a missing publication returns 503 instead of generating content in a read (0.628791ms)
+✔ CLI needs explicit publication intent and output mode makes no remote writes (113.291833ms)
+✔ an incomplete existing publication is rejected instead of being reused (3.978417ms)
+✔ a changed source crossing the summary boundary keeps the previous full-transform semantics (4.995833ms)
+✔ large publications upload bounded trees before exposing the complete ref (150.318125ms)
+✔ oversized and escaped generated files use blob upload instead of oversized inline trees (413.842875ms)
+✔ incremental publication reads one changed source and reuses unchanged JSON blobs (4.8005ms)
+✔ unchanged source push reads no Markdown and reuses every public body (1.889125ms)
+✔ new and deleted link targets regenerate unresolved Markdown/Notion dependents only (12.776167ms)
+✔ an ancestor category change regenerates inheriting children and leaves unrelated bodies reusable (5.243917ms)
+✔ unchanged attachments keep pinned URLs; changed attachment bytes invalidate only their owner (7.576ms)
+✔ renamed aliases preserve resolved links while removed aliases invalidate dependents (9.428542ms)
+✔ reused graph facts still reject cycles, missing references and unsafe changed content before publication (7.587708ms)
+✔ generation cache excludes arbitrary category metadata as well as document metadata (1.272041ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1032.976958

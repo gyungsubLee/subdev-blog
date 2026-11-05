@@ -1,0 +1,77 @@
+✖ writer cache compresses without changing public JSON and legacy cache still reuses bodies (47.103958ms)
+✖ large JSON chooses the smaller lossless blob encoding (9.893875ms)
+✖ independent large blobs overlap with a two-upload bound before ready publication (1255.574042ms)
+✖ failed concurrent blob uploads drain in-flight work and never publish a ready ref (740.223416ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 0
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2330.963958
+
+✖ failing tests:
+
+test at tests/server/public-publication.test.mjs:160:1
+✖ writer cache compresses without changing public JSON and legacy cache still reuses bodies (47.103958ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 2
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:166:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 2,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/public-publication.test.mjs:188:1
+✖ large JSON chooses the smaller lossless blob encoding (9.893875ms)
+  Error: Invalid source file size
+      at httpError (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/app/server/src/github.mjs:4:24)
+      at requirePublic (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/app/server/src/public-files.mjs:9:25)
+      at sourceTree (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/app/server/src/public-publication.mjs:58:3)
+      at async preparePublicFiles (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/app/server/src/public-publication.mjs:92:18)
+      at async Module.ensurePublicPublication (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/app/server/src/public-publication.mjs:267:40)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:203:22)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    status: 502,
+    details: undefined
+  }
+
+test at tests/server/public-publication.test.mjs:209:1
+✖ independent large blobs overlap with a two-upload bound before ready publication (1255.574042ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 2
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:229:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 2,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/public-publication.test.mjs:234:1
+✖ failed concurrent blob uploads drain in-flight work and never publish a ready ref (740.223416ms)
+  AssertionError [ERR_ASSERTION]: Both independent uploads start before the failure
+  
+  1 !== 2
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:249:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 2,
+    operator: 'strictEqual'
+  }

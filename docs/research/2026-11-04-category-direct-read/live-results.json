@@ -1,0 +1,220 @@
+{
+  "measuredAt": "2026-11-04T11:53:54.079Z",
+  "credential": "existing GitHub CLI credential; same owner and token for both versions",
+  "samples": [
+    {
+      "label": "before",
+      "sample": 1,
+      "ms": 1251.16,
+      "status": 200,
+      "count": 48,
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "calls": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/ref/heads/main",
+          "method": "GET",
+          "status": 200,
+          "headersMs": 285.27,
+          "totalMs": 285.68,
+          "bytes": 360
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/commits/ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+          "method": "GET",
+          "status": 200,
+          "headersMs": 296.29,
+          "totalMs": 296.61,
+          "bytes": 1211
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/trees/809a93b3fe84d8df6d24f8761e876ef70a5c1479",
+          "method": "GET",
+          "status": 200,
+          "headersMs": 372.72,
+          "totalMs": 373.91,
+          "bytes": 1574
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/blobs/0a33eeab4d849c87f5f3aed38903fd82af314e0e",
+          "method": "GET",
+          "status": 200,
+          "headersMs": 289.76,
+          "totalMs": 290.65,
+          "bytes": 10899
+        }
+      ]
+    },
+    {
+      "label": "after",
+      "sample": 1,
+      "ms": 399.66,
+      "status": 200,
+      "count": 48,
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "calls": [
+        {
+          "path": "/graphql",
+          "method": "POST",
+          "status": 200,
+          "headersMs": 397.56,
+          "totalMs": 398.08,
+          "bytes": 9124
+        }
+      ]
+    },
+    {
+      "label": "before",
+      "sample": 2,
+      "ms": 325.73,
+      "status": 200,
+      "count": 48,
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "calls": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/ref/heads/main",
+          "method": "GET",
+          "status": 200,
+          "headersMs": 324.65,
+          "totalMs": 324.91,
+          "bytes": 360
+        }
+      ]
+    },
+    {
+      "label": "after",
+      "sample": 2,
+      "ms": 453.68,
+      "status": 200,
+      "count": 48,
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "calls": [
+        {
+          "path": "/graphql",
+          "method": "POST",
+          "status": 200,
+          "headersMs": 450.63,
+          "totalMs": 453.12,
+          "bytes": 9124
+        }
+      ]
+    },
+    {
+      "label": "before",
+      "sample": 3,
+      "ms": 281.78,
+      "status": 200,
+      "count": 48,
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "calls": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/ref/heads/main",
+          "method": "GET",
+          "status": 200,
+          "headersMs": 280.88,
+          "totalMs": 281.23,
+          "bytes": 360
+        }
+      ]
+    },
+    {
+      "label": "after",
+      "sample": 3,
+      "ms": 374.82,
+      "status": 200,
+      "count": 48,
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "calls": [
+        {
+          "path": "/graphql",
+          "method": "POST",
+          "status": 200,
+          "headersMs": 373.69,
+          "totalMs": 374.16,
+          "bytes": 9124
+        }
+      ]
+    },
+    {
+      "label": "before",
+      "sample": 4,
+      "ms": 312.71,
+      "status": 200,
+      "count": 48,
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "calls": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/ref/heads/main",
+          "method": "GET",
+          "status": 200,
+          "headersMs": 311.07,
+          "totalMs": 311.88,
+          "bytes": 360
+        }
+      ]
+    },
+    {
+      "label": "after",
+      "sample": 4,
+      "ms": 371.64,
+      "status": 200,
+      "count": 48,
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "calls": [
+        {
+          "path": "/graphql",
+          "method": "POST",
+          "status": 200,
+          "headersMs": 370.68,
+          "totalMs": 371.08,
+          "bytes": 9124
+        }
+      ]
+    },
+    {
+      "label": "before",
+      "sample": 5,
+      "ms": 367.17,
+      "status": 200,
+      "count": 48,
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "calls": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/ref/heads/main",
+          "method": "GET",
+          "status": 200,
+          "headersMs": 366.4,
+          "totalMs": 366.68,
+          "bytes": 360
+        }
+      ]
+    },
+    {
+      "label": "after",
+      "sample": 5,
+      "ms": 390.97,
+      "status": 200,
+      "count": 48,
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "calls": [
+        {
+          "path": "/graphql",
+          "method": "POST",
+          "status": 200,
+          "headersMs": 389.88,
+          "totalMs": 390.46,
+          "bytes": 9124
+        }
+      ]
+    }
+  ]
+}

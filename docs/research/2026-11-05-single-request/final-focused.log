@@ -1,0 +1,157 @@
+✔ prepared atomic save uses one CAS mutation and local source receipt (49.369167ms)
+✔ lost mutation response and retry reconcile without duplicate apply (16.949ms)
+✔ successful receipt primes the next prepared title save (9.468917ms)
+✔ fresh remote advance conflicts and never overwrites canonical source (4.228166ms)
+✔ mutation permissions stop immediately without recovery reads (3.637125ms)
+✔ large exact authored bytes stay in the single mutation (45.213791ms)
+✔ a request ID cannot be reused against its successful source commit (5.306958ms)
+✔ durable request marker rejects reuse after unrelated descendants and a new cache scope (6.234209ms)
+✔ retry source revision uses accepted bytes rather than regenerated timestamp (23.061083ms)
+✔ recovery rejects tampered durable receipt and never reapplies (5.447209ms)
+✔ trusted immutable cache remains entry bounded and credential scoped (0.455ms)
+✔ large source inventory drops unused API URLs within existing cache budget (35.098125ms)
+✔ atomic authored no-op reserves its ID with only a durable marker (4.599334ms)
+✔ source save batches small UTF8 files and does no public generation (47.20725ms)
+✔ a lost PATCH response recovers the same source without public writes (7.166333ms)
+✔ a superseding canonical commit is reported without preparing public data (4.195875ms)
+✔ public generation failure cannot block source save or duplicate its retry (4.443416ms)
+✔ publication status stays saved until a complete immutable artifact is verified (17.142625ms)
+✔ bulk receipt reuses verified candidate inventory and locally authored bytes (8.230708ms)
+✔ immutable source reads are reused while canonical heads stay fresh (2.752042ms)
+✔ large source upload rejects an unexpected blob identity before tree or canonical writes (20.821125ms)
+✔ previous ready source cannot mark a newly saved source published (8.662458ms)
+✔ candidate inventory preserves existing assets and verified sizes of new assets (4.295166ms)
+✔ an earlier source receipt becomes published when verified ready advances to its descendant (6.391125ms)
+✔ unchanged source can track workflow readiness without a request candidate or save-path public reads (14.443167ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ session reads share an in-flight request in StrictMode and manual refresh (27.913708ms)
+✔ temporary network loss recovers once; permission failures are not retried (354.232334ms)
+✔ online and focus recover blocked sessions with event throttling and cleanup (2.651042ms)
+✔ logout invalidates a delayed ready response (2.547583ms)
+✔ HTML and null access denials keep their status and never retry (1411.225125ms)
+✔ deadline during retry backoff leaves checking and cleanup aborts owned requests (2.624834ms)
+✔ 5-second debounce coalesces unsent versions and sends one immutable bulk request (10.384542ms)
+✔ another coordinator cannot duplicate an in-flight batch, and later edits survive old response (1.775541ms)
+✔ a lost response retains the same payload and resumes after reload without duplicate identity (1.320125ms)
+✔ daily cleanup verifies receipts and never deletes failed, pending or mismatched data (3.909625ms)
+✔ daily cleanup preserves a record whose receipt commit differs from its saved result (2.824166ms)
+✔ discarding one conflict retains other documents as blocked recoverable saves (1.175333ms)
+✔ cleanup preserves remotely confirmed payloads until their local recovery state is applied (3.000167ms)
+✔ repeated saves coalesce without growing callback or pending queues; capacity rejects only the new request (36.134958ms)
+✔ transient retry schedule is5,15,60 seconds and then stops; manual retry reuses the frozen batch (3.280667ms)
+✔ a superseded lost-response retry cannot attach the latest revision to an older operation (0.50625ms)
+✔ oversized saves and a full retained history stop new work without deleting older requests (18.823667ms)
+✔ a verified source save confirms the queue before public generation and retains its overlay (3.361416ms)
+✔ a source save with a mismatched receipt stays recoverable rather than confirming (1.436ms)
+✔ authorization and conflict failures never automatically resend a source batch (1.094667ms)
+✔ cleanup retains unchanged source receipts only while their flagged publication is pending (2.260208ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ restart applies confirmed recovery data, and late older receipts cannot overwrite a newer baseline (17.584542ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ a delayed peer failure cannot announce an archived failed batch as confirmed (33.466208ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ source confirmation preserves the public snapshot identity and overlays an older public index after restart (42.934833ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ background publication checks survive navigation and retire overlays only at the verified public commit (1547.018792ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ retained published receipts cannot replace a fresher public source baseline (25.323917ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ retained unchanged receipts cannot replace a fresher public source baseline (23.723083ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ an unchanged source awaiting publication survives recovery and retires at the verified public snapshot (1534.538333ms)
+ℹ tests 53
+ℹ suites 0
+ℹ pass 53
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4165.632417

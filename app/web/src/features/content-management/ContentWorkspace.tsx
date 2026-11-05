@@ -1,3 +1,4 @@
+import Button from "../../components/button/Button";
 import { useMemo, useState } from "react";
 import type { Post, PublicCategory } from "../../shared/post";
 import { PostStatus, POST_STATUS_LABELS } from "../../shared/post-status";
@@ -134,17 +135,18 @@ export default function ContentWorkspace({
   onEdit,
   draftVersion = 0,
   session,
-  onDeleted,
+  deletedIds = new Set<string>(),
+  onDeletePost,
 }: {
   posts: Post[];
   categories: PublicCategory[];
   onEdit: (post: Post) => void;
   draftVersion?: number;
   session?: ManagementSession;
-  onDeleted?: (contentCommit?: string) => void;
+  deletedIds?: Set<string>;
+  onDeletePost?: (post: Post) => void;
 }) {
   const [deleting, setDeleting] = useState<Post | null>(null);
-  const [deletedIds, setDeletedIds] = useState(() => new Set<string>());
   const [status, setStatus] = useState<"all" | PostStatus>("all");
   const [query, setQuery] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -259,7 +261,7 @@ export default function ContentWorkspace({
         <section className="work-list" aria-label="글 목록">
           <div className="status-tabs" role="tablist" aria-label="게시 상태">
             {tabs.map((tab) => (
-              <button
+              <Button
                 key={tab.value}
                 type="button"
                 role="tab"
@@ -273,13 +275,13 @@ export default function ContentWorkspace({
                 <span className="count">
                   {statusCounts[tab.value]}
                 </span>
-              </button>
+              </Button>
             ))}
           </div>
           <div className="workspace-toolbar">
             <div className="workspace-category-filter">
               <span>카테고리</span>
-              <button
+              <Button
                 type="button"
                 className="outline-button workspace-category-button"
                 aria-label="카테고리 필터"
@@ -293,7 +295,7 @@ export default function ContentWorkspace({
                     ? "미분류"
                     : "모든 카테고리")}
                 <span aria-hidden="true">⌄</span>
-              </button>
+              </Button>
             </div>
             <label className="workspace-search">
               <span aria-hidden="true">⌕</span>
@@ -326,13 +328,13 @@ export default function ContentWorkspace({
                 {visible.map((row) => (
                   <tr key={row.post.id}>
                     <td>
-                      <button
+                      <Button
                         type="button"
                         className="row-title"
                         onClick={() => onEdit(row.post)}
                       >
                         {row.title || "제목 없음"}
-                      </button>
+                      </Button>
                       {row.dirty ? (
                         <p className="row-note">공개되지 않은 수정 사항</p>
                       ) : null}
@@ -348,22 +350,22 @@ export default function ContentWorkspace({
                     </td>
                     <td>{row.updatedAt.slice(0, 10)}</td>
                     <td>
-                      <button
+                      <Button
                         type="button"
                         className="row-action"
                         onClick={() => onEdit(row.post)}
                       >
                         편집 ↗
-                      </button>
+                      </Button>
                       {session?.state === "ready" ? (
-                        <button
+                        <Button
                           type="button"
                           className="row-action workspace-delete"
                           aria-label={`${row.title || "제목 없음"} 삭제`}
                           onClick={() => setDeleting({ ...row.post, title: row.title })}
                         >
                           삭제
-                        </button>
+                        </Button>
                       ) : null}
                     </td>
                   </tr>
@@ -377,7 +379,7 @@ export default function ContentWorkspace({
             ) : null}
           </div>
           <nav className="workspace-pagination" aria-label="콘텐츠 페이지">
-            <button
+            <Button
               type="button"
               className="outline-button"
               aria-label="이전 페이지"
@@ -385,12 +387,12 @@ export default function ContentWorkspace({
               onClick={() => setPage(currentPage - 1)}
             >
               이전
-            </button>
+            </Button>
             <span role="status">
               {filtered.length.toLocaleString()}개 · {currentPage} /{" "}
               {totalPages} 페이지
             </span>
-            <button
+            <Button
               type="button"
               className="outline-button"
               aria-label="다음 페이지"
@@ -398,19 +400,17 @@ export default function ContentWorkspace({
               onClick={() => setPage(currentPage + 1)}
             >
               다음
-            </button>
+            </Button>
           </nav>
         </section>
       </div>
       {deleting && session ? (
         <PostDeleteDialog
           post={deleting}
-          session={session}
           onClose={() => setDeleting(null)}
-          onDeleted={(commit) => {
-            setDeletedIds((previous) => new Set([...previous, deleting.id]));
+          onConfirm={() => {
+            onDeletePost?.(deleting);
             setDeleting(null);
-            onDeleted?.(commit);
           }}
         />
       ) : null}

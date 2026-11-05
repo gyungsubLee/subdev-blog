@@ -1,0 +1,50 @@
+✖ durable saves schedule immediate dispatch and coalesce only before transmission (5.628583ms)
+✖ restored pending saves ignore a legacy future debounce without bypassing retry waits (0.477792ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 123.120209
+
+✖ failing tests:
+
+test at tests/web/sync-core.test.mjs:19:1
+✖ durable saves schedule immediate dispatch and coalesce only before transmission (5.628583ms)
+  AssertionError [ERR_ASSERTION]: saving must not add a debounce delay
+  + actual - expected
+  
+  + 86406000
+  - 86401000
+        ^
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/sync-core.test.mjs:29:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 86406000,
+    expected: 86401000,
+    operator: 'strictEqual'
+  }
+
+test at tests/web/sync-core.test.mjs:38:1
+✖ restored pending saves ignore a legacy future debounce without bypassing retry waits (0.477792ms)
+  AssertionError [ERR_ASSERTION]: legacy save dueAt must not delay restart
+  + actual - expected
+  
+  + 86406000
+  - 86401000
+        ^
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/sync-core.test.mjs:46:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 86406000,
+    expected: 86401000,
+    operator: 'strictEqual'
+  }

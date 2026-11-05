@@ -1,4 +1,6 @@
+import Button from "../../components/button/Button";
 import { useState } from "react";
+import HeaderAction from "../../components/header-action/HeaderAction";
 import { site } from "../../config/site";
 import { editorConfig } from "./config";
 import EditorShortcuts from "./EditorShortcuts";
@@ -34,20 +36,20 @@ export default function EditorToolbar({
   return (
     <>
       <header className="editor-header">
-        <button type="button" className="editor-back" onClick={onClose}>
+        <Button type="button" className="editor-back" onClick={onClose}>
           ← 기록으로
-        </button>
+        </Button>
         <span className="editor-breadcrumb">
           {site.name} <span>/</span> {title || editorConfig.untitledTitle}
         </span>
-        <button
+        <HeaderAction
           type="button"
           className="editor-help"
           onClick={() => setHelp(!help)}
           aria-expanded={help}
         >
           단축키
-        </button>
+        </HeaderAction>
       </header>
       <div className="editor-actions">
         <span role="status">{status}</span>
@@ -63,16 +65,16 @@ export default function EditorToolbar({
             }}
           />
         </label>
-        <button type="button" onClick={onExportMarkdown}>.md 내보내기</button>
-        <button type="button" onClick={onExportBackup}>원본 백업</button>
-        <button type="submit" className="editor-save" disabled={disabled} onClick={(event) => {
+        <Button type="button" onClick={onExportMarkdown}>.md 내보내기</Button>
+        <Button type="button" onClick={onExportBackup}>원본 백업</Button>
+        <Button type="submit" className="editor-save" disabled={disabled} onClick={(event) => {
           if (!event.currentTarget.form) {
             event.preventDefault();
             onSave();
           }
         }}>
           {saveLabel}
-        </button>
+        </Button>
       </div>
       {error ? (
         <p className="editor-error" role="alert">

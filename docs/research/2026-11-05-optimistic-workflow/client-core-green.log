@@ -1,0 +1,86 @@
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ a remounted public view renders stored data without waiting for or repeating the index download (44.050167ms)
+✔ 5-second debounce coalesces unsent versions and sends one immutable bulk request (7.718917ms)
+✔ another coordinator cannot duplicate an in-flight batch, and later edits survive old response (1.482625ms)
+✔ a lost response retains the same payload and resumes after reload without duplicate identity (1.057458ms)
+✔ daily cleanup verifies receipts and never deletes failed, pending or mismatched data (2.677959ms)
+✔ daily cleanup preserves a record whose receipt commit differs from its saved result (2.183458ms)
+✔ discarding one conflict retains other documents as blocked recoverable saves (1.424166ms)
+✔ cleanup preserves remotely confirmed payloads until their local recovery state is applied (2.055584ms)
+✔ repeated saves coalesce without growing callback or pending queues; capacity rejects only the new request (34.038083ms)
+✔ transient retry schedule is5,15,60 seconds and then stops; manual retry reuses the frozen batch (2.248584ms)
+✔ a superseded lost-response retry cannot attach the latest revision to an older operation (0.520916ms)
+✔ oversized saves and a full retained history stop new work without deleting older requests (21.492459ms)
+✔ a verified source save confirms the queue before public generation and rebases later edits (1.759542ms)
+✔ a source save with a mismatched receipt stays recoverable rather than confirming (1.154041ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ restart applies confirmed recovery data, and late older receipts cannot overwrite a newer baseline (20.62375ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ a delayed peer failure cannot announce an archived failed batch as confirmed (30.136458ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ source confirmation preserves the public snapshot identity and overlays an older public index after restart (32.01375ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ background publication checks survive navigation and retire overlays only at the verified public commit (1556.113542ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2642.037959

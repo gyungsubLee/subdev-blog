@@ -1,0 +1,669 @@
+{
+  "bootstrap": {
+    "sourceCommit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "artifact": "8d6f9de91d263c8b3a303508254b3f6e0768e568",
+    "ms": 64.91816600000004,
+    "transport": "Local disposable GitHub protocol fixture",
+    "posts": 1
+  },
+  "apiRows": [
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 1.660875000001397,
+      "bytes": 151,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/public?kind=index",
+      "method": "GET",
+      "status": 200,
+      "ms": 4.785375000006752,
+      "bytes": 614,
+      "githubFixtureCalls": 4
+    },
+    {
+      "path": "/api/content?kind=categories",
+      "method": "GET",
+      "status": 200,
+      "ms": 8.87095800001407,
+      "bytes": 236,
+      "githubFixtureCalls": 1
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 7.575333000015235,
+      "bytes": 151,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operations": 1,
+      "requestId": "4c2581af-2577-47d4-8ee4-38031135f6c9",
+      "status": 200,
+      "ms": 80.7190830000036,
+      "bytes": 969,
+      "githubFixtureCalls": 38
+    },
+    {
+      "path": "/api/public?kind=index&after=3b2ac2b5556eef9a1655dbec04e6b5979285f20b",
+      "method": "GET",
+      "status": 200,
+      "ms": 0.9281659999978729,
+      "bytes": 755,
+      "githubFixtureCalls": 4
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 1.9208749999525025,
+      "bytes": 151,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operations": 1,
+      "requestId": "c68d229c-ff5c-475a-85e9-e5f9afe756e0",
+      "status": 200,
+      "ms": 17.683000000019092,
+      "bytes": 969,
+      "githubFixtureCalls": 38
+    },
+    {
+      "path": "/api/public?kind=index&after=55ad7bc5e472e6d508bf74841c8a0c1465912b76",
+      "method": "GET",
+      "status": 200,
+      "ms": 2.5630000000237487,
+      "bytes": 755,
+      "githubFixtureCalls": 4
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 0.5052080000168644,
+      "bytes": 151,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 0.854749999998603,
+      "bytes": 151,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 0.37316700001247227,
+      "bytes": 151,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 9.81958399998257,
+      "bytes": 151,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operations": 1,
+      "requestId": "af591c21-5fd8-4391-b344-24045bb306d6",
+      "status": 200,
+      "ms": 39.37829199997941,
+      "bytes": 981,
+      "githubFixtureCalls": 38
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operations": 1,
+      "requestId": "af591c21-5fd8-4391-b344-24045bb306d6",
+      "status": 200,
+      "ms": 4.454874999995809,
+      "bytes": 981,
+      "githubFixtureCalls": 11
+    },
+    {
+      "path": "/api/public?kind=index&after=cb5db474ca72345eead2b33e9da50dfd6a6a1de8",
+      "method": "GET",
+      "status": 200,
+      "ms": 2.8396669999929145,
+      "bytes": 767,
+      "githubFixtureCalls": 4
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 3.834708000009414,
+      "bytes": 151,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/content?kind=post&id=12345678-1234-1234-1234-123456789abc",
+      "method": "GET",
+      "status": 200,
+      "ms": 7.522832999937236,
+      "bytes": 780,
+      "githubFixtureCalls": 5
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operations": 1,
+      "requestId": "c8e759ef-33f2-4a66-9977-9b485274cd6b",
+      "status": 200,
+      "ms": 37.84741699998267,
+      "bytes": 1260,
+      "githubFixtureCalls": 41
+    },
+    {
+      "path": "/api/public?kind=index&after=2448d02ea81205766369c702de29bdcc7b46402d",
+      "method": "GET",
+      "status": 200,
+      "ms": 2.132958000060171,
+      "bytes": 819,
+      "githubFixtureCalls": 4
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 2.6102079999400303,
+      "bytes": 151,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 2.0271659999853,
+      "bytes": 151,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 2.002457999973558,
+      "bytes": 151,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 1.0256250000093132,
+      "bytes": 151,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operations": 1,
+      "requestId": "f7946130-cf30-4fff-8042-14d0ab36b7dc",
+      "status": 200,
+      "ms": 23.896500000031665,
+      "bytes": 1259,
+      "githubFixtureCalls": 41
+    }
+  ],
+  "browserRows": [
+    {
+      "event": "home-ready",
+      "hash": "#/",
+      "at": 926.4000000003725,
+      "elapsedMs": 926.4000000003725,
+      "longTaskMs": 252,
+      "domReadyMs": 893,
+      "resources": [
+        {
+          "name": "/api/session",
+          "duration": 355.7000000011176,
+          "transferSize": 451
+        },
+        {
+          "name": "/api/public?kind=index",
+          "duration": 359.8999999985099,
+          "transferSize": 914
+        }
+      ]
+    },
+    {
+      "event": "save-click",
+      "hash": "#/categories",
+      "at": 23719.5,
+      "elapsedMs": 23719.5,
+      "longTaskMs": 0
+    },
+    {
+      "event": "save-queued",
+      "hash": "#/categories",
+      "at": 23734.599999999627,
+      "elapsedMs": 23734.599999999627,
+      "longTaskMs": 0,
+      "sinceSaveMs": 15.200000001117587
+    },
+    {
+      "event": "save-restored",
+      "hash": "#/categories",
+      "at": 23735.39999999851,
+      "elapsedMs": 23735.39999999851,
+      "longTaskMs": 0,
+      "sinceSaveMs": 16
+    },
+    {
+      "event": "save-queued",
+      "hash": "#/categories",
+      "at": 23751.89999999851,
+      "elapsedMs": 23751.89999999851,
+      "longTaskMs": 0,
+      "sinceSaveMs": 32.5
+    },
+    {
+      "event": "save-sending",
+      "hash": "#/categories",
+      "at": 28861,
+      "elapsedMs": 28861,
+      "longTaskMs": 0,
+      "sinceSaveMs": 5141.60000000149
+    },
+    {
+      "event": "save-confirmed",
+      "hash": "#/categories",
+      "at": 29325.199999999255,
+      "elapsedMs": 29325.199999999255,
+      "longTaskMs": 0,
+      "sinceSaveMs": 5605.700000001118
+    },
+    {
+      "event": "save-click",
+      "hash": "#/categories",
+      "at": 38043.29999999888,
+      "elapsedMs": 38043.29999999888,
+      "longTaskMs": 82
+    },
+    {
+      "event": "save-click",
+      "hash": "#/categories",
+      "at": 46061,
+      "elapsedMs": 46061,
+      "longTaskMs": 82
+    },
+    {
+      "event": "save-queued",
+      "hash": "#/categories",
+      "at": 46067.09999999963,
+      "elapsedMs": 46067.09999999963,
+      "longTaskMs": 82,
+      "sinceSaveMs": 6.200000001117587
+    },
+    {
+      "event": "save-restored",
+      "hash": "#/categories",
+      "at": 46067.89999999851,
+      "elapsedMs": 46067.89999999851,
+      "longTaskMs": 82,
+      "sinceSaveMs": 7
+    },
+    {
+      "event": "save-queued",
+      "hash": "#/categories",
+      "at": 46074.09999999963,
+      "elapsedMs": 46074.09999999963,
+      "longTaskMs": 82,
+      "sinceSaveMs": 13.200000001117587
+    },
+    {
+      "event": "save-click",
+      "hash": "#/categories",
+      "at": 46691.39999999851,
+      "elapsedMs": 46691.39999999851,
+      "longTaskMs": 82
+    },
+    {
+      "event": "save-queued",
+      "hash": "#/categories",
+      "at": 46695.699999999255,
+      "elapsedMs": 46695.699999999255,
+      "longTaskMs": 82,
+      "sinceSaveMs": 4.300000000745058
+    },
+    {
+      "event": "save-restored",
+      "hash": "#/categories",
+      "at": 46696.29999999888,
+      "elapsedMs": 46696.29999999888,
+      "longTaskMs": 82,
+      "sinceSaveMs": 4.900000000372529
+    },
+    {
+      "event": "save-queued",
+      "hash": "#/categories",
+      "at": 46706.5,
+      "elapsedMs": 46706.5,
+      "longTaskMs": 82,
+      "sinceSaveMs": 15.100000001490116
+    },
+    {
+      "event": "save-click",
+      "hash": "#/categories",
+      "at": 46980.79999999888,
+      "elapsedMs": 46980.79999999888,
+      "longTaskMs": 82
+    },
+    {
+      "event": "save-queued",
+      "hash": "#/categories",
+      "at": 46984.79999999888,
+      "elapsedMs": 46984.79999999888,
+      "longTaskMs": 82,
+      "sinceSaveMs": 3.900000000372529
+    },
+    {
+      "event": "save-restored",
+      "hash": "#/categories",
+      "at": 46985.39999999851,
+      "elapsedMs": 46985.39999999851,
+      "longTaskMs": 82,
+      "sinceSaveMs": 4.599999999627471
+    },
+    {
+      "event": "save-queued",
+      "hash": "#/categories",
+      "at": 46993.199999999255,
+      "elapsedMs": 46993.199999999255,
+      "longTaskMs": 82,
+      "sinceSaveMs": 12.400000000372529
+    },
+    {
+      "event": "home-ready",
+      "hash": "#/",
+      "at": 112.5,
+      "elapsedMs": 112.5,
+      "longTaskMs": 0,
+      "domReadyMs": 101.29999999888241,
+      "resources": []
+    },
+    {
+      "event": "home-ready",
+      "hash": "#/",
+      "at": 99.79999999888241,
+      "elapsedMs": 99.79999999888241,
+      "longTaskMs": 0,
+      "domReadyMs": 89,
+      "resources": []
+    },
+    {
+      "event": "home-ready",
+      "hash": "#/",
+      "at": 102.80000000074506,
+      "elapsedMs": 102.80000000074506,
+      "longTaskMs": 0,
+      "domReadyMs": 91.30000000074506,
+      "resources": []
+    },
+    {
+      "event": "save-click",
+      "hash": "#/categories",
+      "at": 35669.09999999963,
+      "elapsedMs": 14748.299999998882,
+      "longTaskMs": 244
+    },
+    {
+      "event": "save-click",
+      "hash": "#/categories",
+      "at": 92679.40000000037,
+      "elapsedMs": 71758.59999999963,
+      "longTaskMs": 297
+    },
+    {
+      "event": "save-queued",
+      "hash": "#/categories",
+      "at": 92690.40000000037,
+      "elapsedMs": 71769.59999999963,
+      "longTaskMs": 297,
+      "sinceSaveMs": 11
+    },
+    {
+      "event": "save-restored",
+      "hash": "#/categories",
+      "at": 92691.90000000037,
+      "elapsedMs": 71771.09999999963,
+      "longTaskMs": 297,
+      "sinceSaveMs": 12.5
+    },
+    {
+      "event": "save-queued",
+      "hash": "#/categories",
+      "at": 92710.19999999925,
+      "elapsedMs": 71789.39999999851,
+      "longTaskMs": 297,
+      "sinceSaveMs": 30.799999998882413
+    },
+    {
+      "event": "save-sending",
+      "hash": "#/categories",
+      "at": 97689.59999999963,
+      "elapsedMs": 76768.79999999888,
+      "longTaskMs": 605,
+      "sinceSaveMs": 5010.199999999255
+    },
+    {
+      "event": "save-confirmed",
+      "hash": "#/categories",
+      "at": 98461.5,
+      "elapsedMs": 77540.69999999925,
+      "longTaskMs": 605,
+      "sinceSaveMs": 5782.0999999996275
+    },
+    {
+      "event": "sync-state",
+      "value": {
+        "pending": 0,
+        "active": null,
+        "history": [
+          {
+            "id": "4c2581af-2577-47d4-8ee4-38031135f6c9",
+            "state": "confirmed",
+            "applied": true,
+            "operations": 1
+          },
+          {
+            "id": "c68d229c-ff5c-475a-85e9-e5f9afe756e0",
+            "state": "confirmed",
+            "applied": true,
+            "operations": 1
+          },
+          {
+            "id": "af591c21-5fd8-4391-b344-24045bb306d6",
+            "state": "confirmed",
+            "applied": true,
+            "operations": 1
+          }
+        ],
+        "cleanedAt": 1793799584392
+      }
+    },
+    {
+      "event": "cleanup-result",
+      "value": {
+        "results": [
+          {
+            "scope": "42:gyungsubLee/subdev-blog-content:main",
+            "skipped": true,
+            "retryAfterMs": 60001,
+            "removed": 0
+          },
+          {
+            "scope": "42:gyungsubLee/subdev-blog-content:main",
+            "skipped": false,
+            "removed": 3
+          }
+        ],
+        "elapsedMs": 304.40000000037253,
+        "frames": 16,
+        "pending": 0,
+        "active": null,
+        "history": [
+          {
+            "id": "03409a6e-3eb5-4bb4-8bf4-7c18909327c0",
+            "state": "failed",
+            "applied": true,
+            "operations": 1
+          },
+          {
+            "id": "507dc207-f902-4c23-be67-9643fd627768",
+            "state": "confirmed",
+            "applied": false,
+            "operations": 1
+          },
+          {
+            "id": "91862bf6-5472-4c31-ac3d-9be3ec6ab73c",
+            "state": "confirmed",
+            "applied": true,
+            "operations": 1
+          }
+        ],
+        "cleanedAt": 1793799968749
+      }
+    },
+    {
+      "event": "workspace-ready",
+      "hash": "#/content",
+      "at": 162347.79999999888,
+      "elapsedMs": 170.19999999925494,
+      "longTaskMs": 2607,
+      "domReadyMs": 13.099999999627471,
+      "resources": [
+        {
+          "name": "/api/session",
+          "duration": 357.7000000011176,
+          "transferSize": 451
+        }
+      ]
+    },
+    {
+      "event": "save-click",
+      "hash": "#/content",
+      "at": 205199.09999999963,
+      "elapsedMs": 43021.5,
+      "longTaskMs": 3718
+    },
+    {
+      "event": "save-queued",
+      "hash": "#/content",
+      "at": 205455.69999999925,
+      "elapsedMs": 43278.09999999963,
+      "longTaskMs": 4030,
+      "sinceSaveMs": 273.09999999962747
+    },
+    {
+      "event": "save-restored",
+      "hash": "#/content",
+      "at": 205550.59999999963,
+      "elapsedMs": 43373,
+      "longTaskMs": 4030,
+      "sinceSaveMs": 368.09999999962747
+    },
+    {
+      "event": "save-queued",
+      "hash": "#/content",
+      "at": 205582.3999999985,
+      "elapsedMs": 43404.79999999888,
+      "longTaskMs": 4030,
+      "sinceSaveMs": 399.8999999985099
+    },
+    {
+      "event": "save-sending",
+      "hash": "#/content",
+      "at": 223242.69999999925,
+      "elapsedMs": 61065.09999999963,
+      "longTaskMs": 21681,
+      "sinceSaveMs": 18060.199999999255
+    },
+    {
+      "event": "save-confirmed",
+      "hash": "#/content",
+      "at": 227265.19999999925,
+      "elapsedMs": 65087.59999999963,
+      "longTaskMs": 25210,
+      "sinceSaveMs": 22082.699999999255
+    },
+    {
+      "event": "workspace-ready",
+      "hash": "#/content",
+      "at": 612.1999999992549,
+      "elapsedMs": 612.1999999992549,
+      "longTaskMs": 0,
+      "domReadyMs": 557.7999999988824,
+      "resources": [
+        {
+          "name": "/api/session",
+          "duration": 355.09999999962747,
+          "transferSize": 451
+        }
+      ]
+    },
+    {
+      "event": "save-click",
+      "hash": "#/content",
+      "at": 174604.09999999963,
+      "elapsedMs": 174604.09999999963,
+      "longTaskMs": 218
+    },
+    {
+      "event": "save-queued",
+      "hash": "#/content",
+      "at": 174669.29999999888,
+      "elapsedMs": 174669.29999999888,
+      "longTaskMs": 288,
+      "sinceSaveMs": 67.59999999962747
+    },
+    {
+      "event": "save-restored",
+      "hash": "#/content",
+      "at": 174672.29999999888,
+      "elapsedMs": 174672.29999999888,
+      "longTaskMs": 288,
+      "sinceSaveMs": 70.59999999962747
+    },
+    {
+      "event": "save-queued",
+      "hash": "#/content",
+      "at": 174690.79999999888,
+      "elapsedMs": 174690.79999999888,
+      "longTaskMs": 288,
+      "sinceSaveMs": 86.59999999962747
+    },
+    {
+      "event": "workspace-ready",
+      "hash": "#/content",
+      "at": 936.5,
+      "elapsedMs": 936.5,
+      "longTaskMs": 108,
+      "domReadyMs": 709.4000000003725,
+      "resources": [
+        {
+          "name": "/api/session",
+          "duration": 354.80000000074506,
+          "transferSize": 451
+        }
+      ]
+    }
+  ],
+  "head": "2856f3e02479f99d0256d3be9164a87710cd3ef5",
+  "sourceCommits": 5
+}

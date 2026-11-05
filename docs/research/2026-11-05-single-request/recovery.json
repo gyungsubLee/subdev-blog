@@ -1,0 +1,18 @@
+{
+  "event": {
+    "event": "actual-recovery",
+    "requestId": "atomic-aced19b6-046a-471d-94c5-cd3026a72d7b",
+    "expectedCommit": "da120cc94884bd0bbd33006a5bfddc29c406154a",
+    "actualCommit": "da120cc94884bd0bbd33006a5bfddc29c406154a",
+    "sameCommit": true,
+    "state": "saved",
+    "ms": 4464.700000000186
+  },
+  "status": 200,
+  "githubCalls": 8,
+  "readOnlyGraphqlRequestBytes": 738,
+  "mutationRequests": 0,
+  "canonicalHeadAfter": "da120cc94884bd0bbd33006a5bfddc29c406154a",
+  "sourceUnchanged": true,
+  "classification": "Known bound RecoverAtomicSave query has exact738-byte body; other requests are GET. Raw trace preserved."
+}

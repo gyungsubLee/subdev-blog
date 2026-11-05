@@ -1,0 +1,54 @@
+{
+  "scope": "Actual generated JSON GETs for the same baseline artifact; header timing excludes subsequent body transfer/decompression. Includes cold samples and parity requests, not a sum of complete request latency.",
+  "requests": [
+    {
+      "method": "GET",
+      "host": "raw.githubusercontent.com",
+      "path": "/gyungsubLee/subdev-blog-content/3691898cb231115b4594542ade7300d710e65544/manifest.json",
+      "status": 200,
+      "headersMs": 34.74241599999368
+    },
+    {
+      "method": "GET",
+      "host": "raw.githubusercontent.com",
+      "path": "/gyungsubLee/subdev-blog-content/3691898cb231115b4594542ade7300d710e65544/index.json",
+      "status": 200,
+      "headersMs": 654.323958999943
+    },
+    {
+      "method": "GET",
+      "host": "raw.githubusercontent.com",
+      "path": "/gyungsubLee/subdev-blog-content/3691898cb231115b4594542ade7300d710e65544/manifest.json",
+      "status": 200,
+      "headersMs": 36.04887499997858
+    },
+    {
+      "method": "GET",
+      "host": "raw.githubusercontent.com",
+      "path": "/gyungsubLee/subdev-blog-content/3691898cb231115b4594542ade7300d710e65544/index.json",
+      "status": 200,
+      "headersMs": 24.162167000002228
+    },
+    {
+      "method": "GET",
+      "host": "raw.githubusercontent.com",
+      "path": "/gyungsubLee/subdev-blog-content/3691898cb231115b4594542ade7300d710e65544/manifest.json",
+      "status": 200,
+      "headersMs": 43.3790840000147
+    },
+    {
+      "method": "GET",
+      "host": "raw.githubusercontent.com",
+      "path": "/gyungsubLee/subdev-blog-content/3691898cb231115b4594542ade7300d710e65544/index.json",
+      "status": 200,
+      "headersMs": 27.163332999916747
+    },
+    {
+      "method": "GET",
+      "host": "raw.githubusercontent.com",
+      "path": "/gyungsubLee/subdev-blog-content/3691898cb231115b4594542ade7300d710e65544/posts/3f4eda9b-0fe1-8004-89ff-c68ec5620797.json",
+      "status": 200,
+      "headersMs": 305.0725829999428
+    }
+  ]
+}

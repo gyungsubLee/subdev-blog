@@ -1,0 +1,221 @@
+{
+  "label": "before",
+  "apiRows": [
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 8.173000000002503,
+      "bytes": 217
+    },
+    {
+      "path": "/api/public?kind=index",
+      "method": "GET",
+      "status": 200,
+      "ms": 4365.667291999998,
+      "bytes": 1297463,
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "posts": 3033
+    },
+    {
+      "path": "/api/public?kind=index",
+      "method": "GET",
+      "status": 200,
+      "ms": 3872.1059170000008,
+      "bytes": 1297463,
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "posts": 3033
+    },
+    {
+      "path": "/api/public?kind=index",
+      "method": "GET",
+      "status": 200,
+      "ms": 3890.975584,
+      "bytes": 1297463,
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "posts": 3033
+    },
+    {
+      "path": "/api/public?kind=post&id=3f4eda9b-0fe1-8004-89ff-c68ec5620797&commit=ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "method": "GET",
+      "status": 200,
+      "ms": 52.223500000007334,
+      "bytes": 35694
+    },
+    {
+      "path": "/api/public?kind=index",
+      "method": "GET",
+      "status": 200,
+      "ms": 730.3549999999814,
+      "bytes": 1297463,
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "posts": 3033
+    },
+    {
+      "path": "/api/public?kind=post&id=3f4eda9b-0fe1-8004-89ff-c68ec5620797&commit=ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "method": "GET",
+      "status": 200,
+      "ms": 33.265958000090905,
+      "bytes": 35694
+    }
+  ],
+  "browserRows": [
+    {
+      "event": "home-ready",
+      "hash": "#/",
+      "at": 5108.299999999814,
+      "elapsedMs": 5108.299999999814,
+      "longTaskMs": 481,
+      "domReadyMs": 4828.399999999441,
+      "resources": [
+        {
+          "name": "/api/public?kind=index",
+          "duration": 4417.799999999814,
+          "transferSize": 1297763
+        },
+        {
+          "name": "/api/session",
+          "duration": 38.200000000186265,
+          "transferSize": 517
+        }
+      ]
+    },
+    {
+      "event": "image-loaded",
+      "hash": "#/",
+      "at": 5487,
+      "elapsedMs": 5487,
+      "longTaskMs": 481,
+      "src": "/gyungsubLee/subdev-blog-content/ae379ba3db9279e04fd12befb1b757091fbdbcb5/posts/3f2eda9b-0fe1-80ac-b96a-e01c777509c2/fb3b1ee7da4a15e0.webp",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "event": "images-complete",
+      "hash": "#/",
+      "at": 5490.899999999441,
+      "elapsedMs": 5490.899999999441,
+      "longTaskMs": 481,
+      "images": 1,
+      "failed": 0
+    },
+    {
+      "event": "image-loaded",
+      "hash": "#/",
+      "at": 4184.199999999255,
+      "elapsedMs": 4184.199999999255,
+      "longTaskMs": 52,
+      "src": "/gyungsubLee/subdev-blog-content/ae379ba3db9279e04fd12befb1b757091fbdbcb5/posts/3f2eda9b-0fe1-80ac-b96a-e01c777509c2/fb3b1ee7da4a15e0.webp",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "event": "images-complete",
+      "hash": "#/",
+      "at": 4213,
+      "elapsedMs": 4213,
+      "longTaskMs": 52,
+      "images": 1,
+      "failed": 0
+    },
+    {
+      "event": "home-ready",
+      "hash": "#/",
+      "at": 4218.399999999441,
+      "elapsedMs": 4218.399999999441,
+      "longTaskMs": 137,
+      "domReadyMs": 4130.699999999255,
+      "resources": [
+        {
+          "name": "/api/public?kind=index",
+          "duration": 3923.2000000001863,
+          "transferSize": 1297763
+        },
+        {
+          "name": "/api/session",
+          "duration": 4,
+          "transferSize": 338
+        },
+        {
+          "name": "/api/session",
+          "duration": 10.5,
+          "transferSize": 338
+        }
+      ]
+    },
+    {
+      "event": "home-ready",
+      "hash": "#/",
+      "at": 4378.5,
+      "elapsedMs": 4378.5,
+      "longTaskMs": 0,
+      "domReadyMs": 4277.700000000186,
+      "resources": [
+        {
+          "name": "/api/session",
+          "duration": 3.599999999627471,
+          "transferSize": 338
+        },
+        {
+          "name": "/api/public?kind=index",
+          "duration": 3969.7999999998137,
+          "transferSize": 1297763
+        },
+        {
+          "name": "/api/session",
+          "duration": 2.8999999994412065,
+          "transferSize": 338
+        }
+      ]
+    },
+    {
+      "event": "image-loaded",
+      "hash": "#/",
+      "at": 4385.5999999996275,
+      "elapsedMs": 4385.5999999996275,
+      "longTaskMs": 50,
+      "src": "/gyungsubLee/subdev-blog-content/ae379ba3db9279e04fd12befb1b757091fbdbcb5/posts/3f2eda9b-0fe1-80ac-b96a-e01c777509c2/fb3b1ee7da4a15e0.webp",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "event": "images-complete",
+      "hash": "#/",
+      "at": 4386.700000000186,
+      "elapsedMs": 4386.700000000186,
+      "longTaskMs": 50,
+      "images": 1,
+      "failed": 0
+    },
+    {
+      "event": "post-ready",
+      "hash": "#/post/3f4eda9b-0fe1-8004-89ff-c68ec5620797",
+      "at": 12044.599999999627,
+      "elapsedMs": 210.70000000018626,
+      "longTaskMs": 179,
+      "domReadyMs": 133.5,
+      "resources": [
+        {
+          "name": "/api/session",
+          "duration": 3.599999999627471,
+          "transferSize": 338
+        },
+        {
+          "name": "/api/public?kind=index",
+          "duration": 3969.7999999998137,
+          "transferSize": 1297763
+        },
+        {
+          "name": "/api/session",
+          "duration": 2.8999999994412065,
+          "transferSize": 338
+        },
+        {
+          "name": "/api/public?kind=post&id=3f4eda9b-0fe1-8004-89ff-c68ec5620797&commit=ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+          "duration": 55.5,
+          "transferSize": 35994
+        }
+      ]
+    }
+  ]
+}

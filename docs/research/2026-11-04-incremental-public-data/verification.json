@@ -1,0 +1,255 @@
+{
+  "scope": "Latest handler and production frontend on local HTTP; actual GitHub REST/raw, existing genuine OAuth session/CSRF/authorization. No GitHub or identity mock. Native preview and app-main deployment preserved.",
+  "timingDefinition": "HTTP handler POST elapsed includes real GitHub transport and complete canonical publication; one independent create, title update and delete observation, not statistical medians. Bootstrap and its cleanup recorded separately. Prior measurements from same3033-post corpus and machine/network session; commits differ by disposable test operations.",
+  "mutations": [
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operation": "post.create",
+      "status": 200,
+      "ms": 167595.506541,
+      "bytes": 361,
+      "sourceMarkdownReads": 3034,
+      "githubWrites": 26,
+      "githubCalls": 3079
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operation": "post.delete",
+      "status": 200,
+      "ms": 21368.555500000017,
+      "bytes": 361,
+      "sourceMarkdownReads": 0,
+      "githubWrites": 9,
+      "githubCalls": 33
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operation": "post.create",
+      "status": 200,
+      "ms": 22277.334959,
+      "bytes": 361,
+      "sourceMarkdownReads": 1,
+      "githubWrites": 11,
+      "githubCalls": 32
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operation": "post.update",
+      "status": 200,
+      "ms": 20731.414875000017,
+      "bytes": 361,
+      "sourceMarkdownReads": 1,
+      "githubWrites": 10,
+      "githubCalls": 33
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operation": "post.delete",
+      "status": 200,
+      "ms": 28206.90887500008,
+      "bytes": 361,
+      "sourceMarkdownReads": 0,
+      "githubWrites": 9,
+      "githubCalls": 33
+    }
+  ],
+  "baseline": {
+    "freshUpdateMs": 161171.380292,
+    "freshDeleteMs": 156548.364,
+    "priorCreateMs": 71475.37625,
+    "priorCreateWasRecovery": true
+  },
+  "phases": {
+    "bootstrap": {
+      "phase": "bootstrap",
+      "at": "2026-11-04T12:50:17.420Z",
+      "contentCommit": "99497b73108215436bc42461f5c43d0cf09ba224",
+      "publicationCommit": "8ba4fe6deba57e3926e005ea05ddd12f364b43a6",
+      "postCount": 3034,
+      "testPosts": [
+        {
+          "id": "0a9063d1-6227-42f3-93ef-799d23435d29",
+          "title": "E2E \uc99d\ubd84 \ucd08\uae30\ud654 20261104 1248"
+        }
+      ],
+      "publicationVerified": true,
+      "generation": {
+        "generatedPosts": 3034,
+        "reusedPosts": 0,
+        "cacheBytes": 2650485
+      },
+      "actualInventory": {
+        "reusedBodies": 1847,
+        "changedBodies": 1187,
+        "removedBodies": 0
+      },
+      "bodyVerified": true
+    },
+    "bootstrap-deleted": {
+      "phase": "bootstrap-deleted",
+      "at": "2026-11-04T12:52:35.025Z",
+      "contentCommit": "2b20a61e8e58f953ba95104a66f64608c7b382f0",
+      "publicationCommit": "2abb48d80181f15b7eeaf39ec475872cd23df9cd",
+      "postCount": 3033,
+      "testPosts": [],
+      "publicationVerified": true,
+      "generation": {
+        "generatedPosts": 0,
+        "reusedPosts": 3033,
+        "cacheBytes": 2650012
+      },
+      "actualInventory": {
+        "reusedBodies": 3033,
+        "changedBodies": 0,
+        "removedBodies": 1
+      },
+      "originalFilesUnchanged": true,
+      "sourceFileCount": 10294
+    },
+    "created": {
+      "phase": "created",
+      "at": "2026-11-04T12:54:04.057Z",
+      "contentCommit": "1b6df5d40c88dddf1808e0f8fdcd0fd6020aab1a",
+      "publicationCommit": "348451c29489208ca6cef8dfbc61b21dd2557530",
+      "postCount": 3034,
+      "testPosts": [
+        {
+          "id": "5dbf6fc4-7b82-4767-9ad2-ea2427cf6e14",
+          "title": "E2E \uc99d\ubd84 \uc800\uc7a5 20261104 1248"
+        }
+      ],
+      "publicationVerified": true,
+      "generation": {
+        "generatedPosts": 1,
+        "reusedPosts": 3033,
+        "cacheBytes": 2650479
+      },
+      "actualInventory": {
+        "reusedBodies": 3033,
+        "changedBodies": 1,
+        "removedBodies": 0
+      },
+      "bodyVerified": true
+    },
+    "updated": {
+      "phase": "updated",
+      "at": "2026-11-04T12:55:18.989Z",
+      "contentCommit": "1a759aef2a95fa63531e0f3435f94b0c171bc2aa",
+      "publicationCommit": "16291878cd843711bbcd3b9a33fc7ca019181e05",
+      "postCount": 3034,
+      "testPosts": [
+        {
+          "id": "5dbf6fc4-7b82-4767-9ad2-ea2427cf6e14",
+          "title": "E2E \uc99d\ubd84 \uc800\uc7a5 20261104 1248 \uc218\uc815"
+        }
+      ],
+      "publicationVerified": true,
+      "generation": {
+        "generatedPosts": 1,
+        "reusedPosts": 3033,
+        "cacheBytes": 2650493
+      },
+      "actualInventory": {
+        "reusedBodies": 3033,
+        "changedBodies": 1,
+        "removedBodies": 0
+      },
+      "bodyVerified": true
+    },
+    "deleted": {
+      "phase": "deleted",
+      "at": "2026-11-04T12:57:28.603Z",
+      "contentCommit": "c79fdcc047ce9f0e13210bda19b059f7cb9f3a66",
+      "publicationCommit": "608a37b8fabb2f684cf2fd928584d9f394eb6c6f",
+      "postCount": 3033,
+      "testPosts": [],
+      "publicationVerified": true,
+      "generation": {
+        "generatedPosts": 0,
+        "reusedPosts": 3033,
+        "cacheBytes": 2650012
+      },
+      "actualInventory": {
+        "reusedBodies": 3033,
+        "changedBodies": 0,
+        "removedBodies": 1
+      },
+      "originalFilesUnchanged": true,
+      "sourceFileCount": 10294
+    }
+  },
+  "checks": {
+    "publisher": "18/18 passed",
+    "domain/server/public regression": "166/166 passed (includes publisher18)",
+    "isolated generator": "15/15 passed",
+    "HTTP E2E": "3/3 passed",
+    "production build": "passed",
+    "independent review": "category extension leakage fixed with red/green test; final review no remaining findings",
+    "full unit suite": "Not rerun; prior unrelated category editor failures not claimed resolved"
+  },
+  "sourceBefore": "17397ef27e1f8dc4ecc8b5fec0ed678f6e723500",
+  "finalSourceCommit": "c79fdcc047ce9f0e13210bda19b059f7cb9f3a66",
+  "generatorCommit": "9c7a699f3ec2b2e1839fd1371baf52eabd5eca30",
+  "sourceFilesUnchanged": 10294,
+  "workflowRuns": [
+    {
+      "conclusion": "success",
+      "databaseId": 41833619691,
+      "event": "push",
+      "headSha": "c79fdcc047ce9f0e13210bda19b059f7cb9f3a66",
+      "status": "completed",
+      "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41833619691"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 41833388031,
+      "event": "push",
+      "headSha": "1a759aef2a95fa63531e0f3435f94b0c171bc2aa",
+      "status": "completed",
+      "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41833388031"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 41833167796,
+      "event": "push",
+      "headSha": "1b6df5d40c88dddf1808e0f8fdcd0fd6020aab1a",
+      "status": "completed",
+      "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41833167796"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 41832830352,
+      "event": "push",
+      "headSha": "2b20a61e8e58f953ba95104a66f64608c7b382f0",
+      "status": "completed",
+      "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41832830352"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 41832670461,
+      "event": "push",
+      "headSha": "99497b73108215436bc42461f5c43d0cf09ba224",
+      "status": "completed",
+      "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41832670461"
+    }
+  ],
+  "cleanup": {
+    "testPostsRemoved": true,
+    "taskTabsClosed": true,
+    "testServersStopped": true,
+    "originalPreviewPreserved": true,
+    "sessionNotLoggedOut": true
+  },
+  "limitations": [
+    "Metadata graph checks and aggregate index/cache JSON writes still occur. Only source Markdown validation/projection and per-post blobs become incremental.",
+    "Cache migration required one full bootstrap167.60s; missing first-parent artifact/cache or changed catalog signature also takes a full fallback.",
+    "First read/public API contracts unchanged; public-read.json proves no generation cache or source fetch, not a new three-sample performance study.",
+    "Existing native preview keeps old handler code until normal restart; measurements use latest module backend. No app deployment or native rebuild."
+  ],
+  "metricClarification": "sourceMarkdownReads counts raw.githubusercontent.com .md requests during the handler. Existing save preflight Git blob API reads of the edited/deleted document are included in githubCalls but are not classified as raw Markdown reads."
+}

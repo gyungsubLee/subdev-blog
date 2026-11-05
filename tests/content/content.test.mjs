@@ -102,11 +102,8 @@ test("explicit child categories override inherited categories", async (t) => {
 test("rejects invalid post relations, duplicate IDs and categories", async (t) => {
   for (const [name, change] of [
     ["cycle", (s) => { [...s.documents.values()][0].metadata.parent_id = inheritedChildId; }],
-    ["missing parent", (s) => { [...s.documents.values()][0].metadata.parent_id = otherId; }],
     ["duplicate ID", (s) => { s.documents.set("duplicate", [...s.documents.values()][0]); }],
     ["invalid category", (s) => { [...s.documents.values()][0].metadata.category_id = "missing"; }],
-    ["missing reference", (s) => { [...s.documents.values()][0].metadata.related_ids = [otherId]; }],
-    ["missing source", (s) => { [...s.documents.values()][0].metadata.source_ids = [otherId]; }],
     ["category cycle", (s) => { s.categories[0].parent_id = s.categories[1].id; s.categories[1].parent_id = s.categories[0].id; }],
     ["missing category parent", (s) => { s.categories[0].parent_id = "missing"; }],
     ["duplicate category", (s) => { s.categories.push(s.categories[0]); }],
@@ -201,7 +198,7 @@ test("failed validation leaves old Markdown and asset bytes unchanged", async (t
   const before = await readFile(path.join(folder, "Title.md"));
   for (const [doc, assets] of [
     [{ metadata: { ...entry.metadata, title: "Invalid" }, markdown: "![x](./missing.png)" }, []],
-    [{ metadata: { ...entry.metadata, parent_id: otherId }, markdown: entry.markdown }, []],
+    [{ metadata: { ...entry.metadata, parent_id: parentId }, markdown: entry.markdown }, []],
     [entry, [{ name: "picture.webp", bytes: Buffer.from("different") }]],
     [entry, [{ name: "../escape.webp", bytes: Buffer.from("bad") }]],
     [entry, [{ name: "bad%2fpath.webp", bytes: Buffer.from("bad") }]],
@@ -441,10 +438,10 @@ test("content checking defaults to app content and never falls back to legacy JS
 });
 
 test("content checking rejects invalid hierarchy and missing or uninitialized content", async (t) => {
-  const invalid = await fixture(t, [document(parentId, { parent_id: otherId })]);
+  const invalid = await fixture(t, [document(parentId, { parent_id: parentId })]);
   const result = checkContent(invalid);
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /Missing post parent/);
+  assert.match(result.stderr, /Cycle in post hierarchy/);
   for (const root of [path.join(invalid, "missing"), await fixture(t, [])]) {
     if (!root.endsWith("missing")) await rm(path.join(root, "categories.json"));
     const missing = checkContent(root);
@@ -743,4 +740,14 @@ test('legacy asset preparation updates the relocated web public directory', asyn
   assert.equal(result.status, 0, result.stderr?.slice(-2000));
   const mapping = await readFile(path.join(project, 'app/web/public/notion/asset-map.json'), 'utf8');
   assert.equal(mapping.trim(), '{}');
+});
+
+test("deleted post IDs remain readable in metadata and body links", async (t) => {
+  const original = document(parentId, { parent_id: otherId, related_ids: [otherId], source_ids: [otherId] }, `[deleted](#/post/${otherId})`);
+  const snapshot = await readContent(await fixture(t, [original]));
+  const posts = toPublicPosts(snapshot);
+  assert.equal(posts.length, 1);
+  assert.equal(posts[0].parentId, otherId);
+  assert.equal(posts[0].markdown, `[deleted](#/post/${otherId})`);
+  assert.deepEqual(snapshot.documents.get(parentId).metadata.related_ids, [otherId]);
 });

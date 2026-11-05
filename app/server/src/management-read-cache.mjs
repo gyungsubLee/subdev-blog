@@ -30,7 +30,23 @@ export function createManagementGitHubClient(token, config, fetcher = globalThis
     while (configurations.size > 4) configurations.delete(configurations.keys().next().value);
   }
 
-  return async (path, options = {}) => {
+  const retain = (path, value) => {
+    const immutable = /\/git\/(?:commits|trees|blobs)\/[a-f0-9]{40}(?:\?recursive=1)?$/.test(path) ||
+      /\/contents\/(?:content|\.gitmodules|categories\.json|posts|CONTENT_SCHEMA\.md)\?ref=[a-f0-9]{40}$/.test(path);
+    if (!immutable) return;
+    const bytes = JSON.stringify(value).length * 2;
+    if (bytes > MAX_BYTES) return;
+    if (cache.entries.has(path)) cache.bytes -= cache.entries.get(path).bytes;
+    cache.entries.set(path, {value, bytes});
+    cache.bytes += bytes;
+    while (cache.entries.size > MAX_ENTRIES || cache.bytes > MAX_BYTES) {
+      const oldest = cache.entries.keys().next().value;
+      cache.bytes -= cache.entries.get(oldest).bytes;
+      cache.entries.delete(oldest);
+    }
+  };
+
+  const client = async (path, options = {}) => {
     // Never retain identity, installation grants, repository permissions or heads.
     // Only commit-addressed files and immutable Git objects may outlive a request.
     const immutable = /\/git\/(?:commits|trees|blobs)\/[a-f0-9]{40}(?:\?recursive=1)?$/.test(path) ||
@@ -43,22 +59,19 @@ export function createManagementGitHubClient(token, config, fetcher = globalThis
     if (cache.pending.size >= MAX_ENTRIES) return github(path, options);
 
     const loading = (async () => {
-      const value = await github(path, options);
-      const bytes = JSON.stringify(value).length * 2;
-      if (bytes <= MAX_BYTES) {
-        cache.entries.set(path, { value, bytes });
-        cache.bytes += bytes;
-        while (cache.entries.size > MAX_ENTRIES || cache.bytes > MAX_BYTES) {
-          const oldest = cache.entries.keys().next().value;
-          cache.bytes -= cache.entries.get(oldest).bytes;
-          cache.entries.delete(oldest);
-        }
+      let value = await github(path, options);
+      if (/\/git\/trees\//.test(path) && Array.isArray(value.tree)) {
+        // Source validation needs identities and sizes, not repeated GitHub URLs.
+        value = {...value,tree:value.tree.map(({path,mode,type,sha,size}) => ({path,mode,type,sha,...(size === undefined ? {} : {size})}))};
       }
+      retain(path, value);
       return value;
     })().finally(() => { cache.pending.delete(path); });
     cache.pending.set(path, loading);
     return loading;
   };
+  client.prime = retain;
+  return client;
 }
 
 

@@ -149,7 +149,7 @@ function doc(postId, markdown, extra = {}) {
     markdown,
   });
 }
-test('pre-deletion snapshot blocks Notion inbound links even if candidate removes the link', async t => {
+test('publication permits deleting a target while keeping inbound ID links', async t => {
   const f = await fixture(t);
   await mkdir(path.join(f.root, 'posts', secondId));
   await writeFile(path.join(f.root, 'posts', secondId, 'Title.md'), doc(secondId, 'Delete target\n'));
@@ -158,10 +158,10 @@ test('pre-deletion snapshot blocks Notion inbound links even if candidate remove
   git(f.root, 'commit', '-m', 'linked base');
   const base = git(f.root, 'rev-parse', 'HEAD');
   await rm(path.join(f.root, 'posts', secondId), { recursive: true });
-  await writeFile(path.join(f.root, 'posts', id, 'Title.md'), doc(id, 'Removed link\n'));
+
   git(f.root, 'add', 'posts');
   git(f.root, 'commit', '-m', 'delete');
-  await assert.rejects(validateCandidate({ root: f.root, base, candidate: git(f.root, 'rev-parse', 'HEAD') }), /inbound/);
+  assert.deepEqual((await validateCandidate({ root: f.root, base, candidate: git(f.root, 'rev-parse', 'HEAD') })).deleted, [secondId]);
 });
 
 test('rejects deleting unclassified and categories with original children or assignments', async t => {

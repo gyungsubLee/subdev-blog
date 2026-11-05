@@ -1,0 +1,12 @@
+--- profiled content
++++ current content
+@@ -636,7 +636,8 @@
+                     if (operation.type === 'categories.save') continue;
+                     const id = operation.id ?? operation.document.metadata.id;
+                     const {path, ...source} = await readPost(savedTree, id, {recoverEditor:true});
+-                    sources[id] = {...source, categories:categories.categories, contentCommit:result.contentCommit};
++                    sources[id] = {revision:source.revision,editorRevision:source.editorRevision,
++                        filename:source.filename,updatedAt:source.document.metadata.updated,contentCommit:result.contentCommit};
+                 }
+                 return {...result, sources, categories: {...categories, contentCommit:result.contentCommit},
+                     receipt: {requestId, payloadHash:digest(JSON.stringify(input)), contentCommit:result.contentCommit}};

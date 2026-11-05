@@ -1,0 +1,15 @@
+✔ generation projects safe public files and full bodies before publishing an immutable ref (33.353459ms)
+✔ unsafe source fails before the ready ref is created (9.969584ms)
+✔ generation rewrites pinned assets and inherited category without exposing original metadata (2.359459ms)
+✔ CLI needs explicit publication intent and output mode makes no remote writes (37.71975ms)
+✔ a changed source crossing the summary boundary keeps the previous full-transform semantics (3.345666ms)
+✔ large publications upload bounded trees before exposing the complete ref (120.985334ms)
+✔ oversized and escaped generated files use blob upload instead of oversized inline trees (437.44375ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1049.341

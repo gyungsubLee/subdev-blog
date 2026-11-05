@@ -1,6 +1,14 @@
 import AppKit
 import WebKit
 
+func canRetryNativeLogin(statusCode: Int?, transportFailed: Bool = false, failureCount: Int, deadline: Date) -> Bool {
+  guard failureCount < 2, Date() < deadline else { return false }
+  guard let statusCode else { return true }
+  if [401, 403, 410].contains(statusCode) { return false }
+  if transportFailed { return true }
+  return (500...599).contains(statusCode)
+}
+
 struct Configuration: Decodable {
   let sourceRoot: String
   let port: Int
@@ -235,7 +243,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
 
   @objc private func reloadLibrary(_ sender: Any?) {
     if browserLoginID != nil {
-      startBrowserLogin()
+      startBrowserLogin(restart: true)
       return
     }
     guard server?.isRunning == true else {
@@ -275,9 +283,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
     window.toolbar?.validateVisibleItems()
   }
 
-  private func startBrowserLogin() {
-    cancelBrowserLogin()
-    guard let request = nativeAuthRequest("__native/auth/start", method: "POST") else { return }
+  private func startBrowserLogin(restart: Bool = false) {
+    guard browserLoginID == nil || restart else { return }
+    if restart { cancelBrowserLogin() }
+    guard var request = nativeAuthRequest("__native/auth/start", method: "POST") else { return }
+    if restart { request.setValue("1", forHTTPHeaderField: "X-Second-Brain-Restart") }
     let attempt = UUID()
     browserLoginID = attempt
     window.title = "Second Brain — 브라우저 로그인 중"
@@ -309,12 +319,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
     showNavigationFailure(message, failedURL: configuration?.origin.appendingPathComponent("api/auth/github"))
   }
 
-  private func pollBrowserLogin(_ attempt: UUID, flow: String, deadline: Date) {
+  private func pollBrowserLogin(_ attempt: UUID, flow: String, deadline: Date, failureCount: Int = 0) {
     guard browserLoginID == attempt,
       let request = nativeAuthRequest("__native/auth/result", flow: flow) else { return }
-    URLSession.shared.dataTask(with: request) { data, response, _ in
+    URLSession.shared.dataTask(with: request) { data, response, error in
       DispatchQueue.main.async {
         guard self.browserLoginID == attempt else { return }
+        let statusCode = (response as? HTTPURLResponse)?.statusCode
+        if canRetryNativeLogin(statusCode: statusCode, transportFailed: error != nil, failureCount: failureCount, deadline: deadline) {
+          DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.pollBrowserLogin(attempt, flow: flow, deadline: deadline, failureCount: failureCount + 1)
+          }
+          return
+        }
         guard let response = response as? HTTPURLResponse, let data,
           let state = try? JSONSerialization.jsonObject(with: data) as? [String: String]
         else {
@@ -332,17 +349,40 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
           self.webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie) {
             DispatchQueue.main.async {
               guard self.browserLoginID == attempt else { return }
-              self.browserLoginID = nil
-              self.browserLoginFlow = nil
-              self.window.title = "Second Brain"
-              self.openHome(nil)
-              self.window.makeKeyAndOrderFront(nil)
-              NSApp.activate()
+              self.acknowledgeBrowserLogin(attempt, flow: flow, deadline: deadline)
             }
           }
         } else {
           self.failBrowserLogin(attempt, message: "로그인이 취소되었거나 시간이 초과됐습니다. 다시 시도하거나 홈으로 돌아가세요.")
         }
+      }
+    }.resume()
+  }
+
+  private func acknowledgeBrowserLogin(_ attempt: UUID, flow: String, deadline: Date, failureCount: Int = 0) {
+    guard browserLoginID == attempt,
+      let request = nativeAuthRequest("__native/auth/result", method: "POST", flow: flow) else { return }
+    URLSession.shared.dataTask(with: request) { _, response, error in
+      DispatchQueue.main.async {
+        guard self.browserLoginID == attempt else { return }
+        let statusCode = (response as? HTTPURLResponse)?.statusCode
+        if canRetryNativeLogin(statusCode: statusCode, transportFailed: error != nil, failureCount: failureCount, deadline: deadline) {
+          DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.acknowledgeBrowserLogin(attempt, flow: flow, deadline: deadline, failureCount: failureCount + 1)
+          }
+          return
+        }
+        // A lost acknowledgement response may already have consumed the flow.
+        guard statusCode == 204 || statusCode == 410 else {
+          self.failBrowserLogin(attempt, message: "로그인 연결이 끊겼습니다. 다시 시도해 주세요.")
+          return
+        }
+        self.browserLoginID = nil
+        self.browserLoginFlow = nil
+        self.window.title = "Second Brain"
+        self.openHome(nil)
+        self.window.makeKeyAndOrderFront(nil)
+        NSApp.activate()
       }
     }.resume()
   }

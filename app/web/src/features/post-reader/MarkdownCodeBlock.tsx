@@ -1,3 +1,4 @@
+import Button from "../../components/button/Button";
 import {
   Children,
   isValidElement,
@@ -32,9 +33,9 @@ export default function MarkdownCodeBlock({ children, caption, wrap = false }: {
     <figure className="article-code" data-wrap={String(wrap)}>
       <figcaption>
         <span>{language}{caption ? " · " + caption : ""}</span>
-        <button type="button" onClick={copy} aria-live="polite">
+        <Button type="button" onClick={copy} aria-live="polite">
           {message}
-        </button>
+        </Button>
       </figcaption>
       <pre ref={pre}>{children}</pre>
     </figure>

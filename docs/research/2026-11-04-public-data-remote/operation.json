@@ -1,0 +1,157 @@
+{
+  "state": "completed",
+  "authorization": "User explicitly authorized remote initial publication, push workflow connection and real GitHub E2E/measurement on 2026-11-04.",
+  "appRepository": "gyungsubLee/subdev-blog",
+  "appBase": "27441173f257769add825aea596f7080d282e1ca",
+  "generatorBranch": "codex/public-content-generator-20261104",
+  "contentRepository": "gyungsubLee/subdev-blog-content",
+  "contentBranch": "main",
+  "contentBefore": "723231cd3cedd4702d2d77ced9190e63387e852d",
+  "localContentUnchanged": "9f99941c6b650c70f363208cd97c7191ef785a46",
+  "scope": "Publish only generator dependencies on a dedicated app branch; content main gets only workflow file; configure pinned SHA and use the resulting push for bootstrap. No app main merge/deployment or unrelated local changes. Real E2E may create/update/delete a uniquely named disposable test post through the existing authenticated app.",
+  "generatorCommit": "22905f58a7c18af51aac6c7d1ca0d6dfa70f16bf",
+  "generatorRemoteVerified": "22905f58a7c18af51aac6c7d1ca0d6dfa70f16bf",
+  "generatorFiles": [
+    "app/content/scripts/publish-public-content.mjs",
+    "app/content/workflows/public-content.yml",
+    "app/server/src/public-publication.mjs",
+    "app/server/src/public-files.mjs",
+    "app/server/src/github.mjs",
+    "app/server/scripts/prepare-content.mjs",
+    "app/content/src/content.mjs",
+    "app/shared/document.mjs",
+    "app/shared/content-links.mjs",
+    "app/shared/editor-document.mjs"
+  ],
+  "generatorChecks": "7/7 isolated generator;10/10 publisher;3/3 HTTP E2E",
+  "pinnedVariable": "22905f58a7c18af51aac6c7d1ca0d6dfa70f16bf",
+  "workflowCandidate": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+  "workflowCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+  "workflowRemoteVerified": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+  "contentPaths": [
+    ".github/workflows/public-content.yml"
+  ],
+  "bootstrapRun": {
+    "conclusion": "success",
+    "headSha": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+    "jobs": [
+      {
+        "completedAt": "2026-11-04T12:12:51Z",
+        "conclusion": "success",
+        "databaseId": 126564122597,
+        "name": "generate",
+        "startedAt": "2026-11-04T12:10:34Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-11-04T12:10:35Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-11-04T12:10:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-04T12:10:36Z",
+            "conclusion": "success",
+            "name": "Require a pinned trusted generator",
+            "number": 2,
+            "startedAt": "2026-11-04T12:10:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-04T12:10:52Z",
+            "conclusion": "success",
+            "name": "Check out trusted application code",
+            "number": 3,
+            "startedAt": "2026-11-04T12:10:36Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-04T12:10:53Z",
+            "conclusion": "success",
+            "name": "Set up Node.js",
+            "number": 4,
+            "startedAt": "2026-11-04T12:10:52Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-04T12:10:58Z",
+            "conclusion": "success",
+            "name": "Install trusted dependencies",
+            "number": 5,
+            "startedAt": "2026-11-04T12:10:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-04T12:11:22Z",
+            "conclusion": "success",
+            "name": "Prepare the trusted baseline catalog",
+            "number": 6,
+            "startedAt": "2026-11-04T12:10:58Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-04T12:12:46Z",
+            "conclusion": "success",
+            "name": "Validate and publish immutable public files",
+            "number": 7,
+            "startedAt": "2026-11-04T12:11:22Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-04T12:12:48Z",
+            "conclusion": "success",
+            "name": "Post Set up Node.js",
+            "number": 13,
+            "startedAt": "2026-11-04T12:12:46Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-04T12:12:48Z",
+            "conclusion": "success",
+            "name": "Post Check out trusted application code",
+            "number": 14,
+            "startedAt": "2026-11-04T12:12:48Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-04T12:12:48Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 15,
+            "startedAt": "2026-11-04T12:12:48Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41824034965/job/126564122597"
+      }
+    ],
+    "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41824034965"
+  },
+  "bootstrapFailure": {
+    "status": 422,
+    "endpoint": "POST /git/trees",
+    "message": "input too large to process; build tree incrementally",
+    "fix": "bounded inline uploads followed by SHA-only complete tree",
+    "diagnosticMs": 136410
+  },
+  "secondFailure": {
+    "status": 502,
+    "endpoint": "POST /git/trees",
+    "smallGroups": "18 successful201 responses",
+    "oversizedInline": "GitHub Server Error",
+    "fix": "serialized2MiB bound; oversized files use Git blob endpoint"
+  },
+  "remainingFailure": {
+    "status": 502,
+    "endpoint": "POST /git/trees final SHA-only3035 entries",
+    "largeBlob": "201",
+    "all18smallGroups": "201",
+    "fix": "sequential bounded base_tree assembly; no large final tree"
+  },
+  "realE2E": "create recovery, fresh title update, delete, public body UI, byte parity and anonymous read passed",
+  "finalSourceCommit": "17397ef27e1f8dc4ecc8b5fec0ed678f6e723500",
+  "originalSourceFilesUnchanged": true,
+  "allFourPushWorkflows": "success"
+}

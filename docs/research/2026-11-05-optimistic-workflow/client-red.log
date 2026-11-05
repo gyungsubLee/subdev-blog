@@ -1,0 +1,68 @@
+✖ a verified source save confirms the queue before public generation and rebases later edits (7.844625ms)
+✔ a source save with a mismatched receipt stays recoverable rather than confirming (1.268541ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ source confirmation preserves the public snapshot identity and overlays an older public index after restart (39.689292ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 1
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3316.146417
+
+✖ failing tests:
+
+test at tests/web/sync-core.test.mjs:143:1
+✖ a verified source save confirms the queue before public generation and rebases later edits (7.844625ms)
+  AssertionError [ERR_ASSERTION]: a valid source receipt ends source transmission
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/sync-core.test.mjs:152:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }
+
+test at tests/web/sync-recovery.test.mjs:121:1
+✖ source confirmation preserves the public snapshot identity and overlays an older public index after restart (39.689292ms)
+  AssertionError [ERR_ASSERTION]: public body identities remain pinned to generated artifacts
+  + actual - expected
+  
+  + '1111111111111111111111111111111111111111'
+  - '0000000000000000000000000000000000000000'
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/sync-recovery.test.mjs:145:12)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '1111111111111111111111111111111111111111',
+    expected: '0000000000000000000000000000000000000000',
+    operator: 'strictEqual'
+  }

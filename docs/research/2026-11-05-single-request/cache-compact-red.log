@@ -1,0 +1,38 @@
+✔ prepared atomic save uses one CAS mutation and local source receipt (62.986583ms)
+✔ lost mutation response and retry reconcile without duplicate apply (14.623625ms)
+✔ successful receipt primes the next prepared title save (7.996458ms)
+✔ fresh remote advance conflicts and never overwrites canonical source (3.59375ms)
+✔ mutation permissions stop immediately without recovery reads (2.617041ms)
+✔ large exact authored bytes stay in the single mutation (39.694042ms)
+✔ a request ID cannot be reused against its successful source commit (3.397875ms)
+✔ durable request marker rejects reuse after unrelated descendants and a new cache scope (5.849042ms)
+✔ retry source revision uses accepted bytes rather than regenerated timestamp (22.265083ms)
+✔ recovery rejects tampered durable receipt and never reapplies (4.261125ms)
+✔ trusted immutable cache remains entry bounded and credential scoped (0.457375ms)
+✖ large source inventory drops unused API URLs within existing cache budget (71.326833ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 11
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 545.092042
+
+✖ failing tests:
+
+test at tests/server/atomic-save.test.mjs:23:1
+✖ large source inventory drops unused API URLs within existing cache budget (71.326833ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  2 !== 1
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:23:690)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 2,
+    expected: 1,
+    operator: 'strictEqual'
+  }

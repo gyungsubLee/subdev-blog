@@ -1,0 +1,80 @@
+✔ prepared atomic save uses one CAS mutation and local source receipt (38.253709ms)
+✔ lost mutation response and retry reconcile without duplicate apply (12.348292ms)
+✔ successful receipt primes the next prepared title save (5.956541ms)
+✔ fresh remote advance conflicts and never overwrites canonical source (3.304292ms)
+✔ mutation permissions stop immediately without recovery reads (2.591125ms)
+✔ large exact authored bytes stay in the single mutation (41.339292ms)
+✔ a request ID cannot be reused against its successful source commit (3.28675ms)
+✔ durable request marker rejects reuse after unrelated descendants and a new cache scope (5.012875ms)
+✔ retry source revision uses accepted bytes rather than regenerated timestamp (21.315917ms)
+✔ recovery rejects tampered durable receipt and never reapplies (4.38875ms)
+✔ trusted immutable cache remains entry bounded and credential scoped (0.454916ms)
+✔ large source inventory drops unused API URLs within existing cache budget (35.311208ms)
+✔ atomic authored no-op reserves its ID with only a durable marker (2.85825ms)
+✔ atomic category no-op preserves the original compact bytes (2.039375ms)
+✔ atomic transient GraphQL errors leave the queue retryable (2.988417ms)
+✔ recovery read errors preserve their transient status after CAS rejection (6.080542ms)
+✖ durable retry reconciles before sending another mutation (5.355792ms)
+✔ 5-second debounce coalesces unsent versions and sends one immutable bulk request (8.282542ms)
+✔ another coordinator cannot duplicate an in-flight batch, and later edits survive old response (1.004416ms)
+✖ a lost response retains the same payload and resumes after reload without duplicate identity (2.526542ms)
+✔ daily cleanup verifies receipts and never deletes failed, pending or mismatched data (3.200584ms)
+✔ daily cleanup preserves a record whose receipt commit differs from its saved result (2.286083ms)
+✔ discarding one conflict retains other documents as blocked recoverable saves (0.877917ms)
+✔ cleanup preserves remotely confirmed payloads until their local recovery state is applied (2.076291ms)
+✔ repeated saves coalesce without growing callback or pending queues; capacity rejects only the new request (27.891542ms)
+✔ transient retry schedule is5,15,60 seconds and then stops; manual retry reuses the frozen batch (2.262959ms)
+✔ a superseded lost-response retry cannot attach the latest revision to an older operation (0.650958ms)
+✔ oversized saves and a full retained history stop new work without deleting older requests (15.618208ms)
+✔ a verified source save confirms the queue before public generation and retains its overlay (2.531625ms)
+✔ a source save with a mismatched receipt stays recoverable rather than confirming (0.606458ms)
+✔ authorization and conflict failures never automatically resend a source batch (0.924167ms)
+✔ cleanup retains unchanged source receipts only while their flagged publication is pending (2.089334ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 30
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 514.915166
+
+✖ failing tests:
+
+test at tests/server/atomic-save.test.mjs:255:1
+✖ durable retry reconciles before sending another mutation (5.355792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:265:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual'
+  }
+
+test at tests/web/sync-core.test.mjs:43:1
+✖ a lost response retains the same payload and resumes after reload without duplicate identity (2.526542ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   undefined,
+  +   undefined
+  -   false,
+  -   true
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/sync-core.test.mjs:51:9)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ undefined, undefined ],
+    expected: [ false, true ],
+    operator: 'deepStrictEqual'
+  }

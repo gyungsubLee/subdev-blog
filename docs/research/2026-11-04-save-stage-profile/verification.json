@@ -1,0 +1,88 @@
+{
+  "scope": "Local production frontend/latest snapshotted real handler; actual GitHub REST/raw and existing real OAuth/CSRF. This task did not edit production modules; instrumented import-rewired copies add timing markers only.",
+  "method": "Three sequential title-only modifications of one small disposable post; HTTP POST handler elapsed, excluding editor-open/client export and Vercel cold-start.",
+  "samplesSeconds": [
+    24.971053124999976,
+    22.97469949999993,
+    20.548147958999966
+  ],
+  "medianSeconds": 22.97469949999993,
+  "representative": "Actual middle-total request; not independently selected per-stage medians",
+  "representativeStages": [
+    {
+      "name": "Source lookup and validation",
+      "ms": 2949.8474590000114,
+      "calls": 7,
+      "networkMs": 2889.3662490000715,
+      "residualMs": 60.48120999993989
+    },
+    {
+      "name": "Source commit and candidate check",
+      "ms": 3138.1669999999576,
+      "calls": 5,
+      "networkMs": 3136.644709999964,
+      "residualMs": 1.522289999993518
+    },
+    {
+      "name": "Public lookup, candidate tree and previous artifact",
+      "ms": 3576.9405410000472,
+      "calls": 9,
+      "networkMs": 3411.5487090001116,
+      "residualMs": 165.39183199993568
+    },
+    {
+      "name": "Changed post and JSON generation",
+      "ms": 476.87624999997206,
+      "calls": 1,
+      "networkMs": 245.73070899996674,
+      "residualMs": 231.14554100000532
+    },
+    {
+      "name": "Public blob/tree/commit/ref upload",
+      "ms": 10259.39387499995,
+      "calls": 5,
+      "networkMs": 10170.978206999891,
+      "residualMs": 88.41566800005967
+    },
+    {
+      "name": "Canonical advance and final verification",
+      "ms": 2571.58050000004,
+      "calls": 6,
+      "networkMs": 2560.332124999957,
+      "residualMs": 11.248375000082888
+    }
+  ],
+  "networkWaitMs": 22414.600708999962,
+  "otherMs": 558.204916000017,
+  "networkSharePercent": 97.56210612896167,
+  "requestPayloadBytes": 11443508,
+  "decodedResponseBytes": 18307654,
+  "productEditedByThisTask": false,
+  "snapshotStableAcrossSamples": true,
+  "concurrentChange": "content.mjs bulk receipt response format changed by another task. The sampled single-operation route does not execute it; profiled snapshot and exact diff retained.",
+  "setupIssue": "Diagnostic dynamic import rewrite initially missing; GET500 before any save, corrected and GET200 confirmed before sampling.",
+  "limits": [
+    "Awaited spans include transport, stream consumption and GitHub server processing; pure wire time not isolated.",
+    "Residual includes local computation, scheduling, filesystem and diagnostic overhead; not a CPU profiler.",
+    "Decoded response bytes differ from compressed wire bytes. Request payload excludes HTTP/TLS headers.",
+    "Unconsumed expected404 error bodies use header wait time.",
+    "Three small title-only updates; latency varies with GitHub/CDN conditions.",
+    "Generation raw MD count excludes edited-source preflight Git blob API reads, which are included in all33 calls."
+  ],
+  "checks": {
+    "diagnosticUnit": "1/1 passed",
+    "publisherParity": "Original and instrumented fixture publishers produced identical artifact Git SHA",
+    "realWrites": "create,3updates,delete all200",
+    "sourceReuse": "each update generation rawMarkdown1; existing3033 public body blobs reused",
+    "originalFiles": "10294 unchanged",
+    "workflows": "all5 success"
+  },
+  "cleanup": {
+    "postRemoved": true,
+    "tabClosed": true,
+    "measurementServerStopped": true,
+    "originalPreviewPreserved": true,
+    "sessionNotLoggedOut": true
+  },
+  "finalSourceCommit": "26ad314322a088a878f9cb60f01c941b04a77466"
+}

@@ -1,0 +1,74 @@
+{
+  "before": {
+    "checking": {
+      "state": "checking",
+      "requests": 1,
+      "loginVisible": true,
+      "contentManagementVisible": false,
+      "writeVisible": false
+    },
+    "ready": {
+      "state": "ready",
+      "requests": 1,
+      "loginVisible": false,
+      "contentManagementVisible": true,
+      "writeVisible": true
+    },
+    "focusedWhileOffline": {
+      "state": "ready",
+      "requests": 1,
+      "loginVisible": false,
+      "contentManagementVisible": true,
+      "writeVisible": true
+    },
+    "onlineAgain": {
+      "state": "ready",
+      "requests": 1,
+      "loginVisible": false,
+      "contentManagementVisible": true,
+      "writeVisible": true
+    }
+  },
+  "after": {
+    "checking": {
+      "state": "checking",
+      "requests": 1,
+      "loginVisible": true,
+      "contentManagementVisible": false,
+      "writeVisible": false
+    },
+    "ready": {
+      "state": "ready",
+      "requests": 1,
+      "loginVisible": false,
+      "contentManagementVisible": true,
+      "writeVisible": true
+    },
+    "focusedWhileOffline": {
+      "state": "blocked",
+      "requests": 3,
+      "loginVisible": true,
+      "contentManagementVisible": false,
+      "writeVisible": false
+    },
+    "onlineAgain": {
+      "state": "ready",
+      "requests": 4,
+      "loginVisible": false,
+      "contentManagementVisible": true,
+      "writeVisible": true
+    }
+  },
+  "native": {
+    "before": {
+      "reusedAbandonedFlow": false,
+      "reopenedStatus": 302,
+      "oauthStarts": 2
+    },
+    "after": {
+      "reusedAbandonedFlow": true,
+      "reopenedStatus": 410,
+      "oauthStarts": 1
+    }
+  }
+}

@@ -1,0 +1,298 @@
+✖ prepared atomic save uses one CAS mutation and local source receipt (30.542375ms)
+✖ lost mutation response and retry reconcile without duplicate apply (3.637792ms)
+✖ successful receipt primes the next prepared title save (2.278959ms)
+✖ fresh remote advance conflicts and never overwrites canonical source (2.78325ms)
+✖ mutation permissions stop immediately without recovery reads (1.5835ms)
+✖ large exact authored bytes stay in the single mutation (1.923292ms)
+✖ a request ID cannot be reused against its successful source commit (1.449291ms)
+✖ durable request marker rejects reuse after unrelated descendants and a new cache scope (1.923958ms)
+✖ retry source revision uses accepted bytes rather than regenerated timestamp (19.178042ms)
+✖ recovery rejects tampered durable receipt and never reapplies (2.190209ms)
+✔ trusted immutable cache remains entry bounded and credential scoped (0.470875ms)
+✔ large source inventory drops unused API URLs within existing cache budget (36.14575ms)
+✖ atomic authored no-op reserves its ID with only a durable marker (2.057709ms)
+✖ atomic category no-op preserves the original compact bytes (1.50025ms)
+✖ atomic transient GraphQL errors leave the queue retryable (1.312459ms)
+✖ recovery read errors preserve their transient status after CAS rejection (1.209959ms)
+✖ durable retry reconciles before sending another mutation (3.246ms)
+✖ reconciliation permits first dispatch only when the marker is absent at the unchanged base (3.944333ms)
+✖ mixed batches retain compact bytes for their unchanged category operation (1.854333ms)
+✖ atomic save rejects a legacy request namespace before writes (10.847334ms)
+✖ atomic receipt rejects merge provenance with a second parent (1.521125ms)
+✖ large repeated asset references use bounded SHA tree writes (2.866042ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 2
+ℹ fail 20
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 392.470084
+
+✖ failing tests:
+
+test at tests/server/atomic-save.test.mjs:29:1
+✖ prepared atomic save uses one CAS mutation and local source receipt (30.542375ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  400 !== 200
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:35:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 400,
+    expected: 200,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/atomic-save.test.mjs:44:1
+✖ lost mutation response and retry reconcile without duplicate apply (3.637792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  400 !== 200
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:54:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 400,
+    expected: 200,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/atomic-save.test.mjs:60:1
+✖ successful receipt primes the next prepared title save (2.278959ms)
+  TypeError [Error]: Cannot read properties of undefined (reading '12345678-1234-1234-1234-123456789abc')
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:67:53)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7)
+
+test at tests/server/atomic-save.test.mjs:76:1
+✖ fresh remote advance conflicts and never overwrites canonical source (2.78325ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  400 !== 409
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:83:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 400,
+    expected: 409,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/atomic-save.test.mjs:88:1
+✖ mutation permissions stop immediately without recovery reads (1.5835ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  400 !== 403
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:92:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 400,
+    expected: 403,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/atomic-save.test.mjs:96:1
+✖ large exact authored bytes stay in the single mutation (1.923292ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  400 !== 200
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:103:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 400,
+    expected: 200,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/atomic-save.test.mjs:110:1
+✖ a request ID cannot be reused against its successful source commit (1.449291ms)
+  TypeError [Error]: Cannot read properties of undefined (reading '12345678-1234-1234-1234-123456789abc')
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:115:133)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7)
+
+test at tests/server/atomic-save.test.mjs:120:1
+✖ durable request marker rejects reuse after unrelated descendants and a new cache scope (1.923958ms)
+  TypeError [Error]: Cannot read properties of undefined (reading '12345678-1234-1234-1234-123456789abc')
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:127:57)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7)
+
+test at tests/server/atomic-save.test.mjs:136:1
+✖ retry source revision uses accepted bytes rather than regenerated timestamp (19.178042ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  400 !== 200
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:143:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 400,
+    expected: 200,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/atomic-save.test.mjs:147:1
+✖ recovery rejects tampered durable receipt and never reapplies (2.190209ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'sha')
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:154:31)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7)
+
+test at tests/server/atomic-save.test.mjs:195:1
+✖ atomic authored no-op reserves its ID with only a durable marker (2.057709ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  400 !== 200
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:202:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 400,
+    expected: 200,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/atomic-save.test.mjs:213:1
+✖ atomic category no-op preserves the original compact bytes (1.50025ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'tree')
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:223:85)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7)
+
+test at tests/server/atomic-save.test.mjs:230:1
+✖ atomic transient GraphQL errors leave the queue retryable (1.312459ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  400 !== 503
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:238:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 400,
+    expected: 503,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/atomic-save.test.mjs:242:1
+✖ recovery read errors preserve their transient status after CAS rejection (1.209959ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  400 !== 502
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:251:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 400,
+    expected: 502,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/atomic-save.test.mjs:255:1
+✖ durable retry reconciles before sending another mutation (3.246ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  400 !== 200
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:263:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 400,
+    expected: 200,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/atomic-save.test.mjs:268:1
+✖ reconciliation permits first dispatch only when the marker is absent at the unchanged base (3.944333ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  400 !== 200
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:273:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 400,
+    expected: 200,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/atomic-save.test.mjs:278:1
+✖ mixed batches retain compact bytes for their unchanged category operation (1.854333ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'tree')
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:286:85)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7)
+
+test at tests/server/atomic-save.test.mjs:294:1
+✖ atomic save rejects a legacy request namespace before writes (10.847334ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 400
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:298:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 400,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/atomic-save.test.mjs:302:1
+✖ atomic receipt rejects merge provenance with a second parent (1.521125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  400 !== 409
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:312:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 400,
+    expected: 409,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/atomic-save.test.mjs:315:1
+✖ large repeated asset references use bounded SHA tree writes (2.866042ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  400 !== 200
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:324:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 400,
+    expected: 200,
+    operator: 'strictEqual'
+  }

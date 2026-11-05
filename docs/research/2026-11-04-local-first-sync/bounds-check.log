@@ -1,0 +1,21 @@
+✔ 5-second debounce coalesces unsent versions and sends one immutable bulk request (11.58625ms)
+✔ another coordinator cannot duplicate an in-flight batch, and later edits survive old response (1.130167ms)
+✔ a lost response retains the same payload and resumes after reload without duplicate identity (0.996625ms)
+✔ daily cleanup verifies receipts and never deletes failed, pending or mismatched data (2.833958ms)
+✔ discarding one conflict retains other documents as blocked recoverable saves (1.011875ms)
+✔ cleanup preserves remotely confirmed payloads until their local recovery state is applied (2.000834ms)
+✔ repeated saves coalesce without growing callback or pending queues; capacity rejects only the new request (26.665ms)
+✔ transient retry schedule is5,15,60 seconds and then stops; manual retry reuses the frozen batch (2.246542ms)
+✔ a superseded lost-response retry cannot attach the latest revision to an older operation (0.477291ms)
+✔ oversized saves and a full retained history stop new work without deleting older requests (18.428625ms)
+✔ restart applies confirmed recovery data, and late older receipts cannot overwrite a newer baseline (15.947042ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2258.796708
+        2.42 real         0.66 user         0.24 sys
+time: sysctl kern.clockrate: Operation not permitted

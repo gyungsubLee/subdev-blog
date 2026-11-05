@@ -1,3 +1,4 @@
+import Button from "../../components/button/Button";
 import { useEffect } from "react";
 import type { Post } from "../../shared/post";
 import { getBody } from "../../shared/post-content";
@@ -83,7 +84,7 @@ export default function PostReader({
           <nav aria-label="글 목차">
             <span className="eyebrow">이 글에서</span>
             {headings.map((heading) => (
-              <button
+              <Button
                 key={heading.line}
                 className={"toc-level-" + heading.level}
                 type="button"
@@ -97,7 +98,7 @@ export default function PostReader({
                 }
               >
                 {heading.title}
-              </button>
+              </Button>
             ))}
           </nav>
         ) : null}

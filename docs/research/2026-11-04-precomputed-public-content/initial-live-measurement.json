@@ -1,0 +1,309 @@
+{
+  "measuredAt": "2026-11-04T10:48:04.279Z",
+  "node": "v24.3.0",
+  "sourceHashes": {
+    "app/server/src/public-content.mjs": "4f24036e057cac4ec7d229bb895bf1e9c8ab96a55e293340a1f7bd2ce0c678ca",
+    "app/server/src/public-publication.mjs": "39a7e9218f93b6e566b0995e86d8964988543e228a48b5d5f7adce666b770e42",
+    "app/server/src/public-files.mjs": "6e82deee06193ebaf08033889064610fdf57f270a8a3a214ec0b64bc9c36a5ed",
+    "app/server/src/github.mjs": "877b95a44668624eafbc9c84e3709fb2047610e63b4258dd84739a6b1b5a0e5a",
+    "app/content/src/content.mjs": "85b4d93a523b2d9018dfb893ce4e08d4cfae988ef8ea98423f0c17cc0e8e079a",
+    "app/server/generated/content-catalog.json": "81a6d6645261ea5591ca99da73f8222fe65839d6afb739e4ef5b2f6774dbe106",
+    "package-lock.json": "6e4f60584ce2a92166d835f42821f842d6565dfd493882722d06c2ec2d2e67ff"
+  },
+  "sourceCommit": "723231cd3cedd4702d2d77ced9190e63387e852d",
+  "posts": 3033,
+  "tokenConfigured": false,
+  "generation": {
+    "ms": 116913.5,
+    "requests": 3036,
+    "sourceBytes": 23881466,
+    "outputBytes": 26348367,
+    "files": 3035
+  },
+  "rows": [
+    {
+      "label": "before-live-cold",
+      "ms": 9163.3,
+      "status": 200,
+      "requests": 6,
+      "wireBytes": 1297467,
+      "jsonBytes": 5560675,
+      "digest": "bfc7bdfeb3f1948dfe2ffe950aa1faca3b37ce956aa3e3244dbfcd2e931bfbee",
+      "events": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content",
+          "status": 200,
+          "headersMs": 108.9,
+          "ms": 112,
+          "bytes": 5640
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/ref/heads/main",
+          "status": 200,
+          "headersMs": 36.7,
+          "ms": 37.1,
+          "bytes": 360
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/commits/723231cd3cedd4702d2d77ced9190e63387e852d",
+          "status": 200,
+          "headersMs": 254.7,
+          "ms": 255.7,
+          "bytes": 1323
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/trees/b423593dba3e63a161b57f7f546fe120080dc9f4",
+          "status": 200,
+          "headersMs": 4756.8,
+          "ms": 6329.5,
+          "bytes": 3752054
+        },
+        {
+          "path": "/gyungsubLee/subdev-blog-content/723231cd3cedd4702d2d77ced9190e63387e852d/posts/49455108-498d-4e6d-983c-a4e4ae4b37ff/%EA%B8%80%20%EC%9E%91%EC%84%B1%20%ED%85%8C%EC%8A%A4%ED%8A%B8%202.md",
+          "status": 200,
+          "headersMs": 255.5,
+          "ms": 256.1,
+          "bytes": 617
+        },
+        {
+          "path": "/gyungsubLee/subdev-blog-content/723231cd3cedd4702d2d77ced9190e63387e852d/categories.json",
+          "status": 200,
+          "headersMs": 278.1,
+          "ms": 278.5,
+          "bytes": 7693
+        }
+      ]
+    },
+    {
+      "label": "before-replay-cold-0",
+      "ms": 1968.8,
+      "status": 200,
+      "requests": 0,
+      "wireBytes": 1297467,
+      "jsonBytes": 5560675,
+      "digest": "bfc7bdfeb3f1948dfe2ffe950aa1faca3b37ce956aa3e3244dbfcd2e931bfbee",
+      "events": []
+    },
+    {
+      "label": "after-replay-cold-0",
+      "ms": 142.3,
+      "status": 200,
+      "requests": 0,
+      "wireBytes": 1297467,
+      "jsonBytes": 5560675,
+      "digest": "bfc7bdfeb3f1948dfe2ffe950aa1faca3b37ce956aa3e3244dbfcd2e931bfbee",
+      "events": []
+    },
+    {
+      "label": "before-replay-cold-1",
+      "ms": 1972.1,
+      "status": 200,
+      "requests": 0,
+      "wireBytes": 1297467,
+      "jsonBytes": 5560675,
+      "digest": "bfc7bdfeb3f1948dfe2ffe950aa1faca3b37ce956aa3e3244dbfcd2e931bfbee",
+      "events": []
+    },
+    {
+      "label": "after-replay-cold-1",
+      "ms": 131.3,
+      "status": 200,
+      "requests": 0,
+      "wireBytes": 1297467,
+      "jsonBytes": 5560675,
+      "digest": "bfc7bdfeb3f1948dfe2ffe950aa1faca3b37ce956aa3e3244dbfcd2e931bfbee",
+      "events": []
+    },
+    {
+      "label": "before-replay-cold-2",
+      "ms": 1978.1,
+      "status": 200,
+      "requests": 0,
+      "wireBytes": 1297467,
+      "jsonBytes": 5560675,
+      "digest": "bfc7bdfeb3f1948dfe2ffe950aa1faca3b37ce956aa3e3244dbfcd2e931bfbee",
+      "events": []
+    },
+    {
+      "label": "after-replay-cold-2",
+      "ms": 139.6,
+      "status": 200,
+      "requests": 0,
+      "wireBytes": 1297467,
+      "jsonBytes": 5560675,
+      "digest": "bfc7bdfeb3f1948dfe2ffe950aa1faca3b37ce956aa3e3244dbfcd2e931bfbee",
+      "events": []
+    },
+    {
+      "label": "after-replay-prepare",
+      "ms": 128.4,
+      "status": 200,
+      "requests": 0,
+      "wireBytes": 1297467,
+      "jsonBytes": 5560675,
+      "digest": "bfc7bdfeb3f1948dfe2ffe950aa1faca3b37ce956aa3e3244dbfcd2e931bfbee",
+      "events": []
+    },
+    {
+      "label": "after-replay-warm-0",
+      "ms": 0.4,
+      "status": 200,
+      "requests": 0,
+      "wireBytes": 1297467,
+      "jsonBytes": 5560675,
+      "digest": "bfc7bdfeb3f1948dfe2ffe950aa1faca3b37ce956aa3e3244dbfcd2e931bfbee",
+      "events": []
+    },
+    {
+      "label": "after-replay-warm-1",
+      "ms": 0.3,
+      "status": 200,
+      "requests": 0,
+      "wireBytes": 1297467,
+      "jsonBytes": 5560675,
+      "digest": "bfc7bdfeb3f1948dfe2ffe950aa1faca3b37ce956aa3e3244dbfcd2e931bfbee",
+      "events": []
+    },
+    {
+      "label": "after-replay-warm-2",
+      "ms": 0.3,
+      "status": 200,
+      "requests": 0,
+      "wireBytes": 1297467,
+      "jsonBytes": 5560675,
+      "digest": "bfc7bdfeb3f1948dfe2ffe950aa1faca3b37ce956aa3e3244dbfcd2e931bfbee",
+      "events": []
+    },
+    {
+      "label": "after-live-head-local-artifacts",
+      "ms": 323.2,
+      "status": 403,
+      "requests": 1,
+      "wireBytes": 33,
+      "jsonBytes": 33,
+      "digest": "7d07da90995d7de6c2936d48125760923c38d655706d2cad300000db3ccff391",
+      "events": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/ref/heads/main",
+          "status": 403,
+          "headersMs": 322.6,
+          "ms": 322.8,
+          "bytes": 280
+        }
+      ]
+    },
+    {
+      "label": "before-live-post-3f4eda9b-0fe1-8004-89ff-c68ec5620797",
+      "ms": 143.3,
+      "status": 403,
+      "requests": 1,
+      "wireBytes": 33,
+      "jsonBytes": 33,
+      "digest": "7d07da90995d7de6c2936d48125760923c38d655706d2cad300000db3ccff391",
+      "events": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content",
+          "status": 403,
+          "headersMs": 136.5,
+          "ms": 136.6,
+          "bytes": 280
+        }
+      ]
+    },
+    {
+      "label": "after-replay-post-3f4eda9b-0fe1-8004-89ff-c68ec5620797",
+      "ms": 0.2,
+      "status": 403,
+      "requests": 0,
+      "wireBytes": 33,
+      "jsonBytes": 33,
+      "digest": "7d07da90995d7de6c2936d48125760923c38d655706d2cad300000db3ccff391",
+      "events": []
+    },
+    {
+      "label": "before-live-post-49455108-498d-4e6d-983c-a4e4ae4b37ff",
+      "ms": 34.3,
+      "status": 403,
+      "requests": 1,
+      "wireBytes": 33,
+      "jsonBytes": 33,
+      "digest": "7d07da90995d7de6c2936d48125760923c38d655706d2cad300000db3ccff391",
+      "events": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content",
+          "status": 403,
+          "headersMs": 34,
+          "ms": 34.1,
+          "bytes": 280
+        }
+      ]
+    },
+    {
+      "label": "after-replay-post-49455108-498d-4e6d-983c-a4e4ae4b37ff",
+      "ms": 0.2,
+      "status": 403,
+      "requests": 0,
+      "wireBytes": 33,
+      "jsonBytes": 33,
+      "digest": "7d07da90995d7de6c2936d48125760923c38d655706d2cad300000db3ccff391",
+      "events": []
+    },
+    {
+      "label": "before-live-post-3f2eda9b-0fe1-80d6-ac75-f8660cc3d8d7",
+      "ms": 41.6,
+      "status": 403,
+      "requests": 1,
+      "wireBytes": 33,
+      "jsonBytes": 33,
+      "digest": "7d07da90995d7de6c2936d48125760923c38d655706d2cad300000db3ccff391",
+      "events": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content",
+          "status": 403,
+          "headersMs": 41.3,
+          "ms": 41.4,
+          "bytes": 280
+        }
+      ]
+    },
+    {
+      "label": "after-replay-post-3f2eda9b-0fe1-80d6-ac75-f8660cc3d8d7",
+      "ms": 0.2,
+      "status": 403,
+      "requests": 0,
+      "wireBytes": 33,
+      "jsonBytes": 33,
+      "digest": "7d07da90995d7de6c2936d48125760923c38d655706d2cad300000db3ccff391",
+      "events": []
+    },
+    {
+      "label": "after-live-remote-artifacts",
+      "ms": 40.7,
+      "status": 403,
+      "requests": 1,
+      "wireBytes": 33,
+      "jsonBytes": 33,
+      "digest": "7d07da90995d7de6c2936d48125760923c38d655706d2cad300000db3ccff391",
+      "events": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/ref/heads/main",
+          "status": 403,
+          "headersMs": 40.4,
+          "ms": 40.5,
+          "bytes": 280
+        }
+      ]
+    }
+  ],
+  "scope": {
+    "writesToGitHub": false,
+    "afterReplay": "Generated artifacts are local response bytes, not remotely hosted artifacts.",
+    "hybrid": "Only source head is live GitHub; generated ref/files are local fixtures.",
+    "activationStatus": 403,
+    "excluded": [
+      "deployed server cold start",
+      "client response transfer",
+      "browser rendering"
+    ]
+  }
+}

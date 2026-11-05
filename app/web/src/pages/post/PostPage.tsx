@@ -1,3 +1,4 @@
+import Button from "../../components/button/Button";
 import { HOME_HREF, postHref } from "../../shared/routes";
 import Arrow from "../../components/icons/Arrow";
 import { site } from "../../config/site";
@@ -45,14 +46,14 @@ export default function PostPage({
           <Arrow back /> 전체 글
         </a>
         {onEdit ? (
-          <button
+          <Button
             className="outline-button article-edit"
             type="button"
             disabled={post.bodyLoaded === false}
             onClick={() => onEdit(post)}
           >
             편집하기
-          </button>
+          </Button>
         ) : null}
       </div>
       <header className="article-header">

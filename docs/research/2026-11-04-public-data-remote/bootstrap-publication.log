@@ -1,0 +1,27 @@
+generate	Validate and publish immutable public files	﻿2026-11-04T12:11:22.2639128Z ##[group]Run node app/content/scripts/publish-public-content.mjs --commit "$SOURCE_COMMIT" --publish
+generate	Validate and publish immutable public files	2026-11-04T12:11:22.2639845Z [36;1mnode app/content/scripts/publish-public-content.mjs --commit "$SOURCE_COMMIT" --publish[0m
+generate	Validate and publish immutable public files	2026-11-04T12:11:22.2652492Z shell: /usr/bin/bash -e {0}
+generate	Validate and publish immutable public files	2026-11-04T12:11:22.2652794Z env:
+generate	Validate and publish immutable public files	2026-11-04T12:11:22.2655474Z   GITHUB_TOKEN: ***
+generate	Validate and publish immutable public files	2026-11-04T12:11:22.2655829Z   SOURCE_COMMIT: ae379ba3db9279e04fd12befb1b757091fbdbcb5
+generate	Validate and publish immutable public files	2026-11-04T12:11:22.2656185Z ##[endgroup]
+generate	Validate and publish immutable public files	2026-11-04T12:12:28.4341193Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/blobs","requestBytes":7414270,"status":201,"ms":2029}
+generate	Validate and publish immutable public files	2026-11-04T12:12:29.8877174Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/trees","requestBytes":1079527,"status":201,"ms":1445}
+generate	Validate and publish immutable public files	2026-11-04T12:12:31.0490535Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/trees","requestBytes":1820448,"status":201,"ms":1155}
+generate	Validate and publish immutable public files	2026-11-04T12:12:32.1537819Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/trees","requestBytes":2091604,"status":201,"ms":1098}
+generate	Validate and publish immutable public files	2026-11-04T12:12:33.0076925Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/trees","requestBytes":585366,"status":201,"ms":852}
+generate	Validate and publish immutable public files	2026-11-04T12:12:33.7536824Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/trees","requestBytes":389894,"status":201,"ms":744}
+generate	Validate and publish immutable public files	2026-11-04T12:12:34.8166923Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/trees","requestBytes":1679980,"status":201,"ms":1058}
+generate	Validate and publish immutable public files	2026-11-04T12:12:35.7945123Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/trees","requestBytes":1492794,"status":201,"ms":973}
+generate	Validate and publish immutable public files	2026-11-04T12:12:36.8841893Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/trees","requestBytes":1958539,"status":201,"ms":1083}
+generate	Validate and publish immutable public files	2026-11-04T12:12:38.0113547Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/trees","requestBytes":1417674,"status":201,"ms":1122}
+generate	Validate and publish immutable public files	2026-11-04T12:12:39.1052413Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/trees","requestBytes":1759935,"status":201,"ms":1088}
+generate	Validate and publish immutable public files	2026-11-04T12:12:40.1999704Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/trees","requestBytes":1177528,"status":201,"ms":1090}
+generate	Validate and publish immutable public files	2026-11-04T12:12:41.2791540Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/trees","requestBytes":1513172,"status":201,"ms":1073}
+generate	Validate and publish immutable public files	2026-11-04T12:12:42.5478360Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/trees","requestBytes":2072439,"status":201,"ms":1262}
+generate	Validate and publish immutable public files	2026-11-04T12:12:43.8701522Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/trees","requestBytes":1275876,"status":201,"ms":1318}
+generate	Validate and publish immutable public files	2026-11-04T12:12:44.8571278Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/trees","requestBytes":1110673,"status":201,"ms":983}
+generate	Validate and publish immutable public files	2026-11-04T12:12:45.8796373Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/trees","requestBytes":1205214,"status":201,"ms":1018}
+generate	Validate and publish immutable public files	2026-11-04T12:12:46.2907417Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/commits","requestBytes":129,"status":201,"ms":411}
+generate	Validate and publish immutable public files	2026-11-04T12:12:46.9271909Z {"method":"POST","path":"/repos/gyungsubLee/subdev-blog-content/git/refs","requestBytes":122,"status":201,"ms":636}
+generate	Validate and publish immutable public files	2026-11-04T12:12:46.9278224Z {"sourceCommit":"ae379ba3db9279e04fd12befb1b757091fbdbcb5","publicationCommit":"3691898cb231115b4594542ade7300d710e65544"}

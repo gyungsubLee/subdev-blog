@@ -1,3 +1,4 @@
+import Button from "../../components/button/Button";
 import { ALL_CATEGORIES } from "./config";
 import "./post-category.css";
 
@@ -15,14 +16,14 @@ export default function PostCategoryFilter({
   return (
     <div className="category-tabs" role="group" aria-label="카테고리">
       {[ALL_CATEGORIES, ...categories].map((name) => (
-        <button
+        <Button
           type="button"
           key={name}
           aria-pressed={category === name}
           onClick={() => onChange(name)}
         >
           {name}
-        </button>
+        </Button>
       ))}
     </div>
   );

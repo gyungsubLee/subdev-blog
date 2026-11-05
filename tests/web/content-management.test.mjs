@@ -406,7 +406,11 @@ test("canonical category retries retain edits, original sources and request iden
 });
 
 test("a lost deletion response can be retried after the source has disappeared", async () => {
-  const { default: DeleteDialog } = await loadComponent("app/web/src/features/content-management/PostDeleteDialog.tsx");
+  const { usePostDeletion } = await loadComponent("app/web/src/features/content-management/usePostDeletion.ts");
+  function Deletion() {
+    const deletion = usePostDeletion(ready);
+    return React.createElement('button', { id: 'confirm-post-delete', onClick: () => deletion.remove(post) }, 'delete');
+  }
   const previous = globalThis.fetch;
   const saves = [];
   let deleted = false;
@@ -418,16 +422,15 @@ test("a lost deletion response can be retried after the source has disappeared",
     deleted = true;
     throw new Error("response lost");
   };
-  const props = { post, session: ready, onClose() {}, onDeleted() {} };
   async function remove() {
     const button = document.querySelector('#confirm-post-delete');
     assert.ok(button !== null, "the workspace delete dialog retains the saved request");
     await act(async () => button.click());
   }
   try {
-    await mounted(React.createElement(DeleteDialog, { ...props, key: "first" }), async (root) => {
+    await mounted(React.createElement(Deletion, { key: "first" }), async (root) => {
       await remove();
-      await act(async () => root.render(React.createElement(DeleteDialog, { ...props, key: "second" })));
+      await act(async () => root.render(React.createElement(Deletion, { key: "second" })));
       await remove();
       assert.equal(saves.length, 2);
       assert.equal(saves[0].operation.type, "post.delete");

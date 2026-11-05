@@ -1,3 +1,4 @@
+import Button from "../button/Button";
 import type { ComponentPropsWithoutRef } from "react";
 import "./header-action.css";
 
@@ -14,5 +15,5 @@ export default function HeaderAction({ className = "", ...props }: HeaderActionP
   }
 
   const { as, ...buttonProps } = props;
-  return <button type="button" className={classes} {...buttonProps} />;
+  return <Button type="button" className={classes} {...buttonProps} />;
 }

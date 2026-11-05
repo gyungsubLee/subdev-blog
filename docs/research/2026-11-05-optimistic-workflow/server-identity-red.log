@@ -1,0 +1,28 @@
+✖ large source upload rejects an unexpected blob identity before tree or canonical writes (48.934625ms)
+✔ previous ready source cannot mark a newly saved source published (11.265916ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 242.031583
+
+✖ failing tests:
+
+test at tests/server/save-reuse.test.mjs:156:1
+✖ large source upload rejects an unexpected blob identity before tree or canonical writes (48.934625ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 502
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/save-reuse.test.mjs:166:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 502,
+    operator: 'strictEqual'
+  }

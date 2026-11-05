@@ -1,0 +1,18 @@
+[
+  {
+    "probe": "archived-failed-peer-event",
+    "policyPassed": false,
+    "confirmedEvents": [
+      {
+        "state": "confirmed",
+        "hasResult": false
+      }
+    ]
+  },
+  {
+    "probe": "mismatched-receipt-commit",
+    "policyPassed": false,
+    "removed": 1,
+    "remaining": 0
+  }
+]

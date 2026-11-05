@@ -1,3 +1,4 @@
+import { createButton } from "../../components/button/Button";
 import {
   BlockNoteSchema,
   createBlockSpec,
@@ -78,9 +79,7 @@ export const codeBlockSpec = createBlockSpec<
         tools.appendChild(languagePicker.parentElement!);
       }
 
-      const copy = document.createElement("button");
-      copy.type = "button";
-      copy.textContent = "복사";
+      const copy = createButton("복사");
       copy.addEventListener("click", async () => {
         try {
           await navigator.clipboard.writeText(
@@ -96,9 +95,7 @@ export const codeBlockSpec = createBlockSpec<
       });
       tools.appendChild(copy);
 
-      const wrap = document.createElement("button");
-      wrap.type = "button";
-      wrap.textContent = "줄바꿈";
+      const wrap = createButton("줄바꿈");
       wrap.setAttribute("aria-pressed", String(block.props.wrap));
       wrap.addEventListener("click", () =>
         editor.updateBlock(block, { props: { wrap: !currentProps.wrap } }),

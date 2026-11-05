@@ -1,0 +1,13 @@
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+[{"probe":"archived-failed-peer-event","policyPassed":false,"confirmedEvents":[{"state":"confirmed","hasResult":false}]},{"probe":"mismatched-receipt-commit","policyPassed":false,"removed":1,"remaining":0}]

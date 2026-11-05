@@ -1,3 +1,4 @@
+import Button from "../../components/button/Button";
 import {
   useCallback,
   useDeferredValue,
@@ -1115,7 +1116,7 @@ export default function ManagedPostEditor({
                         {(draft.tags ?? []).map((tag) => (
                           <span className="mock-tag-chip" key={tag}>
                             {tag}
-                            <button
+                            <Button
                               type="button"
                               aria-label={tag + " 태그 삭제"}
                               onClick={() =>
@@ -1126,7 +1127,7 @@ export default function ManagedPostEditor({
                                 })}
                             >
                               ×
-                            </button>
+                            </Button>
                           </span>
                         ))}
                         <input
@@ -1213,13 +1214,13 @@ export default function ManagedPostEditor({
                     ["published", "superseded", "unchanged"].includes(
                       publication?.state ?? "",
                     )))) ? (
-              <button
+              <Button
                 className="outline-button"
                 type="button"
                 onClick={reopenSource}
               >
                 {isCanonical ? "최신 원본으로 다시 시작" : "다음 글 작성"}
-              </button>
+              </Button>
             ) : null}
           </main>
           {draft && previewVisible ? (

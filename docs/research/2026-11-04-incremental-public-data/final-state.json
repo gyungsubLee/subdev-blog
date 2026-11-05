@@ -1,0 +1,10 @@
+{
+  "appRemoteRefs": [
+    "9c7a699f3ec2b2e1839fd1371baf52eabd5eca30\trefs/heads/codex/public-content-generator-20261104",
+    "27441173f257769add825aea596f7080d282e1ca\trefs/heads/main"
+  ],
+  "generatorPin": "9c7a699f3ec2b2e1839fd1371baf52eabd5eca30",
+  "localHead": "a25208d8a5965f9688a6ecbb0d5be5ac26cc9a92",
+  "localContentHead": "9f99941c6b650c70f363208cd97c7191ef785a46",
+  "stagedPaths": []
+}

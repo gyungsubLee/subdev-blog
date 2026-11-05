@@ -1,0 +1,147 @@
+{
+  "scope": "Local production frontend and latest real HTTP handler; real GitHub REST/raw transport and existing real browser session. Owner request URL/origin normalized to the existing configured CMS origin, then normal session binding/CSRF/authorization checks run. No mocked identity, GitHub repository or assets. Not deployed Vercel/native cold-start benchmarking.",
+  "readCredential": "Same existing gh credential in server memory for before/after public API reads; normal configured app anonymous public read separately returned200. No tokens saved or exposed.",
+  "input": {
+    "sourceCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+    "posts": 3033
+  },
+  "timingDefinition": "Three sequential empty-handler-cache home navigations per implementation; same local production build and source commit. Chrome PerformanceObserver/DOM readiness plus two animation frames; real CDN/cache/network uncontrolled; sample size3. Post observations are one navigation after warm index.",
+  "measurements": {
+    "before": {
+      "indexApiSamplesMs": [
+        4365.667291999998,
+        3872.1059170000008,
+        3890.975584
+      ],
+      "indexApiMedianMs": 3890.975584,
+      "homeSamplesMs": [
+        5108.299999999814,
+        4218.399999999441,
+        4378.5
+      ],
+      "homeMedianMs": 4378.5,
+      "imagesSamplesMs": [
+        5490.899999999441,
+        4213,
+        4386.700000000186
+      ],
+      "imagesMedianMs": 4386.700000000186,
+      "firstPostObservationMs": 210.70000000018626,
+      "imageFailures": 0,
+      "browserErrors": []
+    },
+    "after": {
+      "indexApiSamplesMs": [
+        2133.8128329999745,
+        2029.7226670000236,
+        1571.172208000091
+      ],
+      "indexApiMedianMs": 2029.7226670000236,
+      "homeSamplesMs": [
+        3265.399999999441,
+        2392.800000000745,
+        2426.2999999998137
+      ],
+      "homeMedianMs": 2426.2999999998137,
+      "imagesSamplesMs": [
+        3536,
+        2385.4000000003725,
+        2533.2999999998137
+      ],
+      "imagesMedianMs": 2533.2999999998137,
+      "firstPostObservationMs": 492.30000000074506,
+      "imageFailures": 0,
+      "browserErrors": []
+    }
+  },
+  "mutations": [
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operation": "post.create",
+      "status": 502,
+      "ms": 144009.3537910001,
+      "bytes": 33
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operation": "post.create",
+      "status": 200,
+      "ms": 71475.37625,
+      "bytes": 361
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operation": "post.update",
+      "status": 200,
+      "ms": 161171.38029200002,
+      "bytes": 361
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operation": "post.delete",
+      "status": 200,
+      "ms": 156548.364,
+      "bytes": 361
+    }
+  ],
+  "finalSourceCommit": "17397ef27e1f8dc4ecc8b5fec0ed678f6e723500",
+  "originalSourceFilesUnchanged": true,
+  "checks": {
+    "publicationTests": "10/10 passed",
+    "isolatedGeneratorTests": "7/7 passed",
+    "httpE2E": "3/3 passed",
+    "productionBuild": "passed",
+    "fullSuite": "Previous full run522/524; two unrelated managed-editor category failures remain; full suite not claimed green"
+  },
+  "workflowRuns": [
+    {
+      "conclusion": "success",
+      "databaseId": 41829722834,
+      "event": "push",
+      "headSha": "17397ef27e1f8dc4ecc8b5fec0ed678f6e723500",
+      "status": "completed",
+      "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41829722834"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 41829101021,
+      "event": "push",
+      "headSha": "357e00e80429348449bcba14b5ab36c813c9d247",
+      "status": "completed",
+      "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41829101021"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 41828475822,
+      "event": "push",
+      "headSha": "fc1a496aabc930cad33c0d4b5cf3aa52c36a6efc",
+      "status": "completed",
+      "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41828475822"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 41824034965,
+      "event": "push",
+      "headSha": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "status": "completed",
+      "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41824034965"
+    }
+  ],
+  "limitations": [
+    "Existing native preview process started before publisher fixes; initial create failed502 after144009ms. Existing process preserved. Latest-handler retry succeeded and reused same source candidate;71.48s is recovery timing, not independent cold-create timing.",
+    "Representative first post navigation increased210.7ms\u2192492.3ms because generated body requires a real remote fetch; cached after-body API0.33ms.",
+    "Full corpus generation makes fresh saves slow; record actual update/delete timing rather than implying write performance was preserved.",
+    "Actual category mutation and conflict fault injection remain covered by local HTTP fixture tests, not destructive remote corpus edits."
+  ],
+  "cleanup": {
+    "measurementServersStopped": true,
+    "taskTabsClosed": true,
+    "existingPreviewPreserved": true,
+    "userSessionNotLoggedOut": true,
+    "deletedPublicUrl": "PAGE NOT FOUND"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "profiled": {
+    "app/server/src/content.mjs": "f470b64f169974b082782a230c7b5ad9dd9d0a5653e8d40f81709407c2c7b5a5",
+    "app/server/src/public-publication.mjs": "c97c849d7d390992c7095801522e31b6404707d332efabc3bf300bfb4a267b77",
+    "app/server/src/handler.mjs": "47f5fd955a887dbd6788eae408d1c2563c67fd5049b7e83d54a6fe340d304783"
+  },
+  "currentAtCompletion": {
+    "app/server/src/content.mjs": "aadacfbf4f5d5a17aed586558891ddab62190c13a6ac257be8b25f0207b2df98",
+    "app/server/src/public-publication.mjs": "c97c849d7d390992c7095801522e31b6404707d332efabc3bf300bfb4a267b77",
+    "app/server/src/handler.mjs": "47f5fd955a887dbd6788eae408d1c2563c67fd5049b7e83d54a6fe340d304783"
+  },
+  "concurrentChanges": [
+    "app/server/src/content.mjs"
+  ],
+  "scopeOfConcurrentChange": "bulk withReceipt response format only; single-operation requests return before this branch"
+}

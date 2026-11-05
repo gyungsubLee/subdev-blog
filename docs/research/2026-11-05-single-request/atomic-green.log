@@ -1,0 +1,21 @@
+✔ prepared atomic save uses one CAS mutation and local source receipt (41.018041ms)
+✔ lost mutation response and retry reconcile without duplicate apply (14.101958ms)
+✔ successful receipt primes the next prepared title save (6.63ms)
+✔ fresh remote advance conflicts and never overwrites canonical source (4.880375ms)
+✔ mutation permissions stop immediately without recovery reads (2.562334ms)
+✔ large exact authored bytes stay in the single mutation (41.9195ms)
+✔ a request ID cannot be reused against its successful source commit (3.30625ms)
+✔ durable request marker rejects reuse after unrelated descendants and a new cache scope (5.594ms)
+✔ retry source revision uses accepted bytes rather than regenerated timestamp (22.703542ms)
+✔ recovery rejects tampered durable receipt and never reapplies (4.059125ms)
+✔ trusted immutable cache remains entry bounded and credential scoped (0.429792ms)
+✔ large source inventory drops unused API URLs within existing cache budget (36.004083ms)
+✔ atomic authored no-op reserves its ID with only a durable marker (2.651291ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 461.268167

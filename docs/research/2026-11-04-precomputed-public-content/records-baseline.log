@@ -1,0 +1,19 @@
+Warning: KaTeX doesn't work in quirks mode. Make sure your website has a suitable doctype.
+✖ records filters and visible count survive article and home roundtrips (156.494334ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 922.290375
+
+✖ failing tests:
+
+test at tests/web/records-flow.test.mjs:28:1
+✖ records filters and visible count survive article and home roundtrips (156.494334ms)
+  TypeError [Error]: Cannot read properties of null (reading 'getAttribute')
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/.tmp/precomputed-public/records-baseline/tests/web/records-flow.test.mjs:92:68)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3)

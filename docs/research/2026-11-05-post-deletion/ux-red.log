@@ -1,0 +1,60 @@
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ delete confirmation closes and hides the row before the background response (54.815584ms)
+✖ background deletion failure restores the row and its recovery and announces the error (13.411417ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2646.579084
+
+✖ failing tests:
+
+test at tests/web/content-workspace.test.mjs:433:1
+✖ delete confirmation closes and hides the row before the background response (54.815584ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(document.querySelector('dialog') === null)
+  
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/content-workspace.test.mjs:449:14
+      at async mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/content-workspace.test.mjs:34:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/content-workspace.test.mjs:445:5)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }
+
+test at tests/web/content-workspace.test.mjs:458:1
+✖ background deletion failure restores the row and its recovery and announces the error (13.411417ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(document.querySelector('dialog') === null)
+  
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/content-workspace.test.mjs:473:14
+      at async mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/content-workspace.test.mjs:34:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/content-workspace.test.mjs:470:5)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }

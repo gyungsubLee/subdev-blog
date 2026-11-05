@@ -1,0 +1,136 @@
+{
+  "measuredAt": "2026-11-04T13:49:45.651Z",
+  "transport": "real GitHub read only; same owner credential and category contents",
+  "samples": [
+    {
+      "mode": "direct",
+      "sample": 1,
+      "ms": 432.0317909999999,
+      "count": 48,
+      "contentCommit": "26ad314322a088a878f9cb60f01c941b04a77466",
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/graphql",
+          "status": 200,
+          "ms": 427.38641699999994,
+          "bytes": 9124
+        }
+      ]
+    },
+    {
+      "mode": "cached",
+      "sample": 1,
+      "ms": 0.28920799999991686,
+      "count": 48,
+      "contentCommit": "26ad314322a088a878f9cb60f01c941b04a77466",
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "calls": []
+    },
+    {
+      "mode": "direct",
+      "sample": 2,
+      "ms": 635.427584,
+      "count": 48,
+      "contentCommit": "26ad314322a088a878f9cb60f01c941b04a77466",
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/graphql",
+          "status": 200,
+          "ms": 634.429083,
+          "bytes": 9124
+        }
+      ]
+    },
+    {
+      "mode": "cached",
+      "sample": 2,
+      "ms": 0.37095799999997325,
+      "count": 48,
+      "contentCommit": "26ad314322a088a878f9cb60f01c941b04a77466",
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "calls": []
+    },
+    {
+      "mode": "direct",
+      "sample": 3,
+      "ms": 408.49024999999983,
+      "count": 48,
+      "contentCommit": "26ad314322a088a878f9cb60f01c941b04a77466",
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/graphql",
+          "status": 200,
+          "ms": 406.84791600000017,
+          "bytes": 9124
+        }
+      ]
+    },
+    {
+      "mode": "cached",
+      "sample": 3,
+      "ms": 0.7309580000001006,
+      "count": 48,
+      "contentCommit": "26ad314322a088a878f9cb60f01c941b04a77466",
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "calls": []
+    },
+    {
+      "mode": "direct",
+      "sample": 4,
+      "ms": 412.51683300000013,
+      "count": 48,
+      "contentCommit": "26ad314322a088a878f9cb60f01c941b04a77466",
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/graphql",
+          "status": 200,
+          "ms": 411.8059589999998,
+          "bytes": 9124
+        }
+      ]
+    },
+    {
+      "mode": "cached",
+      "sample": 4,
+      "ms": 0.17499999999972715,
+      "count": 48,
+      "contentCommit": "26ad314322a088a878f9cb60f01c941b04a77466",
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "calls": []
+    },
+    {
+      "mode": "direct",
+      "sample": 5,
+      "ms": 439.76441699999987,
+      "count": 48,
+      "contentCommit": "26ad314322a088a878f9cb60f01c941b04a77466",
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/graphql",
+          "status": 200,
+          "ms": 437.7546659999998,
+          "bytes": 9124
+        }
+      ]
+    },
+    {
+      "mode": "cached",
+      "sample": 5,
+      "ms": 0.7265830000001188,
+      "count": 48,
+      "contentCommit": "26ad314322a088a878f9cb60f01c941b04a77466",
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "calls": []
+    }
+  ]
+}

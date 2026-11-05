@@ -219,7 +219,7 @@ function validateHierarchy(records, idOf, parentOf, label) {
       if (ancestors.has(id)) throw new Error("Cycle in " + label + " hierarchy: " + id);
       ancestors.add(id);
       const parent = parentOf(current);
-      if (parent !== null && !byId.has(parent))
+      if (label !== "post" && parent !== null && !byId.has(parent))
         throw new Error("Missing " + label + " parent: " + parent);
       current = byId.get(parent);
     }
@@ -290,9 +290,6 @@ export function validateContent(snapshot, { validatedDocuments, transformDocumen
   const effectiveCategories = new Map();
   for (const entry of entries) {
     const metadata = entry.metadata;
-    for (const reference of [...(metadata.related_ids ?? []), ...(metadata.source_ids ?? [])]) {
-      if (!byId.has(reference)) throw new Error("Missing document reference: " + reference);
-    }
     if (Object.hasOwn(metadata, "category_id") && !categories.has(metadata.category_id))
       throw new Error("Missing explicit category: " + metadata.category_id);
     let ancestor = entry;
@@ -358,8 +355,6 @@ function linkResolver(snapshot, entry, assets = new Map(), externals = new Set()
     if (destination.startsWith("#/post/")) {
       const id = destination.slice(7).split(/[?#]/)[0];
       dependencies?.add('id:' + id);
-      if (!snapshot.documents.has(id) && !snapshot.allowUnresolvedLinks)
-        throw new Error("Missing linked document: " + id);
       return destination;
     }
     if (destination.startsWith("#")) return destination;
@@ -402,10 +397,7 @@ function linkResolver(snapshot, entry, assets = new Map(), externals = new Set()
       dependencies?.add('path:' + relative);
       dependencies?.add('path:' + path.posix.normalize(decoded));
       const id = snapshot.paths.get(relative) ?? snapshot.paths.get(path.posix.normalize(decoded));
-      if (!id) {
-        if (snapshot.allowUnresolvedLinks) return destination;
-        throw new Error("Missing Markdown document: " + destination);
-      }
+      if (!id) return destination;
       return "#/post/" + id + suffix.replace(/^\?[^#]*/, "");
     }
     return resolveAsset(decoded.replace(/^\.\//, ""), pathname) + suffix;

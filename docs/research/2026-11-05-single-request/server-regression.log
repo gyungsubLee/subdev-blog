@@ -1,0 +1,105 @@
+✔ repeat and concurrent category reads reuse validated data with zero external requests (205.87025ms)
+✔ explicit latest-source refresh replaces the cache without a HEAD request (5.477625ms)
+✔ reads canonical original, preserving exact markdown and revision (31.131625ms)
+✔ authenticated content errors also disable response caching (1.481167ms)
+✔ explicit publication persists tag edits without replacing body or hidden metadata (94.214375ms)
+✔ direct save preserves body, opaque metadata and attachments; retry is idempotent (8.726334ms)
+✔ stale revisions and path escaping IDs fail before candidate creation (9.8785ms)
+✔ uploads validate strict base64, size, SHA and join chunk bytes (1.71225ms)
+✔ category update preserves sources and opaque fields and rejects unclassified deletion (5.194166ms)
+✔ new documents enforce canonical ID and preserve asset data (3.444833ms)
+✔ 5 MiB total chunk ceiling and complete wire ceiling are enforced (108.493083ms)
+✔ no-op updates never create candidate commits (9.945083ms)
+✔ document schema failures return actionable 422 while malformed transport stays 400 (5.754791ms)
+✔ create and update reject malformed asset records before side effects (13.8485ms)
+✔ canonical parent_id category CRUD preserves real source records and opaque metadata (10.4755ms)
+✔ lost canonical PATCH response recovers accepted candidate without duplicate writes (3.116208ms)
+✔ publish GET only reports pending status and authenticated POST alone resumes the candidate (8.447625ms)
+✔ publish rejects a candidate that does not match its immutable request branch (4.096416ms)
+✔ a concurrent sibling save rejects the stale candidate without overwriting canonical (3.712833ms)
+✔ canonical PATCH success is verified against HEAD before claiming saved (4.286375ms)
+✔ a canonical descendant accepts a saved candidate without moving HEAD backwards (9.819167ms)
+✔ post deletion rejects incoming document relations and canonical, Notion, relative and HTML links (57.039917ms)
+✔ post deletion resolves legacy Markdown aliases and permits code examples without live references (11.578167ms)
+✔ category deletion rejects assigned categories and original child relationships (4.910375ms)
+✔ post create and category assignment reject missing references before side effects (5.478958ms)
+✔ body edits read only the target document and category catalog (4.417834ms)
+✔ publish revalidates unaccepted pre-upgrade candidates before applying them (4.848625ms)
+✔ publish rejects retained candidates with paths or modes outside the editable content contract (3.2645ms)
+✔ publish rejects a retained document candidate with a missing category (2.281917ms)
+✔ new asset paths reject unsafe names and portable collisions with canonical assets (7.361041ms)
+✔ publish rejects a retained new post whose parent points to itself (2.292417ms)
+✔ category saves preserve the catalog schema when adding a category (2.508375ms)
+✔ unchanged catalog documents block deletion for full-body references beyond the summary without blob reads (3.2775ms)
+✔ category deletion reuses complete catalog metadata across a large unchanged tree (44.082958ms)
+✔ changed documents bypass stale catalog references and resolve against complete metadata aliases (11.274458ms)
+✔ a source save becomes public after the workflow publishes the accepted commit (12.576959ms)
+✔ authored unsafe URLs and encoded paths fail before any candidate writes without reading sibling bodies (32.84625ms)
+✔ pending candidates with unsafe authored URLs cannot be applied by POST resume (8.613584ms)
+✔ target URL validation preserves authored bytes, allows missing links and skips code examples (3.569916ms)
+✔ serialized Markdown byte size matches the public runtime two MiB boundary (1294.00425ms)
+✔ oversized pending Markdown and fresh category JSON fail before accepting a candidate (44.817833ms)
+✔ canonical source returns validated editor data and a separate exact-byte revision without exposing an attachment (2.031125ms)
+✔ saves reject invalid or externally desynchronized editor data (2.996667ms)
+✔ authenticated recovery returns exact Markdown and raw broken editor source without allowing overwrite (32.571625ms)
+✔ a block post is created with Markdown and editor JSON in the same Git commit (2.957375ms)
+✔ editor-only settings changes save repeatedly and identical paired files report unchanged (10.924ms)
+✔ paired updates reject stale editor revisions and a body change without a new editor before writes (5.147334ms)
+✔ metadata-only edits can preserve existing editor bytes with a matching editor revision (3.859083ms)
+✔ reserved editor filenames cannot be uploaded as attachments through case or encoding changes (3.970166ms)
+✔ source inventories reject editor filename aliases instead of exposing them as attachments (1.082125ms)
+✔ publish revalidates editor pairing and allows mutable editor settings on retained candidates (6.179166ms)
+✔ category reads query only the file and save base without separate HEAD or tree requests (0.553375ms)
+✔ confirmed post deletion removes Markdown, editor backup and attachments from the canonical tree only (7.558583ms)
+✔ category move deletes only the category and moves original documents to unclassified atomically (8.547791ms)
+✔ category whole deletion removes assigned originals, inherited posts and assets but preserves unrelated posts (7.6655ms)
+✔ category whole deletion refuses inbound references from surviving categories before writing (3.696958ms)
+✔ category deletion validates mode and preserves unclassified and parent-category protection (3.052333ms)
+✔ unaccepted category move candidates are revalidated before publish resume (6.987958ms)
+✔ unaccepted category delete candidates are revalidated before publish resume (4.399583ms)
+✔ category move candidates cannot rewrite unrelated original title or body (3.784666ms)
+✔ category deletion preserves parent-category protection before any Git write (1.605916ms)
+✔ moving a category reuses metadata catalog and reads only the reassigned original body (56.621875ms)
+✔ save advances only source and leaves public generation to the push workflow (3.134333ms)
+✔ generation failure leaves saved source recoverable without duplicate writes (2.260833ms)
+✔ category data read retains save conflicts when the canonical branch advances (0.970334ms)
+✔ bulk updates multiple posts with one canonical commit and idempotent retry (10.223958ms)
+✔ bulk category creation and a dependent post share one commit; an invalid operation advances nothing (6.944958ms)
+✔ missing configuration blocks management without exposing secrets (18.119875ms)
+✔ unknown routes stay outside management API (0.239625ms)
+✔ repeated login reuses the pending challenge and stale callbacks preserve cookies (2.345291ms)
+✔ failed matching callback preserves existing session and bounds one-use code exchange (0.983041ms)
+✔ PKCE login exchanges code server-side and keeps token encrypted (9.519375ms)
+✔ callback rejects state tampering, cancellation and other identities (1.254833ms)
+✔ both direct and rewritten mutations reject unauthenticated callers (0.426667ms)
+✔ content reads and mutations enforce session owner before repository work (0.804792ms)
+✔ owner mutations require both matching origin and CSRF before repository work (1.22275ms)
+✔ slow identity checks cannot extend session past the token expiry (5.127583ms)
+✔ public reads bypass management configuration for direct and rewritten routes (1520.662833ms)
+✔ public reads refuse mutation methods before contacting GitHub (1.224667ms)
+✔ Vercel configuration routes nested API requests and disables automatic Git deployment (3.733666ms)
+✖ Vite serves management requests with their method, body and separate cookies (872.663834ms)
+ℹ tests 81
+ℹ suites 0
+ℹ pass 80
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2442.473334
+
+✖ failing tests:
+
+test at tests/server/management-runtime.test.mjs:15:1
+✖ Vite serves management requests with their method, body and separate cookies (872.663834ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1:5173
+      at Server.setupListenHandle [as _listen2] (node:net:1918:21)
+      at listenInCluster (node:net:1997:12)
+      at node:net:2206:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1',
+    port: 5173
+  }

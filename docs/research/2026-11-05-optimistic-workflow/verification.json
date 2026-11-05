@@ -1,0 +1,151 @@
+{
+  "scope": "Real GitHub/OAuth/CSRF; production IndexedDB/background modules on a disposable browser control page. Control-page paint is not a full editor interaction benchmark.",
+  "checks": [
+    {
+      "owner": "server worker",
+      "command": "node --test tests/server/github-content.test.mjs tests/server/save-reuse.test.mjs tests/server/management-category-read.test.mjs tests/server/category-response-cache.test.mjs tests/server/management-api.test.mjs",
+      "passed": 95,
+      "log": "server-final.log",
+      "reuse": "Unchanged source-write paths; later GET status edits covered by server-readiness and server-status-final."
+    },
+    {
+      "owner": "server worker",
+      "command": "targeted retained asset inventory regression",
+      "passed": 1,
+      "log": "server-assets.log"
+    },
+    {
+      "owner": "server worker",
+      "command": "node --test --test-name-pattern=\"earlier source receipt|unchanged source\" tests/server/save-reuse.test.mjs",
+      "passed": 2,
+      "log": "server-readiness-green.log"
+    },
+    {
+      "owner": "server worker",
+      "command": "node --test --test-name-pattern=\"publication status stays|previous ready source\" tests/server/save-reuse.test.mjs",
+      "passed": 2,
+      "log": "server-status-final.log"
+    },
+    {
+      "owner": "publication worker",
+      "command": "node --test --test-timeout=60000 tests/server/public-publication.test.mjs tests/server/public-content.test.mjs tests/server/public-transfer-guards.test.mjs",
+      "passed": 62,
+      "log": "publication-green.log",
+      "bindings": "publication-verification.json"
+    },
+    {
+      "owner": "client worker",
+      "command": "node --test tests/web/sync-core.test.mjs tests/web/sync-recovery.test.mjs tests/web/public-client-cache.test.mjs tests/web/content-management.test.mjs",
+      "passed": 35,
+      "log": "client-green.log",
+      "reuse": "Later client source/history changes covered by final23; unchanged status-component checks retained."
+    },
+    {
+      "owner": "client worker",
+      "command": "node --test tests/web/sync-core.test.mjs tests/web/sync-recovery.test.mjs tests/web/public-client-cache.test.mjs",
+      "passed": 23,
+      "log": "client-unchanged-green.log"
+    },
+    {
+      "owner": "root",
+      "command": "node --test tests/e2e/public-data-http.test.mjs",
+      "passed": 3,
+      "log": "http-e2e.log",
+      "transport": "fake GitHub; real local HTTP"
+    },
+    {
+      "owner": "root",
+      "command": "node --test tests/server/management-runtime.test.mjs",
+      "passed": 2,
+      "log": "runtime.log",
+      "transport": "local Vite HTTP"
+    },
+    {
+      "owner": "root",
+      "command": "npm run build",
+      "exitCode": 0,
+      "log": "build-final.log",
+      "includes": "check:version, prepare-content, tsc -b, vite build"
+    },
+    {
+      "owner": "root",
+      "command": "git diff --check; node --check content/background-sync/sync-core",
+      "exitCode": 0
+    }
+  ],
+  "doNotSumOverlappingTests": true,
+  "actualGitHub": {
+    "sourceMutations": 5,
+    "titleSamples": 3,
+    "sourcePostMedianMs": 6122.268457999977,
+    "callsPerTitleSource": 12,
+    "writesPerTitleSource": 4,
+    "workflows": 5,
+    "workflowConclusions": "success",
+    "lateWorkflow": "late-workflow.json",
+    "realOAuthCsrfOwner": true,
+    "sourceBindings": "measurement-source-hashes.json"
+  },
+  "inventory": {
+    "complete": true,
+    "beforeCommit": "0bba342dfd2c537b767698330fd7a40be182eb9f",
+    "afterCommit": "fc5e526e770990ad3e294bf126b850a6ac00e6d0",
+    "beforeFiles": 10292,
+    "afterFiles": 10292,
+    "beforePosts": 3032,
+    "afterPosts": 3032,
+    "allOriginalFileShasMatch": true,
+    "postCountMatches": true,
+    "differenceCount": 0,
+    "differencePaths": [],
+    "beforeReady": null,
+    "afterReady": "fc5e526e770990ad3e294bf126b850a6ac00e6d0",
+    "afterGenerator": "e763d9adf0e07f77a1b0177895674f08922f9122",
+    "afterPin": "e763d9adf0e07f77a1b0177895674f08922f9122"
+  },
+  "remoteGenerator": "remote-generator.json",
+  "review": "review.md",
+  "limits": [
+    "Source POST baseline is server HTTP time; it is not a click-to-device or click-to-screen baseline.",
+    "Each local/queue median is selected independently. Source POST calls/bytes use the sample with the median POST time.",
+    "remoteExcludingDebounceMs is the browser sending-notification-to-source-ACK interval; it excludes the entire pre-send queue. clickToSourceWithoutNominalDebounceMs subtracts only the nominal 5000 ms.",
+    "Ready response completion is publisher startedAt + measured ms. Subtracting browser clickAt compares runner and browser wall clocks; no clock synchronization or skew bound was measured.",
+    "Browser publication checks are polling upper bounds. Workflow updatedAt includes post-publication job cleanup.",
+    "Workflow traffic covers instrumented publisher GitHub/raw calls only; checkout, npm, Actions log retrieval, watch polling and capture-state diagnostic requests are excluded.",
+    "Source preparation classifies only POST /graphql within the bound GET /api/content?kind=categories trace as the explicit readOnly ReadCategories query; other GraphQL POSTs remain writes. Calls and byte totals retain the query.",
+    "Unfinished source POST response bodies are preserved in the counts; the expected request-ref 404 probes may leave these bodies unfinished. No complete-body or compressed-wire claim is made.",
+    "Traffic failedCalls includes expected GitHub 404 misses; it does not by itself indicate a failed save or workflow.",
+    "Workflow traffic is separate from source POST and application publication polling/read traffic. Request bytes exclude HTTP/TLS headers; decoded response bytes are not compressed wire bytes.",
+    "The historical save baseline used 3033 posts; the current pre-test canonical has 3032. Commits and GitHub/network conditions differ; no randomized interleaved control was measured.",
+    "Browser large-queue memory safety and the full editor save interaction are outside these small disposable control-page samples.",
+    "Missing evidence remains incomplete; no zero-valued timing or original inventory is inferred for absent files."
+  ],
+  "preexisting": {
+    "fullSuiteNotRepeated": true,
+    "oldEditorFailures": 2,
+    "contextCheck": "Existing oversized .project-context/INDEX.md; identity preserved",
+    "warnings": [
+      "existing updatedAt duplicate key",
+      "bundle chunk size"
+    ]
+  },
+  "cleanup": {
+    "taskTabIds": [
+      "1490590918",
+      "1490590934"
+    ],
+    "tabsClosed": true,
+    "serverPid": 17143,
+    "serverExited": true,
+    "callbackListenerClosedWithServer": true,
+    "normalLoginPreserved": true,
+    "previewNotRestarted": true
+  },
+  "publicationEvidenceBindingsMatch": true,
+  "publicationChangedBindings": [],
+  "contextCheckpoint": {
+    "path": ".project-context/handoffs/optimistic-workflow-verified-20261105.json",
+    "saveExitCode": 0,
+    "initialSaveAttempt": "Rejected missing authority field; exact template read, authority added, one corrected retry passed. No project reinitialization or existing-record deletion."
+  }
+}

@@ -22,6 +22,7 @@ import type { Management } from "../features/content-management/useManagement";
 import ContentWorkspace from "../features/content-management/ContentWorkspace";
 import ManagedCategories from "../features/content-management/ManagedCategories";
 import { categoryNodesToGroups } from "../features/post-category/hierarchy";
+import { usePostDeletion, type PostDeletion } from "../features/content-management/usePostDeletion";
 
 const PostDeleteDialog = lazy(
   () => import("../features/content-management/PostDeleteDialog"),
@@ -29,6 +30,7 @@ const PostDeleteDialog = lazy(
 
 type BlogViewProps = {
   posts: Post[];
+  deletion?: PostDeletion;
   categories?: PublicCategory[];
   hash: string;
   onWrite: (categoryId?: string, pendingCategories?: PublicCategory[]) => void;
@@ -39,7 +41,8 @@ type BlogViewProps = {
 };
 
 export default function BlogView({
-  posts,
+  posts: allPosts,
+  deletion: providedDeletion,
   categories,
   hash,
   onWrite,
@@ -48,6 +51,12 @@ export default function BlogView({
   onContentSaved,
   draftVersion,
 }: BlogViewProps) {
+  const localDeletion = usePostDeletion(management?.session, onContentSaved);
+  const deletion = providedDeletion ?? localDeletion;
+  const posts = useMemo(
+    () => deletion.deletedIds.size ? allPosts.filter(post => !deletion.deletedIds.has(post.id)) : allPosts,
+    [allPosts, deletion.deletedIds],
+  );
   const [deletingPost, setDeletingPost] = useState<Post | null>(null);
   const [backHref, setBackHref] = useState(HOME_HREF);
   const selectedId = postIdFromHash(hash);
@@ -144,7 +153,8 @@ export default function BlogView({
         onEdit={onEdit}
         draftVersion={draftVersion}
         session={management.session}
-        onDeleted={onContentSaved}
+        deletedIds={deletion.deletedIds}
+        onDeletePost={deletion.remove}
       />
     ) : (
       <main className="app-state" id="main-content" tabIndex={-1}>
@@ -193,16 +203,16 @@ export default function BlogView({
         onWrite={() => onWrite()}
         management={management}
       />
+      {!providedDeletion && deletion.error ? <div className="app-warning" role="alert">{deletion.error}</div> : null}
       {page}
       {deletingPost && management?.session.state === "ready" ? (
         <Suspense fallback={null}>
           <PostDeleteDialog
             post={deletingPost}
-            session={management.session}
             onClose={() => setDeletingPost(null)}
-            onDeleted={(commit) => {
+            onConfirm={() => {
+              deletion.remove(deletingPost);
               setDeletingPost(null);
-              onContentSaved?.(commit);
             }}
           />
         </Suspense>

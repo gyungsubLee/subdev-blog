@@ -1,0 +1,80 @@
+✔ public index reads canonical GitHub content without login or a token (44.038ms)
+✔ public reads exclude editor source without fetching its private editing payload (5.306542ms)
+✔ public Markdown cannot publish editor source as an attachment (2272.719125ms)
+✔ encoded aliases of the reserved editor filename fail public tree validation (754.137083ms)
+✔ body, cover, icon and attachments remain pinned to the list commit after head advances (7.884292ms)
+✔ a full SHA outside canonical history cannot expose a draft commit (3.895584ms)
+✔ an uncached canonical ancestor can be read after ancestry verification (6.4445ms)
+✔ after bypasses an old head cache and selects the new commit publication (4.733833ms)
+✔ fixed public repository reads do not fetch metadata and tokens stay server-side (5.114125ms)
+✔ invalid request parameters and repository overrides are rejected before network access (1.762292ms)
+✔ GitHub errors are visible and never become a successful empty index or stale snapshot (2.11075ms)
+✔ runtime retains missing authored links but rejects unsafe paths and URL schemes (3024.042583ms)
+✔ generation source reads are bounded in parallel and unsafe trees fail before publication (814.324834ms)
+✔ a generation source failure is surfaced and request deadlines are finite (1508.586708ms)
+✔ anonymous GitHub requests omit credentials and always carry an abort deadline (1.164458ms)
+✔ generated summaries preserve inheritance, links and changed content; detail fetches only its public JSON (15.355ms)
+✔ content catalog records carry the exact Git blob hash of canonical source bytes (11.203542ms)
+✔ a cached snapshot is denied after canonical history is replaced (7.231333ms)
+✔ a cached ancestor proof is reused only for its current canonical head (5.07825ms)
+✔ production-size indexes use bounded gzip without losing records or summary search text (2001.750334ms)
+✔ explicit gzip rejection overrides wildcards and large identity responses stay bounded (5.126ms)
+✔ small public responses remain ordinary JSON when gzip is rejected (3.183334ms)
+✔ repeated consumed index responses reuse JSON bytes and remain independently readable (2.857291ms)
+✔ encoded bytes count toward the snapshot budget and trigger eviction on growth (1113.889959ms)
+✔ retention never exceeds three snapshots after new commits (9.646584ms)
+✖ workflow exposes a verified source only after its immutable publication is complete (41.239417ms)
+✔ an older workflow cannot roll back a newer ready source (10.800209ms)
+✔ lost ready-ref response recovers without generating duplicate public commits (4.410042ms)
+✔ a pending or failed new source keeps the last ready public index readable on a cold reader (10.691333ms)
+✔ generation projects safe public files and full bodies before publishing an immutable ref (7.510041ms)
+✔ unsafe source fails before the ready ref is created (9.407042ms)
+✔ generation rewrites pinned assets and inherited category without exposing original metadata (3.206875ms)
+✔ the reader serves generated files without touching source Markdown or trees (2.549375ms)
+✔ a missing publication returns 503 instead of generating content in a read (0.588875ms)
+✔ CLI needs explicit publication intent and output mode makes no remote writes (118.631584ms)
+✔ an incomplete existing publication is rejected instead of being reused (3.764208ms)
+✔ a changed source crossing the summary boundary keeps the previous full-transform semantics (4.705542ms)
+✔ large publications upload bounded trees before exposing the complete ref (147.229209ms)
+✔ oversized and escaped generated files use blob upload instead of oversized inline trees (455.117208ms)
+✔ writer cache compresses without changing public JSON and legacy cache still reuses bodies (4.442916ms)
+✔ large JSON chooses the smaller lossless blob encoding (2443.551875ms)
+✔ independent large blobs overlap with a two-upload bound before ready publication (1225.214292ms)
+✔ failed concurrent blob uploads drain in-flight work and never publish a ready ref (802.603125ms)
+✔ matching request-local source snapshots reuse inventory and still validate every source boundary (1.76475ms)
+✔ incremental publication reads one changed source and reuses unchanged JSON blobs (4.556458ms)
+✔ unchanged source push reads no Markdown and reuses every public body (2.012917ms)
+✔ new and deleted link targets regenerate unresolved Markdown/Notion dependents only (10.309417ms)
+✔ an ancestor category change regenerates inheriting children and leaves unrelated bodies reusable (4.928459ms)
+✔ unchanged attachments keep pinned URLs; changed attachment bytes invalidate only their owner (5.824041ms)
+✔ renamed aliases preserve resolved links while removed aliases invalidate dependents (6.498834ms)
+✔ reused graph facts still reject cycles, missing references and unsafe changed content before publication (9.914875ms)
+✔ generation cache excludes arbitrary category metadata as well as document metadata (0.869375ms)
+✔ a verified cache with noncanonical base64 fails before any new publication write (40.153417ms)
+✔ a verified cache with malformed gzip fails before any new publication write (5.606584ms)
+✔ a verified cache with invalid decoded JSON fails before any new publication write (4.490458ms)
+✔ a verified compressed cache cannot decode beyond the public file limit (68.085125ms)
+✔ a wrong concurrent blob SHA drains active uploads and never publishes a ready ref (1331.502458ms)
+ℹ tests 57
+ℹ suites 0
+ℹ pass 56
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11862.199375
+
+✖ failing tests:
+
+test at tests/server/public-publication.test.mjs:12:1
+✖ workflow exposes a verified source only after its immutable publication is complete (41.239417ms)
+  AssertionError [ERR_ASSERTION]: The ready ref follows verification of the completed artifact
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:22:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }

@@ -1,3 +1,4 @@
+import Button from "../../components/button/Button";
 import {
   useEffect,
   useRef,
@@ -79,7 +80,7 @@ export default function CategorySelectionDialog({
               }}
               style={{ "--depth": depth } as CSSProperties}
             >
-              <button
+              <Button
                 type="button"
                 className="expander"
                 disabled={!hasChildren}
@@ -95,11 +96,11 @@ export default function CategorySelectionDialog({
                 }
               >
                 {hasChildren ? (expanded ? "⌄" : "›") : "·"}
-              </button>
+              </Button>
               <span className="grip" aria-hidden="true">
                 ≡
               </span>
-              <button
+              <Button
                 type="button"
                 className="row-name"
                 aria-pressed={pending === category.id}
@@ -109,7 +110,7 @@ export default function CategorySelectionDialog({
                 <span className="inline-count">
                   ({(category.count ?? 0).toLocaleString()})
                 </span>
-              </button>
+              </Button>
             </div>
             {hasChildren && expanded && categoryRows(category.id, depth + 1)}
           </div>
@@ -154,23 +155,23 @@ export default function CategorySelectionDialog({
               <span className="grip" aria-hidden="true">
                 ≡
               </span>
-              <button
+              <Button
                 type="button"
                 className="row-name"
                 aria-pressed={!pending}
                 onClick={() => setPending("")}
               >
                 {emptyLabel}
-              </button>
+              </Button>
             </div>
           ) : null}
           {categoryRows(null)}
         </div>
         <div className="category-selection-actions">
-          <button type="button" onClick={cancel}>
+          <Button type="button" onClick={cancel}>
             취소
-          </button>
-          <button type="submit">선택 완료</button>
+          </Button>
+          <Button type="submit">선택 완료</Button>
         </div>
       </form>
     </dialog>

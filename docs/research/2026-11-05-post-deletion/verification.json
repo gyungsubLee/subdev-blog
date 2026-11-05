@@ -1,0 +1,111 @@
+{
+  "task": "POST-DELETION-UX-20261105",
+  "status": "verified-local",
+  "scope": [
+    "Permit deletion despite inbound body links, related/source IDs, and parent IDs. Preserve surviving original bytes.",
+    "Close confirmation immediately; hide deleted items across lists; restore visibility and announce failures.",
+    "Retain retry identity after response loss; remove recovery data only after confirmed deletion."
+  ],
+  "implementation": [
+    "Removed inbound-reference guards from request handling and candidate publication.",
+    "Allowed absent document IDs in content validation; retained cycles, category integrity, URL/path safety, and attachment validation.",
+    "Moved deletion work to an app-owned hook so editor and list navigation do not own request lifetime."
+  ],
+  "checks": {
+    "full": {
+      "command": "npm run check",
+      "tests": 623,
+      "passed": 623,
+      "failed": 0,
+      "exit": 0,
+      "log": "full-check.log"
+    },
+    "build": {
+      "command": "npm run build",
+      "exit": 0,
+      "log": "build.log",
+      "warnings": [
+        "Existing large-chunk warning."
+      ]
+    },
+    "browser": {
+      "connector": "Chrome extension, task tab 1490590984",
+      "url": "http://127.0.0.1:5198/after/",
+      "viewportScreenshot": [
+        1728,
+        846
+      ],
+      "fixture": "Actual BlogView and deletion dialog; simulated source/delete responses; no live content mutation.",
+      "passed": [
+        "Modal uses existing typography, buttons, colors and layout; only obsolete restriction text removed.",
+        "Confirm closes modal and hides item while POST response remains unresolved.",
+        "Navigate from content to records while pending: item remains hidden.",
+        "Fail POST after navigation: item is restored and error is visible.",
+        "Successful retry leaves item hidden."
+      ],
+      "cleanup": "Task tab and local server closed."
+    },
+    "diff": "Focused changed-file whitespace check passed; unrelated pre-existing app/server/src/public-files.mjs EOF whitespace warning left intact."
+  },
+  "performance": {
+    "server": {
+      "input": "100 unrelated documents, complete structural catalog, 3 warmups + 7 samples, simulated GitHub I/O",
+      "beforeMedianMs": 12.051792,
+      "afterMedianMs": 1.347833,
+      "beforeRequests": 12,
+      "afterRequests": 11,
+      "unrelatedDocumentReads": 0
+    },
+    "render": {
+      "input": "3000 posts, JSDOM, same-process alternating order, 4 warmup pairs + 21 sample pairs; full mount/unmount",
+      "beforeMedianMs": 9.311708,
+      "afterMedianMs": 9.467875,
+      "deltaMs": 0.156167,
+      "log": "paired-render.log",
+      "interpretation": "Small median increase amid broad overlapping sample variation. This does not establish strict equivalence or actual-device frame performance.",
+      "initialSeparateProcessComparison": {
+        "beforeMedianMs": 9.345583,
+        "afterMedianMs": 10.486417,
+        "reasonForPairedProbe": "Control process/JIT/order differences after an apparent increase."
+      }
+    }
+  },
+  "limits": [
+    "No live GitHub deletion, deployment, or push was performed.",
+    "The running native preview process was not restarted; server code already loaded by that process needs an app restart. The web production build is refreshed.",
+    "Background work runs for the current app lifetime. Reloading or quitting interrupts it; persisted request identity supports explicit retry.",
+    "Missing IDs use the existing not-found page; surviving IDs and link labels are retained.",
+    "Strict real-device performance equivalence is unverified.",
+    "ste-ko SKILL.md at the requested path was absent; no Korean documentation file was written.",
+    "Project context readiness check reported an already oversized INDEX.md; existing identity and index content were preserved."
+  ],
+  "bindings": {
+    "app/content/src/content.mjs": "302b1d7653b7adcea382b7a91c96942f91ab7a31ce801be3b35c92746141b1c9",
+    "app/server/src/content.mjs": "13b503be282657dca3df9a7c1db4a161f362f996fc9d005fcebde4a348523c37",
+    "scripts/publish-content.mjs": "f71f708f2574cdc9eb0a6f4979c0f002ee5e6fa75a08969db5f4ff6bdc74eb38",
+    "app/web/src/site/App.tsx": "524b607fea3657dcbed77aea5507156047971e49ee783678fcf5dd1b8b24888f",
+    "app/web/src/site/BlogView.tsx": "21159afbdff50938e403ede23e189a321f2a9f90c432e7bafcd8ba3fa54738ed",
+    "app/web/src/features/content-management/ContentWorkspace.tsx": "62e431aebcc1849675c61791363b2393c34f7272a79b482b4389c3c20d7a45dc",
+    "app/web/src/features/content-management/PostDeleteDialog.tsx": "4fa41983f9c4f6d0367828b7c3e4ffc79d829f75adcd04e6429ec35f080e2bb5",
+    "app/web/src/features/content-management/usePostDeletion.ts": "c92b85948f8b3ec6d0c982884e8bb0c75ca85b0504e9f51eb6cb6ca9d2e4a51e",
+    "tests/content/content.test.mjs": "c06cba89fe4d898c6d8a343abc0b989d360d00747f0242bd6da8b2ad304178c7",
+    "tests/server/github-content.test.mjs": "52afda1f7e914fd651b789bc5b35c35c499d0c87a2b93e9578097e8d12606ffa",
+    "tests/server/publish-content.test.mjs": "9e2aac85076c0e3feeeecc1f7fb50991524a393e94c24e225987597b6de4b505",
+    "tests/server/public-publication.test.mjs": "f75869161f30033d4e572d2cdcadd88fe66c879139b7a52a58ee127af89ef48e",
+    "tests/web/content-management.test.mjs": "1c200837b978343d7a9f8efc48d84e57485d6fe72dcf1b98411108efbf0148a1",
+    "tests/web/content-workspace.test.mjs": "5f851fb79641fccdb44040aa9aca4b8ac549443a50c0dfe5c01d63f238510154"
+  },
+  "baselineBindings": {
+    "scripts/publish-content.mjs": "1d3279dfeb8d4950158967dd6209622db6ece63afa7241c6307dc117204808dd",
+    "app/web/src/site/BlogView.tsx": "c94d463290b9db769ac4af3b89255803e64ee6be3b3069fd4191652a3640229c",
+    "app/web/src/features/content-management/PostDeleteDialog.tsx": "043b981073869fa52a52ef920315ad2583286ac627f49ae36a73c95bb8bc1d67",
+    "app/web/src/features/content-management/ContentWorkspace.tsx": "154519344c854c1a1368ddf6c692950a581d12fd0e8804274a59964cc7d37eff",
+    "app/content/src/content.mjs": "5ad57d2f09e307b59281376e73c953d8cf26c5527dd505e3f2c936355d2475fe",
+    "app/server/src/content.mjs": "de7b2766192970cfa4919326a49e0cffbaeb1fa45455e991e8d40c852772c213",
+    "tests/web/content-management.test.mjs": "a840ff65923b08d360a411ffd54022982449f8a1d9408b1fd36f47fd301b6a31",
+    "tests/content/content.test.mjs": "0a1147953098ca1c41fc64e26514ff51186bde1af9feffdd98912bf8072a97ae",
+    "tests/server/publish-content.test.mjs": "1cb39ee4bd4d50e8ad38bb86a19e96254cc30545d72c9df9f9532ceb8a290331",
+    "tests/server/github-content.test.mjs": "067f16d70a7f660974d6e3306e291329811d5885f6056d9dc60da196bd219884"
+  },
+  "next": "Review the local changes and restart the running application to load the rebuilt web output and updated server code."
+}

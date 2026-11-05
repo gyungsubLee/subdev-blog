@@ -486,7 +486,7 @@ const otherDocument = (metadata = {}, markdown = '') => ({
     metadata:{...document.metadata,id:otherId,title:'Sibling',...metadata},markdown,
 });
 
-test('post deletion rejects incoming document relations and canonical, Notion, relative and HTML links', async () => {
+test('post deletion preserves surviving document relations and links while deleting the target', async () => {
     const inbound = [
         otherDocument({parent_id:id}),
         otherDocument({related_ids:[id]}),
@@ -499,10 +499,12 @@ test('post deletion rejects incoming document relations and canonical, Notion, r
     ];
     for (const entry of inbound) {
         const f = setup({documents:[entry]});
+        const before = await f.call('content?kind=post&id=' + otherId);
         const result = await f.call('content', deletePayload(f.base));
-        assert.equal(result.status, 409);
-        assert.equal(f.refs.get('heads/main'), f.base);
-        assert.equal(f.calls.filter(isWrite).length, 0);
+        assert.equal(result.state, 'saved', result.error);
+        assert.notEqual(f.refs.get('heads/main'), f.base);
+        const remaining = await f.call('content?kind=post&id=' + otherId);
+        assert.deepEqual(remaining.document, before.document);
     }
 });
 
@@ -513,7 +515,7 @@ test('post deletion resolves legacy Markdown aliases and permits code examples w
     });
     const original = await f.call('content?kind=post&id=' + id);
     const result = await f.call('content', {requestId,baseCommit:f.base,operation:{type:'post.delete',id,baseRevision:original.revision}});
-    assert.equal(result.status, 409);
+    assert.equal(result.state, 'saved', result.error);
     const safe = setup({documents:[otherDocument({}, '`[example](#/post/' + id + ')`')]});
     assert.equal((await safe.call('content', deletePayload(safe.base))).state, 'saved');
 });
@@ -574,14 +576,14 @@ function retainedCandidate(f, entries) {
     return candidate;
 }
 
-test('publish revalidates unaccepted pre-upgrade candidates before applying them', async () => {
+test('publish accepts a retained deletion candidate with a surviving child', async () => {
     const f = setup({documents:[otherDocument({parent_id:id})]});
     const entries = f.trees.get('b'.repeat(40)).filter(entry => !entry.path.startsWith(`posts/${id}/`));
     const candidateCommit = retainedCandidate(f, entries);
     const result = await f.call('publish', {requestId,candidateCommit});
-    assert.equal(result.status, 409);
-    assert.equal(f.refs.get('heads/main'), f.base);
-    assert.equal(f.calls.filter(call => call.method === 'PATCH').length, 0);
+    assert.equal(result.state, 'saved', result.error);
+    assert.equal(f.refs.get('heads/main'), candidateCommit);
+    assert.equal(f.calls.filter(call => call.method === 'PATCH').length, 1);
 });
 
 test('publish rejects retained candidates with paths or modes outside the editable content contract', async () => {
@@ -661,14 +663,14 @@ function fixtureCatalog(f, references = {}) {
     })};
 }
 
-test('unchanged catalog documents block deletion for full-body references beyond the summary without blob reads', async () => {
+test('unchanged catalog documents permit deletion for full-body references beyond the summary without blob reads', async () => {
     const f = setup({documents:[otherDocument({}, 'x'.repeat(1600) + `\n[target](#/post/${id})`)]});
     f.controls.catalog = fixtureCatalog(f, {[otherId]:[id]});
     const siblingSha = f.controls.catalog.documents.find(entry => entry.metadata.id === otherId).blobSha;
     const result = await f.call('content', deletePayload(f.base));
-    assert.equal(result.status, 409);
+    assert.equal(result.state, 'saved', result.error);
     assert.equal(f.calls.filter(call => call.path === '/git/blobs/' + siblingSha).length, 0);
-    assert.equal(f.refs.get('heads/main'), f.base);
+    assert.notEqual(f.refs.get('heads/main'), f.base);
 });
 
 test('category deletion reuses complete catalog metadata across a large unchanged tree', async () => {
@@ -701,8 +703,8 @@ test('changed documents bypass stale catalog references and resolve against comp
         sibling.sha = blobSha;
         const original = await f.call('content?kind=post&id=' + id);
         const result = await f.call('content', {requestId,baseCommit:f.base,operation:{type:'post.delete',id,baseRevision:original.revision}});
-        assert.equal(result.status, 409);
-        assert.equal(f.calls.filter(call => call.path === '/git/blobs/' + blobSha).length, 1);
+        assert.equal(result.state, 'saved', result.error);
+        assert.equal(f.calls.filter(call => call.path === '/git/blobs/' + blobSha).length, 0);
     }
 });
 
@@ -1064,14 +1066,14 @@ test('category whole deletion removes assigned originals, inherited posts and as
     assert.equal(f.calls.filter(call=>call.method==='PATCH').length,1);
 });
 
-test('category whole deletion refuses inbound references from surviving categories before writing', async () => {
+test('category whole deletion permits references from surviving categories', async () => {
     const f = setup({categories:deletionCategories,document:{...document,metadata:{...document.metadata,category_id:'group:main'}},
         documents:[otherDocument({category_id:'group:unclassified'},`[Main](#/post/${id})`)]});
     const source = await f.call('content?kind=categories');
     const result = await f.call('content',categoryDeletePayload(f,source,'delete'));
-    assert.equal(result.status,409);
-    assert.equal(f.refs.get('heads/main'),f.base);
-    assert.equal(f.calls.filter(isWrite).length,0);
+    assert.equal(result.state,'saved',result.error);
+    assert.notEqual(f.refs.get('heads/main'),f.base);
+    assert.ok(f.calls.some(isWrite));
 });
 
 test('category deletion validates mode and preserves unclassified and parent-category protection', async () => {

@@ -1,3 +1,4 @@
+import Button from "../../components/button/Button";
 import { postHref } from "../../shared/routes";
 import Arrow from "../../components/icons/Arrow";
 import PostArt from "../../components/post-art/PostArt";
@@ -27,13 +28,13 @@ export default function PostList({
             ? "다른 검색어 또는 카테고리를 선택하십시오."
             : "수집 상태를 확인하거나 첫 글을 작성하십시오."}
         </p>
-        <button
+        <Button
           className="outline-button"
           type="button"
           onClick={hasPosts ? onReset : onWrite}
         >
           {hasPosts ? "전체 글 보기" : "글 쓰기"}
-        </button>
+        </Button>
       </div>
     );
   }

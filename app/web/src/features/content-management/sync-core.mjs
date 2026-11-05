@@ -1,4 +1,3 @@
-export const DEBOUNCE_MS = 5000;
 export const DAY_MS = 86400000;
 const LEASE_MS = 330000;
 const RETRIES = [5000, 15000, 60000];
@@ -66,7 +65,7 @@ export function createSyncEngine({store, send, prepare = async payload => payloa
       item.version = ++state.version;
       item.target = target;
       state.pending = [...state.pending.filter(previous => previous.target !== target), item];
-      state.dueAt = now() + DEBOUNCE_MS;
+      state.dueAt = 0;
       checkCapacity(state);
       if (state.history.length >= 500 || storageBytes(state) > MAX_STORAGE_BYTES - MAX_BATCH_BYTES * 3 - 65536) throw new Error('전송 보관 한도에 도달했습니다. 동기화 결과를 확인하거나 백업을 내보내십시오.');
       return {version:item.version,activeBatch:null,resuming:false};
@@ -82,7 +81,7 @@ export function createSyncEngine({store, send, prepare = async payload => payloa
     waiter.version = version;
     const completion = waiter.promise;
     notify({scope,state:'queued',item});
-    if (!staged.activeBatch || staged.resuming) schedule(scope,staged.resuming ? 0 : DEBOUNCE_MS);
+    if (!staged.activeBatch || staged.resuming) schedule(scope,0);
     return {version, completion};
   }
   async function flush(scope, explicit = false) {
@@ -102,10 +101,9 @@ export function createSyncEngine({store, send, prepare = async payload => payloa
         if (state.history.length >= 500) return null;
         const eligible = state.pending.filter(item=>!item.blocked);
         if (!eligible.length) return null;
-        if (state.dueAt > now()) {schedule(scope,state.dueAt-now());return null;}
         const baseCommit = eligible[0].baseCommit;
         const items = [];
-        const requestId = crypto.randomUUID();
+        const requestId = 'atomic-' + crypto.randomUUID();
         for (const item of eligible) {
           if (item.baseCommit !== baseCommit || items.length >= (state.pending.some(item=>item.pendingCategories?.length) ? 19 : 20)) continue;
           const candidate = {requestId,baseCommit,operations:[...items.map(value=>value.operation),item.operation]};
@@ -116,7 +114,7 @@ export function createSyncEngine({store, send, prepare = async payload => payloa
           items.push(item);
         }
         state.pending = state.pending.filter(item=>!items.some(chosen=>chosen.version===item.version));
-        state.active = {items,payload:{requestId,baseCommit,operations:items.map(item=>item.operation)},attempts:0,hash:'',createdAt:now(),retryAt:0,blocked:false};
+        state.active = {items,payload:{saveMode:'atomic',requestId,baseCommit,operations:items.map(item=>item.operation)},attempts:0,hash:'',createdAt:now(),retryAt:0,blocked:false};
       }
       checkCapacity(state);
       state.lease = {owner,expires:now()+LEASE_MS};
@@ -135,10 +133,12 @@ export function createSyncEngine({store, send, prepare = async payload => payloa
         if (storageBytes(batch.payload)>MAX_BATCH_BYTES || batch.payload.operations.length>20) throw Object.assign(new Error('저장 묶음의 크기나 작업 수를 확인하십시오.'),{status:413});
       }
       batch.hash = await payloadHash(batch.payload);
+      const reconcile = batch.sent === true;
       await store.update(scope,state=>{
         if (state.active?.payload.requestId !== batch.payload.requestId || state.lease?.owner !== owner) throw new Error('저장 요청 소유자가 바뀌었습니다.');
         state.active.payload = batch.payload;
         state.active.prepared = true;
+        state.active.sent = true;
         state.active.hash = batch.hash;
         checkCapacity(state);
       });
@@ -150,7 +150,7 @@ export function createSyncEngine({store, send, prepare = async payload => payloa
       heartbeat = setTimer(()=>void beat().catch(()=>{}),30000);
       heartbeat?.unref?.();
       notify({scope,state:'sending',batch});
-      const result = await send(batch.payload);
+      const result = await send(batch.payload, {reconcile});
       if (result.state === 'superseded') {
         throw Object.assign(new Error('저장 후 원격 내용이 다시 바뀌었습니다. 편집 내용은 보관합니다. 최신 원본을 확인하십시오.'), {status:409});
       }
@@ -174,7 +174,7 @@ export function createSyncEngine({store, send, prepare = async payload => payloa
         }
       }
       const state = await store.read(scope);
-      if (state.pending.length) schedule(scope,Math.max(0,state.dueAt-now()));
+      if (state.pending.length) schedule(scope,0);
     } catch(error) {
       const status = Number(error.status)||0;
       await store.update(scope,state=>{
@@ -196,7 +196,8 @@ export function createSyncEngine({store, send, prepare = async payload => payloa
   async function resume(scope, explicit = false) {
     stopped = false;
     const state = await store.read(scope);
-    if(state.active || state.pending.length) schedule(scope,state.active ? 0 : Math.max(0,state.dueAt-now()));
+    // Old pending records may still carry a debounce dueAt; retryAt remains authoritative.
+    if(state.active || state.pending.length) schedule(scope,0);
     if(explicit)return flush(scope,true);
   }
   async function reconcile(scope) {

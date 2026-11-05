@@ -1,0 +1,11 @@
+{
+  "app/server/src/content.mjs": "de7b2766192970cfa4919326a49e0cffbaeb1fa45455e991e8d40c852772c213",
+  "app/server/src/management-read-cache.mjs": "0f6b1c4654975f1910c57f236722bee70619257dff56d90a0e22025843a0db5d",
+  "app/web/src/features/content-management/sync-core.mjs": "4778446294f2a2cf31010a47263737279340f71e8978839825886a50f8e6e39f",
+  "app/web/src/features/content-management/background-sync.mjs": "3cd65ef478a2af6905f81af2e43bf95f640e5b9577f764544e2fa104531a5dcc",
+  "app/web/src/features/content-management/types.ts": "f61d132144ce1c3da3b46db4d1252685e633c154418ededda54879c019db2ce8",
+  "app/web/src/features/content-management/api.ts": "74d720dba620972fddb688507ee9e0c99f66be5293d1f5ecea4d94e1f4f5884f",
+  "tests/support/public-repository.mjs": "3c60dc5f4c7bf27df925aeff4c5a6a326d3a202a009a7fbc1eddd6d030db3744",
+  "tests/web/sync-core.test.mjs": "5b61e9c9910f42df18896a35c57f95eb57f3b2d9645f6c86cf75f566ed267324",
+  "tests/server/atomic-save.test.mjs": "11d0f4421922355fc356923f232d48fd9703316825dc598efcffb450a6af3f1c"
+}

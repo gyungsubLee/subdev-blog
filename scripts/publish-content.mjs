@@ -4,8 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createSign } from 'node:crypto';
-import { readContent, toPublicPosts } from '../app/content/src/content.mjs';
-import { rewriteContentLinks } from '../app/shared/content-links.mjs';
+import { readContent } from '../app/content/src/content.mjs';
 const shaPattern = /^[a-f0-9]{40}$/;
 const uuid = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 
@@ -58,22 +57,6 @@ export async function validateCandidate({ root, base, candidate }) {
     const before = await snapshot(root, base, path.join(temporary, 'base'));
     const after = await snapshot(root, candidate, path.join(temporary, 'candidate'));
     const deleted = [...before.documents.keys()].filter(id => !after.documents.has(id));
-    for (const post of toPublicPosts(before)) {
-      if (!after.documents.has(post.id)) continue;
-      const links = [post.cover, post.icon];
-      rewriteContentLinks(post.markdown, destination => {
-        links.push(destination);
-        return destination;
-      });
-      const metadata = before.documents.get(post.id).metadata;
-      for (const id of deleted) {
-        const linked = links.some(value => typeof value === 'string' && value.startsWith('#/post/') && value.slice(7).split(/[?#]/)[0] === id);
-        const related = ['related_ids', 'source_ids'].some(key => metadata[key]?.includes(id));
-        if (linked || post.parentId === id || related) {
-          throw new Error('Deleted post has inbound references: ' + id);
-        }
-      }
-    }
     const remaining = new Set(after.categories.map(category => category.id));
     for (const category of before.categories.filter(category => !remaining.has(category.id))) {
       const hasChildren = before.categories.some(child => child.parent_id === category.id);

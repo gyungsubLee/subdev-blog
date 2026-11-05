@@ -1,0 +1,356 @@
+{
+  "measuredAt": "2026-11-04T11:33:58.566Z",
+  "remainingSeconds": 3596,
+  "cookieBytes": 438,
+  "samples": [
+    {
+      "label": "before",
+      "path": "/api/session",
+      "sample": 1,
+      "status": 200,
+      "state": "ready",
+      "ms": 3478.19,
+      "calls": [
+        {
+          "path": "/user",
+          "status": 200,
+          "ms": 281.15
+        },
+        {
+          "path": "/user/installations",
+          "status": 200,
+          "ms": 340.85
+        },
+        {
+          "path": "/user/installations/174706865/repositories",
+          "status": 200,
+          "ms": 365.62
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content",
+          "status": 200,
+          "ms": 653.14
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog",
+          "status": 200,
+          "ms": 654.54
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/branches/main",
+          "status": 200,
+          "ms": 366.96
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog/branches/main",
+          "status": 200,
+          "ms": 367.53
+        }
+      ]
+    },
+    {
+      "label": "before",
+      "path": "/api/session",
+      "sample": 2,
+      "status": 200,
+      "state": "ready",
+      "ms": 1467.78,
+      "calls": [
+        {
+          "path": "/user",
+          "status": 200,
+          "ms": 281.15
+        },
+        {
+          "path": "/user/installations",
+          "status": 200,
+          "ms": 340.85
+        },
+        {
+          "path": "/user/installations/174706865/repositories",
+          "status": 200,
+          "ms": 365.62
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content",
+          "status": 200,
+          "ms": 653.14
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog",
+          "status": 200,
+          "ms": 654.54
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/branches/main",
+          "status": 200,
+          "ms": 366.96
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog/branches/main",
+          "status": 200,
+          "ms": 367.53
+        }
+      ]
+    },
+    {
+      "label": "before",
+      "path": "/api/session",
+      "sample": 3,
+      "status": 200,
+      "state": "ready",
+      "ms": 1676.35,
+      "calls": [
+        {
+          "path": "/user",
+          "status": 200,
+          "ms": 281.15
+        },
+        {
+          "path": "/user/installations",
+          "status": 200,
+          "ms": 340.85
+        },
+        {
+          "path": "/user/installations/174706865/repositories",
+          "status": 200,
+          "ms": 365.62
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content",
+          "status": 200,
+          "ms": 653.14
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog",
+          "status": 200,
+          "ms": 654.54
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/branches/main",
+          "status": 200,
+          "ms": 366.96
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog/branches/main",
+          "status": 200,
+          "ms": 367.53
+        }
+      ]
+    },
+    {
+      "label": "after",
+      "path": "/api/session",
+      "sample": 1,
+      "status": 200,
+      "state": "ready",
+      "ms": 1.34,
+      "calls": []
+    },
+    {
+      "label": "after",
+      "path": "/api/session",
+      "sample": 2,
+      "status": 200,
+      "state": "ready",
+      "ms": 0.3,
+      "calls": []
+    },
+    {
+      "label": "after",
+      "path": "/api/session",
+      "sample": 3,
+      "status": 200,
+      "state": "ready",
+      "ms": 0.29,
+      "calls": []
+    },
+    {
+      "label": "before",
+      "path": "/api/content?kind=categories",
+      "sample": 1,
+      "status": 200,
+      "categories": 48,
+      "contentCommit": "723231cd3cedd4702d2d77ced9190e63387e852d",
+      "ms": 4267.25,
+      "calls": [
+        {
+          "path": "/user",
+          "status": 200,
+          "ms": 287.44
+        },
+        {
+          "path": "/user/installations/174706865/repositories",
+          "status": 200,
+          "ms": 329.66
+        },
+        {
+          "path": "/user/installations",
+          "status": 200,
+          "ms": 364.64
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog",
+          "status": 200,
+          "ms": 366.9
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content",
+          "status": 200,
+          "ms": 516.08
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog/branches/main",
+          "status": 200,
+          "ms": 318.83
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/branches/main",
+          "status": 200,
+          "ms": 437.42
+        }
+      ]
+    },
+    {
+      "label": "before",
+      "path": "/api/content?kind=categories",
+      "sample": 2,
+      "status": 200,
+      "categories": 48,
+      "contentCommit": "723231cd3cedd4702d2d77ced9190e63387e852d",
+      "ms": 1422.94,
+      "calls": [
+        {
+          "path": "/user",
+          "status": 200,
+          "ms": 287.44
+        },
+        {
+          "path": "/user/installations/174706865/repositories",
+          "status": 200,
+          "ms": 329.66
+        },
+        {
+          "path": "/user/installations",
+          "status": 200,
+          "ms": 364.64
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog",
+          "status": 200,
+          "ms": 366.9
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content",
+          "status": 200,
+          "ms": 516.08
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog/branches/main",
+          "status": 200,
+          "ms": 318.83
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/branches/main",
+          "status": 200,
+          "ms": 437.42
+        }
+      ]
+    },
+    {
+      "label": "before",
+      "path": "/api/content?kind=categories",
+      "sample": 3,
+      "status": 200,
+      "categories": 48,
+      "contentCommit": "723231cd3cedd4702d2d77ced9190e63387e852d",
+      "ms": 1610.1,
+      "calls": [
+        {
+          "path": "/user",
+          "status": 200,
+          "ms": 287.44
+        },
+        {
+          "path": "/user/installations/174706865/repositories",
+          "status": 200,
+          "ms": 329.66
+        },
+        {
+          "path": "/user/installations",
+          "status": 200,
+          "ms": 364.64
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog",
+          "status": 200,
+          "ms": 366.9
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content",
+          "status": 200,
+          "ms": 516.08
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog/branches/main",
+          "status": 200,
+          "ms": 318.83
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/branches/main",
+          "status": 200,
+          "ms": 437.42
+        }
+      ]
+    },
+    {
+      "label": "after",
+      "path": "/api/content?kind=categories",
+      "sample": 1,
+      "status": 200,
+      "categories": 48,
+      "contentCommit": "723231cd3cedd4702d2d77ced9190e63387e852d",
+      "ms": 1391.28,
+      "calls": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/ref/heads/main",
+          "status": 200,
+          "ms": 337.81
+        }
+      ]
+    },
+    {
+      "label": "after",
+      "path": "/api/content?kind=categories",
+      "sample": 2,
+      "status": 200,
+      "categories": 48,
+      "contentCommit": "723231cd3cedd4702d2d77ced9190e63387e852d",
+      "ms": 333.06,
+      "calls": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/ref/heads/main",
+          "status": 200,
+          "ms": 337.81
+        }
+      ]
+    },
+    {
+      "label": "after",
+      "path": "/api/content?kind=categories",
+      "sample": 3,
+      "status": 200,
+      "categories": 48,
+      "contentCommit": "723231cd3cedd4702d2d77ced9190e63387e852d",
+      "ms": 339.79,
+      "calls": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/ref/heads/main",
+          "status": 200,
+          "ms": 337.81
+        }
+      ]
+    }
+  ],
+  "measurementIssue": "Shared call-array reference overwrote earlier samples with final-sample calls. Only sample 3 call details/counts are valid; timings and responses remain independent. Cold measurements are preserved separately. Probe source was corrected after this run without another OAuth."
+}

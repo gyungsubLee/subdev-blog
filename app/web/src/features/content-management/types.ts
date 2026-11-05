@@ -40,6 +40,7 @@ export type SourceDocument = {
 export type Publication = {
   background?: boolean;
   publicationPending?: boolean;
+  sourceOnly?: boolean;
   affectedPostIds?: string[];
   deletedPostIds?: string[];
   requestId: string;

@@ -1,0 +1,25 @@
+{
+  "phase": "updated",
+  "at": "2026-11-04T12:55:18.989Z",
+  "contentCommit": "1a759aef2a95fa63531e0f3435f94b0c171bc2aa",
+  "publicationCommit": "16291878cd843711bbcd3b9a33fc7ca019181e05",
+  "postCount": 3034,
+  "testPosts": [
+    {
+      "id": "5dbf6fc4-7b82-4767-9ad2-ea2427cf6e14",
+      "title": "E2E 증분 저장 20261104 1248 수정"
+    }
+  ],
+  "publicationVerified": true,
+  "generation": {
+    "generatedPosts": 1,
+    "reusedPosts": 3033,
+    "cacheBytes": 2650493
+  },
+  "actualInventory": {
+    "reusedBodies": 3033,
+    "changedBodies": 1,
+    "removedBodies": 0
+  },
+  "bodyVerified": true
+}

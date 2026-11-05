@@ -1,0 +1,12 @@
+{
+  "app/web/src/site/App.tsx": "08446e5eadb7d39c47af8833165b0bfa4d3935ab3ca0c047d1c5974fd66028ff",
+  "app/web/src/site/usePosts.ts": "cb803780e8aed6ff9c35cbd2eeef4c171228bf5215a3c71fd7cc7193c341e5b7",
+  "app/web/src/features/content-management/types.ts": "f2f10c725f093b9b3561f99c311978c6f1e66c50a36a8ec697f11148031ce8ab",
+  "app/web/src/features/content-management/PublishStatus.tsx": "2c41bda76d574abee3b91358cab09b44e07ab9ff94b87c7806b2e33527ed8205",
+  "app/web/src/features/content-management/ManagedPostEditor.tsx": "7071a765d4a99c6b3926fda267e4e468d81dde82eace740c47d13d1205b6c83b",
+  "app/web/src/features/content-management/ManagedCategories.tsx": "06efc5febe435ad4b18ff730eda0aa6a27e9e3bac6584516b732168a235b4819",
+  "app/web/src/features/content-management/ContentWorkspace.tsx": "154519344c854c1a1368ddf6c692950a581d12fd0e8804274a59964cc7d37eff",
+  "tests/e2e/save-trace.mjs": "23bad7a1243225b9d8694509bbd6b6f5917743cbcf58d54ecc8ea5fe3b27d766",
+  "tests/e2e/public-data-http.test.mjs": "7ef28527ddd65e807c617b7eec470114dd6ce4ca7b0c21f8928fb7eba3785be5",
+  "tests/support/public-e2e-server.mjs": "668db9845c48d671e3aadc70860bf143e83ed957e9537dad31548f36c839dc22"
+}

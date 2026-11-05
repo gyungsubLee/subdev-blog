@@ -1,0 +1,10 @@
+{
+  "remoteAppRefs": [
+    "22905f58a7c18af51aac6c7d1ca0d6dfa70f16bf\trefs/heads/codex/public-content-generator-20261104",
+    "27441173f257769add825aea596f7080d282e1ca\trefs/heads/main"
+  ],
+  "pinnedGenerator": "22905f58a7c18af51aac6c7d1ca0d6dfa70f16bf",
+  "localHead": "a25208d8a5965f9688a6ecbb0d5be5ac26cc9a92",
+  "localContentHead": "9f99941c6b650c70f363208cd97c7191ef785a46",
+  "stagedPaths": []
+}

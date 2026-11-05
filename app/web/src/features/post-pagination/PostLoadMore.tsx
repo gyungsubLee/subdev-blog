@@ -1,3 +1,4 @@
+import Button from "../../components/button/Button";
 import "./post-pagination.css";
 
 export default function PostLoadMore({
@@ -12,9 +13,9 @@ export default function PostLoadMore({
   if (total <= limit) return null;
   return (
     <div className="load-more">
-      <button className="outline-button" type="button" onClick={onLoadMore}>
+      <Button className="outline-button" type="button" onClick={onLoadMore}>
         더 보기 <span aria-hidden="true">↓</span>
-      </button>
+      </Button>
       <span>
         {Math.min(limit, total)} / {total}
       </span>

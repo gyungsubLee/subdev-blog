@@ -1,0 +1,19 @@
+Command: node --test tests/server/save-reuse.test.mjs
+Provenance: exact stdout/stderr captured during the original post-implementation TDD run; copied from the agent tool result without rerunning.
+Stage: content.mjs reuse and publisher sourceSnapshot support were present. Six tests existed at this stage.
+Limit: no contemporaneous complete source digest was retained by this agent. Reuse this as historical TDD evidence; root-owned later regression evidence establishes the final snapshot result.
+
+✔ direct save reuses the candidate inventory and freshly prepared publication (48.457708ms)
+✔ a lost PATCH response uses fresh canonical head and the same prepared publication (7.893334ms)
+✔ a superseding canonical commit still prepares its own publication (9.067625ms)
+✔ failed publication keeps canonical unchanged and a new request verifies the retry (13.21725ms)
+✔ a later retry rechecks an existing publication instead of reusing request-local readiness (7.652667ms)
+✔ candidate inventory retains asset sizes and applies renamed paths exactly (14.722625ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 332.439334

@@ -1,0 +1,46 @@
+{
+  "app/web/src/features/content-management/ManagedCategories.tsx": {
+    "beforeSha256": "b20c6d30e835c04251561d88feba3d8d9672a09ecff03a12fa080c12d88f484a",
+    "afterSha256": "06efc5febe435ad4b18ff730eda0aa6a27e9e3bac6584516b732168a235b4819"
+  },
+  "app/web/src/features/content-management/ManagedPostEditor.tsx": {
+    "beforeSha256": "bb79e22a186d8d7e90b14258914c86a514c5d0bd5827504981a2f759fb29a205",
+    "afterSha256": "95ae1b6b511c3ddc21039ff1faa62ecaf2ce87cbeca4985743ee514e44bd0265"
+  },
+  "app/web/src/features/content-management/PublishStatus.tsx": {
+    "beforeSha256": "a082f56766af60db523ca3c09c7768874508d5de1e937480416a71ad857e6bdf",
+    "afterSha256": "2c41bda76d574abee3b91358cab09b44e07ab9ff94b87c7806b2e33527ed8205"
+  },
+  "app/web/src/features/content-management/background-sync.mjs": {
+    "beforeSha256": "bfcc19e24e4e44d19e3b66792f03b01821f806902321120f3eb5f4e68f2cb1f0",
+    "afterSha256": "8b0312081cfd9521e8989529f54b0777647c7c0f7b0bf5c195286d5da8037f08"
+  },
+  "app/web/src/features/content-management/sync-core.mjs": {
+    "beforeSha256": "a2d993ae089bd23a889d5167ac591b5bf1f948a7253af7581dd197a23869a0b1",
+    "afterSha256": "c737d4d6b1e2a2b595d22d6340e3cc8a7af6120cfd66d4ffabf77eb3218d1123"
+  },
+  "app/web/src/features/content-management/types.ts": {
+    "beforeSha256": "fe64f556ac74321a654753639077e65f5088748ce75a806d5d8115bbe2618b30",
+    "afterSha256": "f2f10c725f093b9b3561f99c311978c6f1e66c50a36a8ec697f11148031ce8ab"
+  },
+  "app/web/src/site/App.tsx": {
+    "beforeSha256": "d6712daa3d061b045d6739814e2753e96a8fca7f4be05fbae1b71ae99d332bb2",
+    "afterSha256": "08446e5eadb7d39c47af8833165b0bfa4d3935ab3ca0c047d1c5974fd66028ff"
+  },
+  "app/web/src/site/usePosts.ts": {
+    "beforeSha256": "57c9214397d8d9b527360bfa426c368d9ea0bf432fb7d116f58d8af1eb3ca413",
+    "afterSha256": "cb803780e8aed6ff9c35cbd2eeef4c171228bf5215a3c71fd7cc7193c341e5b7"
+  },
+  "tests/web/content-management.test.mjs": {
+    "beforeSha256": "407728d1886bdadb9cda572541feac8927ab57765a7b5aa1187f83472a6253b0",
+    "afterSha256": "83cb6ed7961c795302eff969d88fd78acbc0385df43250e5926db4eee0c732dc"
+  },
+  "tests/web/sync-core.test.mjs": {
+    "beforeSha256": "5c0bed97929d932547c3dc2e10b4c45bf6e82f2465cbb72b6e7f3c5261c53618",
+    "afterSha256": "32bd9fd6e8b6feacd3fa58fecaa470e5377270fbb453791582343a348f3e6c62"
+  },
+  "tests/web/sync-recovery.test.mjs": {
+    "beforeSha256": "81b7c58347387cbe0babb544b3dca88caff9beae6893013443e47948c165299f",
+    "afterSha256": "3a3f551b0e85bf0cc35e7d7a5758427a852b120c8239d21aaa4aae86219dbff7"
+  }
+}

@@ -1,0 +1,13 @@
+✔ a verified cache with noncanonical base64 fails before any new publication write (41.438125ms)
+✔ a verified cache with malformed gzip fails before any new publication write (7.235625ms)
+✔ a verified cache with invalid decoded JSON fails before any new publication write (5.031ms)
+✔ a verified compressed cache cannot decode beyond the public file limit (64.152541ms)
+✔ a wrong concurrent blob SHA drains active uploads and never publishes a ready ref (1296.428625ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1934.996916

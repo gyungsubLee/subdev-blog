@@ -1,0 +1,24 @@
+✔ durable saves schedule immediate dispatch and coalesce only before transmission (6.759916ms)
+✔ restored pending saves ignore a legacy future debounce without bypassing retry waits (0.7915ms)
+✔ another coordinator cannot duplicate an in-flight batch, and later edits survive old response (1.27925ms)
+✔ a lost response retains the same payload and resumes after reload without duplicate identity (1.301292ms)
+✔ daily cleanup verifies receipts and never deletes failed, pending or mismatched data (3.054ms)
+✔ daily cleanup preserves a record whose receipt commit differs from its saved result (2.229375ms)
+✔ discarding one conflict retains other documents as blocked recoverable saves (1.011417ms)
+✔ cleanup preserves remotely confirmed payloads until their local recovery state is applied (2.627208ms)
+✔ repeated saves coalesce without growing callback or pending queues; capacity rejects only the new request (27.06575ms)
+✔ transient retry schedule is5,15,60 seconds and then stops; manual retry reuses the frozen batch (2.64475ms)
+✔ a superseded lost-response retry cannot attach the latest revision to an older operation (0.443208ms)
+✔ oversized saves and a full retained history stop new work without deleting older requests (15.383958ms)
+✔ a verified source save confirms the queue before public generation and retains its overlay (2.545583ms)
+✔ a source save with a mismatched receipt stays recoverable rather than confirming (0.533917ms)
+✔ authorization and conflict failures never automatically resend a source batch (1.05825ms)
+✔ cleanup retains unchanged source receipts only while their flagged publication is pending (2.46675ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 154.993083

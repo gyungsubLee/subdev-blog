@@ -1,0 +1,159 @@
+{
+  "bootstrap": {
+    "sourceCommit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "artifact": "aef17ac9adffcf2bd775fbb2b04ae770d9867a8a",
+    "ms": 81.13162500000001,
+    "transport": "Local disposable GitHub protocol fixture",
+    "posts": 1
+  },
+  "apiRows": [
+    {
+      "path": "/api/public?kind=index",
+      "method": "GET",
+      "status": 200,
+      "ms": 7.30899999999383,
+      "bytes": 614,
+      "githubFixtureCalls": 4
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 2.3363749999989523,
+      "bytes": 22,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/public?kind=index",
+      "method": "GET",
+      "status": 200,
+      "ms": 0.5811249999969732,
+      "bytes": 614,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 0.773709000000963,
+      "bytes": 22,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/public?kind=index",
+      "method": "GET",
+      "status": 200,
+      "ms": 0.7953750000015134,
+      "bytes": 614,
+      "githubFixtureCalls": 1
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 0.7007089999970049,
+      "bytes": 22,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/public?kind=index",
+      "method": "GET",
+      "status": 200,
+      "ms": 0.4873329999973066,
+      "bytes": 614,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 0.21941700000024866,
+      "bytes": 22,
+      "githubFixtureCalls": 0
+    }
+  ],
+  "browserRows": [
+    {
+      "event": "home-ready",
+      "hash": "#/",
+      "at": 971.3000000007451,
+      "elapsedMs": 971.3000000007451,
+      "longTaskMs": 507,
+      "domReadyMs": 716.1999999992549,
+      "resources": [
+        {
+          "name": "/api/public?kind=index",
+          "duration": 360.69999999925494,
+          "transferSize": 914
+        },
+        {
+          "name": "/api/session",
+          "duration": 362.59999999962747,
+          "transferSize": 322
+        }
+      ]
+    },
+    {
+      "event": "home-ready",
+      "hash": "#/",
+      "at": 476.40000000037253,
+      "elapsedMs": 476.40000000037253,
+      "longTaskMs": 0,
+      "domReadyMs": 445.09999999962747,
+      "resources": [
+        {
+          "name": "/api/public?kind=index",
+          "duration": 353.59999999962747,
+          "transferSize": 914
+        },
+        {
+          "name": "/api/session",
+          "duration": 354.1000000014901,
+          "transferSize": 322
+        }
+      ]
+    },
+    {
+      "event": "home-ready",
+      "hash": "#/",
+      "at": 460.7000000011176,
+      "elapsedMs": 460.7000000011176,
+      "longTaskMs": 88,
+      "domReadyMs": 447.6000000014901,
+      "resources": [
+        {
+          "name": "/api/public?kind=index",
+          "duration": 358.5,
+          "transferSize": 914
+        },
+        {
+          "name": "/api/session",
+          "duration": 359.59999999962747,
+          "transferSize": 322
+        }
+      ]
+    },
+    {
+      "event": "home-ready",
+      "hash": "#/",
+      "at": 476.90000000037253,
+      "elapsedMs": 476.90000000037253,
+      "longTaskMs": 191,
+      "domReadyMs": 453.69999999925494,
+      "resources": [
+        {
+          "name": "/api/public?kind=index",
+          "duration": 353.19999999925494,
+          "transferSize": 914
+        },
+        {
+          "name": "/api/session",
+          "duration": 353.69999999925494,
+          "transferSize": 322
+        }
+      ]
+    }
+  ],
+  "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "sourceCommits": 0
+}

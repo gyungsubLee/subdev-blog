@@ -1,0 +1,13 @@
+{"rows":3000,"samples":[9.864125000000058,11.970041999999921,8.409208000000035,8.958541999999852,8.56574999999998,10.264374999999973,10.997708999999986,8.97679200000016,9.470790999999963,8.843624999999975,9.345583000000033],"medianMs":9.345583000000033}
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+

@@ -1,0 +1,24 @@
+import { execFileSync, spawn } from 'node:child_process';
+import { readFile, writeFile } from 'node:fs/promises';
+const folder=new URL('./',import.meta.url);
+const commit=process.argv[2];
+if(!/^[a-f0-9]{40}$/.test(commit??''))throw Error('Full source SHA required');
+const repo='gyungsubLee/subdev-blog-content';
+const query=JSON.parse(execFileSync('gh',['api',`repos/${repo}/actions/runs?head_sha=${commit}&event=push&per_page=20`],{encoding:'utf8',timeout:30000}));
+const matching=query.workflow_runs.filter(run=>run.path==='.github/workflows/public-content.yml'&&run.head_sha===commit);
+if(matching.length!==1)throw Error('Expected exactly one current push generation run, found '+matching.length);
+const run=matching[0];
+console.log(JSON.stringify({run:run.id,commit,url:run.html_url,status:run.status,conclusion:run.conclusion}));
+const child=spawn('gh',['run','watch',String(run.id),'--repo',repo,'--exit-status','--interval','10'],{stdio:['ignore','pipe','pipe']});
+let output='';for(const stream of[child.stdout,child.stderr])stream.on('data',part=>{if(output.length<2*1024*1024)output+=part;});
+const timer=setTimeout(()=>child.kill('SIGTERM'),600000);
+const exit=await new Promise(resolve=>child.once('close',resolve));clearTimeout(timer);
+await writeFile(new URL('workflow-'+commit+'-watch.log',folder),output);
+const final=JSON.parse(execFileSync('gh',['api',`repos/${repo}/actions/runs/${run.id}`],{encoding:'utf8',timeout:30000}));
+const logs=execFileSync('gh',['run','view',String(run.id),'--repo',repo,'--log'],{encoding:'utf8',timeout:60000,maxBuffer:6*1024*1024});
+// Keep only publisher metadata, final result and checkout generator identity from logs.
+const kept=logs.split('\n').filter(line=>line.includes('"requestBytes"')||line.includes('"sourceCommit"')||line.includes('HEAD is now at')||line.includes("'e763d9adf0e07f77a1b0177895674f08922f9122'"));
+await writeFile(new URL('workflow-'+commit+'-trace.log',folder),kept.join('\n')+'\n');
+const result={id:final.id,attempt:final.run_attempt,url:final.html_url,headSha:final.head_sha,status:final.status,conclusion:final.conclusion,createdAt:final.created_at,startedAt:final.run_started_at,updatedAt:final.updated_at,watchExit:exit};
+await writeFile(new URL('workflow-'+commit+'.json',folder),JSON.stringify(result,null,2)+'\n');
+console.log(JSON.stringify(result));if(result.conclusion!=='success')process.exitCode=1;

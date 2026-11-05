@@ -1,0 +1,28 @@
+✖ oversized and escaped generated files use blob upload instead of oversized inline trees (425.26325ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 604.060583
+
+✖ failing tests:
+
+test at tests/server/public-publication.test.mjs:124:1
+✖ oversized and escaped generated files use blob upload instead of oversized inline trees (425.26325ms)
+  AssertionError [ERR_ASSERTION]: Serialized tree request must stay bounded
+      at github (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:130:14)
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/app/server/src/public-publication.mjs:181:30
+      at Array.from (<anonymous>)
+      at Module.ensurePublicPublication (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/app/server/src/public-publication.mjs:177:27)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:135:20)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }

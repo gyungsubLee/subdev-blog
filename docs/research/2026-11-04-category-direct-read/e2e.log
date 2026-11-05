@@ -1,0 +1,11 @@
+✔ GitHub fixture preserves source trees, blobs, parents and non-force refs across publication (20.704458ms)
+✔ HTTP E2E: authentication, generated reads, CRUD, retry, category save and push generation (1023.313167ms)
+✔ HTTP E2E serves exact pinned asset bytes and excludes editor sources (57.342584ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1251.242167

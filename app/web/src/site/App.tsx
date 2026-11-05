@@ -7,6 +7,7 @@ import { usePosts } from "./usePosts";
 import "./app.css";
 import { CONTENT_HREF } from "../shared/routes";
 import { useManagement } from "../features/content-management/useManagement";
+import { usePostDeletion } from "../features/content-management/usePostDeletion";
 
 const ManagedPostEditor = lazy(() => import("../features/content-management/ManagedPostEditor"));
 
@@ -17,6 +18,7 @@ export default function App() {
   const [pendingCategories, setPendingCategories] = useState<PublicCategory[]>([]);
   const [draftVersion, setDraftVersion] = useState(0);
   const management = useManagement();
+  const deletion = usePostDeletion(management.session, reload);
 
   function edit(
     post: Post | null,
@@ -35,6 +37,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
+      {deletion.error ? <div className="app-warning" role="alert">{deletion.error}</div> : null}
       {error ? (
         <div className="app-warning" role="alert">
           {error}
@@ -72,6 +75,7 @@ export default function App() {
           management={management}
           onContentSaved={reload}
           draftVersion={draftVersion}
+          deletion={deletion}
         />
       ) : (
         <main className="app-state">기록을 불러오는 중입니다.</main>

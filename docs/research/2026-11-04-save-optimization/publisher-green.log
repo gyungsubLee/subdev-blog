@@ -1,0 +1,31 @@
+✔ generation projects safe public files and full bodies before publishing an immutable ref (39.11975ms)
+✔ unsafe source fails before the ready ref is created (12.693ms)
+✔ generation rewrites pinned assets and inherited category without exposing original metadata (2.62825ms)
+✔ the reader serves generated files without touching source Markdown or trees (6.331875ms)
+✔ a missing publication returns 503 instead of generating content in a read (0.863208ms)
+✔ CLI needs explicit publication intent and output mode makes no remote writes (135.71625ms)
+✔ an incomplete existing publication is rejected instead of being reused (4.065459ms)
+✔ a changed source crossing the summary boundary keeps the previous full-transform semantics (5.893416ms)
+✔ large publications upload bounded trees before exposing the complete ref (172.586958ms)
+✔ oversized and escaped generated files use blob upload instead of oversized inline trees (467.752334ms)
+✔ writer cache compresses without changing public JSON and legacy cache still reuses bodies (4.890417ms)
+✔ large JSON chooses the smaller lossless blob encoding (2121.165834ms)
+✔ independent large blobs overlap with a two-upload bound before ready publication (1200.851417ms)
+✔ failed concurrent blob uploads drain in-flight work and never publish a ready ref (798.453ms)
+✔ matching request-local source snapshots reuse inventory and still validate every source boundary (1.914ms)
+✔ incremental publication reads one changed source and reuses unchanged JSON blobs (4.794041ms)
+✔ unchanged source push reads no Markdown and reuses every public body (2.353917ms)
+✔ new and deleted link targets regenerate unresolved Markdown/Notion dependents only (11.061792ms)
+✔ an ancestor category change regenerates inheriting children and leaves unrelated bodies reusable (5.003625ms)
+✔ unchanged attachments keep pinned URLs; changed attachment bytes invalidate only their owner (7.673166ms)
+✔ renamed aliases preserve resolved links while removed aliases invalidate dependents (6.962958ms)
+✔ reused graph facts still reject cycles, missing references and unsafe changed content before publication (12.419792ms)
+✔ generation cache excludes arbitrary category metadata as well as document metadata (1.085875ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5236.462334

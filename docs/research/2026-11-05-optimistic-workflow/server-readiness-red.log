@@ -1,0 +1,48 @@
+✖ an earlier source receipt becomes published when verified ready advances to its descendant (53.053291ms)
+✖ unchanged source can track workflow readiness without a request candidate or save-path public reads (7.501209ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 242.034
+
+✖ failing tests:
+
+test at tests/server/save-reuse.test.mjs:199:1
+✖ an earlier source receipt becomes published when verified ready advances to its descendant (53.053291ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'superseded'
+  - 'published'
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/save-reuse.test.mjs:208:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'superseded',
+    expected: 'published',
+    operator: 'strictEqual'
+  }
+
+test at tests/server/save-reuse.test.mjs:216:1
+✖ unchanged source can track workflow readiness without a request candidate or save-path public reads (7.501209ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - true
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/save-reuse.test.mjs:227:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: 'strictEqual'
+  }

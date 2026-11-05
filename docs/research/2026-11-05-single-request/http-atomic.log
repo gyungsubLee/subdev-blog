@@ -1,0 +1,10 @@
+✔ atomic HTTP save uses one GitHub mutation and recovers a lost browser reply read-only (313.794042ms)
+✔ diagnostic trace measures consumed bytes and sequential stages without persisting bodies or credentials (37.477375ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 720.276458

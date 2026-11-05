@@ -1,0 +1,48 @@
+✖ incremental publication reads one changed source and reuses unchanged JSON blobs (49.006375ms)
+✖ unchanged source push reads no Markdown and reuses every public body (4.664209ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 242.988417
+
+✖ failing tests:
+
+test at tests/server/public-publication.test.mjs:150:1
+✖ incremental publication reads one changed source and reuses unchanged JSON blobs (49.006375ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      '12345678-1234-1234-1234-123456789abc',
+  +   '22345678-1234-1234-1234-123456789abc'
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:157:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ '12345678-1234-1234-1234-123456789abc', '22345678-1234-1234-1234-123456789abc' ],
+    expected: [ '12345678-1234-1234-1234-123456789abc' ],
+    operator: 'deepStrictEqual'
+  }
+
+test at tests/server/public-publication.test.mjs:164:1
+✖ unchanged source push reads no Markdown and reuses every public body (4.664209ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:170:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual'
+  }

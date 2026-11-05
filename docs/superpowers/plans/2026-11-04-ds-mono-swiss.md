@@ -26,7 +26,7 @@
 
 ### Task1: Shared theme and consumers
 
-**Files:** src/styles/*.css, src/components/**/*.css, src/pages/**/*.css, src/features/**/*.css.
+**Files:** app/web/src/styles/*.css, app/web/src/components/**/*.css, app/web/src/pages/**/*.css, app/web/src/features/**/*.css.
 **Interfaces:** Existing --paper, --ink, --muted, --accent, --line, --display remain; add surface/shape/shadow roles consumed in CSS only.
 - [x] Save current CSS and non-CSS source hashes as a local ownership/performance baseline.
 - [x] Update shared tokens and all component surface, shape and heading consumers in place.

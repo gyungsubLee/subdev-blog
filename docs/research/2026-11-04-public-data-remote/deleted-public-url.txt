@@ -1,0 +1,3 @@
+Browser tab: 1490590592, Title: "Second Brain — 경섭의 기록", URL: "http://127.0.0.1:55872/#/post/a1986037-7090-45ab-a3de-3208b34f7e7b".
+There has been no change in the accessibility tree.
+The focused UI element is 1 AXWebArea Second Brain — 경섭의 기록, URL: 127.0.0.1:55872/#/post/a1986037-7090-45ab-a3de-3208b34f7e7b

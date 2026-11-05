@@ -1,0 +1,46 @@
+{
+  "recordedAt": "2026-11-04T10:57:17.654976+00:00",
+  "head": "a25208d8a5965f9688a6ecbb0d5be5ac26cc9a92",
+  "sha256": {
+    "app/server/src/github.mjs": "d896f9ac2f29567ba223ee71f00deeb0b7d6bfdab38f0208203b5de35651652f",
+    "app/server/src/handler.mjs": "b725cdef308dc8a0ab4ffd9fc75e5ab1e3fc747e192bbf7fe2e6355b3ba6e376",
+    "app/server/src/native-auth.mjs": "a2ad2a0ac525fd46d9617a6ba16644e5caec1863b89bc3867792a25911986629",
+    "app/web/src/features/content-management/api.ts": "9cbba3d5bfdb5e68ed4dea2423c306622f7623e197925daa41138303624471c0",
+    "app/web/src/features/content-management/useManagement.ts": "cfb1184a3d1357a33b2b735fba32137f663b88e046d30bab218e4f6cb954317d",
+    "app/native/SecondBrain.swift": "9e09a5940723733844541a6d63436c5c5a9e7a4a942bc659d233d7fc0e9b1a11",
+    "tests/server/github-auth.test.mjs": "534707c5c7af17481b589154bfb6fdeeb859fa75eaa0ecdfb2e1a0d4ac3978fc",
+    "tests/server/management-api.test.mjs": "0ad897fba7695516fc2cd9563d34ab5c6d3ee591a0c35722ba20bba2688f5477",
+    "tests/server/management-runtime.test.mjs": "22f34d45795651fa7ebfe3192c13c664e1c92d1caf6207c7264d55869ac233eb",
+    "tests/native/native-auth.test.mjs": "67cd0570a850ccb71984c03fa966ae8cb71ce6b9d0b517d988f9c94309c86c71",
+    "tests/native/test_native_navigation.py": "b5eb9ac7423c9eeb3d9536be01b56e41991c07f08341ba7887922f7c650b7cf0",
+    "tests/web/management-recovery.test.mjs": "af261573085248b775eecfab3949b337b022e751129d0b6f1837d23f7d70a9f2",
+    "dist/web/index.html": "6bab824f6042636f1cf956be4b7d0682a6eb5c4b6c71ff79bc9054e56bd5d591",
+    "dist/native/Second Brain.app/Contents/MacOS/SecondBrain": "552be3dc92a1885367061ffc302362f75bf8e93286c69abf57872f8a57744cbc"
+  },
+  "fullCheck": {
+    "tests": 520,
+    "pass": 519,
+    "fail": 1,
+    "failure": "records filters and visible count survive article and home roundtrips: .back-link missing",
+    "bindingLimit": "Run preceded final null-safe error lookup; final six recovery tests, typecheck and web build passed afterwards."
+  },
+  "nativeChecks": "2 passed; navigation check passed again after transport-error retry changes",
+  "review": "approved after accepted boundary fixes; reviewer ran no tests",
+  "actualLogin": [
+    "Chrome logout/login completed with ready management controls",
+    "Updated native executable logout/login completed through receipt ACK"
+  ],
+  "unverified": [
+    "Production login",
+    "Actual one-hour idle expiry",
+    "Actual macOS transport loss",
+    "Strict equal-environment performance equivalence"
+  ],
+  "evidence": [
+    "check-final.log",
+    "recovery-final.log",
+    "build-final.log",
+    "live-results-after.json",
+    "recovery.md"
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "apiRows": [
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 2.362959000000046,
+      "bytes": 151,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/public?kind=index",
+      "method": "GET",
+      "status": 200,
+      "ms": 4.230708999999479,
+      "bytes": 614,
+      "githubFixtureCalls": 4
+    },
+    {
+      "path": "/api/content?kind=post&id=12345678-1234-1234-1234-123456789abc",
+      "method": "GET",
+      "status": 200,
+      "ms": 11.262459000005038,
+      "bytes": 626,
+      "githubFixtureCalls": 5
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 2.6540420000092126,
+      "bytes": 151,
+      "githubFixtureCalls": 0
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operations": 1,
+      "requestId": "352cfa1e-6b7d-4902-b44b-42930e8b4a6f",
+      "status": 200,
+      "ms": 98.80479200000991,
+      "bytes": 1102,
+      "githubFixtureCalls": 35
+    }
+  ],
+  "browserRows": [
+    {
+      "event": "home-ready",
+      "hash": "#/",
+      "at": 707.5999999996275,
+      "elapsedMs": 707.5999999996275,
+      "longTaskMs": 56,
+      "domReadyMs": 671.8000000007451,
+      "resources": [
+        {
+          "name": "/api/session",
+          "duration": 356.90000000037253,
+          "transferSize": 451
+        },
+        {
+          "name": "/api/public?kind=index",
+          "duration": 359.80000000074506,
+          "transferSize": 914
+        }
+      ]
+    },
+    {
+      "event": "workspace-ready",
+      "hash": "#/content",
+      "at": 19407.900000000373,
+      "elapsedMs": 125.40000000037253,
+      "longTaskMs": 56,
+      "domReadyMs": 5.900000000372529,
+      "resources": [
+        {
+          "name": "/api/session",
+          "duration": 356.90000000037253,
+          "transferSize": 451
+        },
+        {
+          "name": "/api/public?kind=index",
+          "duration": 359.80000000074506,
+          "transferSize": 914
+        }
+      ]
+    },
+    {
+      "event": "save-click",
+      "hash": "#/content",
+      "at": 96071.69999999925,
+      "elapsedMs": 76789.19999999925,
+      "longTaskMs": 222
+    },
+    {
+      "event": "save-queued",
+      "hash": "#/content",
+      "at": 96131.90000000037,
+      "elapsedMs": 76849.40000000037,
+      "longTaskMs": 299,
+      "sinceSaveMs": 60.20000000111759
+    },
+    {
+      "event": "save-restored",
+      "hash": "#/content",
+      "at": 96133.90000000037,
+      "elapsedMs": 76851.40000000037,
+      "longTaskMs": 299,
+      "sinceSaveMs": 62.100000001490116
+    },
+    {
+      "event": "save-queued",
+      "hash": "#/content",
+      "at": 96143.09999999963,
+      "elapsedMs": 76860.59999999963,
+      "longTaskMs": 299,
+      "sinceSaveMs": 71.40000000037253
+    },
+    {
+      "event": "workspace-ready",
+      "hash": "#/content",
+      "at": 559.2000000011176,
+      "elapsedMs": 559.2000000011176,
+      "longTaskMs": 0,
+      "domReadyMs": 538.8000000007451,
+      "resources": [
+        {
+          "name": "/api/session",
+          "duration": 357,
+          "transferSize": 451
+        }
+      ]
+    }
+  ],
+  "sourceCommits": 1
+}

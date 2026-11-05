@@ -1,0 +1,10 @@
+{
+  "initialBytes": 45303433,
+  "confirmedRecords": 450,
+  "rejectedInMs": 228.81570799999997,
+  "cleanupMs": 752.4290840000001,
+  "removed": 450,
+  "maxRssKiB": 1376416,
+  "heapLimitMiB": 512,
+  "model": "Node core, copy-on-write transactional adapter; not browser IndexedDB or UI latency"
+}

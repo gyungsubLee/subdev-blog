@@ -1,3 +1,4 @@
+import Button from "../button/Button";
 import { CATEGORIES_HREF, CONTENT_HREF, RECORDS_HREF } from "../../shared/routes";
 import Wordmark from "./Wordmark";
 import SettingsButton from "../../features/theme-settings/SettingsButton";
@@ -43,7 +44,7 @@ export default function SiteHeader({
       </nav>
       <div className="header-actions">
         {canWrite ? (
-          <button className="dark-button header-write" type="button" onClick={onWrite}>
+          <Button className="dark-button header-write" type="button" onClick={onWrite}>
             <svg
               aria-hidden="true"
               focusable="false"
@@ -60,7 +61,7 @@ export default function SiteHeader({
               <path d="m14 5 5 5" />
             </svg>
             글 쓰기
-          </button>
+          </Button>
         ) : (
           <a className="dark-button header-write" href="/api/auth/github">
             <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
@@ -70,7 +71,7 @@ export default function SiteHeader({
           </a>
         )}
         {management?.session.state === "ready" ? (
-          <button className="dark-button header-logout" type="button" onClick={management.logout}>
+          <Button className="dark-button header-logout" type="button" onClick={management.logout}>
             <svg
               aria-hidden="true"
               focusable="false"
@@ -87,7 +88,7 @@ export default function SiteHeader({
               <path d="M9 12h12m-5-5 5 5-5 5" />
             </svg>
             로그아웃
-          </button>
+          </Button>
         ) : null}
         <SettingsButton />
       </div>

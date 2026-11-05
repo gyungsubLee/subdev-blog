@@ -1,0 +1,18 @@
+{
+  "app/server/src/content.mjs": "479f62a596c495ba6317dea8fc8c58cc8f2681e271f491aad720350b3ef1cf0b",
+  "app/server/src/management-read-cache.mjs": "3611efc0ceb2ceae08a648db82694f886d80bfb8edb3f8230a484d6a7d1cb6e1",
+  "app/server/src/public-content.mjs": "c3622771836bd1e2cf4d2d3d8a3ee1e7cb5103acfd6d4e0e34a0599cd1d564ba",
+  "app/server/src/public-publication.mjs": "fbf1d350969c3ec6afdcbab2ed4455ea73560bef71fcc37293b8d82a0f41f69f",
+  "app/server/src/github.mjs": "4857427b3f9cfd14d2e6298a84b5ffa3903326a4b0c774ae4adf160368c942b5",
+  "app/server/src/auth.mjs": "1c8187efed7421d31d504091464c96547d9335825bec5052789ba7e474079ef0",
+  "app/server/src/handler.mjs": "47f5fd955a887dbd6788eae408d1c2563c67fd5049b7e83d54a6fe340d304783",
+  "app/content/scripts/publish-public-content.mjs": "77c502c355504114e7737dad8c556bdeaa24ce9f84754368e1a108059735bddb",
+  "app/web/src/features/content-management/sync-core.mjs": "c737d4d6b1e2a2b595d22d6340e3cc8a7af6120cfd66d4ffabf77eb3218d1123",
+  "app/web/src/features/content-management/sync-store.mjs": "68ca0c7e99bc350b843c2335fcb803aaf43b5b9ae4fc30e5b473365d7c884646",
+  "app/web/src/features/content-management/background-sync.mjs": "8b0312081cfd9521e8989529f54b0777647c7c0f7b0bf5c195286d5da8037f08",
+  "app/web/src/features/content-management/sync-cleanup.worker.mjs": "9b7db1aab418e86464c157ee00779560f3b03fe88666f550a4681f045208a847",
+  "tests/e2e/optimistic-control.html": "8eb8b576190ca0ecb968b223e8b25b2a78e4443a905f41e73a943d52744c8612",
+  "tests/e2e/serve-optimistic-github.mjs": "2a82a8163c1c058d610f76b4a4ac3cfea05825b846ba901fc264216088055198",
+  "package.json": "e76894bfa44a0c1292155bb132acd35d154567c2cdfe2a2e8f7de9819d1908f6",
+  "package-lock.json": "6e4f60584ce2a92166d835f42821f842d6565dfd493882722d06c2ec2d2e67ff"
+}

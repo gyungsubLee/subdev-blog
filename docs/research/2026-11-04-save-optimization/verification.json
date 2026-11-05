@@ -1,0 +1,234 @@
+{
+  "scope": "Latest fixed copied real HTTP handler and actual GitHub/OAuth/CSRF; dedicated measurement control page, not an editor interaction timing or deployed app benchmark. Existing preview preserved.",
+  "baseline": "../2026-11-04-save-stage-profile/verification.json",
+  "samplesSeconds": [
+    22.797222374999897,
+    18.61283387500001,
+    17.302313375000143
+  ],
+  "medianSeconds": 18.61283387500001,
+  "beforeMedianSeconds": 22.97469949999993,
+  "improvementPercent": 18.98551763429999,
+  "representative": "Actual middle-total sample, not independently selected stage medians",
+  "stages": [
+    {
+      "name": "Source lookup and validation",
+      "beforeMs": 2949.8474590000114,
+      "afterMs": 3113.8890420000535,
+      "beforeCalls": 7,
+      "afterCalls": 7
+    },
+    {
+      "name": "Source commit and candidate check",
+      "beforeMs": 3138.1669999999576,
+      "afterMs": 2649.291790999938,
+      "beforeCalls": 5,
+      "afterCalls": 5
+    },
+    {
+      "name": "Public lookup, candidate tree and previous artifact",
+      "beforeMs": 3576.9405410000472,
+      "afterMs": 2525.691542000044,
+      "beforeCalls": 9,
+      "afterCalls": 7
+    },
+    {
+      "name": "Changed post and JSON generation",
+      "beforeMs": 476.87624999997206,
+      "afterMs": 418.43458299990743,
+      "beforeCalls": 1,
+      "afterCalls": 1
+    },
+    {
+      "name": "Public blob/tree/commit/ref upload",
+      "beforeMs": 10259.39387499995,
+      "afterMs": 8538.545750000048,
+      "beforeCalls": 5,
+      "afterCalls": 4
+    },
+    {
+      "name": "Canonical advance and final verification",
+      "beforeMs": 2571.58050000004,
+      "afterMs": 1366.2128749999683,
+      "beforeCalls": 6,
+      "afterCalls": 2
+    }
+  ],
+  "githubCalls": 26,
+  "beforeGithubCalls": 33,
+  "githubWrites": 9,
+  "beforeGithubWrites": 10,
+  "requestPayloadBytes": 6919612,
+  "beforeRequestPayloadBytes": 11443508,
+  "requestReductionPercent": 39.532423099629945,
+  "decodedResponseBytes": 11165283,
+  "beforeDecodedResponseBytes": 18307654,
+  "responseReductionPercent": 39.01303247264778,
+  "networkMs": 18167.919045000803,
+  "otherMs": 444.6249549991917,
+  "realOperations": [
+    {
+      "operation": "post.create",
+      "status": 200,
+      "ms": 22684.549833000026,
+      "githubCalls": 25,
+      "githubWrites": 10
+    },
+    {
+      "operation": "post.update",
+      "status": 200,
+      "ms": 22797.222374999896,
+      "githubCalls": 26,
+      "githubWrites": 9
+    },
+    {
+      "operation": "post.update",
+      "status": 200,
+      "ms": 18612.83387500001,
+      "githubCalls": 26,
+      "githubWrites": 9
+    },
+    {
+      "operation": "post.update",
+      "status": 200,
+      "ms": 17302.313375000143,
+      "githubCalls": 26,
+      "githubWrites": 9
+    },
+    {
+      "operation": "post.delete",
+      "status": 200,
+      "ms": 17257.03737499984,
+      "githubCalls": 26,
+      "githubWrites": 8
+    }
+  ],
+  "checks": {
+    "publisher": "23/23",
+    "requestReuse": "6/6",
+    "compressionAndIntegrityGuards": "5/5",
+    "relatedRegression": "186/187 in sandbox; sole socket EPERM rechecked in runtime target 2/2 outside socket restriction",
+    "httpE2EAndTrace": "4/4, fake GitHub protocol fixture distinct from real measurements",
+    "legacyGenerator": "v2 envelope -> full safe fallback, v1 output and complete ready ref",
+    "independentReview": "Approved; negative cache/integrity coverage minor addressed by 5 guard checks",
+    "instrumentationParity": "Original/instrumented artifact Git SHA identical; measured source hashes unchanged through cleanup",
+    "fullSuite": "Not rerun; no whole-suite success claim",
+    "build": "Not rerun; no UI/TS/build/config changes, latest modules syntax-checked and executed directly"
+  },
+  "sourceHashes": {
+    "app/server/src/public-publication.mjs": "543b23a22be9c9f82a9de06ee3bce46c26a425038b25c12f3d6f1067e342c2a5",
+    "app/server/src/content.mjs": "56957f503c720f1967b77ba7f0033dcb09be35350962f330a514bd3c94eb057c",
+    "app/server/src/public-files.mjs": "6a46004f4404be8968355b99d1a9a7279c8ac1ae6acb8f825583802264bd93ae",
+    "app/server/src/public-content.mjs": "f448e23be98b0e283f20db6344a28f3c3f2e2cda2607a8cbe768ee17f10d22bd",
+    "app/server/src/handler.mjs": "47f5fd955a887dbd6788eae408d1c2563c67fd5049b7e83d54a6fe340d304783",
+    "app/server/src/auth.mjs": "1c8187efed7421d31d504091464c96547d9335825bec5052789ba7e474079ef0",
+    "app/server/src/github.mjs": "4857427b3f9cfd14d2e6298a84b5ffa3903326a4b0c774ae4adf160368c942b5",
+    "app/content/src/content.mjs": "5ad57d2f09e307b59281376e73c953d8cf26c5527dd505e3f2c936355d2475fe",
+    "tests/server/public-publication.test.mjs": "46d68f3cb09d75a78d66517344be134db372adab7520e6a6fcc0615d3086595d",
+    "tests/server/save-reuse.test.mjs": "0cd5139a3dc7b7d9c7620d5a955975fd238b1ba3eac99ee79d2f737e6feb111a",
+    "tests/server/public-transfer-guards.test.mjs": "441b1ad654a9d0b890bb4c7e8d4d3e4d73536fcfd5331aa9e917fdbff6e59469",
+    "tests/e2e/prepare-save-profile.py": "a2813f45dce3227c2f5be9eca9ee5cd2802f3de6738a8ceb190aca96ea07579e",
+    "tests/e2e/serve-github.mjs": "bf0e780a2700597864f51b28dbd57ecfa537672044e79674ef22459620e23263",
+    "tests/e2e/save-control.html": "961ff3f9897c82f837b0cb4469a74860514ef09d3f7f5109ef9053382a5bb605",
+    "tests/e2e/save-trace.mjs": "23bad7a1243225b9d8694509bbd6b6f5917743cbcf58d54ecc8ea5fe3b27d766",
+    "package.json": "e76894bfa44a0c1292155bb132acd35d154567c2cdfe2a2e8f7de9819d1908f6",
+    "package-lock.json": "6e4f60584ce2a92166d835f42821f842d6565dfd493882722d06c2ec2d2e67ff"
+  },
+  "remote": {
+    "base": "9c7a699f3ec2b2e1839fd1371baf52eabd5eca30",
+    "commit": "624cdbaa2076bb4db83839fb67985fa4838168b3",
+    "branch": "codex/public-content-generator-20261104",
+    "files": [
+      "app/server/src/public-publication.mjs"
+    ],
+    "sourceHashes": {
+      "app/server/src/public-publication.mjs": "543b23a22be9c9f82a9de06ee3bce46c26a425038b25c12f3d6f1067e342c2a5"
+    },
+    "authority": "Current user explicitly approved exact generator branch and pin update after automatic approval review rejected historical approval",
+    "state": "published",
+    "verifiedGenerator": "624cdbaa2076bb4db83839fb67985fa4838168b3",
+    "verifiedPin": "624cdbaa2076bb4db83839fb67985fa4838168b3",
+    "applicationMain": "27441173f257769add825aea596f7080d282e1ca"
+  },
+  "cleanup": {
+    "before": "26ad314322a088a878f9cb60f01c941b04a77466",
+    "after": "166f9dfe6d5b391d03546cd46c95ad86cfebbbf7",
+    "originalFilesUnchanged": 10294,
+    "posts": 3033,
+    "allOriginalPublicBodyBlobsUnchanged": 3033,
+    "beforeArtifact": "3ada1dc845b12a0d3e4d085590a69204eb1e9efe",
+    "afterArtifact": "83f387913431f03c89c85867160800c6c5f4e052",
+    "cacheBytes": 545716,
+    "cacheDecodedBytes": 2650012,
+    "cacheVersion": 2,
+    "generatedPosts": 0,
+    "reusedPosts": 3033,
+    "indexBytes": 5560675,
+    "temporaryPostRemoved": true,
+    "taskServersClosed": true,
+    "taskTabClosed": true,
+    "previewNotRestartedByThisTask": true,
+    "finalPreviewPid": 69070,
+    "initialPreviewPid": 41523,
+    "externalPreviewRestartObserved": true,
+    "sessionNotLoggedOut": true
+  },
+  "workflows": [
+    {
+      "conclusion": "success",
+      "databaseId": 41846841277,
+      "event": "push",
+      "headSha": "166f9dfe6d5b391d03546cd46c95ad86cfebbbf7",
+      "status": "completed",
+      "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41846841277"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 41846703031,
+      "event": "push",
+      "headSha": "2641aecf2023b87076cda921ffa29489ebf21a66",
+      "status": "completed",
+      "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41846703031"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 41846569276,
+      "event": "push",
+      "headSha": "0f1cc34ed39b251d764887c4c92c204a91cda9be",
+      "status": "completed",
+      "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41846569276"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 41846467981,
+      "event": "push",
+      "headSha": "33aee7e886f387dc4db6eb2844ff2eae21a8a671",
+      "status": "completed",
+      "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41846467981"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 41843592843,
+      "event": "push",
+      "headSha": "c62a3743a075e8611098d156ab8320f42b1ba384",
+      "status": "completed",
+      "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41843592843"
+    }
+  ],
+  "remainingBottlenecks": [
+    "Plain shared index remains 5.56MB to preserve running readers; UTF8 blob request ~5.88MB.",
+    "Representative public upload is8.539s: index blob4.064s, tree2.924s, commit0.563s, ref0.878s.",
+    "Previous-artifact reads and one original recursive source tree remain. Compressed cache now fits inline tree: one standalone public blob in these real samples. Two-worker overlap verified on large-document fixtures, not demonstrated as a speedup on this workload."
+  ],
+  "limits": [
+    "Three small title-only saves against a3033-post corpus with the same machine/runtime and equivalent disposable input; different GitHub/CDN conditions and distinct commits, no randomized/interleaved control.",
+    "Awaited spans include transfer/body consumption/GitHub service time; response bytes are decoded rather than compressed wire bytes; request payload excludes HTTP/TLS headers.",
+    "No deployed application, native rebuild, cold-start, bulk hardware throughput or editor click-to-save benchmark.",
+    "Read code and public body/index contract retained; no new reader-latency benchmark.",
+    "Concurrent operation-loop indentation change was not authored by this task; retained. No functional change detected after fixed source copies.",
+    "Initial expired real session returned non-ready twice; renewed with existing actual GitHub OAuth before any mutation. No bypass or credential logging.",
+    "Initial remote push/pin auto-review rejected historical authorization; actual current user approved exact624cdba before successful mutation.",
+    "Final PID check observed preview changed from41523 to69070 outside this task; actor/cause and exact current served code unverified. This task signaled only its own server49461. Initial final-audit assertion requiring oldPID failed; inspected actual process, recorded the external change and continued remaining read-only checks."
+  ],
+  "finalBindingsVerified": true
+}

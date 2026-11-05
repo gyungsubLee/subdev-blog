@@ -1,0 +1,51 @@
+[
+  {
+    "path": ".tmp/notion-assets-cleanup/retired-public-notion",
+    "exists": true,
+    "files": 6454,
+    "bytes": 343186180,
+    "deleted": false
+  },
+  {
+    "path": ".tmp/notion-assets-cleanup/retired-built-notion",
+    "exists": true,
+    "files": 6454,
+    "bytes": 343186180,
+    "deleted": false
+  },
+  {
+    "path": ".tmp/notion-assets-cleanup/retired-legacy-built-notion",
+    "exists": true,
+    "files": 6454,
+    "bytes": 343186180,
+    "deleted": false
+  },
+  {
+    "path": ".tmp/structure-migration/previous-web-dist/notion",
+    "exists": true,
+    "files": 6454,
+    "bytes": 343186180,
+    "deleted": false
+  },
+  {
+    "path": ".tmp/structure-migration/previous-public-content/assets",
+    "exists": true,
+    "files": 7255,
+    "bytes": 407333516,
+    "deleted": false
+  },
+  {
+    "path": ".tmp/structure-migration/previous-web-dist/content/assets",
+    "exists": true,
+    "files": 7255,
+    "bytes": 407333516,
+    "deleted": false
+  },
+  {
+    "path": "dist/content/assets",
+    "exists": true,
+    "files": 7255,
+    "bytes": 407333516,
+    "deleted": false
+  }
+]

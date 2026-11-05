@@ -1,0 +1,33 @@
+✔ prepared atomic save uses one CAS mutation and local source receipt (36.588166ms)
+✔ lost mutation response and retry reconcile without duplicate apply (15.682ms)
+✔ successful receipt primes the next prepared title save (6.303584ms)
+✔ fresh remote advance conflicts and never overwrites canonical source (3.539917ms)
+✔ mutation permissions stop immediately without recovery reads (2.51025ms)
+✔ large exact authored bytes stay in the single mutation (40.661166ms)
+✖ a request ID cannot be reused against its successful source commit (5.595ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 6
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 377.651708
+
+✖ failing tests:
+
+test at tests/server/atomic-save.test.mjs:18:1
+✖ a request ID cannot be reused against its successful source commit (5.595ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 409
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:18:344)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 409,
+    operator: 'strictEqual'
+  }

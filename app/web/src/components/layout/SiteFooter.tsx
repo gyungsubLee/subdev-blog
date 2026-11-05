@@ -1,3 +1,4 @@
+import Button from "../button/Button";
 import { HOME_HREF } from "../../shared/routes";
 import { site } from "../../config/site";
 import "./layout.css";
@@ -9,7 +10,7 @@ export default function SiteFooter() {
         {site.name}.
       </a>
       <span>{site.footerDescription}</span>
-      <button
+      <Button
         type="button"
         onClick={() =>
           window.scrollTo({
@@ -22,7 +23,7 @@ export default function SiteFooter() {
         }
       >
         맨 위로 ↑
-      </button>
+      </Button>
     </footer>
   );
 }

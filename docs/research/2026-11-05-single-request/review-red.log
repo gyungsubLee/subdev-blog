@@ -1,0 +1,76 @@
+✔ prepared atomic save uses one CAS mutation and local source receipt (39.30925ms)
+✔ lost mutation response and retry reconcile without duplicate apply (12.375333ms)
+✔ successful receipt primes the next prepared title save (6.147125ms)
+✔ fresh remote advance conflicts and never overwrites canonical source (3.790291ms)
+✔ mutation permissions stop immediately without recovery reads (3.065208ms)
+✔ large exact authored bytes stay in the single mutation (39.38475ms)
+✔ a request ID cannot be reused against its successful source commit (2.964625ms)
+✔ durable request marker rejects reuse after unrelated descendants and a new cache scope (5.412792ms)
+✔ retry source revision uses accepted bytes rather than regenerated timestamp (22.218708ms)
+✔ recovery rejects tampered durable receipt and never reapplies (4.431667ms)
+✔ trusted immutable cache remains entry bounded and credential scoped (0.454833ms)
+✔ large source inventory drops unused API URLs within existing cache budget (34.49725ms)
+✔ atomic authored no-op reserves its ID with only a durable marker (2.967625ms)
+✖ atomic category no-op preserves the original compact bytes (2.494375ms)
+✖ atomic transient GraphQL errors leave the queue retryable (2.850167ms)
+✖ recovery read errors preserve their transient status after CAS rejection (5.09725ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 13
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 432.700917
+
+✖ failing tests:
+
+test at tests/server/atomic-save.test.mjs:213:1
+✖ atomic category no-op preserves the original compact bytes (2.494375ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'bc0e01853f3596faf04a7087d663f81056e1df39'
+  - '57a2b44ed5ccf20685f3f203f759cd934b934c72'
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:226:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'bc0e01853f3596faf04a7087d663f81056e1df39',
+    expected: '57a2b44ed5ccf20685f3f203f759cd934b934c72',
+    operator: 'strictEqual'
+  }
+
+test at tests/server/atomic-save.test.mjs:230:1
+✖ atomic transient GraphQL errors leave the queue retryable (2.850167ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  409 !== 503
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:238:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 409,
+    expected: 503,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/atomic-save.test.mjs:242:1
+✖ recovery read errors preserve their transient status after CAS rejection (5.09725ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  409 !== 502
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:251:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 409,
+    expected: 502,
+    operator: 'strictEqual'
+  }

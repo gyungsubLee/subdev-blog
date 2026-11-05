@@ -1,0 +1,48 @@
+✖ ready source advances by canonical ancestry and concurrent workflows preserve the newest source (42.042042ms)
+✖ ready source status verifies the immutable artifact and rejects an incomplete publication (0.75725ms)
+✔ failed artifact verification never advances the last ready source (6.793167ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 1
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 260.52375
+
+✖ failing tests:
+
+test at tests/server/public-publication.test.mjs:25:1
+✖ ready source advances by canonical ancestry and concurrent workflows preserve the newest source (42.042042ms)
+  Error: Ready source history conflict
+      at httpError (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/app/server/src/github.mjs:4:24)
+      at requirePublic (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/app/server/src/public-files.mjs:9:25)
+      at Module.publishPublicSource (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/app/server/src/public-publication.mjs:311:7)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:31:17)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    status: 409,
+    details: undefined
+  }
+
+test at tests/server/public-publication.test.mjs:44:1
+✖ ready source status verifies the immutable artifact and rejects an incomplete publication (0.75725ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'undefined'
+  - 'function'
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:45:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1062:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:752:18)
+      at Test.postRun (node:internal/test_runner/test:1191:19)
+      at Test.run (node:internal/test_runner/test:1119:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual'
+  }

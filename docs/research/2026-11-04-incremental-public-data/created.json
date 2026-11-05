@@ -1,0 +1,25 @@
+{
+  "phase": "created",
+  "at": "2026-11-04T12:54:04.057Z",
+  "contentCommit": "1b6df5d40c88dddf1808e0f8fdcd0fd6020aab1a",
+  "publicationCommit": "348451c29489208ca6cef8dfbc61b21dd2557530",
+  "postCount": 3034,
+  "testPosts": [
+    {
+      "id": "5dbf6fc4-7b82-4767-9ad2-ea2427cf6e14",
+      "title": "E2E 증분 저장 20261104 1248"
+    }
+  ],
+  "publicationVerified": true,
+  "generation": {
+    "generatedPosts": 1,
+    "reusedPosts": 3033,
+    "cacheBytes": 2650479
+  },
+  "actualInventory": {
+    "reusedBodies": 3033,
+    "changedBodies": 1,
+    "removedBodies": 0
+  },
+  "bodyVerified": true
+}

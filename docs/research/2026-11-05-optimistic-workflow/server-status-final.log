@@ -1,0 +1,10 @@
+✔ publication status stays saved until a complete immutable artifact is verified (53.230584ms)
+✔ previous ready source cannot mark a newly saved source published (8.86275ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 497.635333

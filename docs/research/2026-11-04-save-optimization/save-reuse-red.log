@@ -1,0 +1,51 @@
+Command: node --test tests/server/save-reuse.test.mjs
+Provenance: exact stdout/stderr captured during the original pre-implementation TDD run; copied from the agent tool result without rerunning.
+Stage: content.mjs candidate/sourceSnapshot reuse and final same-candidate check had not been implemented. Five tests existed at this stage.
+
+✖ direct save reuses the candidate inventory and freshly prepared publication (46.200584ms)
+✖ a lost PATCH response uses fresh canonical head and the same prepared publication (8.599416ms)
+✔ a superseding canonical commit still prepares its own publication (9.5565ms)
+✔ failed publication keeps canonical unchanged and a new request verifies the retry (10.973417ms)
+✔ candidate inventory retains asset sizes and applies renamed paths exactly (15.556458ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 3
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 258.380042
+
+✖ failing tests:
+
+test at tests/server/save-reuse.test.mjs:27:1
+✖ direct save reuses the candidate inventory and freshly prepared publication (46.200584ms)
+  AssertionError [ERR_ASSERTION]: Known candidate commit must not be downloaded again
+
+  1 !== 0
+
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/save-reuse.test.mjs:35:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/save-reuse.test.mjs:43:1
+✖ a lost PATCH response uses fresh canonical head and the same prepared publication (8.599416ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  5 !== 1
+
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/save-reuse.test.mjs:56:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 5,
+    expected: 1,
+    operator: 'strictEqual'
+  }

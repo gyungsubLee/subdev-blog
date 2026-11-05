@@ -12,43 +12,78 @@ function fixture() {
  const options={store,now:()=>time,setTimer:(fn,delay)=>{timers.set(++sequence,{fn,at:time+delay});return sequence;},clearTimer:id=>timers.delete(id),send:async payload=>{
   sent.push(structuredClone(payload));return {state:'published',contentCommit:next,categories:{revision:'new',contentCommit:next},sources:{},receipt:{requestId:payload.requestId,payloadHash:await payloadHash(payload),contentCommit:next}};
  }};
- return {store,records,sent,options,advance:ms=>{time+=ms;},get now(){return time;}};
+ return {store,records,sent,timers,options,advance:ms=>{time+=ms;},get now(){return time;}};
 }
 const input=name=>({baseCommit:base,operation:{type:'post.update',id:'p',baseRevision:'original',changes:{title:name}},draftKey:'draft',clientRequestId:name});
 
-test('5-second debounce coalesces unsent versions and sends one immutable bulk request',async()=>{
+test('durable saves schedule immediate dispatch and coalesce only before transmission', {timeout:3000}, async()=>{
  const f=fixture(),engine=createSyncEngine(f.options);
- const first=await engine.stage('scope',input('A'));
- f.advance(4000);await engine.flush('scope');assert.equal(f.sent.length,0);
- await engine.stage('scope',input('B'));f.advance(4000);await engine.flush('scope');assert.equal(f.sent.length,0);
- const latest=await engine.stage('scope',input('C'));f.advance(5000);await engine.flush('scope');
- assert.equal(f.sent.length,1);assert.equal(f.sent[0].operations.length,1);assert.equal(f.sent[0].operations[0].changes.title,'C');
- assert.equal((await latest.completion).contentCommit,next);assert.equal((await first.completion).contentCommit,next);
- assert.equal((await f.store.read('scope')).history.length,1);engine.stop();
+ try {
+  const first=await engine.stage('scope',input('A'));
+  await engine.stage('scope',input('B'));
+  const latest=await engine.stage('scope',input('C'));
+  const stored=await f.store.read('scope');
+  assert.equal(stored.pending[0].operation.changes.title,'C');
+  assert.equal(f.sent.length,0,'the durable pending record exists before dispatch');
+  const scheduled=[...f.timers.values()][0];
+  assert.equal(scheduled.at,f.now,'saving must not add a debounce delay');
+  scheduled.fn();
+  assert.equal((await latest.completion).contentCommit,next);
+  assert.equal((await first.completion).contentCommit,next);
+  assert.equal(f.sent.length,1);
+  assert.equal(f.sent[0].operations[0].changes.title,'C');
+ } finally {engine.stop();}
 });
+
+test('restored pending saves ignore a legacy future debounce without bypassing retry waits', {timeout:3000}, async()=>{
+ const f=fixture(),before=createSyncEngine(f.options);
+ await before.stage('scope',input('restored'));
+ before.stop();
+ await f.store.update('scope',state=>{state.dueAt=f.now+5000;});
+ const restored=createSyncEngine(f.options);
+ try {
+  await restored.resume('scope');
+  assert.equal([...f.timers.values()][0].at,f.now,'legacy save dueAt must not delay restart');
+  await restored.flush('scope');
+  assert.equal(f.sent.length,1);
+ } finally {restored.stop();}
+});
+
 test('another coordinator cannot duplicate an in-flight batch, and later edits survive old response',async()=>{
  const f=fixture();let release;
  const response=f.options.send;
  f.options.send=async payload=>{await new Promise(resolve=>{release=resolve;});return response(payload);};
  const one=createSyncEngine({...f.options,owner:'one'}),two=createSyncEngine({...f.options,owner:'two'});
- await one.stage('scope',input('A'));f.advance(5000);
+ await one.stage('scope',input('A'));
  const running=one.flush('scope');
  for(let n=0;n<20&&!release;n++)await new Promise(resolve=>setImmediate(resolve));
  assert.ok(typeof release==='function');
  await one.stage('scope',input('C'));await two.flush('scope');assert.equal(f.sent.length,0);
  release();await running;
  const stored=await f.store.read('scope');assert.equal(stored.pending[0].operation.changes.title,'C');assert.equal(stored.pending[0].baseCommit,next);
- assert.equal(f.sent.length,1);one.stop();two.stop();
+ assert.equal(f.sent.length,1);
+ const ready=[...f.timers.values()].filter(timer=>timer.at===f.now);
+ assert.ok(ready.length>0,'the next saved edit must be scheduled at the same clock');
+ // Complete the queued follow-up without advancing the wall clock.
+ release=undefined;
+ const following=one.flush('scope');
+ for(let n=0;n<20&&!release;n++)await new Promise(resolve=>setImmediate(resolve));
+ assert.ok(typeof release==='function');
+ release();await following;
+ assert.equal(f.sent.length,2);
+ assert.equal(f.sent[1].operations[0].changes.title,'C');
+ assert.equal(f.sent[1].baseCommit,next);
+ one.stop();two.stop();
 });
 test('a lost response retains the same payload and resumes after reload without duplicate identity',async()=>{
  const f=fixture();let fail=true;
- const response=f.options.send;const attempts=[];
- f.options.send=async payload=>{attempts.push(JSON.stringify(payload));if(fail)throw Error('lost');return response(payload);};
+ const response=f.options.send;const attempts=[],reconcile=[];
+ f.options.send=async (payload,options)=>{attempts.push(JSON.stringify(payload));reconcile.push(options?.reconcile);if(fail)throw Error('lost');return response(payload);};
  const first=createSyncEngine({...f.options,owner:'first'});
  await first.stage('scope',input('A'));f.advance(5000);await first.flush('scope');first.stop();
  const stored=await f.store.read('scope');assert.ok(stored.active);assert.equal(stored.history.length,0);
  fail=false;f.advance(5000);const reloaded=createSyncEngine({...f.options,owner:'reloaded'});await reloaded.flush('scope');
- assert.equal(attempts.length,2);assert.equal(attempts[0],attempts[1]);assert.equal((await f.store.read('scope')).history.length,1);reloaded.stop();
+ assert.deepEqual(reconcile,[false,true]);assert.equal(attempts.length,2);assert.equal(attempts[0],attempts[1]);assert.equal((await f.store.read('scope')).history.length,1);reloaded.stop();
 });
 test('daily cleanup verifies receipts and never deletes failed, pending or mismatched data',async()=>{
  const f=fixture(),engine=createSyncEngine(f.options);await engine.stage('scope',input('A'));f.advance(5000);await engine.flush('scope');

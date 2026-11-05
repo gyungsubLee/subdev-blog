@@ -124,7 +124,7 @@ async function recordReceipt(event) {
     localStorage.setItem(item.draftKey,JSON.stringify({
       ...draft, syncVersion:item.version, revision:baseline.revision,contentCommit:baseline.contentCommit,
       ...(source ? {sourceDocument:source,canonicalId:source.document.metadata.id} : {}),
-      publication:same?{state:result.state,requestId:result.requestId,candidateCommit:result.candidateCommit,contentCommit:result.contentCommit,commitUrl:result.commitUrl,publicationPending:result.publicationPending,background:true}:undefined,
+      publication:same?{state:result.state,requestId:result.requestId,candidateCommit:result.candidateCommit,contentCommit:result.contentCommit,commitUrl:result.commitUrl,sourceOnly:result.sourceOnly,publicationPending:result.publicationPending,background:true}:undefined,
     }));
   }
   const index = await readPublicCache('/api/public?kind=index');
@@ -147,7 +147,7 @@ async function applyConfirmation(event) {
       if(!stored)return;
       stored.applied=true;
       const result=stored.result;
-      stored.result={state:result.state,requestId:result.requestId,contentCommit:result.contentCommit,candidateCommit:result.candidateCommit,commitUrl:result.commitUrl,receipt:result.receipt,publicationPending:result.publicationPending};
+      stored.result={state:result.state,requestId:result.requestId,contentCommit:result.contentCommit,candidateCommit:result.candidateCommit,commitUrl:result.commitUrl,receipt:result.receipt,sourceOnly:result.sourceOnly,publicationPending:result.publicationPending};
     });
   });
   // Native Web Locks serialize receipt/cache application across open tabs.
@@ -183,7 +183,7 @@ async function checkPublications(scope,explicit) {
     for(const batch of waiting) {
       if(!started||controller.signal.aborted||!context||syncScope(context)!==scope)break;
       try {
-        const sourceOnly=batch.result.state==='unchanged';
+        const sourceOnly=batch.result.sourceOnly===true||batch.result.state==='unchanged';
         const params=new URLSearchParams(sourceOnly?{sourceCommit:batch.result.contentCommit}:
           {requestId:batch.payload.requestId,candidateCommit:batch.result.candidateCommit??batch.result.contentCommit});
         const result=await requestApi('/api/publish?'+params,{signal:AbortSignal.any([controller.signal,AbortSignal.timeout(30000)])});
@@ -245,9 +245,9 @@ const engine = createSyncEngine({
     }
     return {...payload,operations:[{...categoryOperation,categories},...payload.operations.filter(operation=>operation.type!=='categories.save')]};
   },
-  send:payload=>{
+  send:(payload,{reconcile=false}={})=>{
     if (!context) throw Object.assign(new Error('로그인이 필요합니다.'),{status:401});
-    return sendApi('/api/content',payload,context.csrfToken);
+    return sendApi('/api/content',payload,context.csrfToken,undefined,reconcile?{'X-Content-Reconcile':'1'}:{});
   },
   notify:event=>{
     void (async()=>{

@@ -1,0 +1,7 @@
+{
+  "app/server/src/public-content.mjs": "cebff4306e53691466933400b475b15a72f49223062d8dc0c16a9e513536e7ff",
+  "app/server/src/github.mjs": "77aaa75f298090ed5377e7c1bfeaab733d25bfb31cce9ab99cbd199794aa8881",
+  "app/content/src/content.mjs": "85b4d93a523b2d9018dfb893ce4e08d4cfae988ef8ea98423f0c17cc0e8e079a",
+  "app/server/generated/content-catalog.json": "81a6d6645261ea5591ca99da73f8222fe65839d6afb739e4ef5b2f6774dbe106",
+  "package-lock.json": "6e4f60584ce2a92166d835f42821f842d6565dfd493882722d06c2ec2d2e67ff"
+}

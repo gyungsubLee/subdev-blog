@@ -1,0 +1,52 @@
+{
+  "command": [
+    "node",
+    "--test",
+    "--test-timeout=60000",
+    "tests/server/public-publication.test.mjs",
+    "tests/server/public-content.test.mjs",
+    "tests/server/public-transfer-guards.test.mjs"
+  ],
+  "externalDeadlineSeconds": 75,
+  "exitCode": 0,
+  "passed": 62,
+  "failed": 0,
+  "output": "publication-green.log",
+  "red": [
+    "publication-red.log",
+    "publication-race-red.log",
+    "publication-trace-red.log"
+  ],
+  "node": "v24.3.0",
+  "bindings": {
+    "app/server/src/public-publication.mjs": "fbf1d350969c3ec6afdcbab2ed4455ea73560bef71fcc37293b8d82a0f41f69f",
+    "app/server/src/public-content.mjs": "c3622771836bd1e2cf4d2d3d8a3ee1e7cb5103acfd6d4e0e34a0599cd1d564ba",
+    "app/content/scripts/publish-public-content.mjs": "77c502c355504114e7737dad8c556bdeaa24ce9f84754368e1a108059735bddb",
+    "tests/server/public-publication.test.mjs": "43b06fa1f2225b9ce7dbd4dbca4ecf10060fb1248f3f5811a3473836dd84c5a3",
+    "tests/server/public-content.test.mjs": "212ea8cb27a1d43a3863d4f138f9fd516471fc5b73577f7d82bfe633ebcf5e99",
+    "tests/server/public-transfer-guards.test.mjs": "441b1ad654a9d0b890bb4c7e8d4d3e4d73536fcfd5331aa9e917fdbff6e59469",
+    "tests/support/public-repository.mjs": "2aea73a83c7d23b7b80f0ac3031a7750fcca9c8a8f42b1e4cd8daacd89698e4c",
+    "app/server/src/public-files.mjs": "6a46004f4404be8968355b99d1a9a7279c8ac1ae6acb8f825583802264bd93ae",
+    "app/server/src/github.mjs": "4857427b3f9cfd14d2e6298a84b5ffa3903326a4b0c774ae4adf160368c942b5",
+    "app/content/src/content.mjs": "5ad57d2f09e307b59281376e73c953d8cf26c5527dd505e3f2c936355d2475fe",
+    "package.json": "e76894bfa44a0c1292155bb132acd35d154567c2cdfe2a2e8f7de9819d1908f6",
+    "package-lock.json": "6e4f60584ce2a92166d835f42821f842d6565dfd493882722d06c2ec2d2e67ff"
+  },
+  "remoteWrites": false,
+  "otherChecks": [
+    "node --check app/server/src/public-publication.mjs",
+    "node --check app/content/scripts/publish-public-content.mjs",
+    "git diff --check -- app/server/src/public-content.mjs tests/support/public-repository.mjs tests/server/public-content.test.mjs"
+  ],
+  "readyRef": "public-ready/<canonical branch>",
+  "remoteGeneratorPaths": [
+    "app/server/src/public-publication.mjs",
+    "app/content/scripts/publish-public-content.mjs"
+  ],
+  "workflowChange": "Existing push workflow already invokes --publish on the pinned generator; no workflow YAML change required. Bootstrap current verified source before asynchronous source saves.",
+  "limits": [
+    "Legacy ready-ref404 fallback requires the exact canonical publication; bootstrap is a rollout prerequisite.",
+    "No actual GitHub write, browser or performance measurements owned by this worker.",
+    "Full suite and build owned by root; not repeated."
+  ]
+}

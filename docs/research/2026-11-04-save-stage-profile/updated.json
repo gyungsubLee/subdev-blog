@@ -1,0 +1,25 @@
+{
+  "phase": "updated",
+  "at": "2026-11-04T13:27:24.559Z",
+  "contentCommit": "2b2b5b93e86a8217aa0778e0372f18f2b573d5e1",
+  "publicationCommit": "e716c3bbf35e68683d970abe45270cbe54e79cf3",
+  "postCount": 3034,
+  "testPosts": [
+    {
+      "id": "31ae9f5b-c1dc-4f99-8638-4f61babb8252",
+      "title": "E2E 저장 단계 실측 20261104 1315 수정 3"
+    }
+  ],
+  "publicationVerified": true,
+  "generation": {
+    "generatedPosts": 1,
+    "reusedPosts": 3033,
+    "cacheBytes": 2650511
+  },
+  "actualInventory": {
+    "reusedBodies": 3033,
+    "changedBodies": 1,
+    "removedBodies": 0
+  },
+  "bodyVerified": true
+}

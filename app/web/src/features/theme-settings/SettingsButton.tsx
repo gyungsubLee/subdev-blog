@@ -1,4 +1,6 @@
+import Button from "../../components/button/Button";
 import { useEffect, useId, useRef, useState } from "react";
+import HeaderAction from "../../components/header-action/HeaderAction";
 import {
   accents,
   applyThemeSettings,
@@ -16,7 +18,7 @@ export default function SettingsButton() {
 
   return (
     <>
-      <button
+      <HeaderAction
         type="button"
         className="settings-trigger"
         aria-label="설정"
@@ -41,7 +43,7 @@ export default function SettingsButton() {
           <path d="m9 3-.7 2.4-2 .9-2.3-.6-2 3.5 1.6 1.8v2.1L2 15l2 3.5 2.3-.6 2 .9L9 21h4l.7-2.2 2-.9 2.3.6 2-3.5-1.6-1.9V11L20 9.2l-2-3.5-2.3.6-2-.9L13 3H9Z" />
           <circle cx="11" cy="12" r="3" />
         </svg>
-      </button>
+      </HeaderAction>
       {open && <SettingsDialog id={id} onClose={() => setOpen(false)} />}
     </>
   );
@@ -84,9 +86,9 @@ function SettingsDialog({ id, onClose }: { id: string; onClose: () => void }) {
     >
       <div className="theme-settings-heading">
         <h2 id={id + "-title"}>설정</h2>
-        <button type="button" className="settings-close" aria-label="설정 닫기" onClick={close}>
+        <Button type="button" className="settings-close" aria-label="설정 닫기" onClick={close}>
           ×
-        </button>
+        </Button>
       </div>
       <p id={id + "-description"}>색상은 바로 적용되며 이 브라우저에 저장합니다.</p>
       <label className="settings-label" htmlFor={id + "-palette"}>전체 색상 팔레트</label>
@@ -127,8 +129,8 @@ function SettingsDialog({ id, onClose }: { id: string; onClose: () => void }) {
       </fieldset>
       {!persisted && <p className="settings-storage-error" role="status">브라우저에 저장하지 못했습니다. 새로고침 전까지 적용됩니다.</p>}
       <div className="theme-settings-actions">
-        <button type="button" className="settings-reset" onClick={() => update({ ...DEFAULT_SETTINGS })}>기본값으로</button>
-        <button type="button" className="settings-done" onClick={close}>닫기</button>
+        <Button type="button" className="settings-reset" onClick={() => update({ ...DEFAULT_SETTINGS })}>기본값으로</Button>
+        <Button type="button" className="settings-done" onClick={close}>닫기</Button>
       </div>
     </dialog>
   );

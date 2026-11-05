@@ -1,3 +1,4 @@
+import Button from "../../components/button/Button";
 import { useEffect, useRef, useState } from "react";
 import type { Post, PublicCategory } from "../../shared/post";
 import { validatePublicCategories, type CategoryNode } from "../post-category/hierarchy";
@@ -283,14 +284,14 @@ export default function ManagedCategories({ session, posts = [], onSaved }: {
       {needsLogin ? <a href="/api/auth/github">GitHub 다시 로그인</a> : null}
       {draft ? (
         <div className="management-toolbar">
-          <button className="quiet-button" type="button" onClick={() => {
+          <Button className="quiet-button" type="button" onClick={() => {
             downloadFile("categories.json", JSON.stringify(draft.categories, null, 2) + "\n", "application/json");
-          }}>JSON 내보내기</button>
+          }}>JSON 내보내기</Button>
         </div>
       ) : null}
       {publication ? <PublishStatus publication={publication} csrfToken={session.csrfToken ?? ""} onChange={setPublication} onRetry={() => retryContentSync(session)} /> : null}
       {draft && !saving && (error || ["published", "superseded", "unchanged"].includes(publication?.state ?? "")) ? (
-        <button className="outline-button" type="button" onClick={reopenSource}>최신 원본으로 다시 시작</button>
+        <Button className="outline-button" type="button" onClick={reopenSource}>최신 원본으로 다시 시작</Button>
       ) : null}
     </>
   );

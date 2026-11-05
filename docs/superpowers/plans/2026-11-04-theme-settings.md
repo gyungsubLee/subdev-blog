@@ -27,7 +27,7 @@
 
 ### Task1: Preferences and native modal
 
-**Files:** src/features/theme-settings/theme.ts, SettingsButton.tsx, theme-settings.css; tests/theme-settings.test.mjs.
+**Files:** app/web/src/features/theme-settings/theme.ts, SettingsButton.tsx, theme-settings.css; tests/web/theme-settings.test.mjs.
 **Interfaces:** initializeTheme() restores persisted tokens. SettingsButton owns its native dialog and only local UI state. Theme tokens use the existing CSS role names; shape/font tokens never change.
 - [x] Add focused tests for defaults, validation, both color modes, persistence failure, reset, native-dialog close/reopen and no content requests.
 - [x] Observe expected failures before implementation.
@@ -36,7 +36,7 @@
 
 ### Task2: Integration and verification
 
-**Files:** src/main.tsx, components/layout/SiteHeader.tsx, components/layout/layout.css, features/content-management/ManagedEditorChrome.tsx, managed-writing.css, features/post-editor/editor.css, features/post-category/CategoryManager.css, CategorySelectionDialog.css.
+**Files:** app/web/src/main.tsx, components/layout/SiteHeader.tsx, components/layout/layout.css, features/content-management/ManagedEditorChrome.tsx, managed-writing.css, features/post-editor/editor.css, features/post-category/CategoryManager.css, CategorySelectionDialog.css.
 **Interfaces:** Same SettingsButton imported into both headers; startup initialization before React render. Primary-button foreground uses --on-accent for readable full-palette switching.
 - [x] Connect shared trigger and initial preference application; adapt action wrapping only where the additional button requires it.
 - [x] Run TypeScript and targeted settings/header/editor checks. Do not duplicate any concurrent whole-suite run.

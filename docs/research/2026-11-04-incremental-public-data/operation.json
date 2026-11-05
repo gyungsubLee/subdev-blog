@@ -1,0 +1,27 @@
+{
+  "base": "22905f58a7c18af51aac6c7d1ca0d6dfa70f16bf",
+  "commit": "9c7a699f3ec2b2e1839fd1371baf52eabd5eca30",
+  "branch": "codex/public-content-generator-20261104",
+  "files": [
+    "app/server/src/public-publication.mjs",
+    "app/content/src/content.mjs"
+  ],
+  "sourceHashes": {
+    "app/server/src/public-publication.mjs": "c97c849d7d390992c7095801522e31b6404707d332efabc3bf300bfb4a267b77",
+    "app/content/src/content.mjs": "5ad57d2f09e307b59281376e73c953d8cf26c5527dd505e3f2c936355d2475fe"
+  },
+  "sourceBefore": "17397ef27e1f8dc4ecc8b5fec0ed678f6e723500",
+  "state": "completed",
+  "bootstrap": "first disposable save; no workflow-only trigger commit",
+  "authority": "User explicitly requested incremental reuse implementation and actual GitHub measurement; existing dedicated generator branch/pin/publication workflow retained.",
+  "verifiedGenerator": "9c7a699f3ec2b2e1839fd1371baf52eabd5eca30",
+  "finalSourceCommit": "c79fdcc047ce9f0e13210bda19b059f7cb9f3a66",
+  "originalFilesUnchanged": 10294,
+  "allFiveAutomaticWorkflows": "success",
+  "realTimingsSeconds": {
+    "bootstrap": 167.595506541,
+    "create": 22.277334959,
+    "update": 20.731414875,
+    "delete": 28.206908875
+  }
+}

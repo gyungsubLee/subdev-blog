@@ -5,9 +5,8 @@ import { httpError } from './github.mjs';
 import { createManagementGitHubClient, readCachedCategories, invalidateCategoryCache } from './management-read-cache.mjs';
 import { readReadyPublicSource } from './public-publication.mjs';
 import { parseMarkdownDocument, serializeMarkdownDocument, mergeDocumentPatch, canonicalFilename } from '../../shared/document.mjs';
-import { rewriteContentLinks } from '../../shared/content-links.mjs';
 import { EDITOR_FILENAME, isEditorFilename, validateEditorDocument } from '../../shared/editor-document.mjs';
-import { validateContent, toPublicPosts, toPublicPost } from '../../content/src/content.mjs';
+import { validateContent, toPublicPost } from '../../content/src/content.mjs';
 const UUID = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 const SHA = /^[a-f0-9]{40}$/;
 const MAX_ASSET = 5 * 1024 * 1024;
@@ -98,6 +97,18 @@ function flatName(name) {
     return name;
 }
 
+function graphQLError(errors) {
+    const types = errors.map(error => error.type);
+    const stale = types.includes('STALE_DATA') || errors.some(error =>
+        /Expected branch to point to .* but it did not/.test(error.message ?? ''));
+    const status = types.includes('UNAUTHORIZED') ? 401
+        : types.includes('FORBIDDEN') ? 403
+        : stale ? 409
+        : types.some(type => ['UNPROCESSABLE', 'GRAPHQL_VALIDATION_FAILED'].includes(type)) ? 422
+        : types.includes('RATE_LIMITED') ? 503 : 502;
+    return httpError(status, 'Atomic source save rejected');
+}
+
 export async function handleContentRequest(request, { token, config, fetcher, catalog }) {
     const categoryRead = request.method === 'GET' && new URL(request.url).pathname === '/api/content' &&
         new URL(request.url).searchParams.get('kind') === 'categories';
@@ -110,6 +121,7 @@ export async function handleContentRequest(request, { token, config, fetcher, ca
     const blobSizes = new Map();
     const blobBytes = new Map();
     const inlineBlobs = new Map();
+    let atomic = false;
     const blob = async (sha) => {
         if (blobBytes.has(sha)) return blobBytes.get(sha);
         const value = await call('/git/blobs/' + commitSha(sha));
@@ -303,36 +315,6 @@ export async function handleContentRequest(request, { token, config, fetcher, ca
         }));
         return documents;
     };
-    const validateDeletionReferences = (corpus, deletedIds) => {
-        for (const post of toPublicPosts(corpus)) {
-            if (deletedIds.has(post.id)) continue;
-            const entry = corpus.documents.get(post.id);
-            const links = [post.cover, post.icon];
-            rewriteContentLinks(post.markdown, destination => {
-                links.push(destination);
-                return destination;
-            });
-            const linked = links.some(value => {
-                return typeof value === 'string' && value.startsWith('#/post/')
-                    && deletedIds.has(value.slice(7).split(/[?#]/)[0]);
-            });
-            const references = [
-                ...(entry.metadata.related_ids ?? []),
-                ...(entry.metadata.source_ids ?? []),
-                ...(entry.references ?? []),
-            ];
-            requireValue(!linked && !deletedIds.has(post.parentId)
-                && !references.some(reference => deletedIds.has(reference)),
-                'Deleted post has inbound references from: ' + post.id, 409);
-        }
-    };
-    const validatePostDeletion = async (tree, id, original) => {
-        const categories = await readCategories(tree);
-        const documents = await readDocuments(tree, new Map([[id, original]]), true);
-        const corpus = {categories: categories.categories, documents};
-        validateDocument(() => validateContent(corpus));
-        validateDeletionReferences(corpus, new Set([id]));
-    };
     const categoryDeletionPlan = async (tree, id, mode, categorySource) => {
         requireValue(typeof id === 'string' && id !== 'group:unclassified', 'Cannot delete unclassified category', 422);
         requireValue(['move', 'delete'].includes(mode), 'Choose category deletion mode', 422);
@@ -341,7 +323,7 @@ export async function handleContentRequest(request, { token, config, fetcher, ca
         requireValue(!current.categories.some(category => category.parent_id === id), 'Move child categories before deletion', 409);
         const categories = current.categories.filter(category => category.id !== id);
         requireValue(categories.some(category => category.id === 'group:unclassified'), 'Unclassified category is missing', 409);
-        const documents = await readDocuments(tree, new Map(), mode === 'delete');
+        const documents = await readDocuments(tree, new Map());
         const corpus = {categories: current.categories, documents};
         validateDocument(() => validateContent(corpus));
         const affectedPostIds = [...documents.keys()]
@@ -353,7 +335,6 @@ export async function handleContentRequest(request, { token, config, fetcher, ca
         requireValue(changes[0].bytes.length <= MAX_DOCUMENT, 'Category document exceeds 2 MiB', 413);
         if (mode === 'delete') {
             const deletedIds = new Set(affectedPostIds);
-            validateDeletionReferences(corpus, deletedIds);
             for (const entry of tree.entries) {
                 if (deletedIds.has(entry.path.split('/')[1]) && entry.path.startsWith('posts/')) {
                     changes.push({path: entry.path, mode: entry.mode, type: 'blob', sha: null});
@@ -496,7 +477,6 @@ export async function handleContentRequest(request, { token, config, fetcher, ca
         if (!remains) {
             requireValue(!bulk, 'Bulk save cannot delete posts', 409);
             requireValue(original, 'Deleted candidate document missing', 409);
-            await validatePostDeletion(before, id, original);
             continue;
         }
         const post = await readPost(after, id);
@@ -535,7 +515,7 @@ export async function handleContentRequest(request, { token, config, fetcher, ca
     };
     const writeSourceBlob = async bytes => {
         const text = bytes.toString('utf8');
-        if (bytes.length > MAX_INLINE_FILE || !Buffer.from(text).equals(bytes)) return writeBlob(bytes);
+        if (!atomic && (bytes.length > MAX_INLINE_FILE || !Buffer.from(text).equals(bytes))) return writeBlob(bytes);
         const sha = createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
         blobSizes.set(sha, bytes.length);
         blobBytes.set(sha, bytes);
@@ -638,8 +618,13 @@ export async function handleContentRequest(request, { token, config, fetcher, ca
         if (url.pathname === '/api/content' && request.method === 'POST') {
             const input = await readJson(request);
             const { requestId, baseCommit } = input;
-            uuid(requestId);
             commitSha(baseCommit);
+            atomic = input.saveMode === 'atomic';
+            requireValue(input.saveMode === undefined || atomic, 'Unknown save mode');
+            if (atomic) {
+                requireValue(typeof requestId === 'string' && requestId.startsWith('atomic-'), 'Atomic request namespace required');
+                uuid(requestId.slice(7));
+            } else uuid(requestId);
             const bulk = Object.hasOwn(input, 'operations');
             requireValue(!bulk || !Object.hasOwn(input, 'operation'), 'Choose one operation contract');
             const operations = bulk ? input.operations : [input.operation];
@@ -671,8 +656,8 @@ export async function handleContentRequest(request, { token, config, fetcher, ca
                     receipt: {requestId, payloadHash:digest(JSON.stringify(input)), contentCommit:result.contentCommit}};
             };
             const fingerprint = digest(JSON.stringify(input));
-            const message = `cms-request:${requestId}\npayload-sha256:${fingerprint}`;
-            const existing = await existingCandidate(requestId);
+            const message = `cms-request:${requestId}${atomic ? '\n\n' : '\n'}payload-sha256:${fingerprint}`;
+            const existing = atomic ? null : await existingCandidate(requestId);
             if (existing) {
                 const record = await verifyCandidate(requestId, existing);
                 requireValue(record.message === message && record.parents[0].sha === baseCommit, 'Request ID already used for different content', 409);
@@ -684,8 +669,11 @@ export async function handleContentRequest(request, { token, config, fetcher, ca
                 }
                 return json(await withReceipt(result));
             }
-            requireValue(await head() === baseCommit, 'Canonical branch changed', 409);
+            if (!atomic) requireValue(await head() === baseCommit, 'Canonical branch changed', 409);
             const baseTree = await snapshot(baseCommit);
+            const receiptPath = '.cms/requests/' + requestId + '.json';
+            if (atomic) requireValue(!baseTree.entries.some(entry => entry.path === receiptPath),
+                'Request ID already used for different content', 409);
             const tree = {...baseTree,entries:[...baseTree.entries]};
             const changes = [];
             let allUnchanged = true;
@@ -763,7 +751,6 @@ export async function handleContentRequest(request, { token, config, fetcher, ca
                         requireValue((operation.baseEditorRevision ?? null) === (original?.editorRevision ?? null), 'Editor revision changed', 409);
                     }
                     if (operation.type === 'post.delete') {
-                        await validatePostDeletion(tree, id, original);
                         for (const entry of tree.entries.filter(entry => entry.path.startsWith(`posts/${id}/`)))
                             changes.push({
                                 path: entry.path, mode: entry.mode, type: 'blob', sha: null
@@ -828,6 +815,7 @@ export async function handleContentRequest(request, { token, config, fetcher, ca
                         }
                     }
                 }
+                if (atomic && unchanged) changes.splice(changeStart);
                 allUnchanged = allUnchanged && unchanged;
                 if (bulk) {
                     const entries = new Map(tree.entries.map(entry => [entry.path, entry]));
@@ -838,9 +826,148 @@ export async function handleContentRequest(request, { token, config, fetcher, ca
                     tree.entries = [...entries.values()];
                 }
             }
-            if (allUnchanged) {
+            if (allUnchanged && !atomic) {
                 verifiedSnapshot = baseTree;
                 return json(await withReceipt({state:'unchanged', requestId, contentCommit:baseCommit, publicationPending:true}));
+            }
+            if (atomic) {
+                const entries = new Map(baseTree.entries.map(entry => [entry.path, entry]));
+                const atomicChanges = changes.filter(change => {
+                    const previous = entries.get(change.path);
+                    if (change.sha === null) return Boolean(previous);
+                    return previous?.sha !== change.sha || previous.mode !== change.mode || previous.type !== change.type;
+                });
+                const additions = [];
+                const deletions = [];
+                // Count every destination before allocating base64. Repeated asset
+                // identities share bytes, but each GraphQL destination duplicates them.
+                let encodedBytes = 1024;
+                for (const change of atomicChanges) {
+                    if (change.sha === null) {
+                        encodedBytes += Buffer.byteLength(JSON.stringify({path:change.path})) + 1;
+                    } else {
+                        const bytes = await blob(change.sha);
+                        encodedBytes += 4 * Math.ceil(bytes.length / 3) + Buffer.byteLength(change.path) * 6 + 100;
+                    }
+                }
+                const useGitData = encodedBytes > MAX_WIRE;
+                for (const change of atomicChanges) {
+                    const previous = entries.get(change.path);
+                    if (change.sha !== null && previous?.sha === change.sha && previous.mode === change.mode && previous.type === change.type) continue;
+                    if (change.sha === null) {
+                        entries.delete(change.path);
+                        deletions.push({path: change.path});
+                    } else {
+                        const bytes = await blob(change.sha);
+                        entries.set(change.path, {...change, size: bytes.length});
+                        if (!useGitData) additions.push({path: change.path, contents: bytes.toString('base64')});
+                    }
+                }
+                const proposed = {...baseTree, entries: [...entries.values()]};
+                if (bulk && !allUnchanged) await validatePendingCandidate(baseCommit, baseCommit, true, baseTree, proposed);
+                // Immutable receipts grow with accepted requests. Existing recursive-tree
+                // limits bound repository capacity; a sharded ledger is the upgrade path.
+                const marker = Buffer.from(JSON.stringify({version:1,requestId,payloadHash:fingerprint,baseCommit}));
+                const markerSha = await writeSourceBlob(marker);
+                additions.push({path:receiptPath,contents:marker.toString('base64')});
+                proposed.entries.push({path:receiptPath,sha:markerSha,type:'blob',mode:'100644',size:marker.length});
+                let commit;
+                let canonical;
+                let fallbackResult;
+                const reconcile = async () => {
+                    const recovered = await github('/graphql',{method:'POST',readOnly:true,body:{
+                        query:`query RecoverAtomicSave($owner:String!,$repo:String!,$branch:String!,$path:String!) {
+                          repository(owner:$owner,name:$repo) {
+                            object(expression:$branch) { ... on Commit {
+                              oid file(path:$path) { mode type object { ... on Blob { text byteSize isBinary } } }
+                              history(first:1,path:$path) { nodes { oid message tree { oid } parents(first:2) { nodes { oid } } } }
+                            } }
+                          }
+                        }`,
+                        variables:{owner:config.content.owner,repo:config.content.repo,branch:'refs/heads/'+config.content.branch,path:receiptPath},
+                    }});
+                    if (recovered.errors?.length) throw graphQLError(recovered.errors);
+                    const source = recovered.data?.repository?.object;
+                    requireValue(source && SHA.test(source.oid), 'Invalid reconciliation source', 502);
+                    if (!source.file) {
+                        requireValue(source.oid === baseCommit, 'Canonical branch changed', 409);
+                        return false;
+                    }
+                    const file = source.file;
+                    requireValue(file.type === 'blob' && file.mode === 0o100644 && file.object?.isBinary === false &&
+                        file.object.text === marker.toString('utf8') && file.object.byteSize === marker.length,
+                        'Request ID already used for different content',409);
+                    const record = source.history?.nodes?.[0];
+                    requireValue(record?.message === message && record.parents?.nodes?.length === 1 && record.parents.nodes[0].oid === baseCommit,
+                        'Invalid request provenance',409);
+                    canonical = commitSha(source.oid);
+                    commit = {sha:commitSha(record.oid),message:record.message,tree:{sha:commitSha(record.tree?.oid)},parents:[{sha:baseCommit}]};
+                    return true;
+                };
+                if (request.headers.get('X-Content-Reconcile') === '1') await reconcile();
+                try {
+                    if (!commit && useGitData) {
+                        const uploaded = new Set();
+                        const delta = [...atomicChanges, {path:receiptPath,sha:markerSha,mode:'100644',type:'blob'}];
+                        const treeChanges = [];
+                        let inlineBytes = 0;
+                        for (const change of delta) {
+                            const text = inlineBlobs.get(change.sha);
+                            const escapedBytes = text === undefined ? 0 : Buffer.byteLength(JSON.stringify(text));
+                            if (text !== undefined && Buffer.byteLength(text) <= MAX_INLINE_FILE && inlineBytes + escapedBytes <= MAX_INLINE_TREE) {
+                                inlineBytes += escapedBytes;
+                                const {sha,...entry} = change;
+                                treeChanges.push({...entry,content:text});
+                            } else {
+                                if (text !== undefined && !uploaded.has(change.sha)) {
+                                    await writeBlob(blobBytes.get(change.sha));
+                                    uploaded.add(change.sha);
+                                }
+                                treeChanges.push(change);
+                            }
+                        }
+                        const nextTree = await call('/git/trees',{method:'POST',body:{base_tree:baseTree.treeSha,tree:treeChanges}});
+                        const candidate = await call('/git/commits',{method:'POST',body:{message,tree:nextTree.sha,parents:[baseCommit]}});
+                        commit = {sha:commitSha(candidate.sha),message,tree:{sha:commitSha(nextTree.sha)},parents:[{sha:baseCommit}]};
+                        fallbackResult = await applyCandidate(requestId,commit.sha,baseCommit,true,bulk);
+                    } else if (!commit) {
+                        const response = await github('/graphql', {method:'POST', body:{
+                            query: `mutation AtomicSave($input: CreateCommitOnBranchInput!) {
+                              createCommitOnBranch(input:$input) {
+                                commit { oid message tree { oid } parents(first:2) { nodes { oid } } }
+                              }
+                            }`,
+                            variables:{input:{branch:{repositoryNameWithOwner:config.content.owner+'/'+config.content.repo,branchName:config.content.branch},
+                                expectedHeadOid:baseCommit, message:{headline:message.split('\n')[0],body:message.split('\n').at(-1)},
+                                fileChanges:{additions,deletions},clientMutationId:requestId}},
+                        }});
+                        if (response.errors?.length) {
+                            throw graphQLError(response.errors);
+                        }
+                        const value = response.data?.createCommitOnBranch?.commit;
+                        if (!value || value.message !== message || value.parents?.nodes?.length !== 1 || value.parents.nodes[0].oid !== baseCommit) {
+                            throw Object.assign(httpError(409, 'Invalid atomic source receipt'), {invalidProvenance:true});
+                        }
+                        commit = {sha:commitSha(value.oid),message:value.message,tree:{sha:commitSha(value.tree?.oid)},parents:[{sha:baseCommit}]};
+                    }
+                } catch (error) {
+                    if (error.invalidProvenance || [401,403,422].includes(error.status)) throw error;
+                    if (!await reconcile()) throw error;
+                }
+                // Rebuilding an update generates a new timestamp. A recovered commit
+                // therefore needs its actual immutable files, never the retry's delta.
+                verifiedSnapshot = canonical ? await snapshot(commit.sha)
+                    : {...proposed,commit:commit.sha,record:commit,treeSha:commit.tree.sha};
+                github.prime(content+'/git/commits/'+commit.sha,commit);
+                github.prime(content+'/git/trees/'+commit.tree.sha+'?recursive=1',{truncated:false,tree:verifiedSnapshot.entries});
+                for (const [sha, bytes] of blobBytes) github.prime(content+'/git/blobs/'+sha,{encoding:'base64',content:bytes.toString('base64'),size:bytes.length});
+                const result = {
+                    state:fallbackResult?.state ?? (canonical && canonical !== commit.sha ? 'superseded' : allUnchanged ? 'unchanged' : 'saved'),
+                    requestId,contentCommit:fallbackResult?.contentCommit ?? canonical ?? commit.sha,sourceOnly:true,publicationPending:true,
+                    commitUrl:`https://github.com/${config.content.owner}/${config.content.repo}/commit/${commit.sha}`,
+                };
+                if (result.state === 'superseded') return json(result);
+                return json(await withReceipt(deletionPlan ? {...result,affectedPostIds:deletionPlan.affectedPostIds,deletedPostIds:deletionPlan.deletedPostIds} : result));
             }
             let inlineBytes = 0;
             const treeChanges = [];

@@ -31,6 +31,17 @@ for (index, item) in cases.enumerated() {
   let actual = config.recoveryURL(for: input.flatMap(URL.init(string:)))
   precondition(actual.absoluteString == expected, "Recovery case \\(index) failed")
 }
+let deadline = Date().addingTimeInterval(60)
+precondition(canRetryNativeLogin(statusCode: nil, failureCount: 0, deadline: deadline))
+precondition(canRetryNativeLogin(statusCode: 503, failureCount: 1, deadline: deadline))
+precondition(canRetryNativeLogin(statusCode: 200, transportFailed: true, failureCount: 0, deadline: deadline))
+precondition(canRetryNativeLogin(statusCode: 202, transportFailed: true, failureCount: 0, deadline: deadline))
+precondition(!canRetryNativeLogin(statusCode: 401, transportFailed: true, failureCount: 0, deadline: deadline))
+precondition(!canRetryNativeLogin(statusCode: 503, failureCount: 2, deadline: deadline))
+precondition(!canRetryNativeLogin(statusCode: 401, failureCount: 0, deadline: deadline))
+precondition(!canRetryNativeLogin(statusCode: 403, failureCount: 0, deadline: deadline))
+precondition(!canRetryNativeLogin(statusCode: 410, failureCount: 0, deadline: deadline))
+precondition(!canRetryNativeLogin(statusCode: nil, failureCount: 0, deadline: Date().addingTimeInterval(-1)))
 print("9 navigation recovery cases passed")
 ''')
             executable = folder / "navigation-check"

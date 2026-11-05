@@ -1,0 +1,11 @@
+{
+  "app/server/src/public-content.mjs": "f448e23be98b0e283f20db6344a28f3c3f2e2cda2607a8cbe768ee17f10d22bd",
+  "app/server/src/public-publication.mjs": "12369e146caeb9f4b4f2c68332f1b6db95e636335a91d9b2cb7db903255f48e1",
+  "app/content/scripts/publish-public-content.mjs": "dca6c58d942ee43b548032fbb680f5bd556feacc3050ca30f20f90cf3920dbd3",
+  "app/server/src/content.mjs": "b28af3fc8f4db09366dcf59942c6d7ee0e7a085e501d2a2d95f2d229e7e0eac3",
+  "app/server/src/github.mjs": "4857427b3f9cfd14d2e6298a84b5ffa3903326a4b0c774ae4adf160368c942b5",
+  "tests/e2e/serve-github.mjs": "05376ef7db0473d6cbe4a61ae1f314665c7777b52df205f68dc61dba85763989",
+  "tests/e2e/browser-metrics.js": "230bb66c37ee312a5c90237aaa4cae662973cdaeb19fb005bd7833de65131191",
+  "dist/web/index.html": "230670ac0fef44a99122c12fa295acd1e1da384136f26a75b573668152ebd4c3",
+  "package-lock.json": "6e4f60584ce2a92166d835f42821f842d6565dfd493882722d06c2ec2d2e67ff"
+}

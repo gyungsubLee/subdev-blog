@@ -64,6 +64,36 @@ export function publicRepository(files = {}) {
     }
     const path = pathname.replace('/repos/' + REPOSITORY, '');
     if (path === '/graphql') {
+      if (body.query.startsWith('query RecoverAtomicSave(')) {
+        const oid = refs.get('main');
+        const find = commit => trees.get(commits.get(commit)?.tree.sha)?.find(entry=>entry.path===body.variables.path);
+        const entry = find(oid);
+        let origin = oid;
+        while (entry && commits.get(origin)?.parents?.[0]?.sha && find(commits.get(origin).parents[0].sha)?.sha === entry.sha) origin=commits.get(origin).parents[0].sha;
+        const record=commits.get(origin);
+        const bytes=entry&&blobs.get(entry.sha);
+        return Response.json({data:{repository:{object:{oid,file:entry?{type:'blob',mode:0o100644,object:{text:bytes.toString(),byteSize:bytes.length,isBinary:false}}:null,
+          history:{nodes:entry?[{oid:origin,message:record.message,tree:{oid:record.tree.sha},parents:{nodes:record.parents.map(parent=>({oid:parent.sha}))}}]:[]}}}}});
+      }
+      if (body.query.startsWith('mutation AtomicSave(')) {
+        const input = body.variables.input;
+        const current = refs.get(input.branch.branchName);
+        if (current !== input.expectedHeadOid) return Response.json({errors:[{type:'STALE_DATA'}]});
+        const merged = new Map(trees.get(commits.get(current).tree.sha).map(entry=>[entry.path,entry]));
+        for (const entry of input.fileChanges.deletions) merged.delete(entry.path);
+        for (const entry of input.fileChanges.additions) {
+          const bytes = Buffer.from(entry.contents,'base64');
+          merged.set(entry.path,{path:entry.path,sha:put(bytes),size:bytes.length,type:'blob',mode:'100644'});
+        }
+        const tree = [...merged.values()];
+        const treeSha = sha(JSON.stringify(tree));
+        trees.set(treeSha,tree);
+        const message = input.message.headline+'\n\n'+input.message.body;
+        const oid = sha(JSON.stringify({current,treeSha,message}));
+        commits.set(oid,{sha:oid,message,tree:{sha:treeSha},parents:[{sha:current}]});
+        refs.set(input.branch.branchName,oid);
+        return Response.json({data:{createCommitOnBranch:{commit:{oid,message,tree:{oid:treeSha},parents:{nodes:[{oid:current}]}}}}});
+      }
       if (!body.query.startsWith('query ReadCategories(')) throw Error('Expected category query');
       const commit = refs.get('main');
       const entry = trees.get(commits.get(commit).tree.sha).find(item => item.path === 'categories.json');

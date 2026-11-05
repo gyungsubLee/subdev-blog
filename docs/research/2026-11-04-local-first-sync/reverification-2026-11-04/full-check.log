@@ -1,0 +1,850 @@
+
+> second-brain@0.1.0 check
+> npm run check:version && tsc -b && node --test tests/web/*.test.mjs tests/server/*.test.mjs tests/content/*.test.mjs tests/native/*.test.mjs
+
+
+> second-brain@0.1.0 check:version
+> node scripts/check-version.mjs
+
+Version v0.1.0 is consistent.
+✔ public projections exclude agent metadata and preserve attachment URLs (562.068708ms)
+✔ invalid canonical input preserves the previous public output (253.32775ms)
+✔ public output handles publish failure according to publication outcome (267.054334ms)
+✔ public output handles cleanup failure according to publication outcome (278.912083ms)
+✔ deployment provenance failure preserves the previous public output (640.887167ms)
+✔ Vite emits content identity for local staging and enforces Gitless deployment attestation (2140.766291ms)
+✔ prepare emits a server-only summary catalog keyed by original Git blob identity (402.286333ms)
+✔ rewrites only Markdown destinations and reference definitions (9.078125ms)
+✔ rewrites HTML src href and each srcset candidate while preserving syntax (3.472ms)
+✔ leaves code samples byte identical including nested HTML code and pre (2.788708ms)
+✔ identity resolution preserves every body byte including entities and escapes (0.987042ms)
+✔ preserves escaped HTML and HTML-looking Markdown link titles (0.910291ms)
+✔ splits srcset on decoded separators while preserving source entity spellings (0.46ms)
+✔ written overrides and current public asset bytes survive migration (142.14575ms)
+✔ dry-run leaves inputs untouched and independent staging outputs are deterministic (64.777792ms)
+✔ missing or escaping attachments fail before staging is created (35.016208ms)
+✔ a missing written directory uses the current posts unchanged (25.525ms)
+✔ literal percent in source paths and canonical titles survives URL lookup (78.348125ms)
+✔ percent-encoded-looking raw paths are decoded only at the URL boundary (46.114875ms)
+✔ migration CLI reads assets from the relocated web public directory (575.687334ms)
+✔ editor source is validated separately from attachments (73.909542ms)
+✔ local metadata edits preserve paired source and reject stale body projections (100.056584ms)
+✔ editor source cannot be uploaded or linked as an ordinary attachment (10.816625ms)
+✔ explicit child categories override inherited categories (27.510291ms)
+✔ rejects invalid post relations, duplicate IDs and categories (257.673459ms)
+✔ public projection allowlists fields and uses each original category source only when valid (35.520375ms)
+✔ collects referenced attachments, preserves icon expressions and resolves public links (27.376709ms)
+✔ keeps public attachment URLs as attachments even when they include an existing post ID (15.222625ms)
+✔ rejects missing attachments, decoded traversal and symlink escapes (136.982667ms)
+✔ writes new documents with flat assets and returns root-relative filename (73.233083ms)
+✔ existing writes require current revision and rename only after valid save (49.971875ms)
+✔ failed validation leaves old Markdown and asset bytes unchanged (119.238959ms)
+✔ new IDs cannot clobber an existing folder and folder symlinks are rejected (28.37825ms)
+✔ allows attachment names that coincide with internal staging filenames (42.264542ms)
+✔ metadata-only moves preserve body bytes, IDs and explicit child categories (44.917ms)
+✔ resolves Markdown aliases and known Notion links while retaining block fragments (16.043ms)
+✔ preserves keycap emoji icons from the existing corpus (92.05375ms)
+✔ supports case-only title renames without deleting the replacement (22.763334ms)
+✔ keeps the original source URL in the reader's source link (68.916291ms)
+✔ orders mixed-offset timestamps chronologically and retains the original strings (21.612833ms)
+✔ returns a committed save with a cleanup warning and still releases its lock (72.137917ms)
+✔ publication failure restores old Markdown and removes newly published attachments (31.785208ms)
+✔ retains recovery bytes and the publication cause when rollback cannot restore (42.898ms)
+✔ keeps literal percent filenames and legacy aliases while resolving encoded destinations (10.953417ms)
+✔ does not decode stored percent-encoded-looking aliases into different paths (71.47125ms)
+✔ content checking validates the selected corpus and preserves canonical files (362.7755ms)
+✔ content checking defaults to app content and never falls back to legacy JSON (761.44425ms)
+✔ content checking rejects invalid hierarchy and missing or uninitialized content (823.911334ms)
+✔ export-notion.mjs refuses direct legacy writes for selected and uninitialized canonical content (1563.914916ms)
+✔ repair-markdown.mjs refuses direct legacy writes for selected and uninitialized canonical content (1411.077625ms)
+✔ prepare-web-assets.mjs refuses direct legacy writes for selected and uninitialized canonical content (1223.883291ms)
+✔ import-markdown.mjs refuses direct legacy writes for selected and uninitialized canonical content (1146.1245ms)
+✔ import-markdown.mjs retains its legacy backup-checkout behavior (262.89975ms)
+✔ legacy modules remain importable without reading or writing content (317.540417ms)
+✔ content provenance reports pinned HEAD and accepts an equivalent root path (609.536167ms)
+✔ content provenance rejects ignored canonical post inputs in deployment (689.52675ms)
+✔ content provenance rejects ignored canonical asset inputs in deployment (682.953459ms)
+✔ content provenance allows ignored cache files outside canonical inputs (638.278333ms)
+✔ content provenance enforces deployment cleanliness for CI (583.611291ms)
+✔ content provenance enforces deployment cleanliness for GITHUB_ACTIONS (604.273417ms)
+✔ content provenance enforces deployment cleanliness for VERCEL (812.21575ms)
+✔ content provenance enforces deployment cleanliness for GITHUB_SHA (624.199167ms)
+✔ content provenance enforces deployment cleanliness for VERCEL_GIT_COMMIT_SHA (749.979084ms)
+✔ content provenance rejects a deployment with tracked changes (526.4885ms)
+✔ content provenance rejects a deployment with staged changes (605.48675ms)
+✔ content provenance rejects a deployment with head changes (2218.096208ms)
+✔ content provenance rejects a deployment with index changes (1000.580125ms)
+✔ content provenance rejects a deployment with missing-gitlink changes (897.9285ms)
+✔ content provenance rejects invalid or mismatched supplied commit IDs (479.230959ms)
+✔ content provenance distinguishes Gitless package attestation from local staging (54.903875ms)
+✔ content provenance rejects uninitialized submodules and external deployment roots (439.93325ms)
+✔ validated Markdown is reused only for the original snapshot and source (5.037917ms)
+✔ attachment-free entries need no inventory fields for validation or projection (0.435542ms)
+✔ legacy asset preparation updates the relocated web public directory (350.127958ms)
+✔ editor filename reservation recognizes decoded aliases without breaking ordinary percent names (1.652958ms)
+✔ editor validation preserves notebook children, code settings, links and table cells (1.472958ms)
+✔ editor validation rejects mismatched pairing, unsupported versions and malformed blocks (0.489083ms)
+✔ editor validation bounds nesting and node counts and rejects prototype keys (14.366167ms)
+✔ editor validation checks known property types and keeps unknown JSON properties intact (0.487833ms)
+✔ archived statistics article preserves combined emphasis and inline equations (102.705125ms)
+✔ archived reinforcement article preserves bold ending in parentheses (63.956417ms)
+✔ archived Spring toggle title renders bold rather than literal markers (15.4075ms)
+✔ archived generic table preserves adjacent code runs without added backticks (183.177625ms)
+✔ archived transaction table renders code line breaks instead of br text (34.897334ms)
+✔ bold underline before a Korean suffix (54.331375ms)
+✔ bold beside parentheses (6.787625ms)
+✔ bold retains surrounding whitespace (5.280041ms)
+✔ adjacent bold and highlight runs (5.269291ms)
+✔ intraword italic code (7.082333ms)
+✔ inline code with multiple backticks (4.328208ms)
+✔ adjacent styled code runs (6.072834ms)
+✔ adjacent simple code runs differing only by highlight render as one code element (5.405167ms)
+✔ math annotation code remains separate from adjacent plain code (7.023584ms)
+✔ Notion text keeps literal Markdown punctuation and HTML (7.590958ms)
+✔ inline formulas keep escaped LaTeX in semantic math code (5.599416ms)
+✔ unannotated Notion dollar formulas stay literal in the actual math-enabled reader (5.111125ms)
+✔ Notion math annotations and equation blocks still render as math (22.100375ms)
+✔ links encode attributes without admitting unsafe URLs (6.211125ms)
+✔ offline rendering reuses blocks, metadata, collection rows and all asset source references (15.967333ms)
+✔ offline excerpts decode generated entities while preserving source punctuation (0.254833ms)
+✔ plain and styled Notion source line breaks remain visible in the actual reader (7.049875ms)
+✔ line break conversion covers summaries, lists, table code and captions while preserving fenced and math source (9.463208ms)
+✔ multiline math annotation source in a table retains formula newlines without break elements (3.991958ms)
+✔ fenced code invalid numeric entities survive excerpts without aborting archived rendering (0.178833ms)
+✔ web paths normalize asset destinations without changing page links or literal code examples (0.068208ms)
+✔ stored legacy and unknown statuses remain safe two-state display values (66.453917ms)
+✔ browser OAuth completion retains cookie until the initiating native process acknowledges receipt (28.240958ms)
+✔ repeated starts share an active login; cancellation and expiry invalidate it (0.7405ms)
+✔ OAuth failure reaches the native process without exposing a session (0.537916ms)
+✔ native auth is unavailable outside the local app and rejects cross-origin requests (1.47925ms)
+✔ explicit restart replaces an abandoned browser flow and rejects its late result (1.884959ms)
+✔ a restarted native login cannot reuse an abandoned OAuth challenge from Chrome (3.749416ms)
+development: 20 identical local API requests in 28.5 ms
+preview: 20 identical local API requests in 19.8 ms
+✔ native preview serves built files, its own health token and the existing API (1475.562167ms)
+✔ repeat and concurrent category reads reuse validated data with zero external requests (342.362625ms)
+✔ explicit latest-source refresh replaces the cache without a HEAD request (2.926167ms)
+✔ missing credentials fail closed (1.108167ms)
+✔ missing and forged sessions are rejected (15.526542ms)
+✔ real encrypted cookies enforce expiry, owner, origin and CSRF (2.086708ms)
+✔ connection readiness checks owner repositories and installation (10.346917ms)
+✔ safe GitHub reads recover from connection loss but writes are never retried (252.477ms)
+✔ safe reads recover when the connection fails during the response body (252.483542ms)
+✔ GitHub boundary preserves actionable status while hiding upstream details (0.48275ms)
+✔ installation readiness rejects excess grants and repository selection (0.6965ms)
+✔ existing nondefault app branch cannot report publishing ready (0.419333ms)
+✔ content management accepts Contents-only installations without any Actions query (2.624542ms)
+✔ connection readiness recovers from a transient GitHub content lookup failure (252.116333ms)
+✔ GitHub read retries are bounded and do not retry writes or access failures (754.760875ms)
+✔ explicit read-only GraphQL POST retries connection loss while mutations do not (253.200041ms)
+✔ reads canonical original, preserving exact markdown and revision (24.707417ms)
+✔ authenticated content errors also disable response caching (1.290334ms)
+✔ explicit publication persists tag edits without replacing body or hidden metadata (109.655958ms)
+✔ direct save preserves body, opaque metadata and attachments; retry is idempotent (13.443291ms)
+✔ stale revisions and path escaping IDs fail before candidate creation (2.293625ms)
+✔ uploads validate strict base64, size, SHA and join chunk bytes (1.465542ms)
+✔ category update preserves sources and opaque fields and rejects unclassified deletion (9.637333ms)
+✔ new documents enforce canonical ID and preserve asset data (12.209542ms)
+✔ 5 MiB total chunk ceiling and complete wire ceiling are enforced (117.594042ms)
+✔ no-op updates never create candidate commits (11.251084ms)
+✔ document schema failures return actionable 422 while malformed transport stays 400 (5.397333ms)
+✔ create and update reject malformed asset records before side effects (5.974709ms)
+✔ canonical parent_id category CRUD preserves real source records and opaque metadata (38.130125ms)
+✔ lost canonical PATCH response recovers accepted candidate without duplicate writes (7.024833ms)
+✔ publish GET only reports pending status and authenticated POST alone resumes the candidate (9.481833ms)
+✔ publish rejects a candidate that does not match its immutable request branch (5.898875ms)
+✔ a concurrent sibling save rejects the stale candidate without overwriting canonical (6.712166ms)
+✔ canonical PATCH success is verified against HEAD before claiming saved (6.847417ms)
+✔ a canonical descendant accepts a saved candidate without moving HEAD backwards (8.552791ms)
+✔ post deletion rejects incoming document relations and canonical, Notion, relative and HTML links (31.396542ms)
+✔ post deletion resolves legacy Markdown aliases and permits code examples without live references (12.915958ms)
+✔ category deletion rejects assigned categories and original child relationships (3.069875ms)
+✔ post create and category assignment reject missing references before side effects (4.690792ms)
+✔ body edits read only the target document and category catalog (7.80875ms)
+✔ publish revalidates unaccepted pre-upgrade candidates before applying them (3.235417ms)
+✔ publish rejects retained candidates with paths or modes outside the editable content contract (1.410042ms)
+✔ publish rejects a retained document candidate with a missing category (1.694625ms)
+✔ new asset paths reject unsafe names and portable collisions with canonical assets (4.97675ms)
+✔ publish rejects a retained new post whose parent points to itself (1.129333ms)
+✔ category saves preserve the catalog schema when adding a category (1.12275ms)
+✔ unchanged catalog documents block deletion for full-body references beyond the summary without blob reads (6.0765ms)
+✔ category deletion reuses complete catalog metadata across a large unchanged tree (87.028542ms)
+✔ changed documents bypass stale catalog references and resolve against complete metadata aliases (9.485291ms)
+✔ a direct save refreshes the public index and full body from the accepted commit through the same repository (14.059458ms)
+✔ authored unsafe URLs and encoded paths fail before any candidate writes without reading sibling bodies (13.459ms)
+✔ pending candidates with unsafe authored URLs cannot be applied by POST resume (5.176167ms)
+✔ target URL validation preserves authored bytes, allows missing links and skips code examples (7.257125ms)
+✔ serialized Markdown byte size matches the public runtime two MiB boundary (2668.337084ms)
+✔ oversized pending Markdown and fresh category JSON fail before accepting a candidate (77.965041ms)
+✔ canonical source returns validated editor data and a separate exact-byte revision without exposing an attachment (1.743583ms)
+✔ saves reject invalid or externally desynchronized editor data (2.180875ms)
+✔ authenticated recovery returns exact Markdown and raw broken editor source without allowing overwrite (35.866083ms)
+✔ a block post is created with Markdown and editor JSON in the same Git commit (8.936917ms)
+✔ editor-only settings changes save repeatedly and identical paired files report unchanged (20.075291ms)
+✔ paired updates reject stale editor revisions and a body change without a new editor before writes (4.839417ms)
+✔ metadata-only edits can preserve existing editor bytes with a matching editor revision (8.812334ms)
+✔ reserved editor filenames cannot be uploaded as attachments through case or encoding changes (5.312583ms)
+✔ source inventories reject editor filename aliases instead of exposing them as attachments (1.484416ms)
+✔ publish revalidates editor pairing and allows mutable editor settings on retained candidates (9.718291ms)
+✔ category reads query only the file and save base without separate HEAD or tree requests (0.46025ms)
+✔ confirmed post deletion removes Markdown, editor backup and attachments from the canonical tree only (8.040417ms)
+✔ category move deletes only the category and moves original documents to unclassified atomically (8.529917ms)
+✔ category whole deletion removes assigned originals, inherited posts and assets but preserves unrelated posts (9.26475ms)
+✔ category whole deletion refuses inbound references from surviving categories before writing (2.510709ms)
+✔ category deletion validates mode and preserves unclassified and parent-category protection (1.328667ms)
+✔ unaccepted category move candidates are revalidated before publish resume (11.27675ms)
+✔ unaccepted category delete candidates are revalidated before publish resume (8.076833ms)
+✔ category move candidates cannot rewrite unrelated original title or body (1.887333ms)
+✔ category deletion preserves parent-category protection before any Git write (0.622333ms)
+✔ moving a category reuses metadata catalog and reads only the reassigned original body (75.382375ms)
+✔ save prepares public files before advancing canonical head (6.621375ms)
+✔ generation failure preserves the canonical head and a retryable candidate (8.50875ms)
+✔ category data read retains save conflicts when the canonical branch advances (0.496417ms)
+✔ bulk updates multiple posts with one canonical commit and idempotent retry (11.181958ms)
+✔ bulk category creation and a dependent post share one commit; an invalid operation advances nothing (11.472667ms)
+✔ missing configuration blocks management without exposing secrets (15.767292ms)
+✔ unknown routes stay outside management API (0.312333ms)
+✔ repeated login reuses the pending challenge and stale callbacks preserve cookies (1.803791ms)
+✔ failed matching callback preserves existing session and bounds one-use code exchange (0.829ms)
+✔ PKCE login exchanges code server-side and keeps token encrypted (11.448083ms)
+✔ callback rejects state tampering, cancellation and other identities (1.941166ms)
+✔ both direct and rewritten mutations reject unauthenticated callers (1.3235ms)
+✔ content reads and mutations enforce session owner before repository work (1.667834ms)
+✔ owner mutations require both matching origin and CSRF before repository work (1.311ms)
+✔ slow identity checks cannot extend session past the token expiry (6.045584ms)
+✔ public reads bypass management configuration for direct and rewritten routes (1507.875208ms)
+✔ public reads refuse mutation methods before contacting GitHub (0.272166ms)
+✔ category reads fetch fresh file data without authorization or HEAD queries (19.686125ms)
+✔ content access failures remain visible even with a valid authorized session (3.26875ms)
+✔ changed content head invalidates category lookup even if category bytes are unchanged (1.60175ms)
+✔ session checks use no GitHub requests and content reads independently load current data (1.315208ms)
+✔ direct file lookup preserves rejection of symlink and executable category files (2.491584ms)
+✔ category reads fetch file data once without a HEAD request, including with a stale connection (1.359208ms)
+✔ category query rejects upstream errors, unsafe files and incomplete text without disclosing details (2.855791ms)
+✔ immutable management reads share concurrent work and reuse completed data (15.690083ms)
+✔ mutable permissions and branch refs are never cached; writes always execute (1.603084ms)
+✔ management cache isolates tokens, configurations, fetchers and immutable revisions (0.922208ms)
+✔ failed immutable reads are not retained and can recover (0.706416ms)
+✔ entry, byte and configuration limits evict cached management data (36.03975ms)
+✔ Vercel configuration routes nested API requests and disables automatic Git deployment (3.138208ms)
+Port 5173 is in use, trying another one...
+✔ Vite serves management requests with their method, body and separate cookies (1199.603958ms)
+✔ product areas and site composition follow the documented structure (3.348875ms)
+✔ normal content preparation emits only a server catalog and preserves existing assets (357.460834ms)
+✔ public index reads canonical GitHub content without login or a token (41.223083ms)
+✔ public reads exclude editor source without fetching its private editing payload (7.544292ms)
+✔ public Markdown cannot publish editor source as an attachment (2266.893208ms)
+✔ encoded aliases of the reserved editor filename fail public tree validation (752.448542ms)
+✔ body, cover, icon and attachments remain pinned to the list commit after head advances (8.888416ms)
+✔ a full SHA outside canonical history cannot expose a draft commit (3.249333ms)
+✔ an uncached canonical ancestor can be read after ancestry verification (5.093834ms)
+✔ after bypasses an old head cache and selects the new commit publication (4.917916ms)
+✔ fixed public repository reads do not fetch metadata and tokens stay server-side (3.501708ms)
+✔ invalid request parameters and repository overrides are rejected before network access (1.559959ms)
+✔ GitHub errors are visible and never become a successful empty index or stale snapshot (3.208959ms)
+✔ runtime retains missing authored links but rejects unsafe paths and URL schemes (3019.234666ms)
+✔ generation source reads are bounded in parallel and unsafe trees fail before publication (814.413625ms)
+✔ a generation source failure is surfaced and request deadlines are finite (1505.716833ms)
+✔ anonymous GitHub requests omit credentials and always carry an abort deadline (0.347125ms)
+✔ generated summaries preserve inheritance, links and changed content; detail fetches only its public JSON (12.25025ms)
+✔ content catalog records carry the exact Git blob hash of canonical source bytes (7.848375ms)
+✔ a cached snapshot is denied after canonical history is replaced (5.120417ms)
+✔ a cached ancestor proof is reused only for its current canonical head (4.983958ms)
+✔ production-size indexes use bounded gzip without losing records or summary search text (2034.255875ms)
+✔ explicit gzip rejection overrides wildcards and large identity responses stay bounded (3.563459ms)
+✔ small public responses remain ordinary JSON when gzip is rejected (2.519167ms)
+✔ repeated consumed index responses reuse JSON bytes and remain independently readable (2.60125ms)
+✔ encoded bytes count toward the snapshot budget and trigger eviction on growth (1070.375833ms)
+✔ retention never exceeds three snapshots after new commits (29.953625ms)
+✔ generation projects safe public files and full bodies before publishing an immutable ref (42.146542ms)
+✔ unsafe source fails before the ready ref is created (15.399625ms)
+✔ generation rewrites pinned assets and inherited category without exposing original metadata (3.699834ms)
+✔ the reader serves generated files without touching source Markdown or trees (5.930208ms)
+✔ a missing publication returns 503 instead of generating content in a read (0.71975ms)
+✔ CLI needs explicit publication intent and output mode makes no remote writes (114.124833ms)
+✔ an incomplete existing publication is rejected instead of being reused (3.729458ms)
+✔ a changed source crossing the summary boundary keeps the previous full-transform semantics (4.579916ms)
+✔ large publications upload bounded trees before exposing the complete ref (171.549375ms)
+✔ oversized and escaped generated files use blob upload instead of oversized inline trees (495.575417ms)
+✔ writer cache compresses without changing public JSON and legacy cache still reuses bodies (8.20275ms)
+✔ large JSON chooses the smaller lossless blob encoding (2253.084917ms)
+✔ independent large blobs overlap with a two-upload bound before ready publication (1238.042375ms)
+✔ failed concurrent blob uploads drain in-flight work and never publish a ready ref (812.090375ms)
+✔ matching request-local source snapshots reuse inventory and still validate every source boundary (2.014583ms)
+✔ incremental publication reads one changed source and reuses unchanged JSON blobs (3.956875ms)
+✔ unchanged source push reads no Markdown and reuses every public body (2.0395ms)
+✔ new and deleted link targets regenerate unresolved Markdown/Notion dependents only (10.36025ms)
+✔ an ancestor category change regenerates inheriting children and leaves unrelated bodies reusable (5.51125ms)
+✔ unchanged attachments keep pinned URLs; changed attachment bytes invalidate only their owner (7.165125ms)
+✔ renamed aliases preserve resolved links while removed aliases invalidate dependents (7.031959ms)
+✔ reused graph facts still reject cycles, missing references and unsafe changed content before publication (10.150959ms)
+✔ generation cache excludes arbitrary category metadata as well as document metadata (1.536125ms)
+✔ a verified cache with noncanonical base64 fails before any new publication write (42.677166ms)
+✔ a verified cache with malformed gzip fails before any new publication write (5.8775ms)
+✔ a verified cache with invalid decoded JSON fails before any new publication write (6.381292ms)
+✔ a verified compressed cache cannot decode beyond the public file limit (72.324334ms)
+✔ a wrong concurrent blob SHA drains active uploads and never publishes a ready ref (1421.815292ms)
+✔ validates real commit and rejects noncontent changes and wrong parent (1673.56125ms)
+✔ validates content when the inherited Git tree exceeds one MiB (3185.462542ms)
+✔ source promotion retries, preserves descendants and rejects divergence (2456.0835ms)
+✔ app gitlink moves forward and preserves concurrent app changes (3350.77875ms)
+✔ pre-deletion snapshot blocks Notion inbound links even if candidate removes the link (1126.919ms)
+✔ rejects deleting unclassified and categories with original children or assignments (4800.498916ms)
+✔ deletes a post without inbound references and rejects symbolic links (1624.1395ms)
+✔ failed prospective app verification leaves the remote app branch unchanged (1633.224625ms)
+✔ source advance during verification supersedes the request before the app push (1857.716333ms)
+✔ a concurrent app push rebuilds and reverifies on the new app HEAD (2572.97625ms)
+✔ prospective verification can initialize the exact content submodule (2655.962292ms)
+✔ workflow installs trusted dependencies before running the publication CLI (4.426917ms)
+✔ workflow prepares project settings before source promotion without downloading runtime secrets (2.724833ms)
+✔ workflow uses permitted stored configuration names and preserves CLI environment names (2.64625ms)
+✔ workflow initializes the runner content path at step runtime (10.59575ms)
+✔ preview alias preflight accepts only the optional CMS preview namespace (363.047833ms)
+✔ native network diagnostics expose only bounded error codes and HTTP status (50.338709ms)
+✔ preview alias moves only after all deployed bytes pass verification (2827.834667ms)
+✔ direct save reuses the candidate inventory and freshly prepared publication (51.332708ms)
+✔ a lost PATCH response uses fresh canonical head and the same prepared publication (8.708042ms)
+✔ a superseding canonical commit still prepares its own publication (13.288208ms)
+✔ failed publication keeps canonical unchanged and a new request verifies the retry (10.558458ms)
+✔ a later retry rechecks an existing publication instead of reusing request-local readiness (7.044541ms)
+✔ candidate inventory retains asset sizes and applies renamed paths exactly (15.46075ms)
+✔ login validates grants once and session stays ready without external communication (26.037458ms)
+✔ failed login grants never issue a session (4.327375ms)
+✔ sessions reject legacy cookies, tampering, expiry, excessive lifetime and changed configuration locally (5.389042ms)
+✔ prepare writes only CLI project settings through the project-scoped endpoint (48.021166ms)
+✔ prepare refuses another project or owner before writing settings (3.107625ms)
+✔ alias uses the deployment-scoped REST endpoint and refuses unsafe targets before HTTP (1.0565ms)
+✔ Vercel API failures expose bounded status and code without response secrets (3.19425ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ App loads summaries then the selected body and handles an invalid index (124.926375ms)
+✔ App loads distinct canonical categories sharing a display name (18.580291ms)
+✔ App refreshes the public index after post update and reads the saved body after closing (5067.21775ms)
+✔ App refreshes the public index after post create and reads the saved body after closing (5168.823958ms)
+✔ App refreshes the public index after post delete and reads the saved body after closing (40.91225ms)
+✔ App refreshes public category names after saving canonical categories (5069.552125ms)
+✔ category context menu opens a new writer with its canonical nested category selected (74.688125ms)
+✔ category context menu opens a new writer with its local nested category selected (50.4865ms)
+✔ new writing loads an authenticated base when the public index is unavailable (58.650541ms)
+✔ fragment TOC quotes gain presentation styling without flattening nested lists (69.458583ms)
+✔ a 목차 quote with nonfragment or route links keeps ordinary quote styling (22.98375ms)
+✔ ordinary quote lists require the first meaningful paragraph to be 목차 (5.980292ms)
+✔ a 목차 paragraph without linked list items remains an ordinary quote (5.817583ms)
+✔ mixed TOC and ordinary nested quotes retain normal list presentation (6.487333ms)
+✔ authored quote anchors remain reachable after applying reader styling (6.784375ms)
+✔ the actual statistics TOC preserves every original fragment target (19185.199541ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ article preserves local page links and removes executable HTML (29.803916ms)
+✔ loading article never renders or exports its preview body (2.821667ms)
+✔ article editing requires a ready session and a loaded body (141.866291ms)
+✔ home shows article sections and keeps browser drafts in records (25.070583ms)
+✔ header separates records and category routes while the wordmark opens home (47.512417ms)
+✔ direct article entry returns to home (6.639625ms)
+✔ block and heading anchors stay on the current article route (89.568667ms)
+✔ body-only Markdown keeps text between two horizontal rules (3.869209ms)
+✔ page exploration controls and dialog are absent (47.6735ms)
+✔ original cover has priority over the first body image (2.230042ms)
+✔ reader resolves category labels by canonical ID (6.661125ms)
+✔ reader classifies attachment URLs before resolving article IDs (22.934667ms)
+✔ reader resolves literal percent paths before UUIDs in ancestor folder names (62.632416ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+Warning: KaTeX doesn't work in quirks mode. Make sure your website has a suitable doctype.
+✔ home leaves browsing controls and search shortcuts to records (154.166875ms)
+✔ known sources use approved groups and unknown sources stay navigable (1.246584ms)
+✔ rename, parent move, order and empty categories survive reconciliation (0.121542ms)
+✔ incoming source gets a valid display name without changing source: 새   초안 (0.27925ms)
+✔ incoming source gets a valid display name without changing source: 가가가가가가가가가가가가가가가가가가가가 (0.133917ms)
+✔ incoming source gets a valid display name without changing source: spring ( java ) (0.130167ms)
+✔ an incoming source does not overwrite an existing alias or block catalog saves (0.083666ms)
+✔ blank and truncated incoming names stay unique within the 100-character limit (0.212584ms)
+✔ migrate legacy aliases and preserve sources and order (1.028625ms)
+✔ moving a parent keeps the complete branch and rejects cycles (0.32025ms)
+✔ delete lifts children and retains source ownership across reconciliation (0.39275ms)
+✔ untrusted storage rejects cycles, orphans, duplicate IDs, names and sources (0.191625ms)
+✔ records adapter includes descendant sources and promoted root documents (0.255875ms)
+✔ drag projection can promote a deep node and nest a root without cycling (0.170292ms)
+✔ legacy name collisions migrate without losing IDs, aliases or assignments (0.141959ms)
+✔ canonical category validation permits shared labels but rejects broken public references (0.256458ms)
+✔ moving into a same-named sibling is rejected without changing either branch (0.216125ms)
+✔ approved list edits are staged until save and migrate v1 without overwriting it (82.676709ms)
+✔ keyboard branch moves preserve sources and undo across category page round trips (47.447583ms)
+✔ delete confirms, lifts children and retains source ownership without changing posts (41.704583ms)
+✔ failed storage save keeps draft, undo history and original settings (25.503416ms)
+✔ blank, duplicate and long names never alter a draft (22.105083ms)
+✔ corrupt v2 settings are preserved and source reassignment is rejected (21.16525ms)
+✔ pointer drag promotes a source category and clears the insertion marker on drop (15.188916ms)
+✔ a saved deletion can be undone and saved even when undo empties history (24.564167ms)
+✔ canonical categories initialize labels and personal v1/v2 settings overlay without ID-named nodes (15.827375ms)
+✔ corrupt personal settings use canonical labels while preserving bytes and blocking save (5.11625ms)
+✔ record filtering includes the complete category branch and source-bearing roots (13.996584ms)
+✔ selected root follows its ID through nesting and promotion (3.641875ms)
+✔ content saves outlive the generation deadline while explicit cancellation is preserved (0.630792ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ public articles render while authentication is pending and writing requires login (39.973791ms)
+✔ category management is hidden when authentication is unavailable, including direct entry (6.301167ms)
+✔ public records keep category filters and hide management links without login (35.486584ms)
+✔ logging out an expired session restores public controls and login (19.785542ms)
+✔ direct publication succeeds without polling and clears a stale retry error (72.4895ms)
+✔ legacy publication checks resolve without an Actions run and stop after publication (30.598209ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ canonical title edits preserve Markdown and CSRF then refresh the published commit (5099.049417ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ a failed canonical save retains the edited source for reauthentication (5086.219083ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ new-post retries after reopening retain their original identity and request (10363.951375ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ existing-post retries after reopening retain their original identity and request (10071.140416ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ canonical category retries retain edits, original sources and request identity (5075.864791ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ a lost deletion response can be retried after the source has disappeared (75.31475ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ attachment names with parentheses produce an intact Markdown destination (69.934916ms)
+✔ writing opens an empty local draft without fetching a GitHub source (5137.006584ms)
+✔ a new records category reaches the writer and is created only when its post is published (5105.965209ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ content workspace is reachable only after authorization (53.200834ms)
+✔ workspace keeps public content separate from recovery drafts and filters local edits (17.429958ms)
+✔ workspace migrates legacy draft status labels and preserves malformed recovery bytes (9.579125ms)
+✔ confirmed newly published recovery resolves to one public row without removing its backup (6.894583ms)
+✔ a published draft keeps its canonical identity and recovery key after further edits (10.740292ms)
+✔ workspace pages contain at most fifteen rows and filters restart from page one (79.660584ms)
+✔ category filters include descendants and preserve the empty state (34.634667ms)
+✔ workspace reuses category dialog and keeps category before search (29.498084ms)
+✔ unrecognized legacy categories agree with the unclassified count and filter (13.8085ms)
+✔ category dialog stays open in StrictMode and Escape preserves the filter (15.885041ms)
+✔ double-click confirms the clicked category immediately while expanders stay open (30.046292ms)
+✔ post deletion waits for modal confirmation and removes canonical source plus recovery (18.979833ms)
+✔ failed deletion preserves content and retries identical request after reopening (16.534ms)
+✔ local-only draft deletion clears stored draft without a canonical request (10.628166ms)
+✔ a newly published recovery deletes its canonical identity before the index catches up (14.027166ms)
+✔ delete modal blocks duplicate submission and Escape while the request is in flight (10.486ms)
+✔ saving preserves other drafts and updates an existing draft once (0.624583ms)
+✔ corrupt existing storage is never overwritten (0.181875ms)
+✔ storage quota error reaches the caller (0.190333ms)
+✔ Markdown export retains content and quotes frontmatter (0.171125ms)
+✔ batch source deletion clears only matching canonical recovery aliases and legacy drafts (0.6265ms)
+▶ real React editor mounts, saves, imports, exports, and opens the slash menu
+  ✔ Markdown import updates real blocks and autosaved title/category (886.807ms)
+  ✔ JSON backup imports nested blocks and code settings without flattening (779.376166ms)
+  ✔ MD and JSON download buttons export the current live document (10.193208ms)
+  ✔ slash menu inserts a notebook whose text and formatting survive save and reopen (1161.189875ms)
+✔ real React editor mounts, saves, imports, exports, and opens the slash menu (3680.442ms)
+✔ home shows four newest published articles without mutating archive order (62.411125ms)
+✔ home keeps small archives usable and places undated articles last (11.139083ms)
+✔ home explains an empty published archive and links to records (6.640625ms)
+✔ exported Markdown restores title, category, IDs and body without a duplicate H1 (5.400167ms)
+✔ an unrelated first heading remains in the body (0.529958ms)
+✔ plain Markdown imports its first heading as the document title (0.083ms)
+✔ invalid backup metadata fails before the document can be replaced (0.744792ms)
+✔ horizontal rules do not discard the enclosed body (0.433084ms)
+✔ tag-only patches round-trip and preserve untouched content metadata (5.454125ms)
+✔ canonical metadata survives a Markdown round trip (3.313958ms)
+✔ full documents default optional metadata while preserving their first H1 (0.666459ms)
+✔ valid unknown-only YAML mappings are metadata and leave body bytes intact (0.902292ms)
+✔ invalid metadata fails before callers replace existing text (2.296584ms)
+✔ known canonical fields reject invalid values and missing required fields (3.715666ms)
+✔ non-mapping frontmatter remains ordinary Markdown (0.34975ms)
+✔ legacy source_id wins over a draft alias while schema 1 rejects conflicting IDs (0.707125ms)
+✔ legacy ID fallback ignores an invalid source alias and normalizes valid UUIDs (0.168542ms)
+✔ full edit exports carry base_revision outside canonical metadata (1.765792ms)
+✔ patch round trips require only editable fields and add no full metadata defaults (0.662375ms)
+✔ patch merge checks revision and identity then preserves hidden and unedited fields (0.326166ms)
+✔ canonical filenames are portable NFC names bounded by UTF-8 bytes (1.388792ms)
+✔ a no-op patch preserves the existing modification date (0.174541ms)
+✔ serialization rejects non-JSON extension values and protected nested keys (0.282833ms)
+✔ canonical IDs and references normalize hex case while accepting corpus UUID versions (1.068167ms)
+✔ legacy invalid ID aliases do not become canonical document identities (0.197542ms)
+✔ shared extension objects serialize as JSON values without YAML aliases (1.068583ms)
+✔ patch headers validate supplied known metadata before discarding non-editable fields (0.52225ms)
+✔ truncated whitespace suffixes cannot expose a Windows device name (0.731084ms)
+✔ truncated whitespace-only prefixes use the empty-title fallback (0.278917ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ approved editor keeps draft save local and renders the two-state writing controls (145.772917ms)
+✖ category action precedes preview and shows the assigned name or empty label (96.668417ms)
+✔ new GitHub posts use the notebook editor and save one paired Markdown/block snapshot (5083.022625ms)
+✔ GitHub editor JSON restores toggle children and code settings without browser drafts (5164.147042ms)
+✔ legacy Markdown stays byte-for-byte unchanged until block conversion is chosen (5025.26875ms)
+✔ malformed block recovery data stays intact and cannot silently become a new document (3.795667ms)
+✔ legacy conversion requires explicit confirmation and then saves both formats (5054.382792ms)
+✔ image uploads preview locally while the saved block and Markdown use a stable relative path (5394.677084ms)
+✔ source image previews resolve against the content commit without changing stored URLs (5089.407916ms)
+✔ closing editor shortcuts never submits an enclosing save form (70.656542ms)
+✔ bare sibling image names resolve to the pinned source asset without rewriting the stored URL (5074.170666ms)
+✔ simultaneous sibling uploads preserve every pending attachment (5131.438542ms)
+✔ staggered sibling uploads preserve every pending attachment (5141.332625ms)
+✔ invalid GitHub editor JSON permits exact original exports and blocks all fallback saves (10.758625ms)
+✔ recovery import restores metadata and pending/source attachments into the fresh target identity (5145.179875ms)
+✔ recovery import rejects unsafe attachment ../outside.png 5 (40.924625ms)
+✔ recovery import rejects unsafe attachment %2565ditor.json 5 (39.715958ms)
+✔ recovery import rejects unsafe attachment good.png 5 (40.563709ms)
+✔ recovery import rejects unsafe attachment good.png 6291456 (36.844958ms)
+✔ Cmd/Ctrl+S saves recovery data and prevents browser Save Page without posting to GitHub (27.569292ms)
+✔ cached recovery opens without downloading a damaged remote editor or rewriting its backup (20.566917ms)
+✖ tags, category cancellation and reader controls preserve local-only drafts (53.202458ms)
+✔ invalid imported tags preserve the current blocks and recovery bytes (38.442375ms)
+✔ a published local draft resumes with canonical identity and sends update (10086.055ms)
+✔ editor confirms a category double-click through the shared dialog without publishing (51.986ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ prior category tree UI renames canonical records and retries identical request after 401 (10313.340209ms)
+✔ canonical deletion confirms then saves the original immediately, preserving protected records (45.319833ms)
+✔ failed category deletion retains the row and retries the same request (39.017375ms)
+✔ signed out management renders nothing and never requests canonical content (1.30375ms)
+✔ existing keyboard tree movement serializes canonical parent and sibling order (5127.733792ms)
+✔ malformed saved canonical records keep their bytes and fall back to safe source nodes (14.304792ms)
+✔ canonical counts include stable category IDs and aliases once without changing sources (6.667416ms)
+✔ local drafts neither count nor block deletion of canonical categories (16.370083ms)
+✔ a rejected category deletion releases its request so a refreshed source can be retried (21.687125ms)
+✔ assigned category deletion selects move then requires a separate final confirmation (21.42625ms)
+✔ assigned category deletion selects delete then requires a separate final confirmation (26.686875ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ session reads share an in-flight request in StrictMode and manual refresh (28.752458ms)
+✔ temporary network loss recovers once; permission failures are not retried (355.881541ms)
+✔ online and focus recover blocked sessions with event throttling and cleanup (2.88975ms)
+✔ logout invalidates a delayed ready response (2.697792ms)
+✔ HTML and null access denials keep their status and never retry (1411.515167ms)
+✔ deadline during retry backoff leaves checking and cleanup aborts owned requests (2.938458ms)
+✔ underlined Notion text retains its semantic underline (63.609916ms)
+✔ toggle summaries preserve nested semantic formatting and safe links (12.191542ms)
+✔ inline Markdown formulas render accessible math beside surrounding text (40.419875ms)
+✔ block Markdown formulas render display math outside code blocks (36.699125ms)
+✔ formulas exported inside an HTML summary render inline (52.545875ms)
+✔ table inline code preserves explicit line breaks and literal punctuation (14.539625ms)
+✔ untrusted HTML and URLs remain sanitized while safe content survives (14.027417ms)
+✔ math rendering does not trust URL or HTML macros (34.588542ms)
+✔ published code captions and wrapping use only explicitly allowed attributes (17.675875ms)
+✔ reader color attributes admit only the installed palette and supported alignment (7.898667ms)
+✔ notebook slash insertion keeps editing and saved formatting inside its frame (224.666375ms)
+✔ Markdown preserves notebook content, nested lists, inline formatting and code line breaks (95.91725ms)
+✔ ordinary documents retain native Markdown and notebook HTML remains sanitized (14.337625ms)
+✔ a notebook nested in an ordered list preserves numbering and its parent on import (23.087833ms)
+✔ notebook headings have distinct reader anchors and matching TOC entries (18.21575ms)
+✔ a toggle keeps its notebook and preceding text after Markdown import (10.952416ms)
+✔ ordinary toggles and code settings survive Markdown publication without a notebook (15.643042ms)
+✔ adjacent toggles remain independent expandable sections (15.56475ms)
+✔ published formatting retains the editor palette, alignment and semantic underline (22.664708ms)
+✔ toggle headings publish as expandable headings with their nested body (10.070084ms)
+▶ Notion input rules change real BlockNote blocks and preserve the native rules
+  ✔ "> " (58.685209ms)
+  ✔ "\" " (17.75075ms)
+  ✔ "[] " (11.432709ms)
+  ✔ "a. " (11.379667ms)
+  ✔ "i. " (10.59425ms)
+  ✔ "## " (13.459417ms)
+  ✔ "- " (9.292292ms)
+  ✔ "1. " (9.260667ms)
+  ✔ "```js " (11.071917ms)
+✔ Notion input rules change real BlockNote blocks and preserve the native rules (154.221041ms)
+▶ Notion block shortcuts use Cmd+Option and Ctrl+Shift with the same digit contract
+  ✔ {"metaKey":true,"altKey":true} 0 (9.40275ms)
+  ✔ {"metaKey":true,"altKey":true} 1 (10.856875ms)
+  ✔ {"metaKey":true,"altKey":true} 2 (7.331167ms)
+  ✔ {"metaKey":true,"altKey":true} 3 (6.731833ms)
+  ✔ {"metaKey":true,"altKey":true} 4 (7.263041ms)
+  ✔ {"metaKey":true,"altKey":true} 5 (6.765834ms)
+  ✔ {"metaKey":true,"altKey":true} 6 (9.482459ms)
+  ✔ {"metaKey":true,"altKey":true} 7 (7.747292ms)
+  ✔ {"metaKey":true,"altKey":true} 8 (6.869792ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 0 (6.587041ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 1 (8.11075ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 2 (8.689708ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 3 (6.536208ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 4 (6.893875ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 5 (6.35875ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 6 (6.886666ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 7 (10.612875ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 8 (7.617083ms)
+✔ Notion block shortcuts use Cmd+Option and Ctrl+Shift with the same digit contract (142.186209ms)
+✔ Cmd/Ctrl+E applies inline code and preserves text (9.138833ms)
+✔ composition key events do not convert the current block (6.807541ms)
+✔ native code blocks keep Markdown markers as code text (7.047541ms)
+✔ native undo reverses a Notion input conversion (12.304458ms)
+✔ Cmd/Ctrl+D duplicates a block and nested children with fresh IDs (8.900583ms)
+✔ Cmd/Ctrl+D duplicates all selected blocks once (7.057209ms)
+✔ native Cmd/Ctrl+Shift+Arrow moves the current block (8.226542ms)
+✔ custom code blocks retain language, caption and wrapping in JSON (63.5665ms)
+✔ Cmd+Option+0 turns code back into a paragraph without losing code text (7.943625ms)
+✔ block conversion leaves image blocks intact (10.026375ms)
+✔ Mac Option digit symbols still use the Notion shortcut mapping (10.968375ms)
+✔ typing a code caption updates saved props before blur and keeps the focused input (21.865208ms)
+✔ the same wrap button toggles code wrapping on and off (30.640708ms)
+✔ undo synchronizes the native language picker with persisted code props (19.324042ms)
+✔ TOC labels show semantic HTML heading text without literal tags (52.255708ms)
+✔ TOC labels decode exported punctuation after removing formatting (9.029125ms)
+✔ TOC labels keep existing Markdown emphasis behavior (7.151125ms)
+✔ TOC labels leave malformed or invalid entities readable without throwing (5.733ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ a remounted public view renders stored data without waiting for or repeating the index download (35.648083ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+Warning: KaTeX doesn't work in quirks mode. Make sure your website has a suitable doctype.
+✔ records filters and visible count survive article and home roundtrips (263.73525ms)
+✔ overview adds retain dialog, scroll and disclosures; blank menu is scoped; selection closes (90.654791ms)
+✔ ordinary edits are direct; undo/redo are confirmed and native input undo stays native (34.5945ms)
+✔ global category has no menu and writer receives the category from overview (16.818875ms)
+✔ tag gaps retain projected child DOM, cache valid targets and reject gap drops (1633.830959ms)
+✔ outside/descendant cancels projection and Escape cleans sidebar floating feedback (643.237ms)
+✔ same names in different parents are valid; duplicate siblings and failed storage saves are atomic (40.664292ms)
+✔ a released long hold stays armed for the next drag and blank clicks cancel it (1257.161792ms)
+✔ sidebar browsing preserves category filters and visible count (141.094958ms)
+✔ sidebar group selection and pagination include every matching record once (68.969541ms)
+✔ removed selections fall back to all records and an empty catalog offers writing (29.573625ms)
+✔ record cards use canonical ID labels while source filters include new and moved posts (13.660375ms)
+✔ sidebar preserves managed hierarchy without duplicate roots or synthetic whole-category controls (44.516875ms)
+✔ 5-second debounce coalesces unsent versions and sends one immutable bulk request (7.456292ms)
+✔ another coordinator cannot duplicate an in-flight batch, and later edits survive old response (1.0405ms)
+✔ a lost response retains the same payload and resumes after reload without duplicate identity (0.908ms)
+✔ daily cleanup verifies receipts and never deletes failed, pending or mismatched data (2.5995ms)
+✔ discarding one conflict retains other documents as blocked recoverable saves (0.779792ms)
+✔ cleanup preserves remotely confirmed payloads until their local recovery state is applied (1.938667ms)
+✔ repeated saves coalesce without growing callback or pending queues; capacity rejects only the new request (27.476208ms)
+✔ transient retry schedule is5,15,60 seconds and then stops; manual retry reuses the frozen batch (2.116125ms)
+✔ a superseded lost-response retry cannot attach the latest revision to an older operation (0.529792ms)
+✔ oversized saves and a full retained history stop new work without deleting older requests (14.427417ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:33:17:
+      33 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:32:4:
+      32 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ restart applies confirmed recovery data, and late older receipts cannot overwrite a newer baseline (17.962208ms)
+✔ theme preferences reject unknown or corrupt storage and tolerate blocked storage (21.796667ms)
+✔ palette and accent persist independently and leave layout tokens untouched (43.019042ms)
+✔ all offered palette/accent combinations retain readable text and buttons (18.972459ms)
+✔ shared trigger opens a native dialog, applies colors, reopens and resets without rerendering its parent (128.986959ms)
+✔ settings icon follows logout in the shared site header (34.116959ms)
+✔ first-post category creation preserves a lost-response request but refreshes a definite conflict (1.831666ms)
+ℹ tests 574
+ℹ suites 0
+ℹ pass 572
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 72034.397958
+
+✖ failing tests:
+
+test at tests/web/managed-block-editor.test.mjs:187:1
+✖ category action precedes preview and shows the assigned name or empty label (96.668417ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  '분류 없음' !== '기록'
+  
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:196:14
+      at mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:130:11)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:189:5)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '분류 없음',
+    expected: '기록',
+    operator: 'strictEqual'
+  }
+
+test at tests/web/managed-block-editor.test.mjs:791:1
+✖ tags, category cancellation and reader controls preserve local-only drafts (53.202458ms)
+  AssertionError [ERR_ASSERTION]: cancel must retain the current category
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:813:12
+      at async mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:130:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:792:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }

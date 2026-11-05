@@ -1,0 +1,126 @@
+{
+  "measuredAt": "2026-11-04T11:52:49.568Z",
+  "credential": "existing GitHub CLI credential; same owner and token for both versions",
+  "samples": [
+    {
+      "label": "before",
+      "sample": 1,
+      "ms": 1407.86,
+      "status": 200,
+      "count": 48,
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "calls": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/ref/heads/main",
+          "method": "GET",
+          "status": 200,
+          "ms": 435.92
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/commits/ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+          "method": "GET",
+          "status": 200,
+          "ms": 313.2
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/trees/809a93b3fe84d8df6d24f8761e876ef70a5c1479",
+          "method": "GET",
+          "status": 200,
+          "ms": 339.35
+        },
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/blobs/0a33eeab4d849c87f5f3aed38903fd82af314e0e",
+          "method": "GET",
+          "status": 200,
+          "ms": 313.54
+        }
+      ]
+    },
+    {
+      "label": "before",
+      "sample": 2,
+      "ms": 349.98,
+      "status": 200,
+      "count": 48,
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "calls": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/ref/heads/main",
+          "method": "GET",
+          "status": 200,
+          "ms": 349.11
+        }
+      ]
+    },
+    {
+      "label": "before",
+      "sample": 3,
+      "ms": 839.27,
+      "status": 200,
+      "count": 48,
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "calls": [
+        {
+          "path": "/repos/gyungsubLee/subdev-blog-content/git/ref/heads/main",
+          "method": "GET",
+          "status": 200,
+          "ms": 838.46
+        }
+      ]
+    },
+    {
+      "label": "after",
+      "sample": 1,
+      "ms": 2243.08,
+      "status": 200,
+      "count": 48,
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "calls": [
+        {
+          "path": "/graphql",
+          "method": "POST",
+          "status": 200,
+          "ms": 444.6
+        }
+      ]
+    },
+    {
+      "label": "after",
+      "sample": 2,
+      "ms": 617.33,
+      "status": 200,
+      "count": 48,
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "calls": [
+        {
+          "path": "/graphql",
+          "method": "POST",
+          "status": 200,
+          "ms": 458.26
+        }
+      ]
+    },
+    {
+      "label": "after",
+      "sample": 3,
+      "ms": 552.53,
+      "status": 200,
+      "count": 48,
+      "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "contentCommit": "ae379ba3db9279e04fd12befb1b757091fbdbcb5",
+      "calls": [
+        {
+          "path": "/graphql",
+          "method": "POST",
+          "status": 200,
+          "ms": 481.3
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,376 @@
+{
+  "apiRows": [
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 7.687792000000627,
+      "bytes": 22
+    },
+    {
+      "path": "/api/public?kind=index",
+      "method": "GET",
+      "status": 200,
+      "ms": 1640.8687079999982,
+      "bytes": 1297456,
+      "contentCommit": "17397ef27e1f8dc4ecc8b5fec0ed678f6e723500",
+      "posts": 3033
+    },
+    {
+      "path": "/api/auth/github",
+      "method": "GET",
+      "status": 302,
+      "ms": 3.2358339999991586,
+      "bytes": 0
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 3.164959000001545,
+      "bytes": 217
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operation": "post.create",
+      "status": 200,
+      "ms": 167595.506541,
+      "bytes": 361,
+      "sourceMarkdownReads": 3034,
+      "githubWrites": 26,
+      "githubCalls": 3079
+    },
+    {
+      "path": "/api/public?kind=index&after=99497b73108215436bc42461f5c43d0cf09ba224",
+      "method": "GET",
+      "status": 200,
+      "ms": 1667.7909999999974,
+      "bytes": 1297731,
+      "contentCommit": "99497b73108215436bc42461f5c43d0cf09ba224",
+      "posts": 3034
+    },
+    {
+      "path": "/api/content?kind=post&id=0a9063d1-6227-42f3-93ef-799d23435d29",
+      "method": "GET",
+      "status": 200,
+      "ms": 5617.32587499998,
+      "bytes": 6818
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operation": "post.delete",
+      "status": 200,
+      "ms": 21368.555500000017,
+      "bytes": 361,
+      "sourceMarkdownReads": 0,
+      "githubWrites": 9,
+      "githubCalls": 33
+    },
+    {
+      "path": "/api/public?kind=index&after=2b20a61e8e58f953ba95104a66f64608c7b382f0",
+      "method": "GET",
+      "status": 200,
+      "ms": 2380.628916000016,
+      "bytes": 1297480,
+      "contentCommit": "2b20a61e8e58f953ba95104a66f64608c7b382f0",
+      "posts": 3033
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operation": "post.create",
+      "status": 200,
+      "ms": 22277.334959,
+      "bytes": 361,
+      "sourceMarkdownReads": 1,
+      "githubWrites": 11,
+      "githubCalls": 32
+    },
+    {
+      "path": "/api/public?kind=index&after=1b6df5d40c88dddf1808e0f8fdcd0fd6020aab1a",
+      "method": "GET",
+      "status": 200,
+      "ms": 1765.2473750000354,
+      "bytes": 1297766,
+      "contentCommit": "1b6df5d40c88dddf1808e0f8fdcd0fd6020aab1a",
+      "posts": 3034
+    },
+    {
+      "path": "/api/content?kind=post&id=5dbf6fc4-7b82-4767-9ad2-ea2427cf6e14",
+      "method": "GET",
+      "status": 200,
+      "ms": 2686.347167,
+      "bytes": 6834
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operation": "post.update",
+      "status": 200,
+      "ms": 20731.414875000017,
+      "bytes": 361,
+      "sourceMarkdownReads": 1,
+      "githubWrites": 10,
+      "githubCalls": 33
+    },
+    {
+      "path": "/api/public?kind=index&after=1a759aef2a95fa63531e0f3435f94b0c171bc2aa",
+      "method": "GET",
+      "status": 200,
+      "ms": 1871.9910839999793,
+      "bytes": 1297772,
+      "contentCommit": "1a759aef2a95fa63531e0f3435f94b0c171bc2aa",
+      "posts": 3034
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 3.6309580000815913,
+      "bytes": 217
+    },
+    {
+      "path": "/api/public?kind=post&id=5dbf6fc4-7b82-4767-9ad2-ea2427cf6e14&commit=1a759aef2a95fa63531e0f3435f94b0c171bc2aa",
+      "method": "GET",
+      "status": 200,
+      "ms": 425.19437499996275,
+      "bytes": 801
+    },
+    {
+      "path": "/api/content?kind=post&id=5dbf6fc4-7b82-4767-9ad2-ea2427cf6e14",
+      "method": "GET",
+      "status": 200,
+      "ms": 3803.712124999962,
+      "bytes": 6848
+    },
+    {
+      "path": "/api/content",
+      "method": "POST",
+      "operation": "post.delete",
+      "status": 200,
+      "ms": 28206.90887500008,
+      "bytes": 361,
+      "sourceMarkdownReads": 0,
+      "githubWrites": 9,
+      "githubCalls": 33
+    },
+    {
+      "path": "/api/public?kind=index&after=c79fdcc047ce9f0e13210bda19b059f7cb9f3a66",
+      "method": "GET",
+      "status": 200,
+      "ms": 1846.376707999967,
+      "bytes": 1297480,
+      "contentCommit": "c79fdcc047ce9f0e13210bda19b059f7cb9f3a66",
+      "posts": 3033
+    },
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 12.148207999998704,
+      "bytes": 217
+    }
+  ],
+  "browserRows": [
+    {
+      "event": "home-ready",
+      "hash": "#/",
+      "at": 2461.0999999996275,
+      "elapsedMs": 2461.0999999996275,
+      "longTaskMs": 131,
+      "domReadyMs": 2084.5999999996275,
+      "resources": [
+        {
+          "name": "/api/session",
+          "duration": 11.799999998882413,
+          "transferSize": 322
+        },
+        {
+          "name": "/api/public?kind=index",
+          "duration": 1733.9000000003725,
+          "transferSize": 1297756
+        }
+      ]
+    },
+    {
+      "event": "image-loaded",
+      "hash": "#/",
+      "at": 2473,
+      "elapsedMs": 2473,
+      "longTaskMs": 465,
+      "src": "/gyungsubLee/subdev-blog-content/17397ef27e1f8dc4ecc8b5fec0ed678f6e723500/posts/3f2eda9b-0fe1-80ac-b96a-e01c777509c2/fb3b1ee7da4a15e0.webp",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "event": "images-complete",
+      "hash": "#/",
+      "at": 2476,
+      "elapsedMs": 2476,
+      "longTaskMs": 465,
+      "images": 1,
+      "failed": 0
+    },
+    {
+      "event": "home-ready",
+      "hash": "#/",
+      "at": 387.7000000011176,
+      "elapsedMs": 387.7000000011176,
+      "longTaskMs": 0,
+      "domReadyMs": 345.5,
+      "resources": [
+        {
+          "name": "/api/session",
+          "duration": 15.400000000372529,
+          "transferSize": 517
+        }
+      ]
+    },
+    {
+      "event": "image-loaded",
+      "hash": "#/",
+      "at": 389.5,
+      "elapsedMs": 389.5,
+      "longTaskMs": 0,
+      "src": "/gyungsubLee/subdev-blog-content/17397ef27e1f8dc4ecc8b5fec0ed678f6e723500/posts/3f2eda9b-0fe1-80ac-b96a-e01c777509c2/fb3b1ee7da4a15e0.webp",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "event": "images-complete",
+      "hash": "#/",
+      "at": 390,
+      "elapsedMs": 390,
+      "longTaskMs": 0,
+      "images": 1,
+      "failed": 0
+    },
+    {
+      "event": "editor-ready",
+      "hash": "#/",
+      "at": 5354.5,
+      "elapsedMs": 5354.5,
+      "longTaskMs": 659,
+      "domReadyMs": 5329.200000001118,
+      "resources": [
+        {
+          "name": "/api/session",
+          "duration": 15.400000000372529,
+          "transferSize": 517
+        }
+      ]
+    },
+    {
+      "event": "home-ready",
+      "hash": "#/content",
+      "at": 230369.70000000112,
+      "elapsedMs": 176.60000000149012,
+      "longTaskMs": 1607,
+      "domReadyMs": 230151.70000000112,
+      "resources": [
+        {
+          "name": "/api/session",
+          "duration": 15.400000000372529,
+          "transferSize": 517
+        },
+        {
+          "name": "/api/content",
+          "duration": 167619.8999999985,
+          "transferSize": 661
+        },
+        {
+          "name": "/api/public?kind=index&after=99497b73108215436bc42461f5c43d0cf09ba224",
+          "duration": 1735.300000000745,
+          "transferSize": 1298031
+        }
+      ]
+    },
+    {
+      "event": "workspace-ready",
+      "hash": "#/content",
+      "at": 230380.70000000112,
+      "elapsedMs": 187.60000000149012,
+      "longTaskMs": 1607,
+      "domReadyMs": 30.700000001117587,
+      "resources": [
+        {
+          "name": "/api/session",
+          "duration": 15.400000000372529,
+          "transferSize": 517
+        },
+        {
+          "name": "/api/content",
+          "duration": 167619.8999999985,
+          "transferSize": 661
+        },
+        {
+          "name": "/api/public?kind=index&after=99497b73108215436bc42461f5c43d0cf09ba224",
+          "duration": 1735.300000000745,
+          "transferSize": 1298031
+        }
+      ]
+    },
+    {
+      "event": "editor-ready",
+      "hash": "#/content",
+      "at": 374168,
+      "elapsedMs": 143974.90000000037,
+      "longTaskMs": 3266,
+      "domReadyMs": 143882.80000000075,
+      "resources": [
+        {
+          "name": "/api/session",
+          "duration": 15.400000000372529,
+          "transferSize": 517
+        },
+        {
+          "name": "/api/content",
+          "duration": 167619.8999999985,
+          "transferSize": 661
+        },
+        {
+          "name": "/api/public?kind=index&after=99497b73108215436bc42461f5c43d0cf09ba224",
+          "duration": 1735.300000000745,
+          "transferSize": 1298031
+        },
+        {
+          "name": "/api/content?kind=post&id=0a9063d1-6227-42f3-93ef-799d23435d29",
+          "duration": 5620.700000001118,
+          "transferSize": 7118
+        },
+        {
+          "name": "/api/content",
+          "duration": 21374.699999999255,
+          "transferSize": 661
+        },
+        {
+          "name": "/api/public?kind=index&after=2b20a61e8e58f953ba95104a66f64608c7b382f0",
+          "duration": 2642.800000000745,
+          "transferSize": 1297780
+        }
+      ]
+    },
+    {
+      "event": "post-ready",
+      "hash": "#/post/5dbf6fc4-7b82-4767-9ad2-ea2427cf6e14",
+      "at": 3499.5999999996275,
+      "elapsedMs": 3499.5999999996275,
+      "longTaskMs": 1792,
+      "domReadyMs": 3428.800000000745,
+      "resources": [
+        {
+          "name": "/api/session",
+          "duration": 7,
+          "transferSize": 517
+        },
+        {
+          "name": "/api/public?kind=post&id=5dbf6fc4-7b82-4767-9ad2-ea2427cf6e14&commit=1a759aef2a95fa63531e0f3435f94b0c171bc2aa",
+          "duration": 430.30000000074506,
+          "transferSize": 1101
+        }
+      ]
+    }
+  ]
+}

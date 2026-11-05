@@ -23,11 +23,12 @@ export function sendApi<T>(
   value: unknown,
   csrfToken: string,
   signal?: AbortSignal,
+  headers: Record<string, string> = {},
 ): Promise<T> {
   return requestApi<T>(path, {
     method: "POST",
     signal: signal ?? (path === "/api/content" ? AbortSignal.timeout(300000) : undefined),
-    headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken },
+    headers: { ...headers, "Content-Type": "application/json", "x-csrf-token": csrfToken },
     body: JSON.stringify(value),
   });
 }

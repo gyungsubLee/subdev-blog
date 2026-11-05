@@ -1,0 +1,33 @@
+✔ source save batches small UTF8 files and does no public generation (39.44375ms)
+✔ a lost PATCH response recovers the same source without public writes (5.2385ms)
+✔ a superseding canonical commit is reported without preparing public data (4.175041ms)
+✔ public generation failure cannot block source save or duplicate its retry (3.831792ms)
+✖ publication status stays saved until a complete immutable artifact is verified (12.448417ms)
+✔ bulk receipt reuses verified candidate inventory and locally authored bytes (7.360125ms)
+✔ immutable source reads are reused while canonical heads stay fresh (1.499666ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 6
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 295.273541
+
+✖ failing tests:
+
+test at tests/server/save-reuse.test.mjs:100:1
+✖ publication status stays saved until a complete immutable artifact is verified (12.448417ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 502
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/save-reuse.test.mjs:116:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 502,
+    operator: 'strictEqual'
+  }

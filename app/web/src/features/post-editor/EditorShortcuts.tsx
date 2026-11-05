@@ -1,3 +1,4 @@
+import Button from "../../components/button/Button";
 const shortcuts = [
   ["/", "블록 메뉴 열기"],
   ["# · ## · ### + Space", "제목 1 · 2 · 3"],
@@ -18,9 +19,9 @@ export default function EditorShortcuts({ onClose }: { onClose: () => void }) {
     <aside className="editor-shortcuts" aria-label="작성 단축키">
       <div className="editor-shortcuts-heading">
         <strong>익숙한 방식으로 쓰세요.</strong>
-        <button type="button" onClick={onClose} aria-label="단축키 닫기">
+        <Button type="button" onClick={onClose} aria-label="단축키 닫기">
           ×
-        </button>
+        </Button>
       </div>
       <dl>
         {shortcuts.map(([key, value]) => (

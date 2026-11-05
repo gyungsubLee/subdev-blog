@@ -1,0 +1,34 @@
+{
+  "recordedAt": "2026-11-04T10:38:41.332983+00:00",
+  "head": "41c8fe9cd63092846a770b7f870402afacafe7d9",
+  "sha256": {
+    "app/server/src/handler.mjs": "1d1d50528ec98c7c33426377d4b8d40ed5b277deb05393457a86d499dba58001",
+    "app/server/src/auth.mjs": "870786c1d786b60e02891a4fcbbe89566dbf84b39bac19810339f602e4d0de3a",
+    "app/server/src/github.mjs": "77aaa75f298090ed5377e7c1bfeaab733d25bfb31cce9ab99cbd199794aa8881",
+    "app/server/src/native-auth.mjs": "f618132403701d23d07aba5a2d166737f77362f6666a0e412e25e059a528cf7e",
+    "app/server/src/management-read-cache.mjs": "c3806abe6669df5adf2251974001ca50398f1c1b3fe220f923e76ada04045b5f",
+    "app/native/SecondBrain.swift": "2d7174ad5bb332a8c96a66e8fc925f7eb9b98628efbf95fabdca0b71b854ff9b",
+    "app/web/src/features/content-management/useManagement.ts": "939c7c38e914a2be3e4ead9e006ab399a4ecc13c7302c83c535e52c6380045d9",
+    "app/web/src/features/content-management/api.ts": "10d893a0fa7d9b51a8d0d7d1fb9675cbbf69126d79c920e0839e76d28ead9f1b",
+    "app/web/src/components/layout/SiteHeader.tsx": "488d047b351376d046fe64772bec45400caced30c2434152df5e4ea67e2fc75b",
+    "package-lock.json": "6e4f60584ce2a92166d835f42821f842d6565dfd493882722d06c2ec2d2e67ff",
+    "vite.config.ts": "43e314c6411b6d47112e0e44e7bf4c5ea193c0b9dd5a838de94b0066648e6801",
+    "docs/research/2026-11-04-github-auth/diagnostics.test.mjs": "f42ae1b850ecfe1c421bc07fd8e1b655e60c29c0e948b784fb23f5fede660d58",
+    "tests/server/github-auth.test.mjs": "703ef3c5952b7ef98c15de2dcc78271f08b610f5e94ac2cadab767d328dbde3b",
+    "tests/server/management-api.test.mjs": "66ad41e631dcc56e6931c74ef4d3f2cd73c5d83d2535fc9a58f612b5ee3ac9f7",
+    "tests/native/native-auth.test.mjs": "82b63974ed70b2885d494d1c704d6e09fd0a7dde2e2e495899b8f17d835dc757"
+  },
+  "node": "v24.3.0",
+  "command": "node --test docs/research/2026-11-04-github-auth/diagnostics.test.mjs tests/server/github-auth.test.mjs tests/server/management-api.test.mjs tests/native/native-auth.test.mjs",
+  "exitCode": 0,
+  "tests": 31,
+  "pass": 31,
+  "fail": 0,
+  "durationMs": 1140.62375,
+  "limits": [
+    "Local native and Chrome login succeeded with an already authorized GitHub account.",
+    "Live timings use the current source in a separate process with genuine session handoff and real GitHub responses.",
+    "Six diagnostic tests characterize current failure mechanisms; no fix applied.",
+    "No production, first-consent, one-hour idle, or restart verification."
+  ]
+}

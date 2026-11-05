@@ -1,0 +1,31 @@
+{
+  "/api/public?kind=index": [
+    {
+      "side": "before",
+      "bytes": 5560675,
+      "sha256": "59913a53d66a177ae383165bf04abb58a2721b074465ee33edb0e3ddc6fb23fb"
+    },
+    {
+      "side": "after",
+      "bytes": 5560675,
+      "sha256": "59913a53d66a177ae383165bf04abb58a2721b074465ee33edb0e3ddc6fb23fb"
+    }
+  ],
+  "/api/public?kind=post&id=3f4eda9b-0fe1-8004-89ff-c68ec5620797&commit=ae379ba3db9279e04fd12befb1b757091fbdbcb5": [
+    {
+      "side": "before",
+      "bytes": 35694,
+      "sha256": "ba9556bcc6eb2a403a5b565f36903b6cc5e3f9a4396984165b8bde7ebc468e93"
+    },
+    {
+      "side": "after",
+      "bytes": 35694,
+      "sha256": "ba9556bcc6eb2a403a5b565f36903b6cc5e3f9a4396984165b8bde7ebc468e93"
+    }
+  ],
+  "normalRuntime": {
+    "status": 200,
+    "noBrowserCookie": true,
+    "noPublicTokenConfigured": true
+  }
+}

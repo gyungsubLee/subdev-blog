@@ -1,0 +1,16 @@
+{
+  "base": "9c7a699f3ec2b2e1839fd1371baf52eabd5eca30",
+  "commit": "624cdbaa2076bb4db83839fb67985fa4838168b3",
+  "branch": "codex/public-content-generator-20261104",
+  "files": [
+    "app/server/src/public-publication.mjs"
+  ],
+  "sourceHashes": {
+    "app/server/src/public-publication.mjs": "543b23a22be9c9f82a9de06ee3bce46c26a425038b25c12f3d6f1067e342c2a5"
+  },
+  "authority": "Current user explicitly approved exact generator branch and pin update after automatic approval review rejected historical approval",
+  "state": "published",
+  "verifiedGenerator": "624cdbaa2076bb4db83839fb67985fa4838168b3",
+  "verifiedPin": "624cdbaa2076bb4db83839fb67985fa4838168b3",
+  "applicationMain": "27441173f257769add825aea596f7080d282e1ca"
+}

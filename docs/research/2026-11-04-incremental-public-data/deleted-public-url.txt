@@ -1,0 +1,25 @@
+Browser tab: 1490590618, Title: "Second Brain — 경섭의 기록", URL: "http://127.0.0.1:58643/#/post/5dbf6fc4-7b82-4767-9ad2-ea2427cf6e14".
+1 AXWebArea Second Brain — 경섭의 기록, URL: 127.0.0.1:58643/#/post/5dbf6fc4-7b82-4767-9ad2-ea2427cf6e14
+	2 container root
+		3 link Description: 본문으로 이동, Value: 127.0.0.1:58643/#main-content
+		4 container
+			5 link Description: Second Brain 홈, Value: 127.0.0.1:58643/#/
+			6 container 주 메뉴
+				7 link Description: 기록 관리, Value: 127.0.0.1:58643/#/records
+				8 link Description: 콘텐츠 관리, Value: 127.0.0.1:58643/#/content
+				9 link Description: 카테고리 관리, Value: 127.0.0.1:58643/#/categories
+			10 button 글 쓰기
+			11 button 로그아웃
+			12 pop up button (collapsed) Description: 설정, Secondary Actions: Expand
+		13 container main-content
+			14 text PAGE NOT FOUND
+			15 heading 글을 찾지 못했습니다., Value: 1
+				16 text 글을 찾지 못했습니다.
+			17 text 주소를 확인하거나 전체 글에서 다시 선택하십시오.
+			18 link Description: 전체 글 보기, Value: 127.0.0.1:58643/#/
+		19 container
+			20 link Description: Second Brain., Value: 127.0.0.1:58643/#/
+			21 text 배운 것을 기록하고, 기록한 것을 연결합니다.
+			22 button 맨 위로 ↑
+
+The focused UI element is 1 AXWebArea Second Brain — 경섭의 기록, URL: 127.0.0.1:58643/#/post/5dbf6fc4-7b82-4767-9ad2-ea2427cf6e14

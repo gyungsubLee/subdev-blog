@@ -1,0 +1,28 @@
+✖ prepared atomic save uses one CAS mutation and local source receipt (70.012917ms)
+✔ lost mutation response and retry reconcile without duplicate apply (14.782375ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 540.468333
+
+✖ failing tests:
+
+test at tests/server/atomic-save.test.mjs:12:1
+✖ prepared atomic save uses one CAS mutation and local source receipt (70.012917ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  8 !== 1
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/atomic-save.test.mjs:12:219)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 8,
+    expected: 1,
+    operator: 'strictEqual'
+  }

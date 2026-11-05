@@ -1,0 +1,21 @@
+{
+  "phase": "deleted",
+  "at": "2026-11-04T12:57:28.603Z",
+  "contentCommit": "c79fdcc047ce9f0e13210bda19b059f7cb9f3a66",
+  "publicationCommit": "608a37b8fabb2f684cf2fd928584d9f394eb6c6f",
+  "postCount": 3033,
+  "testPosts": [],
+  "publicationVerified": true,
+  "generation": {
+    "generatedPosts": 0,
+    "reusedPosts": 3033,
+    "cacheBytes": 2650012
+  },
+  "actualInventory": {
+    "reusedBodies": 3033,
+    "changedBodies": 0,
+    "removedBodies": 1
+  },
+  "originalFilesUnchanged": true,
+  "sourceFileCount": 10294
+}

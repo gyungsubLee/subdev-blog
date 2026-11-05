@@ -1,0 +1,8 @@
+{
+  "signaledTaskPids": [
+    49461
+  ],
+  "signal": "SIGTERM",
+  "existingPreviewPid": 41523,
+  "existingPreviewPreserved": true
+}

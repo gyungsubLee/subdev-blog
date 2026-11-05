@@ -1,0 +1,38 @@
+{
+  "measuredAt": "2026-11-04T14:26:35.892936+00:00",
+  "head": "a25208d8a5965f9688a6ecbb0d5be5ac26cc9a92",
+  "environment": {
+    "node": "v24.3.0",
+    "browser": "connected Chrome 156; macOS",
+    "readBenchmark": "one disposable post, API latency 350ms; real GitHub reads reported separately"
+  },
+  "sourceSha256": {
+    "app/server/src/content.mjs": "56957f503c720f1967b77ba7f0033dcb09be35350962f330a514bd3c94eb057c",
+    "app/server/src/management-read-cache.mjs": "0234e69fa867c1ff4bc02dee3339f2cdeb42cd2caa497ad5fb845fe56b437cc4",
+    "app/web/src/features/content-management/sync-core.mjs": "8892375744443cab5c14d9fc10cbdc78b50d66a13f30693eed852531d58b9517",
+    "app/web/src/features/content-management/sync-store.mjs": "68ca0c7e99bc350b843c2335fcb803aaf43b5b9ae4fc30e5b473365d7c884646",
+    "app/web/src/features/content-management/background-sync.mjs": "59abad62e2cc330d2120fb6640a3b75745c9241a8b2e47f299e6ee72bf08210f",
+    "app/web/src/features/content-management/sync-cleanup.worker.mjs": "9b7db1aab418e86464c157ee00779560f3b03fe88666f550a4681f045208a847",
+    "app/web/src/features/content-management/ManagedPostEditor.tsx": "bb79e22a186d8d7e90b14258914c86a514c5d0bd5827504981a2f759fb29a205",
+    "app/web/src/features/content-management/ManagedCategories.tsx": "b20c6d30e835c04251561d88feba3d8d9672a09ecff03a12fa080c12d88f484a",
+    "app/web/src/features/content-management/useManagement.ts": "5b4a92f49b47284c015174b4cd90491360835e6e53e6b0c4eeb2a2e575f254db",
+    "app/web/src/features/content-management/PublishStatus.tsx": "a082f56766af60db523ca3c09c7768874508d5de1e937480416a71ad857e6bdf",
+    "app/web/src/features/content-management/types.ts": "fe64f556ac74321a654753639077e65f5088748ce75a806d5d8115bbe2618b30",
+    "app/web/src/site/usePosts.ts": "57c9214397d8d9b527360bfa426c368d9ea0bf432fb7d116f58d8af1eb3ca413",
+    "app/web/src/site/public-cache.ts": "72e2c648ced100fd7d9d60185c96455ea4c65110e511f790cf1df00184263337",
+    "package-lock.json": "6e4f60584ce2a92166d835f42821f842d6565dfd493882722d06c2ec2d2e67ff",
+    "tests/web/sync-core.test.mjs": "bee21215a18b3e3187a4f13e967fe3f84bb5d756e67984fe704459155a0998e5",
+    "tests/web/sync-recovery.test.mjs": "f968244d44d442e24d5492c7a91a2743b10acbd2f2b1a87b9e0d13c8323c0013",
+    "tests/e2e/local-first-bulk.test.mjs": "fc7b5e1f5911d932d6e4bc12e961121a482853af1c7e697c83e3a4294de510f8"
+  },
+  "checks": {
+    "full": "full-check.log: 554/556 before final targeted recovery/capacity fixes; two pre-existing category editor failures",
+    "functional": "functional-check.log: 46/46; covers actual save callers and cache flow",
+    "bounds": "bounds-check.log:11/11; 256MiB Node heap, external30s deadline; RSS report unavailable",
+    "latestRecovery": "recovery-final.log:1/1 after final optimistic timestamp correction",
+    "http": "http-e2e.log:1/1; three serial vs one atomic bulk commit",
+    "build": "build.log: final build passed",
+    "whitespace": "git diff --check: exit0"
+  },
+  "reuse": "Only reuse when affected source/dependency/config/environment inputs remain unchanged. Final digest is not an assertion that earlier full-suite execution used the final bytes."
+}

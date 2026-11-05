@@ -1,0 +1,41 @@
+{
+  "recordedAt": "2026-11-04T11:13:54.869082+00:00",
+  "baseline": "a25208d8a5965f9688a6ecbb0d5be5ac26cc9a92",
+  "sha256": {
+    "app/server/src/handler.mjs": "b725cdef308dc8a0ab4ffd9fc75e5ab1e3fc747e192bbf7fe2e6355b3ba6e376",
+    "app/server/src/native-auth.mjs": "a2ad2a0ac525fd46d9617a6ba16644e5caec1863b89bc3867792a25911986629",
+    "app/server/src/github.mjs": "d896f9ac2f29567ba223ee71f00deeb0b7d6bfdab38f0208203b5de35651652f",
+    "app/web/src/features/content-management/useManagement.ts": "cfb1184a3d1357a33b2b735fba32137f663b88e046d30bab218e4f6cb954317d",
+    "app/web/src/features/content-management/api.ts": "9cbba3d5bfdb5e68ed4dea2423c306622f7623e197925daa41138303624471c0",
+    "app/web/src/components/layout/SiteHeader.tsx": "488d047b351376d046fe64772bec45400caced30c2434152df5e4ea67e2fc75b",
+    "app/native/SecondBrain.swift": "9e09a5940723733844541a6d63436c5c5a9e7a4a942bc659d233d7fc0e9b1a11",
+    "dist/web/index.html": "230670ac0fef44a99122c12fa295acd1e1da384136f26a75b573668152ebd4c3",
+    "dist/native/Second Brain.app/Contents/MacOS/SecondBrain": "552be3dc92a1885367061ffc302362f75bf8e93286c69abf57872f8a57744cbc"
+  },
+  "matchesPreviousAuthFix": {
+    "app/server/src/handler.mjs": true,
+    "app/server/src/native-auth.mjs": true,
+    "app/server/src/github.mjs": true,
+    "app/web/src/features/content-management/useManagement.ts": true,
+    "app/web/src/features/content-management/api.ts": true,
+    "app/native/SecondBrain.swift": true,
+    "dist/web/index.html": false,
+    "dist/native/Second Brain.app/Contents/MacOS/SecondBrain": true
+  },
+  "command": "python subprocess watchdog15s: node docs/research/2026-11-04-github-auth/retest/compare.mjs",
+  "exitCode": 0,
+  "productEditsThisInvestigation": false,
+  "realChecks": [
+    "native refresh: transient login link then ready without signing in",
+    "native protected categories:48 loaded before logout",
+    "logout: protected categories blocked",
+    "native fresh login: stuck waiting; reload did not restart",
+    "current Chrome OAuth and protected categories:48 loaded; native handoff still waiting"
+  ],
+  "limits": [
+    "No live content writes/deletes",
+    "Initial missing native callback cause unconfirmed; no per-state server logs",
+    "No real1hour expiry test",
+    "No strict performance comparison"
+  ]
+}

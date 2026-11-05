@@ -1,0 +1,95 @@
+{
+  "complete": true,
+  "singleRequestVerified": true,
+  "immediateDispatchVerified": true,
+  "checks": [
+    {
+      "owner": "root",
+      "target": "sync-core.test.mjs",
+      "passed": 16,
+      "deadlineSeconds": 30,
+      "log": "core-final.log"
+    },
+    {
+      "owner": "root",
+      "target": "sync-recovery.test.mjs management-recovery.test.mjs content-api.test.mjs",
+      "passed": 14,
+      "deadlineSeconds": 60,
+      "log": "recovery.log"
+    },
+    {
+      "owner": "root",
+      "target": "npm run build (tsc -b + vite build)",
+      "exit": 0,
+      "deadlineSeconds": 180,
+      "log": "build.log"
+    },
+    {
+      "owner": "root",
+      "target": "analyzer self-check + scoped diff check",
+      "exit": 0
+    },
+    {
+      "owner": "independent reviewer",
+      "target": "immediate dispatch callers/invariants",
+      "result": "approved",
+      "log": "review.md"
+    }
+  ],
+  "realMeasurement": {
+    "titleSamples": 3,
+    "githubCallsPerPreparedSave": [
+      1,
+      1,
+      1
+    ],
+    "before": {
+      "durableNotificationMs": 6.2999999998137355,
+      "independentDurableReadMs": 110.40000000037253,
+      "enqueueMs": 109.40000000037253,
+      "uiPaintMs": 151.20000000018626,
+      "queueIncludingDebounceMs": 5018,
+      "clickToSourceMs": 6682,
+      "remoteExcludingDebounceMs": 1611
+    },
+    "after": {
+      "durableNotificationMs": 7,
+      "independentDurableReadMs": 206.7999999988824,
+      "enqueueMs": 206.2999999988824,
+      "uiPaintMs": 249.59999999962747,
+      "queueIncludingDebounceMs": 15.099999999627471,
+      "clickToSourceMs": 1619.2999999988824,
+      "remoteExcludingDebounceMs": 1581
+    },
+    "clickToSourceImprovementPercent": 75.76623765341391,
+    "successfulExistingWorkflows": 5,
+    "exactReceiptProofs": true,
+    "originalFileShasMatch": true,
+    "beforeFiles": 10297,
+    "afterFiles": 10302,
+    "posts": 3032,
+    "sourceBindings": {
+      "files": 18,
+      "changedPaths": [],
+      "missingPaths": [],
+      "matches": true
+    }
+  },
+  "cleanup": {
+    "ownedServerPid": 66585,
+    "ownedPort": 64692,
+    "closed": true,
+    "tabClosed": true,
+    "preexistingPreviewPid": 20697,
+    "preexistingPreviewPort": 5173,
+    "preexistingPreviewPreserved": true
+  },
+  "limits": [
+    "Control-page paint median151.2→249.6ms increased; first sample1300.5ms retained. Environmental cause not established; no UI performance preservation claim.",
+    "Full React editor, large browser queue memory, actual24hour idle and whole suite not reverified.",
+    "Server HTTP scope unchanged, previous real accepted-recovery evidence retained; actual network packet loss not re-injected.",
+    "Initial create3prep reads +1mutation; recovery and oversized fallback may use multiplecalls.",
+    "Existing INDEX size, build warnings and unowned public-files.mjs blank EOF preserved."
+  ],
+  "scope": "Only remove initial save debounce and legacy dueAt wait; retry5/15/60s, duplicate prevention, conflict/recovery and workflow retained. No deploy/commit/push."
+}

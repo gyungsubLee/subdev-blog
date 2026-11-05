@@ -1,0 +1,14 @@
+development: 20 identical local API requests in 19.5 ms
+preview: 20 identical local API requests in 10.4 ms
+✔ native preview serves built files, its own health token and the existing API (1082.39775ms)
+✔ Vercel configuration routes nested API requests and disables automatic Git deployment (3.234958ms)
+Port 5173 is in use, trying another one...
+✔ Vite serves management requests with their method, body and separate cookies (727.4145ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1272.193917

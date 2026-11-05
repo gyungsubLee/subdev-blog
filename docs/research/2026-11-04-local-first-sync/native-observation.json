@@ -1,0 +1,10 @@
+{
+  "server": "http://127.0.0.1:5173",
+  "status": 200,
+  "posts": 3033,
+  "handlerAndTransportMs": 584.324083,
+  "observed": "Final native app restart; initial blank document cleared by Home; home and repeat refresh rendered existing UI",
+  "nativeWriteTested": false,
+  "networkCountOnNativeRefresh": "not measured",
+  "screenshot": "native-cache-home.png"
+}

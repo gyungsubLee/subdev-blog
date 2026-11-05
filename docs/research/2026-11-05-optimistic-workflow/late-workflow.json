@@ -1,0 +1,22 @@
+{
+  "id": 41959633003,
+  "url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/41959633003",
+  "headSha": "fc5e526e770990ad3e294bf126b850a6ac00e6d0",
+  "attempt": 1,
+  "conclusion": "success",
+  "oldSource": "6429b63738535b3013177c0ae0e44a00d20d73e8",
+  "beforeReady": "fc5e526e770990ad3e294bf126b850a6ac00e6d0",
+  "afterReady": "fc5e526e770990ad3e294bf126b850a6ac00e6d0",
+  "afterHead": "fc5e526e770990ad3e294bf126b850a6ac00e6d0",
+  "result": {
+    "sourceCommit": "6429b63738535b3013177c0ae0e44a00d20d73e8",
+    "publicationCommit": "c362439b6f7bf6d90cbff93adcd14d392aab2939",
+    "state": "superseded"
+  },
+  "calls": 15,
+  "writes": 0,
+  "requestBytes": 0,
+  "decodedResponseBytes": 2665576,
+  "watchExit": 0,
+  "passed": true
+}

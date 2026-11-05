@@ -1,0 +1,172 @@
+{
+  "sameSourceHashes": true,
+  "sameContentCommit": true,
+  "sameIndexDigest": true,
+  "previousFirstIndexMs": 5172,
+  "rerun": [
+    {
+      "label": "cold-index",
+      "handlerMs": 5072.7,
+      "networkCriticalApproxMs": 2607.2,
+      "stages": [
+        {
+          "stage": "validateContent",
+          "ms": 2064.2410409999998
+        },
+        {
+          "stage": "toPublicPosts",
+          "ms": 134.72095799999988
+        },
+        {
+          "stage": "serialize+gzip",
+          "ms": 152.19537499999933
+        }
+      ]
+    },
+    {
+      "label": "warm-index-1",
+      "handlerMs": 0.4,
+      "networkCriticalApproxMs": 0,
+      "stages": [
+        {
+          "stage": "serialize+gzip",
+          "ms": 0.012375000000247383
+        }
+      ]
+    },
+    {
+      "label": "warm-index-2",
+      "handlerMs": 0.4,
+      "networkCriticalApproxMs": 0,
+      "stages": [
+        {
+          "stage": "serialize+gzip",
+          "ms": 0.00820800000019517
+        }
+      ]
+    },
+    {
+      "label": "warm-index-3",
+      "handlerMs": 0.4,
+      "networkCriticalApproxMs": 0,
+      "stages": [
+        {
+          "stage": "serialize+gzip",
+          "ms": 0.008334000000104425
+        }
+      ]
+    },
+    {
+      "label": "first-post",
+      "handlerMs": 248.8,
+      "networkCriticalApproxMs": 220,
+      "stages": [
+        {
+          "stage": "serialize+gzip",
+          "ms": 0.24933299999975134
+        }
+      ]
+    },
+    {
+      "label": "cached-post-1",
+      "handlerMs": 17.1,
+      "networkCriticalApproxMs": 0,
+      "stages": [
+        {
+          "stage": "serialize+gzip",
+          "ms": 0.20229100000051403
+        }
+      ]
+    },
+    {
+      "label": "cached-post-2",
+      "handlerMs": 13.3,
+      "networkCriticalApproxMs": 0,
+      "stages": [
+        {
+          "stage": "serialize+gzip",
+          "ms": 0.20320900000024267
+        }
+      ]
+    },
+    {
+      "label": "cached-post-3",
+      "handlerMs": 11.8,
+      "networkCriticalApproxMs": 0,
+      "stages": [
+        {
+          "stage": "serialize+gzip",
+          "ms": 0.22762499999953434
+        }
+      ]
+    },
+    {
+      "label": "cold-index-2",
+      "handlerMs": 2477.5,
+      "networkCriticalApproxMs": 402.6,
+      "stages": [
+        {
+          "stage": "validateContent",
+          "ms": 1829.2411659999998
+        },
+        {
+          "stage": "toPublicPosts",
+          "ms": 43.62287499999911
+        },
+        {
+          "stage": "serialize+gzip",
+          "ms": 131.09662500000013
+        }
+      ]
+    },
+    {
+      "label": "cold-index-3",
+      "handlerMs": 2302.1,
+      "networkCriticalApproxMs": 308.7,
+      "stages": [
+        {
+          "stage": "validateContent",
+          "ms": 1749.3717500000002
+        },
+        {
+          "stage": "toPublicPosts",
+          "ms": 43.750332999999955
+        },
+        {
+          "stage": "serialize+gzip",
+          "ms": 130.61662500000057
+        }
+      ]
+    },
+    {
+      "label": "cold-index-with-network-replayed",
+      "handlerMs": 1978.8,
+      "networkCriticalApproxMs": 0,
+      "stages": [
+        {
+          "stage": "validateContent",
+          "ms": 1738.1978340000005
+        },
+        {
+          "stage": "toPublicPosts",
+          "ms": 43.09229099999902
+        },
+        {
+          "stage": "serialize+gzip",
+          "ms": 129.84708299999875
+        }
+      ]
+    },
+    {
+      "label": "post-with-network-replayed",
+      "handlerMs": 8.1,
+      "networkCriticalApproxMs": 0,
+      "stages": [
+        {
+          "stage": "serialize+gzip",
+          "ms": 0.1882499999992433
+        }
+      ]
+    }
+  ]
+}

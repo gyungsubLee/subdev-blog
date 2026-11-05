@@ -1,0 +1,14 @@
+{
+  "before": "624cdbaa2076bb4db83839fb67985fa4838168b3",
+  "commit": "e763d9adf0e07f77a1b0177895674f08922f9122",
+  "tree": "74bac56f55dc2931aa662f33d134b7aee4bd5c49",
+  "paths": [
+    "app/server/src/public-publication.mjs",
+    "app/content/scripts/publish-public-content.mjs"
+  ],
+  "appMain": "27441173f257769add825aea596f7080d282e1ca",
+  "branch": "codex/public-content-generator-20261104",
+  "verifiedBranch": "e763d9adf0e07f77a1b0177895674f08922f9122",
+  "verifiedPin": "e763d9adf0e07f77a1b0177895674f08922f9122",
+  "verifiedAppMain": "27441173f257769add825aea596f7080d282e1ca"
+}

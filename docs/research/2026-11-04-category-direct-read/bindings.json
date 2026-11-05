@@ -1,0 +1,16 @@
+{
+  "recordedAt": "2026-11-04T12:00:41.158500+00:00",
+  "root": "/Users/igyeongseob/Develop/10_harness/subdev-blog",
+  "sha256": {
+    "app/server/src/content.mjs": "5505d11297232ce3e90d882f909e24061bf967945e88fc0b8f1faf3dce45de9a",
+    "app/server/src/github.mjs": "4857427b3f9cfd14d2e6298a84b5ffa3903326a4b0c774ae4adf160368c942b5",
+    "tests/server/github-content.test.mjs": "b6d41c67d80457e993240721794394b52d982220158c9d757ad5da5628f30ba3",
+    "tests/server/management-category-read.test.mjs": "8b27c7b9738b9ba3ff18484f6a742818b072d27c7ea242e58a611190c898f9c3",
+    "tests/server/github-auth.test.mjs": "b309cf1b609757016315cc97838b045a1bc46c688a40f1fba00d769752e24de8",
+    "tests/support/management-category-fixture.mjs": "bc13354c1e2e41504b3b2a761fd2fa57f2d869a1cf0dcba8eafd0f7fc65d6a4e",
+    "tests/support/public-repository.mjs": "d1f8b9edc71365dbeda94ce26aef1766fb37678f111e234bd33d83f78414f72b",
+    "package-lock.json": "6e4f60584ce2a92166d835f42821f842d6565dfd493882722d06c2ec2d2e67ff",
+    "dist/web/build-info.json": "4e66f08d3910553500d20561acff6dea12afd1f4df5c89e57f1b45898291f99f",
+    "docs/research/2026-11-04-category-direct-read/compare-live.mjs": "7390bd35785cc3fdba9f08708f937055c349e3938717eb7b41d7683c83d283fc"
+  }
+}

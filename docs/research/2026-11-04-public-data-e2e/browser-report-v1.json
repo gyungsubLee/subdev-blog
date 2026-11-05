@@ -1,0 +1,988 @@
+{
+  "before": {
+    "bootstrap": {
+      "sourceCommit": "9f99941c6b650c70f363208cd97c7191ef785a46",
+      "artifact": null,
+      "ms": 53.50945799999988,
+      "transport": "Local disposable GitHub protocol fixture",
+      "posts": 3032
+    },
+    "apiRows": [
+      {
+        "path": "/api/public?kind=index",
+        "method": "GET",
+        "status": 200,
+        "ms": 2632.774792,
+        "bytes": 1297141,
+        "githubFixtureCalls": 5
+      },
+      {
+        "path": "/api/session",
+        "method": "GET",
+        "status": 200,
+        "ms": 1.2153749999997672,
+        "bytes": 22,
+        "githubFixtureCalls": 0
+      },
+      {
+        "path": "/api/public?kind=post&id=3f4eda9b-0fe1-8004-89ff-c68ec5620797&commit=9f99941c6b650c70f363208cd97c7191ef785a46",
+        "method": "GET",
+        "status": 200,
+        "ms": 49.02975000000151,
+        "bytes": 35694,
+        "githubFixtureCalls": 1
+      },
+      {
+        "path": "/api/public?kind=index",
+        "method": "GET",
+        "status": 200,
+        "ms": 2357.479833000005,
+        "bytes": 1297141,
+        "githubFixtureCalls": 5
+      },
+      {
+        "path": "/api/session",
+        "method": "GET",
+        "status": 200,
+        "ms": 1.230541999990237,
+        "bytes": 22,
+        "githubFixtureCalls": 0
+      },
+      {
+        "path": "/api/public?kind=index",
+        "method": "GET",
+        "status": 200,
+        "ms": 2298.1059999999998,
+        "bytes": 1297141,
+        "githubFixtureCalls": 5
+      },
+      {
+        "path": "/api/session",
+        "method": "GET",
+        "status": 200,
+        "ms": 0.33337499998742715,
+        "bytes": 22,
+        "githubFixtureCalls": 0
+      }
+    ],
+    "browserRows": [
+      {
+        "event": "home-ready",
+        "hash": "#/",
+        "at": 3268.899999999907,
+        "elapsedMs": 3268.899999999907,
+        "longTaskMs": 470,
+        "domReadyMs": 2983,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 2664.0999999996275,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 2644,
+            "transferSize": 322
+          }
+        ]
+      },
+      {
+        "event": "post-ready",
+        "hash": "#/post/3f4eda9b-0fe1-8004-89ff-c68ec5620797",
+        "at": 7996.5,
+        "elapsedMs": 201.10000000009313,
+        "longTaskMs": 470,
+        "domReadyMs": 154.60000000009313,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 2664.0999999996275,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 2644,
+            "transferSize": 322
+          },
+          {
+            "name": "/api/public?kind=post&id=3f4eda9b-0fe1-8004-89ff-c68ec5620797&commit=9f99941c6b650c70f363208cd97c7191ef785a46",
+            "duration": 74.6999999997206,
+            "transferSize": 35994
+          }
+        ]
+      },
+      {
+        "event": "home-ready",
+        "hash": "#/",
+        "at": 62885.19999999972,
+        "elapsedMs": 24.5,
+        "longTaskMs": 470,
+        "domReadyMs": 9.200000000186265,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 2664.0999999996275,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 2644,
+            "transferSize": 322
+          },
+          {
+            "name": "/api/public?kind=post&id=3f4eda9b-0fe1-8004-89ff-c68ec5620797&commit=9f99941c6b650c70f363208cd97c7191ef785a46",
+            "duration": 74.6999999997206,
+            "transferSize": 35994
+          }
+        ]
+      },
+      {
+        "event": "home-ready",
+        "hash": "#/",
+        "at": 2669.100000000093,
+        "elapsedMs": 2669.100000000093,
+        "longTaskMs": 144,
+        "domReadyMs": 2635.600000000093,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 2376.2000000001863,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 2367.2000000001863,
+            "transferSize": 322
+          }
+        ]
+      },
+      {
+        "event": "home-ready",
+        "hash": "#/",
+        "at": 2606.9999999995343,
+        "elapsedMs": 2606.9999999995343,
+        "longTaskMs": 272,
+        "domReadyMs": 2531.3000000002794,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 2318.9000000003725,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 2307.8000000002794,
+            "transferSize": 322
+          }
+        ]
+      }
+    ]
+  },
+  "after": {
+    "bootstrap": {
+      "sourceCommit": "9f99941c6b650c70f363208cd97c7191ef785a46",
+      "artifact": "12c800908316b0966d6119a1261ac6a5b4f7d597",
+      "ms": 15658.567541999999,
+      "transport": "Local disposable GitHub protocol fixture",
+      "posts": 3032
+    },
+    "apiRows": [
+      {
+        "path": "/api/public?kind=index",
+        "method": "GET",
+        "status": 200,
+        "ms": 193.64662500000122,
+        "bytes": 1297141,
+        "githubFixtureCalls": 4
+      },
+      {
+        "path": "/api/session",
+        "method": "GET",
+        "status": 200,
+        "ms": 0.6081249999988358,
+        "bytes": 22,
+        "githubFixtureCalls": 0
+      },
+      {
+        "path": "/api/public?kind=post&id=3f4eda9b-0fe1-8004-89ff-c68ec5620797&commit=9f99941c6b650c70f363208cd97c7191ef785a46",
+        "method": "GET",
+        "status": 200,
+        "ms": 1.723666999998386,
+        "bytes": 35694,
+        "githubFixtureCalls": 2
+      },
+      {
+        "path": "/api/public?kind=index",
+        "method": "GET",
+        "status": 200,
+        "ms": 157.44250000000466,
+        "bytes": 1297141,
+        "githubFixtureCalls": 4
+      },
+      {
+        "path": "/api/session",
+        "method": "GET",
+        "status": 200,
+        "ms": 1.9052500000107102,
+        "bytes": 22,
+        "githubFixtureCalls": 0
+      },
+      {
+        "path": "/api/public?kind=index",
+        "method": "GET",
+        "status": 200,
+        "ms": 170.87608399998862,
+        "bytes": 1297141,
+        "githubFixtureCalls": 4
+      },
+      {
+        "path": "/api/session",
+        "method": "GET",
+        "status": 200,
+        "ms": 0.2939579999947455,
+        "bytes": 22,
+        "githubFixtureCalls": 0
+      },
+      {
+        "path": "/api/public?kind=index",
+        "method": "GET",
+        "status": 200,
+        "ms": 1.045416999986628,
+        "bytes": 1297141,
+        "githubFixtureCalls": 0
+      },
+      {
+        "path": "/api/session",
+        "method": "GET",
+        "status": 200,
+        "ms": 2.094167000002926,
+        "bytes": 350,
+        "githubFixtureCalls": 12
+      },
+      {
+        "path": "/api/content",
+        "method": "POST",
+        "operation": "post.create",
+        "status": 200,
+        "ms": 14756.349084000016,
+        "bytes": 361,
+        "githubFixtureCalls": 3064
+      },
+      {
+        "path": "/api/public?kind=index&after=db4852a890b75c8e283c6dbd866015fedbdc0401",
+        "method": "GET",
+        "status": 200,
+        "ms": 138.6301659999881,
+        "bytes": 1297374,
+        "githubFixtureCalls": 4
+      },
+      {
+        "path": "/api/public?kind=index",
+        "method": "GET",
+        "status": 200,
+        "ms": 1.383417000004556,
+        "bytes": 1297374,
+        "githubFixtureCalls": 1
+      },
+      {
+        "path": "/api/public?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08&commit=db4852a890b75c8e283c6dbd866015fedbdc0401",
+        "method": "GET",
+        "status": 200,
+        "ms": 1.612874999991618,
+        "bytes": 685,
+        "githubFixtureCalls": 1
+      },
+      {
+        "path": "/api/content?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08",
+        "method": "GET",
+        "status": 200,
+        "ms": 42.63866699999198,
+        "bytes": 6732,
+        "githubFixtureCalls": 16
+      },
+      {
+        "path": "/api/content",
+        "method": "POST",
+        "operation": "post.update",
+        "status": 200,
+        "ms": 14441.00458399998,
+        "bytes": 361,
+        "githubFixtureCalls": 3065
+      },
+      {
+        "path": "/api/public?kind=index&after=89db40d46500fd400a0180ab6e481368e90d6791",
+        "method": "GET",
+        "status": 200,
+        "ms": 143.83920899999794,
+        "bytes": 1297363,
+        "githubFixtureCalls": 4
+      },
+      {
+        "path": "/api/public?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08&commit=89db40d46500fd400a0180ab6e481368e90d6791",
+        "method": "GET",
+        "status": 200,
+        "ms": 1.8715830000001006,
+        "bytes": 699,
+        "githubFixtureCalls": 1
+      },
+      {
+        "path": "/api/content?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08",
+        "method": "GET",
+        "status": 200,
+        "ms": 27.894000000029337,
+        "bytes": 6746,
+        "githubFixtureCalls": 16
+      },
+      {
+        "path": "/api/content",
+        "method": "POST",
+        "operation": "post.delete",
+        "status": 200,
+        "ms": 15122.740165999974,
+        "bytes": 361,
+        "githubFixtureCalls": 3063
+      },
+      {
+        "path": "/api/public?kind=index&after=a8f3d72583ddb122d5b6e3e3a4f45b8c40b6741d",
+        "method": "GET",
+        "status": 200,
+        "ms": 135.25029200001154,
+        "bytes": 1297147,
+        "githubFixtureCalls": 4
+      },
+      {
+        "path": "/api/public?kind=post&id=1c3eda9b-0fe1-819c-beab-c6a3a1072bb9&commit=a8f3d72583ddb122d5b6e3e3a4f45b8c40b6741d",
+        "method": "GET",
+        "status": 200,
+        "ms": 2.9361250000074506,
+        "bytes": 1223,
+        "githubFixtureCalls": 2
+      },
+      {
+        "path": "/api/logout",
+        "method": "POST",
+        "status": 200,
+        "ms": 6.4654589999699965,
+        "bytes": 22,
+        "githubFixtureCalls": 1
+      }
+    ],
+    "browserRows": [
+      {
+        "event": "home-ready",
+        "hash": "#/",
+        "at": 507.89999999990687,
+        "elapsedMs": 507.89999999990687,
+        "longTaskMs": 51,
+        "domReadyMs": 481.5,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 239.70000000018626,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 229.79999999981374,
+            "transferSize": 322
+          }
+        ]
+      },
+      {
+        "event": "post-ready",
+        "hash": "#/post/3f4eda9b-0fe1-8004-89ff-c68ec5620797",
+        "at": 41865.19999999972,
+        "elapsedMs": 107.5,
+        "longTaskMs": 51,
+        "domReadyMs": 76.10000000009313,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 239.70000000018626,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 229.79999999981374,
+            "transferSize": 322
+          },
+          {
+            "name": "/api/public?kind=post&id=3f4eda9b-0fe1-8004-89ff-c68ec5620797&commit=9f99941c6b650c70f363208cd97c7191ef785a46",
+            "duration": 22.200000000186265,
+            "transferSize": 35994
+          }
+        ]
+      },
+      {
+        "event": "home-ready",
+        "hash": "#/",
+        "at": 47146.69999999972,
+        "elapsedMs": 17.399999999906868,
+        "longTaskMs": 51,
+        "domReadyMs": 7.7000000001862645,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 239.70000000018626,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 229.79999999981374,
+            "transferSize": 322
+          },
+          {
+            "name": "/api/public?kind=post&id=3f4eda9b-0fe1-8004-89ff-c68ec5620797&commit=9f99941c6b650c70f363208cd97c7191ef785a46",
+            "duration": 22.200000000186265,
+            "transferSize": 35994
+          }
+        ]
+      },
+      {
+        "event": "home-ready",
+        "hash": "#/",
+        "at": 345.89999999990687,
+        "elapsedMs": 345.89999999990687,
+        "longTaskMs": 0,
+        "domReadyMs": 339.79999999981374,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 176.10000000009313,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 165.29999999981374,
+            "transferSize": 322
+          }
+        ]
+      },
+      {
+        "event": "home-ready",
+        "hash": "#/",
+        "at": 548.7000000001863,
+        "elapsedMs": 548.7000000001863,
+        "longTaskMs": 241,
+        "domReadyMs": 513.3000000007451,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 189.20000000018626,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 177.5,
+            "transferSize": 322
+          }
+        ]
+      },
+      {
+        "event": "home-ready",
+        "hash": "#/",
+        "at": 175.79999999981374,
+        "elapsedMs": 175.79999999981374,
+        "longTaskMs": 0,
+        "domReadyMs": 161.5,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 27.200000000186265,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 8,
+            "transferSize": 650
+          }
+        ]
+      },
+      {
+        "event": "editor-ready",
+        "hash": "#/",
+        "at": 6363.0999999996275,
+        "elapsedMs": 6363.0999999996275,
+        "longTaskMs": 184,
+        "domReadyMs": 6325,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 27.200000000186265,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 8,
+            "transferSize": 650
+          }
+        ]
+      },
+      {
+        "event": "home-ready",
+        "hash": "#/content",
+        "at": 58590.40000000037,
+        "elapsedMs": 131.70000000018626,
+        "longTaskMs": 3411,
+        "domReadyMs": 58445.5,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 27.200000000186265,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 8,
+            "transferSize": 650
+          },
+          {
+            "name": "/api/content",
+            "duration": 14767.400000000373,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=db4852a890b75c8e283c6dbd866015fedbdc0401",
+            "duration": 158.79999999981374,
+            "transferSize": 1297674
+          }
+        ]
+      },
+      {
+        "event": "workspace-ready",
+        "hash": "#/content",
+        "at": 58596.09999999963,
+        "elapsedMs": 137.3999999994412,
+        "longTaskMs": 3411,
+        "domReadyMs": 19.299999999813735,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 27.200000000186265,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 8,
+            "transferSize": 650
+          },
+          {
+            "name": "/api/content",
+            "duration": 14767.400000000373,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=db4852a890b75c8e283c6dbd866015fedbdc0401",
+            "duration": 158.79999999981374,
+            "transferSize": 1297674
+          }
+        ]
+      },
+      {
+        "event": "post-ready",
+        "hash": "#/post/6990ae40-a2a8-4a2d-8657-6d8c200f3a08",
+        "at": 161999.5,
+        "elapsedMs": 47.90000000037253,
+        "longTaskMs": 3848,
+        "domReadyMs": 43.60000000055879,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 27.200000000186265,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 8,
+            "transferSize": 650
+          },
+          {
+            "name": "/api/content",
+            "duration": 14767.400000000373,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=db4852a890b75c8e283c6dbd866015fedbdc0401",
+            "duration": 158.79999999981374,
+            "transferSize": 1297674
+          },
+          {
+            "name": "/api/public?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08&commit=db4852a890b75c8e283c6dbd866015fedbdc0401",
+            "duration": 13.899999999441206,
+            "transferSize": 985
+          }
+        ]
+      },
+      {
+        "event": "editor-ready",
+        "hash": "#/post/6990ae40-a2a8-4a2d-8657-6d8c200f3a08",
+        "at": 174724.90000000037,
+        "elapsedMs": 12773.300000000745,
+        "longTaskMs": 6517,
+        "domReadyMs": 12766.700000000186,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 27.200000000186265,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 8,
+            "transferSize": 650
+          },
+          {
+            "name": "/api/content",
+            "duration": 14767.400000000373,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=db4852a890b75c8e283c6dbd866015fedbdc0401",
+            "duration": 158.79999999981374,
+            "transferSize": 1297674
+          },
+          {
+            "name": "/api/public?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08&commit=db4852a890b75c8e283c6dbd866015fedbdc0401",
+            "duration": 13.899999999441206,
+            "transferSize": 985
+          },
+          {
+            "name": "/api/content?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08",
+            "duration": 48.200000000186265,
+            "transferSize": 7032
+          }
+        ]
+      },
+      {
+        "event": "post-ready",
+        "hash": "#/content",
+        "at": 306159.2000000002,
+        "elapsedMs": 30,
+        "longTaskMs": 10591,
+        "domReadyMs": 144152.2000000002,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 27.200000000186265,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 8,
+            "transferSize": 650
+          },
+          {
+            "name": "/api/content",
+            "duration": 14767.400000000373,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=db4852a890b75c8e283c6dbd866015fedbdc0401",
+            "duration": 158.79999999981374,
+            "transferSize": 1297674
+          },
+          {
+            "name": "/api/public?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08&commit=db4852a890b75c8e283c6dbd866015fedbdc0401",
+            "duration": 13.899999999441206,
+            "transferSize": 985
+          },
+          {
+            "name": "/api/content?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08",
+            "duration": 48.200000000186265,
+            "transferSize": 7032
+          },
+          {
+            "name": "/api/content",
+            "duration": 14449.400000000373,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=89db40d46500fd400a0180ab6e481368e90d6791",
+            "duration": 164.90000000037253,
+            "transferSize": 1297663
+          },
+          {
+            "name": "/api/public?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08&commit=89db40d46500fd400a0180ab6e481368e90d6791",
+            "duration": 9.900000000372529,
+            "transferSize": 999
+          }
+        ]
+      },
+      {
+        "event": "workspace-ready",
+        "hash": "#/content",
+        "at": 306164.9000000004,
+        "elapsedMs": 35.700000000186265,
+        "longTaskMs": 10591,
+        "domReadyMs": 9.399999999441206,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 27.200000000186265,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 8,
+            "transferSize": 650
+          },
+          {
+            "name": "/api/content",
+            "duration": 14767.400000000373,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=db4852a890b75c8e283c6dbd866015fedbdc0401",
+            "duration": 158.79999999981374,
+            "transferSize": 1297674
+          },
+          {
+            "name": "/api/public?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08&commit=db4852a890b75c8e283c6dbd866015fedbdc0401",
+            "duration": 13.899999999441206,
+            "transferSize": 985
+          },
+          {
+            "name": "/api/content?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08",
+            "duration": 48.200000000186265,
+            "transferSize": 7032
+          },
+          {
+            "name": "/api/content",
+            "duration": 14449.400000000373,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=89db40d46500fd400a0180ab6e481368e90d6791",
+            "duration": 164.90000000037253,
+            "transferSize": 1297663
+          },
+          {
+            "name": "/api/public?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08&commit=89db40d46500fd400a0180ab6e481368e90d6791",
+            "duration": 9.900000000372529,
+            "transferSize": 999
+          }
+        ]
+      },
+      {
+        "event": "records-ready",
+        "hash": "#/records",
+        "at": 366603.4000000004,
+        "elapsedMs": 80.90000000037253,
+        "longTaskMs": 12826,
+        "domReadyMs": 13.5,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 27.200000000186265,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 8,
+            "transferSize": 650
+          },
+          {
+            "name": "/api/content",
+            "duration": 14767.400000000373,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=db4852a890b75c8e283c6dbd866015fedbdc0401",
+            "duration": 158.79999999981374,
+            "transferSize": 1297674
+          },
+          {
+            "name": "/api/public?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08&commit=db4852a890b75c8e283c6dbd866015fedbdc0401",
+            "duration": 13.899999999441206,
+            "transferSize": 985
+          },
+          {
+            "name": "/api/content?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08",
+            "duration": 48.200000000186265,
+            "transferSize": 7032
+          },
+          {
+            "name": "/api/content",
+            "duration": 14449.400000000373,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=89db40d46500fd400a0180ab6e481368e90d6791",
+            "duration": 164.90000000037253,
+            "transferSize": 1297663
+          },
+          {
+            "name": "/api/public?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08&commit=89db40d46500fd400a0180ab6e481368e90d6791",
+            "duration": 9.900000000372529,
+            "transferSize": 999
+          },
+          {
+            "name": "/api/content?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08",
+            "duration": 30.699999999254942,
+            "transferSize": 7046
+          },
+          {
+            "name": "/api/content",
+            "duration": 15125.700000000186,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=a8f3d72583ddb122d5b6e3e3a4f45b8c40b6741d",
+            "duration": 241.59999999962747,
+            "transferSize": 1297447
+          }
+        ]
+      },
+      {
+        "event": "post-ready",
+        "hash": "#/post/1c3eda9b-0fe1-819c-beab-c6a3a1072bb9",
+        "at": 467866.5999999996,
+        "elapsedMs": 74.8999999994412,
+        "longTaskMs": 12882,
+        "domReadyMs": 70.8999999994412,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 27.200000000186265,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 8,
+            "transferSize": 650
+          },
+          {
+            "name": "/api/content",
+            "duration": 14767.400000000373,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=db4852a890b75c8e283c6dbd866015fedbdc0401",
+            "duration": 158.79999999981374,
+            "transferSize": 1297674
+          },
+          {
+            "name": "/api/public?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08&commit=db4852a890b75c8e283c6dbd866015fedbdc0401",
+            "duration": 13.899999999441206,
+            "transferSize": 985
+          },
+          {
+            "name": "/api/content?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08",
+            "duration": 48.200000000186265,
+            "transferSize": 7032
+          },
+          {
+            "name": "/api/content",
+            "duration": 14449.400000000373,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=89db40d46500fd400a0180ab6e481368e90d6791",
+            "duration": 164.90000000037253,
+            "transferSize": 1297663
+          },
+          {
+            "name": "/api/public?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08&commit=89db40d46500fd400a0180ab6e481368e90d6791",
+            "duration": 9.900000000372529,
+            "transferSize": 999
+          },
+          {
+            "name": "/api/content?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08",
+            "duration": 30.699999999254942,
+            "transferSize": 7046
+          },
+          {
+            "name": "/api/content",
+            "duration": 15125.700000000186,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=a8f3d72583ddb122d5b6e3e3a4f45b8c40b6741d",
+            "duration": 241.59999999962747,
+            "transferSize": 1297447
+          },
+          {
+            "name": "/api/public?kind=post&id=1c3eda9b-0fe1-819c-beab-c6a3a1072bb9&commit=a8f3d72583ddb122d5b6e3e3a4f45b8c40b6741d",
+            "duration": 20.100000000558794,
+            "transferSize": 1523
+          }
+        ]
+      },
+      {
+        "event": "records-ready",
+        "hash": "#/records",
+        "at": 473774.4000000004,
+        "elapsedMs": 17.300000000745058,
+        "longTaskMs": 12882,
+        "domReadyMs": 5.1000000005587935,
+        "resources": [
+          {
+            "name": "/api/public?kind=index",
+            "duration": 27.200000000186265,
+            "transferSize": 1297441
+          },
+          {
+            "name": "/api/session",
+            "duration": 8,
+            "transferSize": 650
+          },
+          {
+            "name": "/api/content",
+            "duration": 14767.400000000373,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=db4852a890b75c8e283c6dbd866015fedbdc0401",
+            "duration": 158.79999999981374,
+            "transferSize": 1297674
+          },
+          {
+            "name": "/api/public?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08&commit=db4852a890b75c8e283c6dbd866015fedbdc0401",
+            "duration": 13.899999999441206,
+            "transferSize": 985
+          },
+          {
+            "name": "/api/content?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08",
+            "duration": 48.200000000186265,
+            "transferSize": 7032
+          },
+          {
+            "name": "/api/content",
+            "duration": 14449.400000000373,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=89db40d46500fd400a0180ab6e481368e90d6791",
+            "duration": 164.90000000037253,
+            "transferSize": 1297663
+          },
+          {
+            "name": "/api/public?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08&commit=89db40d46500fd400a0180ab6e481368e90d6791",
+            "duration": 9.900000000372529,
+            "transferSize": 999
+          },
+          {
+            "name": "/api/content?kind=post&id=6990ae40-a2a8-4a2d-8657-6d8c200f3a08",
+            "duration": 30.699999999254942,
+            "transferSize": 7046
+          },
+          {
+            "name": "/api/content",
+            "duration": 15125.700000000186,
+            "transferSize": 661
+          },
+          {
+            "name": "/api/public?kind=index&after=a8f3d72583ddb122d5b6e3e3a4f45b8c40b6741d",
+            "duration": 241.59999999962747,
+            "transferSize": 1297447
+          },
+          {
+            "name": "/api/public?kind=post&id=1c3eda9b-0fe1-819c-beab-c6a3a1072bb9&commit=a8f3d72583ddb122d5b6e3e3a4f45b8c40b6741d",
+            "duration": 20.100000000558794,
+            "transferSize": 1523
+          }
+        ]
+      }
+    ]
+  }
+}

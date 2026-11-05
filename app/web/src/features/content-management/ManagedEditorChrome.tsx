@@ -1,4 +1,6 @@
+import Button from "../../components/button/Button";
 import { memo, useRef, useState } from "react";
+import HeaderAction from "../../components/header-action/HeaderAction";
 import { site } from "../../config/site";
 import { editorConfig } from "../post-editor/config";
 import EditorShortcuts from "../post-editor/EditorShortcuts";
@@ -48,16 +50,15 @@ export function ManagedEditorToolbar({
   return (
     <>
       <header className="editor-header">
-        <button type="button" className="editor-back" onClick={onClose}>
+        <Button type="button" className="editor-back" onClick={onClose}>
           ← 기록으로
-        </button>
+        </Button>
         <span className="editor-breadcrumb">
           {site.name} <span>/</span> {title || editorConfig.untitledTitle}
         </span>
         <div className="mock-header-actions">
-          <SettingsButton />
           <details ref={fileMenu} className="mock-file-menu">
-            <summary>저장·내보내기</summary>
+            <HeaderAction as="summary">저장·내보내기</HeaderAction>
             <div
               className="mock-file-actions"
               role="group"
@@ -76,7 +77,7 @@ export function ManagedEditorToolbar({
                   }}
                 />
               </label>
-              <button
+              <Button
                 type="button"
                 onClick={() => {
                   onExportMarkdown();
@@ -84,8 +85,8 @@ export function ManagedEditorToolbar({
                 }}
               >
                 .md 내보내기
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => {
                   onExportBackup();
@@ -93,17 +94,18 @@ export function ManagedEditorToolbar({
                 }}
               >
                 원본 백업
-              </button>
+              </Button>
             </div>
           </details>
-          <button
+          <HeaderAction
             type="button"
             className="editor-help"
             aria-expanded={help}
             onClick={() => setHelp(!help)}
           >
             단축키
-          </button>
+          </HeaderAction>
+          <SettingsButton />
         </div>
       </header>
       {error && (
@@ -139,7 +141,7 @@ export const ReaderPreview = memo(function ReaderPreview({
         role="group"
         aria-label="미리보기 화면 크기"
       >
-        <button
+        <Button
           type="button"
           aria-label="데스크톱"
           title="데스크톱"
@@ -158,8 +160,8 @@ export const ReaderPreview = memo(function ReaderPreview({
             <rect x="3" y="4" width="18" height="13" rx="2" />
             <path d="M8 21h8M12 17v4" />
           </svg>
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           aria-label="모바일"
           title="모바일"
@@ -178,7 +180,7 @@ export const ReaderPreview = memo(function ReaderPreview({
             <rect x="6" y="2" width="12" height="20" rx="2.5" />
             <path d="M10 5h4M11 19h2" />
           </svg>
-        </button>
+        </Button>
       </div>
       <div className={"mock-preview-sheet mock-preview-" + mode}>
         <p className="mock-preview-category">

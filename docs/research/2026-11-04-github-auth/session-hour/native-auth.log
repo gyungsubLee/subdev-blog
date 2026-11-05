@@ -1,0 +1,14 @@
+✔ browser OAuth completion retains cookie until the initiating native process acknowledges receipt (17.291542ms)
+✔ repeated starts share an active login; cancellation and expiry invalidate it (0.736583ms)
+✔ OAuth failure reaches the native process without exposing a session (0.527792ms)
+✔ native auth is unavailable outside the local app and rejects cross-origin requests (1.241792ms)
+✔ explicit restart replaces an abandoned browser flow and rejects its late result (1.733083ms)
+✔ a restarted native login cannot reuse an abandoned OAuth challenge from Chrome (9.224459ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 128.063292

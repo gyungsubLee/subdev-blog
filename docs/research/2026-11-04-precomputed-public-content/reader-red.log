@@ -1,0 +1,47 @@
+✔ generation projects safe public files and full bodies before publishing an immutable ref (33.686166ms)
+✔ unsafe source fails before the ready ref is created (10.400208ms)
+✔ generation rewrites pinned assets and inherited category without exposing original metadata (2.294917ms)
+✖ the reader serves generated files without touching source Markdown or trees (5.978959ms)
+✖ a missing publication returns 503 instead of generating content in a read (0.740709ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 3
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 229.292875
+
+✖ failing tests:
+
+test at tests/server/public-publication.test.mjs:48:1
+✖ the reader serves generated files without touching source Markdown or trees (5.978959ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  502 !== 200
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:55:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 502,
+    expected: 200,
+    operator: 'strictEqual'
+  }
+
+test at tests/server/public-publication.test.mjs:61:1
+✖ a missing publication returns 503 instead of generating content in a read (0.740709ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  502 !== 503
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/server/public-publication.test.mjs:65:10)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 502,
+    expected: 503,
+    operator: 'strictEqual'
+  }

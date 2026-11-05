@@ -369,8 +369,8 @@ test("failed deletion preserves content and retries identical request after reop
       await open();
       await act(async () => document.querySelector('#confirm-post-delete').click());
       assert.equal(document.querySelectorAll('tbody tr').length, 1);
-      assert.match(document.querySelector('dialog [role="alert"]').textContent, /response lost/);
-      await act(async () => [...document.querySelectorAll('dialog button')].find(button => button.textContent === '취소').click());
+      assert.match(document.querySelector('[role="alert"]').textContent, /response lost/);
+      assert.ok(document.querySelector('dialog') === null);
       await open();
       await act(async () => document.querySelector('#confirm-post-delete').click());
       assert.equal(reads, 1, 'retry must work even after the source disappears');
@@ -430,7 +430,7 @@ test("a newly published recovery deletes its canonical identity before the index
   } finally { globalThis.fetch = originalFetch; }
 });
 
-test("delete modal blocks duplicate submission and Escape while the request is in flight", { timeout: 5000 }, async () => {
+test("delete confirmation closes and hides the row before the background response", { timeout: 5000 }, async () => {
   const originalFetch = globalThis.fetch;
   let release;
   let writes = 0;
@@ -444,17 +444,38 @@ test("delete modal blocks duplicate submission and Escape while the request is i
   try {
     await mounted({ state: 'ready' }, async () => {
       await act(async () => document.querySelector('[aria-label="공개 제목 삭제"]').click());
-      const modal = document.querySelector('dialog[open]');
-      await act(async () => document.querySelector('#confirm-post-delete').click());
-      assert.ok([...modal.querySelectorAll('button')].every(button => button.disabled));
-      await act(async () => {
-        modal.dispatchEvent(new dom.window.Event('cancel', { cancelable: true }));
-        document.querySelector('#confirm-post-delete').click();
-      });
-      assert.equal(modal.open, true);
+      const confirm = document.querySelector('#confirm-post-delete');
+      await act(async () => { confirm.click(); confirm.click(); });
+      assert.ok(document.querySelector('dialog') === null);
+      assert.equal(document.querySelectorAll('tbody tr').length, 0);
       assert.equal(writes, 1);
       await act(async () => release());
+      assert.equal(document.querySelectorAll('tbody tr').length, 0);
+    });
+  } finally { release(); globalThis.fetch = originalFetch; }
+});
+
+test("background deletion failure restores the row and its recovery and announces the error", { timeout: 5000 }, async () => {
+  const originalFetch = globalThis.fetch;
+  let release;
+  const pending = new Promise(resolve => { release = resolve; });
+  const recovery = JSON.stringify({ title: base.title, markdown: base.markdown, sourceDocument: deletionSource });
+  localStorage.setItem('second-brain:canonical-draft:public', recovery);
+  globalThis.fetch = async (url, options = {}) => {
+    if (!options.method) return response(deletionSource);
+    await pending;
+    return response({ error: 'offline' }, 503);
+  };
+  try {
+    await mounted({ state: 'ready' }, async () => {
+      await act(async () => document.querySelector('[aria-label="공개 제목 삭제"]').click());
+      await act(async () => document.querySelector('#confirm-post-delete').click());
       assert.ok(document.querySelector('dialog') === null);
+      assert.equal(document.querySelectorAll('tbody tr').length, 0);
+      await act(async () => release());
+      assert.equal(document.querySelectorAll('tbody tr').length, 1);
+      assert.match(document.querySelector('[role="alert"]').textContent, /공개 제목.*offline/);
+      assert.equal(localStorage.getItem('second-brain:canonical-draft:public'), recovery);
     });
   } finally { release(); globalThis.fetch = originalFetch; }
 });

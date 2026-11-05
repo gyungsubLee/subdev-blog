@@ -94,6 +94,8 @@ test("records filters and visible count survive article and home roundtrips", { 
     assert.equal(searchShortcut(), true, "article disables list search shortcuts");
     await navigate(document.querySelector(".back-link"));
     assert.equal(document.querySelector('input[type="search"]').value, "공통");
+    // The remounted category tree starts collapsed; reveal the selected leaf before checking it.
+    await click(button("프론트엔드"));
     assert.equal(document.querySelector('button[aria-label="리액트"]').getAttribute("aria-pressed"), "true");
     assert.equal(cards(), 24);
 
@@ -112,6 +114,8 @@ test("records filters and visible count survive article and home roundtrips", { 
     await navigate(document.querySelector(".back-link"));
     await navigate(document.querySelector('.header-navigation a[href="#/records"]'));
     assert.equal(document.querySelector('input[type="search"]').value, "공통");
+    // The remounted category tree starts collapsed; reveal the selected leaf before checking it.
+    await click(button("프론트엔드"));
     assert.equal(document.querySelector('button[aria-label="리액트"]').getAttribute("aria-pressed"), "true");
     assert.equal(cards(), 24);
   } finally {
