@@ -469,16 +469,21 @@ async function legacyProject(t) {
   return root;
 }
 
-for (const script of ["export-notion.mjs", "repair-markdown.mjs", "prepare-web-assets.mjs", "import-markdown.mjs"]) {
-  test(`${script} refuses direct legacy writes for selected and uninitialized canonical content`, async (t) => {
-    const project = await legacyProject(t);
-    const canonical = await fixture(t, [document()]);
-    const filename = path.join(canonical, "posts", parentId, "Title.md");
-    const canonicalBefore = digest(await readFile(filename));
-    const publicFilename = path.join(project, "app/web/public/notion/asset-map.json");
-    const legacyFilename = path.join(project, "content/posts.json");
+// ponytail: cover state combinations at the shared guard, then check each CLI's wiring once.
+test("shared guard refuses legacy writes for selected and uninitialized canonical content", async (t) => {
+  const project = await realpath(await mkdtemp(path.join(os.tmpdir(), "legacy-guard-")));
+  t.after(() => rm(project, { recursive: true, force: true }));
+  await mkdir(path.join(project, "content"));
+  await writeFile(path.join(project, "content/posts.json"), "[]");
+  const canonical = await fixture(t, [document()]);
+  const previousRoot = process.env.CONTENT_ROOT;
+
+  try {
     for (const mode of ["selected", "selected-missing", "default", "marker", "uninitialized", "missing"]) {
-      if (mode === "default") {
+      delete process.env.CONTENT_ROOT;
+      if (mode.startsWith("selected")) {
+        process.env.CONTENT_ROOT = mode === "selected" ? canonical : path.join(canonical, "missing");
+      } else if (mode === "default") {
         await cp(canonical, path.join(project, "content"), { recursive: true });
       } else if (mode === "marker") {
         await rm(path.join(project, "content/posts"), { recursive: true });
@@ -490,26 +495,34 @@ for (const script of ["export-notion.mjs", "repair-markdown.mjs", "prepare-web-a
       } else if (mode === "missing") {
         await rm(path.join(project, ".gitmodules"));
       }
-      const env = { ...process.env };
-      delete env.CONTENT_ROOT;
-      if (mode.startsWith("selected"))
-        env.CONTENT_ROOT = mode === "selected" ? canonical : path.join(canonical, "missing");
-      // Restrict writes to the disposable clone: the old exporter has a personal archive path.
-      const result = spawnSync(process.execPath, [
-        "--permission", "--allow-fs-read=*", `--allow-fs-write=${project}`,
-        path.join(project, script === "prepare-web-assets.mjs" ? "app/web/scripts" : "app/content/scripts", script),
-        ...(script === "import-markdown.mjs" ? [path.join(project, "input.md")] : []),
-      ], { cwd: project, env, encoding: "utf8", timeout: 10_000 });
-      assert.notEqual(result.status, 0, script + ": " + mode);
-      assert.match(result.stderr, /Legacy content writes are disabled/, script + ": " + mode);
-      assert.equal(digest(await readFile(filename)), canonicalBefore);
-      assert.equal(await readFile(publicFilename, "utf8"), "PREVIOUS_PUBLIC_BYTES");
-      if (!["uninitialized", "missing"].includes(mode))
-        assert.equal(await readFile(legacyFilename, "utf8"), "[]");
-      assert.equal((await readdir(path.join(project, "content"))).includes("raw"), false);
-      assert.equal((await readdir(path.join(project, "content"))).includes("written"), false);
-      assert.doesNotMatch(result.stdout, /Imported:|deploy to Vercel/);
+      await assert.rejects(content.assertLegacyContentWritable(project), /Legacy content writes are disabled/, mode);
     }
+  } finally {
+    if (previousRoot === undefined) delete process.env.CONTENT_ROOT;
+    else process.env.CONTENT_ROOT = previousRoot;
+  }
+});
+
+for (const script of ["export-notion.mjs", "repair-markdown.mjs", "prepare-web-assets.mjs", "import-markdown.mjs"]) {
+  test(`${script} refuses legacy writes before changing selected content`, async (t) => {
+    const project = await legacyProject(t);
+    const canonical = await fixture(t, [document()]);
+    const filename = path.join(canonical, "posts", parentId, "Title.md");
+    const canonicalBefore = digest(await readFile(filename));
+    // Restrict writes to the disposable clone: the old exporter has a personal archive path.
+    const result = spawnSync(process.execPath, [
+      "--permission", "--allow-fs-read=*", `--allow-fs-write=${project}`,
+      path.join(project, script === "prepare-web-assets.mjs" ? "app/web/scripts" : "app/content/scripts", script),
+      ...(script === "import-markdown.mjs" ? [path.join(project, "input.md")] : []),
+    ], { cwd: project, env: { ...process.env, CONTENT_ROOT: canonical }, encoding: "utf8", timeout: 10_000 });
+    assert.notEqual(result.status, 0, script);
+    assert.match(result.stderr, /Legacy content writes are disabled/, script);
+    assert.equal(digest(await readFile(filename)), canonicalBefore);
+    assert.equal(await readFile(path.join(project, "app/web/public/notion/asset-map.json"), "utf8"), "PREVIOUS_PUBLIC_BYTES");
+    assert.equal(await readFile(path.join(project, "content/posts.json"), "utf8"), "[]");
+    assert.equal((await readdir(path.join(project, "content"))).includes("raw"), false);
+    assert.equal((await readdir(path.join(project, "content"))).includes("written"), false);
+    assert.doesNotMatch(result.stdout, /Imported:|deploy to Vercel/);
   });
 }
 
@@ -613,18 +626,18 @@ test("content provenance allows ignored cache files outside canonical inputs", a
   }), { contentCommit: input.sha, contentState: "git-pinned" });
 });
 
-for (const marker of ["CI", "GITHUB_ACTIONS", "VERCEL", "GITHUB_SHA", "VERCEL_GIT_COMMIT_SHA"]) {
-  test(`content provenance enforces deployment cleanliness for ${marker}`, async (t) => {
-    const input = await provenanceFixture(t);
-    await writeFile(path.join(input.root, "untracked.txt"), "dirty");
+test("content provenance enforces deployment cleanliness for every deployment marker", async (t) => {
+  const input = await provenanceFixture(t);
+  await writeFile(path.join(input.root, "untracked.txt"), "dirty");
+  for (const marker of ["CI", "GITHUB_ACTIONS", "VERCEL", "GITHUB_SHA", "VERCEL_GIT_COMMIT_SHA"]) {
     await assert.rejects(content.getContentProvenance(input.root, {
       projectRoot: input.projectRoot, env: { [marker]: "true" },
-    }), /dirty|clean|uncommitted/i);
-    assert.deepEqual(await content.getContentProvenance(input.root, {
-      projectRoot: input.projectRoot, env: {},
-    }), { contentCommit: input.sha, contentState: "git-local-dirty" });
-  });
-}
+    }), /dirty|clean|uncommitted/i, marker);
+  }
+  assert.deepEqual(await content.getContentProvenance(input.root, {
+    projectRoot: input.projectRoot, env: {},
+  }), { contentCommit: input.sha, contentState: "git-local-dirty" });
+});
 
 for (const change of ["tracked", "staged", "head", "index", "missing-gitlink"]) {
   test(`content provenance rejects a deployment with ${change} changes`, async (t) => {

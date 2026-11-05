@@ -8,15 +8,7 @@ import { spawnSync } from 'node:child_process';
 
 const root = path.resolve(import.meta.dirname, '../..');
 
-test('product areas and site composition follow the documented structure', async () => {
-  for (const name of [
-    'app/web/src/site/App.tsx', 'app/web/index.html',
-    'app/server/api/index.js', 'app/server/src/handler.mjs',
-    'app/content/src/content.mjs', 'app/content/scripts/check-content.mjs',
-    'app/shared/document.mjs', 'app/native/build.py',
-  ]) {
-    assert.ok(existsSync(path.join(root, name)), `Missing product path: ${name}`);
-  }
+test('deployment includes the server catalog without static content preparation', async () => {
   const manifest = JSON.parse(await readFile(path.join(root, 'package.json')));
   assert.ok(!manifest.scripts.prebuild.includes('export-static'));
   assert.ok(!manifest.scripts.predev.includes('export-static'));

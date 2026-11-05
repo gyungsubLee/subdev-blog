@@ -1,4 +1,3 @@
-import { markdownDocument } from "../../app/shared/document.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -59,13 +58,6 @@ test("storage quota error reaches the caller", () => {
   };
   assert.throws(() => saveDraft(store, draft), /QuotaExceeded/);
 });
-
-test("Markdown export retains content and quotes frontmatter", () => {
-  const output = markdownDocument(draft);
-  assert.match(output, /title: "제목: 테스트"/);
-  assert.match(output, /원문 \*\*강조\*\*/);
-});
-
 
 test("batch source deletion clears only matching canonical recovery aliases and legacy drafts", () => {
   const values=new Map([

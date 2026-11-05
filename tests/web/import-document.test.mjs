@@ -19,7 +19,9 @@ test("exported Markdown restores title, category, IDs and body without a duplica
     updatedAt: "2026-10-22",
     markdown: "## 실제 본문\n\n코드 \x60값\x60",
   };
-  const imported = parseMarkdownDocument(markdownDocument(draft));
+  const exported = markdownDocument(draft);
+  assert.match(exported, /title: "제목: 왕복"/);
+  const imported = parseMarkdownDocument(exported);
   assert.equal(imported.title, draft.title);
   assert.equal(imported.category, draft.category);
   assert.equal(imported.id, draft.id.slice(6));

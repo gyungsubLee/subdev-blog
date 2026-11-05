@@ -73,8 +73,12 @@ test("records filters and visible count survive article and home roundtrips", { 
       document.activeElement === document.querySelector('input[type="search"]'),
       "the search shortcut focuses the search field",
     );
+    assert.equal(cards(), 12);
+    await click(button("더 보기"));
+    assert.equal(cards(), 24);
     await click(button("프론트엔드"));
     await click(document.querySelector('button[aria-label="리액트"]'));
+    assert.equal(cards(), 12, "records category selection resets pagination");
     const input = document.querySelector('input[type="search"]');
     await act(async () => {
       Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value")
@@ -83,6 +87,7 @@ test("records filters and visible count survive article and home roundtrips", { 
     });
     await click(button("더 보기"));
     assert.equal(cards(), 24);
+    assert.equal(document.querySelector('button[aria-label="리액트"]').getAttribute("aria-pressed"), "true");
     await navigate(document.querySelector(".post-card"));
     assert.equal(document.querySelector(".back-link").getAttribute("href"), "#/records");
     assert.equal(document.querySelector(".article-header h1").textContent, "공통 기록 0");
@@ -98,7 +103,9 @@ test("records filters and visible count survive article and home roundtrips", { 
     assert.equal(searchShortcut(), true, "category manager has no list search shortcut");
     await navigate(document.querySelector(".wordmark"));
     assert.ok(document.querySelector(".blog-intro"));
-    assert.ok(!document.querySelector('input[type="search"]'));
+    assert.ok(document.querySelector("main input") === null);
+    assert.ok(document.querySelector('main [aria-label="카테고리"]') === null);
+    assert.ok(document.querySelector("main .load-more") === null);
     assert.equal(searchShortcut(), true, "home has no list search shortcut");
     await navigate(document.querySelector(".home-article-card"));
     assert.equal(document.querySelector(".back-link").getAttribute("href"), "#/");

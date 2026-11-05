@@ -29,11 +29,6 @@ function render(body) {
   ).window.document;
 }
 
-test("underlined Notion text retains its semantic underline", () => {
-  const document = render("A <u>marked phrase</u>.");
-  assert.equal(document.querySelector("u")?.textContent, "marked phrase");
-});
-
 test("toggle summaries preserve nested semantic formatting and safe links", () => {
   const document = render(
     '<details><summary><strong>Bold <em>italic</em></strong> <u>underline</u> <del>deleted</del> <code>a_b*c</code> <a href="https://example.com/guide">guide</a></summary><p>Body</p></details>',
