@@ -1,0 +1,42 @@
+[
+  {
+    "name": "build-021",
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "exitCode": 0,
+    "seconds": 50.1
+  },
+  {
+    "name": "check-021",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "exitCode": 0,
+    "seconds": 57.919
+  },
+  {
+    "name": "content-021",
+    "command": [
+      "npm",
+      "run",
+      "check:content"
+    ],
+    "exitCode": 0,
+    "seconds": 20.553
+  },
+  {
+    "name": "native-build-021",
+    "command": [
+      "python3",
+      "app/native/build.py",
+      "--skip-web-build"
+    ],
+    "exitCode": 0,
+    "seconds": 11.478
+  }
+]

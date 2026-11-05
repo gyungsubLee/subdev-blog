@@ -1,6 +1,6 @@
 # Second Brain
 
-현재 버전은 `v0.2.0`이다. [변경 기록](CHANGELOG.md)에 구현 기능과 검증 한계를 기록한다.
+현재 버전은 `v0.2.1`이다. [변경 기록](CHANGELOG.md)에 구현 기능과 검증 한계를 기록한다.
 
 공개 Notion 블로그를 Markdown 콘텐츠 저장소로 보관하고 웹에서 읽는다.
 글과 카테고리 조회는 공개한다. 원본 생성·수정·삭제는 본인 GitHub 인증과 저장소 연결 확인 뒤 허용한다.
@@ -140,9 +140,9 @@ GitHub 오류와 제한 초과는 화면에 오류로 표시한다. 이전 빌�
 ## 검사와 빌드
 
 ```sh
+npm run build
 npm run check
 npm run check:content
-npm run build
 ```
 
 `check`는 TypeScript와 DOM 기반 동작 검사를 실행한다.

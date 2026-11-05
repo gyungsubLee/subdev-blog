@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "tag": "v0.2.0",
+  "sourceCommit": "8f9f8ea6310ea8521cebddcf0144a44efceb027a",
+  "tagObject": "d6393652f500f401218759b6117da2fe9beb8a0c",
+  "runId": 41973043765,
+  "runNumber": 4,
+  "runAttempt": 1,
+  "runUrl": "https://github.com/gyungsubLee/subdev-blog/actions/runs/41973043765",
+  "state": "building",
+  "notes": "Full historical measurement tables are included in release body; source tag remains immutable."
+}

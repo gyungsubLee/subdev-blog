@@ -1,0 +1,28 @@
+✖ native preview serves built files, its own health token and the existing API (2327.158041ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2975.977
+
+✖ failing tests:
+
+test at tests/native/native-preview.test.mjs:5:1
+✖ native preview serves built files, its own health token and the existing API (2327.158041ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  '0.2.0' !== '0.1.0'
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/native/native-preview.test.mjs:19:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '0.2.0',
+    expected: '0.1.0',
+    operator: 'strictEqual'
+  }

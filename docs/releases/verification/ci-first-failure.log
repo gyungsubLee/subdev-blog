@@ -1,0 +1,937 @@
+build	Check version and source	﻿2026-11-05T05:17:30.3230797Z ##[group]Run npm run check
+build	Check version and source	2026-11-05T05:17:30.3231289Z [36;1mnpm run check[0m
+build	Check version and source	2026-11-05T05:17:30.3231690Z [36;1mnpm run check:content[0m
+build	Check version and source	2026-11-05T05:17:30.3260066Z shell: /usr/bin/bash -e {0}
+build	Check version and source	2026-11-05T05:17:30.3260495Z ##[endgroup]
+build	Check version and source	2026-11-05T05:17:30.4354462Z 
+build	Check version and source	2026-11-05T05:17:30.4355158Z > second-brain@0.2.0 check
+build	Check version and source	2026-11-05T05:17:30.4356574Z > npm run check:version && tsc -b && node --test tests/web/*.test.mjs tests/server/*.test.mjs tests/content/*.test.mjs tests/native/*.test.mjs
+build	Check version and source	2026-11-05T05:17:30.4357751Z 
+build	Check version and source	2026-11-05T05:17:30.5498731Z 
+build	Check version and source	2026-11-05T05:17:30.5499250Z > second-brain@0.2.0 check:version
+build	Check version and source	2026-11-05T05:17:30.5499866Z > node scripts/check-version.mjs
+build	Check version and source	2026-11-05T05:17:30.5500182Z 
+build	Check version and source	2026-11-05T05:17:30.5875801Z Version v0.2.0 is consistent.
+build	Check version and source	2026-11-05T05:17:35.8399214Z ✔ public projections exclude agent metadata and preserve attachment URLs (328.420847ms)
+build	Check version and source	2026-11-05T05:17:36.0634105Z ✔ invalid canonical input preserves the previous public output (224.934314ms)
+build	Check version and source	2026-11-05T05:17:36.3166196Z ✔ public output handles publish failure according to publication outcome (253.54822ms)
+build	Check version and source	2026-11-05T05:17:36.6392701Z ✔ public output handles cleanup failure according to publication outcome (321.894235ms)
+build	Check version and source	2026-11-05T05:17:37.3360145Z ✔ deployment provenance failure preserves the previous public output (694.367552ms)
+build	Check version and source	2026-11-05T05:17:39.0878324Z ✔ Vite emits content identity for local staging and enforces Gitless deployment attestation (1754.83008ms)
+build	Check version and source	2026-11-05T05:17:39.3635901Z ✔ prepare emits a server-only summary catalog keyed by original Git blob identity (274.380546ms)
+build	Check version and source	2026-11-05T05:17:39.3766218Z ✔ rewrites only Markdown destinations and reference definitions (20.139172ms)
+build	Check version and source	2026-11-05T05:17:39.3768620Z ✔ rewrites HTML src href and each srcset candidate while preserving syntax (6.819863ms)
+build	Check version and source	2026-11-05T05:17:39.3770334Z ✔ leaves code samples byte identical including nested HTML code and pre (9.498117ms)
+build	Check version and source	2026-11-05T05:17:39.3775762Z ✔ identity resolution preserves every body byte including entities and escapes (2.753885ms)
+build	Check version and source	2026-11-05T05:17:39.3777631Z ✔ preserves escaped HTML and HTML-looking Markdown link titles (2.006484ms)
+build	Check version and source	2026-11-05T05:17:39.3779095Z ✔ splits srcset on decoded separators while preserving source entity spellings (1.238345ms)
+build	Check version and source	2026-11-05T05:17:39.3780715Z ✔ written overrides and current public asset bytes survive migration (149.799435ms)
+build	Check version and source	2026-11-05T05:17:39.3782306Z ✔ dry-run leaves inputs untouched and independent staging outputs are deterministic (42.448562ms)
+build	Check version and source	2026-11-05T05:17:39.3783846Z ✔ missing or escaping attachments fail before staging is created (17.887611ms)
+build	Check version and source	2026-11-05T05:17:39.3785035Z ✔ a missing written directory uses the current posts unchanged (14.510245ms)
+build	Check version and source	2026-11-05T05:17:39.3786450Z ✔ literal percent in source paths and canonical titles survives URL lookup (35.884232ms)
+build	Check version and source	2026-11-05T05:17:39.3788074Z ✔ percent-encoded-looking raw paths are decoded only at the URL boundary (34.655511ms)
+build	Check version and source	2026-11-05T05:17:39.3789337Z ✔ migration CLI reads assets from the relocated web public directory (531.303219ms)
+build	Check version and source	2026-11-05T05:17:39.4387188Z ✔ editor source is validated separately from attachments (64.621678ms)
+build	Check version and source	2026-11-05T05:17:39.4388357Z ✔ local metadata edits preserve paired source and reject stale body projections (41.942891ms)
+build	Check version and source	2026-11-05T05:17:39.4390215Z ✔ editor source cannot be uploaded or linked as an ordinary attachment (19.241891ms)
+build	Check version and source	2026-11-05T05:17:39.4392290Z ✔ explicit child categories override inherited categories (23.079444ms)
+build	Check version and source	2026-11-05T05:17:39.4393649Z ✔ rejects invalid post relations, duplicate IDs and categories (100.524491ms)
+build	Check version and source	2026-11-05T05:17:39.4394931Z ✔ public projection allowlists fields and uses each original category source only when valid (28.906569ms)
+build	Check version and source	2026-11-05T05:17:39.4396611Z ✔ collects referenced attachments, preserves icon expressions and resolves public links (26.337414ms)
+build	Check version and source	2026-11-05T05:17:39.4398436Z ✔ keeps public attachment URLs as attachments even when they include an existing post ID (9.885872ms)
+build	Check version and source	2026-11-05T05:17:39.4399513Z ✔ rejects missing attachments, decoded traversal and symlink escapes (46.049995ms)
+build	Check version and source	2026-11-05T05:17:39.4400614Z ✔ writes new documents with flat assets and returns root-relative filename (16.543086ms)
+build	Check version and source	2026-11-05T05:17:39.4401714Z ✔ existing writes require current revision and rename only after valid save (61.280735ms)
+build	Check version and source	2026-11-05T05:17:39.4402978Z ✔ failed validation leaves old Markdown and asset bytes unchanged (54.945747ms)
+build	Check version and source	2026-11-05T05:17:39.4404232Z ✔ new IDs cannot clobber an existing folder and folder symlinks are rejected (10.177431ms)
+build	Check version and source	2026-11-05T05:17:39.4405570Z ✔ allows attachment names that coincide with internal staging filenames (13.495357ms)
+build	Check version and source	2026-11-05T05:17:39.4407397Z ✔ metadata-only moves preserve body bytes, IDs and explicit child categories (45.574844ms)
+build	Check version and source	2026-11-05T05:17:39.4409028Z ✔ resolves Markdown aliases and known Notion links while retaining block fragments (14.951877ms)
+build	Check version and source	2026-11-05T05:17:39.4410433Z ✔ preserves keycap emoji icons from the existing corpus (16.399561ms)
+build	Check version and source	2026-11-05T05:17:39.4411765Z ✔ supports case-only title renames without deleting the replacement (28.115864ms)
+build	Check version and source	2026-11-05T05:17:39.4413074Z ✔ keeps the original source URL in the reader's source link (10.109505ms)
+build	Check version and source	2026-11-05T05:17:39.4414490Z ✔ orders mixed-offset timestamps chronologically and retains the original strings (10.234588ms)
+build	Check version and source	2026-11-05T05:17:39.4416007Z ✔ returns a committed save with a cleanup warning and still releases its lock (39.680764ms)
+build	Check version and source	2026-11-05T05:17:39.4425885Z ✔ publication failure restores old Markdown and removes newly published attachments (20.185708ms)
+build	Check version and source	2026-11-05T05:17:39.4427485Z ✔ retains recovery bytes and the publication cause when rollback cannot restore (21.331878ms)
+build	Check version and source	2026-11-05T05:17:39.4429301Z ✔ keeps literal percent filenames and legacy aliases while resolving encoded destinations (12.256514ms)
+build	Check version and source	2026-11-05T05:17:39.4430978Z ✔ does not decode stored percent-encoded-looking aliases into different paths (13.490037ms)
+build	Check version and source	2026-11-05T05:17:39.4432614Z ✔ content checking validates the selected corpus and preserves canonical files (381.843507ms)
+build	Check version and source	2026-11-05T05:17:39.4434231Z ✔ content checking defaults to app content and never falls back to legacy JSON (510.283965ms)
+build	Check version and source	2026-11-05T05:17:39.4435851Z ✔ content checking rejects invalid hierarchy and missing or uninitialized content (617.159736ms)
+build	Check version and source	2026-11-05T05:17:39.4437813Z ✔ shared guard refuses legacy writes for selected and uninitialized canonical content (23.187838ms)
+build	Check version and source	2026-11-05T05:17:39.4439694Z ✔ export-notion.mjs refuses legacy writes before changing selected content (363.911698ms)
+build	Check version and source	2026-11-05T05:17:39.4441292Z ✔ repair-markdown.mjs refuses legacy writes before changing selected content (329.827257ms)
+build	Check version and source	2026-11-05T05:17:39.4442907Z ✔ prepare-web-assets.mjs refuses legacy writes before changing selected content (353.313763ms)
+build	Check version and source	2026-11-05T05:17:39.4444532Z ✔ import-markdown.mjs refuses legacy writes before changing selected content (302.352412ms)
+build	Check version and source	2026-11-05T05:17:39.7427421Z ✔ import-markdown.mjs retains its legacy backup-checkout behavior (304.555075ms)
+build	Check version and source	2026-11-05T05:17:40.0780527Z ✔ legacy modules remain importable without reading or writing content (335.268309ms)
+build	Check version and source	2026-11-05T05:17:40.1871183Z ✔ content provenance reports pinned HEAD and accepts an equivalent root path (109.109333ms)
+build	Check version and source	2026-11-05T05:17:40.3105311Z ✔ content provenance rejects ignored canonical post inputs in deployment (122.96175ms)
+build	Check version and source	2026-11-05T05:17:40.4358043Z ✔ content provenance rejects ignored canonical asset inputs in deployment (124.936432ms)
+build	Check version and source	2026-11-05T05:17:40.5595371Z ✔ content provenance allows ignored cache files outside canonical inputs (124.090895ms)
+build	Check version and source	2026-11-05T05:17:40.7236247Z ✔ content provenance enforces deployment cleanliness for every deployment marker (163.8953ms)
+build	Check version and source	2026-11-05T05:17:40.8090415Z ✔ content provenance rejects a deployment with tracked changes (85.784747ms)
+build	Check version and source	2026-11-05T05:17:40.9044726Z ✔ content provenance rejects a deployment with staged changes (95.050073ms)
+build	Check version and source	2026-11-05T05:17:41.0133762Z ✔ content provenance rejects a deployment with head changes (108.964293ms)
+build	Check version and source	2026-11-05T05:17:41.1371126Z ✔ content provenance rejects a deployment with index changes (123.691375ms)
+build	Check version and source	2026-11-05T05:17:41.3159505Z ✔ content provenance rejects a deployment with missing-gitlink changes (178.382846ms)
+build	Check version and source	2026-11-05T05:17:41.4081537Z ✔ content provenance rejects invalid or mismatched supplied commit IDs (91.331816ms)
+build	Check version and source	2026-11-05T05:17:41.4270355Z ✔ content provenance distinguishes Gitless package attestation from local staging (19.767523ms)
+build	Check version and source	2026-11-05T05:17:41.5131686Z ✔ content provenance rejects uninitialized submodules and external deployment roots (79.832689ms)
+build	Check version and source	2026-11-05T05:17:41.5135524Z ✔ validated Markdown is reused only for the original snapshot and source (4.936647ms)
+build	Check version and source	2026-11-05T05:17:41.5137306Z ✔ attachment-free entries need no inventory fields for validation or projection (0.646223ms)
+build	Check version and source	2026-11-05T05:17:41.7764627Z ✔ legacy asset preparation updates the relocated web public directory (261.570856ms)
+build	Check version and source	2026-11-05T05:17:41.7819280Z ✔ deleted post IDs remain readable in metadata and body links (7.939934ms)
+build	Check version and source	2026-11-05T05:17:41.8012301Z ✔ editor filename reservation recognizes decoded aliases without breaking ordinary percent names (2.096302ms)
+build	Check version and source	2026-11-05T05:17:41.8014065Z ✔ editor validation preserves notebook children, code settings, links and table cells (2.738917ms)
+build	Check version and source	2026-11-05T05:17:41.8015748Z ✔ editor validation rejects mismatched pairing, unsupported versions and malformed blocks (1.309618ms)
+build	Check version and source	2026-11-05T05:17:41.8017945Z ✔ editor validation bounds nesting and node counts and rejects prototype keys (32.910553ms)
+build	Check version and source	2026-11-05T05:17:41.8019541Z ✔ editor validation checks known property types and keeps unknown JSON properties intact (1.228075ms)
+build	Check version and source	2026-11-05T05:18:02.7562632Z ✔ archived statistics article preserves combined emphasis and inline equations (370.258364ms)
+build	Check version and source	2026-11-05T05:18:02.7588480Z ✔ archived reinforcement article preserves bold ending in parentheses (186.059663ms)
+build	Check version and source	2026-11-05T05:18:02.7598319Z ✔ archived Spring toggle title renders bold rather than literal markers (36.609387ms)
+build	Check version and source	2026-11-05T05:18:02.7599732Z ✔ archived generic table preserves adjacent code runs without added backticks (564.195725ms)
+build	Check version and source	2026-11-05T05:18:02.7601427Z ✔ archived transaction table renders code line breaks instead of br text (93.03589ms)
+build	Check version and source	2026-11-05T05:18:02.9225404Z ✔ bold underline before a Korean suffix (98.701245ms)
+build	Check version and source	2026-11-05T05:18:02.9227102Z ✔ bold beside parentheses (14.824991ms)
+build	Check version and source	2026-11-05T05:18:02.9228438Z ✔ bold retains surrounding whitespace (13.993093ms)
+build	Check version and source	2026-11-05T05:18:02.9229667Z ✔ adjacent bold and highlight runs (10.836038ms)
+build	Check version and source	2026-11-05T05:18:02.9230756Z ✔ intraword italic code (10.659479ms)
+build	Check version and source	2026-11-05T05:18:02.9231884Z ✔ inline code with multiple backticks (10.111669ms)
+build	Check version and source	2026-11-05T05:18:02.9232731Z ✔ adjacent styled code runs (10.716925ms)
+build	Check version and source	2026-11-05T05:18:02.9233953Z ✔ adjacent simple code runs differing only by highlight render as one code element (11.426947ms)
+build	Check version and source	2026-11-05T05:18:02.9235335Z ✔ math annotation code remains separate from adjacent plain code (14.267243ms)
+build	Check version and source	2026-11-05T05:18:02.9236532Z ✔ Notion text keeps literal Markdown punctuation and HTML (15.140389ms)
+build	Check version and source	2026-11-05T05:18:02.9238070Z ✔ inline formulas keep escaped LaTeX in semantic math code (10.989002ms)
+build	Check version and source	2026-11-05T05:18:02.9239461Z ✔ unannotated Notion dollar formulas stay literal in the actual math-enabled reader (7.834972ms)
+build	Check version and source	2026-11-05T05:18:02.9240863Z ✔ Notion math annotations and equation blocks still render as math (46.618253ms)
+build	Check version and source	2026-11-05T05:18:02.9242067Z ✔ links encode attributes without admitting unsafe URLs (10.549547ms)
+build	Check version and source	2026-11-05T05:18:02.9243518Z ✔ offline rendering reuses blocks, metadata, collection rows and all asset source references (30.157036ms)
+build	Check version and source	2026-11-05T05:18:02.9245097Z ✔ offline excerpts decode generated entities while preserving source punctuation (0.609043ms)
+build	Check version and source	2026-11-05T05:18:02.9246566Z ✔ plain and styled Notion source line breaks remain visible in the actual reader (8.159857ms)
+build	Check version and source	2026-11-05T05:18:02.9248582Z ✔ line break conversion covers summaries, lists, table code and captions while preserving fenced and math source (26.977238ms)
+build	Check version and source	2026-11-05T05:18:02.9250878Z ✔ multiline math annotation source in a table retains formula newlines without break elements (11.627289ms)
+build	Check version and source	2026-11-05T05:18:02.9252573Z ✔ fenced code invalid numeric entities survive excerpts without aborting archived rendering (0.523294ms)
+build	Check version and source	2026-11-05T05:18:02.9254256Z ✔ web paths normalize asset destinations without changing page links or literal code examples (0.223626ms)
+build	Check version and source	2026-11-05T05:18:02.9255825Z ✔ stored legacy and unknown statuses remain safe two-state display values (23.493975ms)
+build	Check version and source	2026-11-05T05:18:02.9257933Z ✔ browser OAuth completion retains cookie until the initiating native process acknowledges receipt (43.465775ms)
+build	Check version and source	2026-11-05T05:18:02.9259574Z ✔ repeated starts share an active login; cancellation and expiry invalidate it (4.266651ms)
+build	Check version and source	2026-11-05T05:18:02.9260951Z ✔ OAuth failure reaches the native process without exposing a session (1.559192ms)
+build	Check version and source	2026-11-05T05:18:02.9262404Z ✔ native auth is unavailable outside the local app and rejects cross-origin requests (2.213941ms)
+build	Check version and source	2026-11-05T05:18:02.9263931Z ✔ explicit restart replaces an abandoned browser flow and rejects its late result (1.820127ms)
+build	Check version and source	2026-11-05T05:18:02.9265402Z ✔ a restarted native login cannot reuse an abandoned OAuth challenge from Chrome (7.82472ms)
+build	Check version and source	2026-11-05T05:18:02.9270115Z ✖ native preview serves built files, its own health token and the existing API (2241.831558ms)
+build	Check version and source	2026-11-05T05:18:02.9271947Z ✔ prepared atomic save uses one CAS mutation and local source receipt (70.638157ms)
+build	Check version and source	2026-11-05T05:18:02.9273296Z ✔ lost mutation response and retry reconcile without duplicate apply (31.253066ms)
+build	Check version and source	2026-11-05T05:18:02.9274521Z ✔ successful receipt primes the next prepared title save (16.812701ms)
+build	Check version and source	2026-11-05T05:18:02.9275772Z ✔ fresh remote advance conflicts and never overwrites canonical source (8.10967ms)
+build	Check version and source	2026-11-05T05:18:02.9277296Z ✔ mutation permissions stop immediately without recovery reads (7.066682ms)
+build	Check version and source	2026-11-05T05:18:02.9278573Z ✔ large exact authored bytes stay in the single mutation (61.1508ms)
+build	Check version and source	2026-11-05T05:18:02.9279806Z ✔ a request ID cannot be reused against its successful source commit (8.321742ms)
+build	Check version and source	2026-11-05T05:18:02.9281267Z ✔ durable request marker rejects reuse after unrelated descendants and a new cache scope (10.67649ms)
+build	Check version and source	2026-11-05T05:18:02.9282787Z ✔ retry source revision uses accepted bytes rather than regenerated timestamp (29.654421ms)
+build	Check version and source	2026-11-05T05:18:02.9284116Z ✔ recovery rejects tampered durable receipt and never reapplies (13.417692ms)
+build	Check version and source	2026-11-05T05:18:02.9285415Z ✔ trusted immutable cache remains entry bounded and credential scoped (1.346906ms)
+build	Check version and source	2026-11-05T05:18:02.9286774Z ✔ large source inventory drops unused API URLs within existing cache budget (72.666511ms)
+build	Check version and source	2026-11-05T05:18:02.9288357Z ✔ atomic authored no-op reserves its ID with only a durable marker (4.828166ms)
+build	Check version and source	2026-11-05T05:18:02.9289569Z ✔ atomic category no-op preserves the original compact bytes (4.05089ms)
+build	Check version and source	2026-11-05T05:18:02.9290719Z ✔ atomic transient GraphQL errors leave the queue retryable (4.975189ms)
+build	Check version and source	2026-11-05T05:18:02.9291992Z ✔ recovery read errors preserve their transient status after CAS rejection (5.891214ms)
+build	Check version and source	2026-11-05T05:18:02.9293272Z ✔ durable retry reconciles before sending another mutation (10.866924ms)
+build	Check version and source	2026-11-05T05:18:02.9294723Z ✔ reconciliation permits first dispatch only when the marker is absent at the unchanged base (6.303582ms)
+build	Check version and source	2026-11-05T05:18:02.9296224Z ✔ mixed batches retain compact bytes for their unchanged category operation (9.568037ms)
+build	Check version and source	2026-11-05T05:18:02.9297783Z ✔ atomic save rejects a legacy request namespace before writes (0.929029ms)
+build	Check version and source	2026-11-05T05:18:02.9298991Z ✔ atomic receipt rejects merge provenance with a second parent (5.447769ms)
+build	Check version and source	2026-11-05T05:18:02.9300216Z ✔ large repeated asset references use bounded SHA tree writes (22.897986ms)
+build	Check version and source	2026-11-05T05:18:02.9301588Z ✔ cache replacement accounts a pending GET and prime of the same identity once (17.322129ms)
+build	Check version and source	2026-11-05T05:18:02.9303149Z ✔ reconciliation reports superseded even when the descendant deleted the authored post (10.638108ms)
+build	Check version and source	2026-11-05T05:18:02.9304697Z ✔ read-only recovery rejects two-parent provenance (11.650083ms)
+build	Check version and source	2026-11-05T05:18:02.9306395Z ✔ large category moves keep aggregate authored tree content below the existing inline bound (10015.806043ms)
+build	Check version and source	2026-11-05T05:18:02.9308380Z ✔ repeat and concurrent category reads reuse validated data with zero external requests (227.314821ms)
+build	Check version and source	2026-11-05T05:18:02.9309871Z ✔ explicit latest-source refresh replaces the cache without a HEAD request (9.244946ms)
+build	Check version and source	2026-11-05T05:18:02.9310944Z ✔ missing credentials fail closed (1.63863ms)
+build	Check version and source	2026-11-05T05:18:02.9311792Z ✔ missing and forged sessions are rejected (29.440252ms)
+build	Check version and source	2026-11-05T05:18:02.9312875Z ✔ real encrypted cookies enforce expiry, owner, origin and CSRF (12.519431ms)
+build	Check version and source	2026-11-05T05:18:02.9314142Z ✔ connection readiness checks owner repositories and installation (20.989344ms)
+build	Check version and source	2026-11-05T05:18:02.9315530Z ✔ safe GitHub reads recover from connection loss but writes are never retried (255.654187ms)
+build	Check version and source	2026-11-05T05:18:02.9317171Z ✔ safe reads recover when the connection fails during the response body (252.485046ms)
+build	Check version and source	2026-11-05T05:18:02.9318619Z ✔ GitHub boundary preserves actionable status while hiding upstream details (3.59616ms)
+build	Check version and source	2026-11-05T05:18:02.9320002Z ✔ installation readiness rejects excess grants and repository selection (2.39611ms)
+build	Check version and source	2026-11-05T05:18:02.9321334Z ✔ existing nondefault app branch cannot report publishing ready (2.327111ms)
+build	Check version and source	2026-11-05T05:18:02.9323150Z ✔ content management accepts Contents-only installations without any Actions query (4.772212ms)
+build	Check version and source	2026-11-05T05:18:02.9324670Z ✔ connection readiness recovers from a transient GitHub content lookup failure (254.732902ms)
+build	Check version and source	2026-11-05T05:18:02.9326112Z ✔ GitHub read retries are bounded and do not retry writes or access failures (752.818066ms)
+build	Check version and source	2026-11-05T05:18:02.9327856Z ✔ explicit read-only GraphQL POST retries connection loss while mutations do not (251.444667ms)
+build	Check version and source	2026-11-05T05:18:02.9329246Z ✔ reads canonical original, preserving exact markdown and revision (64.812254ms)
+build	Check version and source	2026-11-05T05:18:02.9330497Z ✔ authenticated content errors also disable response caching (5.080097ms)
+build	Check version and source	2026-11-05T05:18:02.9331887Z ✔ explicit publication persists tag edits without replacing body or hidden metadata (59.110499ms)
+build	Check version and source	2026-11-05T05:18:02.9333404Z ✔ direct save preserves body, opaque metadata and attachments; retry is idempotent (17.42117ms)
+build	Check version and source	2026-11-05T05:18:02.9334792Z ✔ stale revisions and path escaping IDs fail before candidate creation (6.746358ms)
+build	Check version and source	2026-11-05T05:18:02.9336058Z ✔ uploads validate strict base64, size, SHA and join chunk bytes (4.198339ms)
+build	Check version and source	2026-11-05T05:18:02.9337722Z ✔ category update preserves sources and opaque fields and rejects unclassified deletion (5.219847ms)
+build	Check version and source	2026-11-05T05:18:02.9339087Z ✔ new documents enforce canonical ID and preserve asset data (4.601991ms)
+build	Check version and source	2026-11-05T05:18:02.9340299Z ✔ 5 MiB total chunk ceiling and complete wire ceiling are enforced (179.449002ms)
+build	Check version and source	2026-11-05T05:18:02.9341383Z ✔ no-op updates never create candidate commits (18.026624ms)
+build	Check version and source	2026-11-05T05:18:02.9343119Z ✔ document schema failures return actionable 422 while malformed transport stays 400 (9.737914ms)
+build	Check version and source	2026-11-05T05:18:02.9344569Z ✔ create and update reject malformed asset records before side effects (13.990676ms)
+build	Check version and source	2026-11-05T05:18:02.9346046Z ✔ canonical parent_id category CRUD preserves real source records and opaque metadata (15.084232ms)
+build	Check version and source	2026-11-05T05:18:02.9347874Z ✔ lost canonical PATCH response recovers accepted candidate without duplicate writes (3.896673ms)
+build	Check version and source	2026-11-05T05:18:02.9349535Z ✔ publish GET only reports pending status and authenticated POST alone resumes the candidate (9.996988ms)
+build	Check version and source	2026-11-05T05:18:02.9351063Z ✔ publish rejects a candidate that does not match its immutable request branch (5.168592ms)
+build	Check version and source	2026-11-05T05:18:02.9352539Z ✔ a concurrent sibling save rejects the stale candidate without overwriting canonical (5.25322ms)
+build	Check version and source	2026-11-05T05:18:02.9353951Z ✔ canonical PATCH success is verified against HEAD before claiming saved (5.610161ms)
+build	Check version and source	2026-11-05T05:18:02.9355439Z ✔ a canonical descendant accepts a saved candidate without moving HEAD backwards (13.110945ms)
+build	Check version and source	2026-11-05T05:18:02.9357522Z ✔ post deletion preserves surviving document relations and links while deleting the target (80.193633ms)
+build	Check version and source	2026-11-05T05:18:02.9359300Z ✔ post deletion resolves legacy Markdown aliases and permits code examples without live references (10.210465ms)
+build	Check version and source	2026-11-05T05:18:02.9360945Z ✔ category deletion rejects assigned categories and original child relationships (6.630932ms)
+build	Check version and source	2026-11-05T05:18:02.9362501Z ✔ post create and category assignment reject missing references before side effects (8.388865ms)
+build	Check version and source	2026-11-05T05:18:02.9363845Z ✔ body edits read only the target document and category catalog (16.477249ms)
+build	Check version and source	2026-11-05T05:18:02.9365121Z ✔ publish accepts a retained deletion candidate with a surviving child (4.144354ms)
+build	Check version and source	2026-11-05T05:18:02.9366682Z ✔ publish rejects retained candidates with paths or modes outside the editable content contract (2.844514ms)
+build	Check version and source	2026-11-05T05:18:02.9373695Z ✔ publish rejects a retained document candidate with a missing category (5.255142ms)
+build	Check version and source	2026-11-05T05:18:02.9375263Z ✔ new asset paths reject unsafe names and portable collisions with canonical assets (14.362042ms)
+build	Check version and source	2026-11-05T05:18:02.9376654Z ✔ publish rejects a retained new post whose parent points to itself (2.339124ms)
+build	Check version and source	2026-11-05T05:18:02.9378267Z ✔ category saves preserve the catalog schema when adding a category (2.633672ms)
+build	Check version and source	2026-11-05T05:18:02.9380242Z ✔ unchanged catalog documents permit deletion for full-body references beyond the summary without blob reads (4.428162ms)
+build	Check version and source	2026-11-05T05:18:02.9381976Z ✔ category deletion reuses complete catalog metadata across a large unchanged tree (110.964769ms)
+build	Check version and source	2026-11-05T05:18:02.9383656Z ✔ changed documents bypass stale catalog references and resolve against complete metadata aliases (18.034288ms)
+build	Check version and source	2026-11-05T05:18:02.9385232Z ✔ a source save becomes public after the workflow publishes the accepted commit (27.307198ms)
+build	Check version and source	2026-11-05T05:18:02.9392886Z ✔ authored unsafe URLs and encoded paths fail before any candidate writes without reading sibling bodies (36.969075ms)
+build	Check version and source	2026-11-05T05:18:02.9394722Z ✔ pending candidates with unsafe authored URLs cannot be applied by POST resume (12.231738ms)
+build	Check version and source	2026-11-05T05:18:02.9396375Z ✔ target URL validation preserves authored bytes, allows missing links and skips code examples (18.695879ms)
+build	Check version and source	2026-11-05T05:18:02.9398247Z ✔ serialized Markdown byte size matches the public runtime two MiB boundary (1438.266384ms)
+build	Check version and source	2026-11-05T05:18:02.9399830Z ✔ oversized pending Markdown and fresh category JSON fail before accepting a candidate (98.460768ms)
+build	Check version and source	2026-11-05T05:18:02.9401685Z ✔ canonical source returns validated editor data and a separate exact-byte revision without exposing an attachment (4.795166ms)
+build	Check version and source	2026-11-05T05:18:02.9403237Z ✔ saves reject invalid or externally desynchronized editor data (6.214196ms)
+build	Check version and source	2026-11-05T05:18:02.9404853Z ✔ authenticated recovery returns exact Markdown and raw broken editor source without allowing overwrite (66.478445ms)
+build	Check version and source	2026-11-05T05:18:02.9406459Z ✔ a block post is created with Markdown and editor JSON in the same Git commit (7.699421ms)
+build	Check version and source	2026-11-05T05:18:02.9409798Z ✔ editor-only settings changes save repeatedly and identical paired files report unchanged (17.730512ms)
+build	Check version and source	2026-11-05T05:18:02.9411581Z ✔ paired updates reject stale editor revisions and a body change without a new editor before writes (8.193501ms)
+build	Check version and source	2026-11-05T05:18:02.9413273Z ✔ metadata-only edits can preserve existing editor bytes with a matching editor revision (6.55978ms)
+build	Check version and source	2026-11-05T05:18:02.9414985Z ✔ reserved editor filenames cannot be uploaded as attachments through case or encoding changes (9.821511ms)
+build	Check version and source	2026-11-05T05:18:02.9416680Z ✔ source inventories reject editor filename aliases instead of exposing them as attachments (3.408314ms)
+build	Check version and source	2026-11-05T05:18:02.9418733Z ✔ publish revalidates editor pairing and allows mutable editor settings on retained candidates (7.509838ms)
+build	Check version and source	2026-11-05T05:18:02.9420387Z ✔ category reads query only the file and save base without separate HEAD or tree requests (1.919743ms)
+build	Check version and source	2026-11-05T05:18:02.9422438Z ✔ confirmed post deletion removes Markdown, editor backup and attachments from the canonical tree only (16.847803ms)
+build	Check version and source	2026-11-05T05:18:02.9424225Z ✔ category move deletes only the category and moves original documents to unclassified atomically (9.823532ms)
+build	Check version and source	2026-11-05T05:18:02.9426100Z ✔ category whole deletion removes assigned originals, inherited posts and assets but preserves unrelated posts (7.173072ms)
+build	Check version and source	2026-11-05T05:18:02.9427975Z ✔ category whole deletion permits references from surviving categories (3.90014ms)
+build	Check version and source	2026-11-05T05:18:02.9429535Z ✔ category deletion validates mode and preserves unclassified and parent-category protection (2.321962ms)
+build	Check version and source	2026-11-05T05:18:02.9431082Z ✔ unaccepted category move candidates are revalidated before publish resume (7.213687ms)
+build	Check version and source	2026-11-05T05:18:02.9432535Z ✔ unaccepted category delete candidates are revalidated before publish resume (5.137112ms)
+build	Check version and source	2026-11-05T05:18:02.9433973Z ✔ category move candidates cannot rewrite unrelated original title or body (3.331922ms)
+build	Check version and source	2026-11-05T05:18:02.9435431Z ✔ category deletion preserves parent-category protection before any Git write (1.433618ms)
+build	Check version and source	2026-11-05T05:18:02.9437784Z ✔ moving a category reuses metadata catalog and reads only the reassigned original body (96.840883ms)
+build	Check version and source	2026-11-05T05:18:02.9439540Z ✔ save advances only source and leaves public generation to the push workflow (4.775469ms)
+build	Check version and source	2026-11-05T05:18:02.9441341Z ✔ generation failure leaves saved source recoverable without duplicate writes (3.982613ms)
+build	Check version and source	2026-11-05T05:18:02.9443057Z ✔ category data read retains save conflicts when the canonical branch advances (1.161351ms)
+build	Check version and source	2026-11-05T05:18:02.9444547Z ✔ bulk updates multiple posts with one canonical commit and idempotent retry (29.097259ms)
+build	Check version and source	2026-11-05T05:18:02.9446236Z ✔ bulk category creation and a dependent post share one commit; an invalid operation advances nothing (13.853816ms)
+build	Check version and source	2026-11-05T05:18:02.9448035Z ✔ missing configuration blocks management without exposing secrets (40.339866ms)
+build	Check version and source	2026-11-05T05:18:02.9449166Z ✔ unknown routes stay outside management API (0.836667ms)
+build	Check version and source	2026-11-05T05:18:02.9450494Z ✔ repeated login reuses the pending challenge and stale callbacks preserve cookies (4.936097ms)
+build	Check version and source	2026-11-05T05:18:02.9452061Z ✔ failed matching callback preserves existing session and bounds one-use code exchange (3.128243ms)
+build	Check version and source	2026-11-05T05:18:02.9453482Z ✔ PKCE login exchanges code server-side and keeps token encrypted (26.537244ms)
+build	Check version and source	2026-11-05T05:18:02.9454831Z ✔ callback rejects state tampering, cancellation and other identities (4.180401ms)
+build	Check version and source	2026-11-05T05:18:02.9456144Z ✔ both direct and rewritten mutations reject unauthenticated callers (1.508338ms)
+build	Check version and source	2026-11-05T05:18:02.9457754Z ✔ content reads and mutations enforce session owner before repository work (2.896321ms)
+build	Check version and source	2026-11-05T05:18:02.9459207Z ✔ owner mutations require both matching origin and CSRF before repository work (7.234245ms)
+build	Check version and source	2026-11-05T05:18:02.9460554Z ✔ slow identity checks cannot extend session past the token expiry (8.745117ms)
+build	Check version and source	2026-11-05T05:18:02.9461961Z ✔ public reads bypass management configuration for direct and rewritten routes (1507.882954ms)
+build	Check version and source	2026-11-05T05:18:02.9463342Z ✔ public reads refuse mutation methods before contacting GitHub (3.564254ms)
+build	Check version and source	2026-11-05T05:18:02.9464668Z ✔ category reads fetch fresh file data without authorization or HEAD queries (70.209713ms)
+build	Check version and source	2026-11-05T05:18:02.9466097Z ✔ content access failures remain visible even with a valid authorized session (17.082706ms)
+build	Check version and source	2026-11-05T05:18:02.9467930Z ✔ changed content head invalidates category lookup even if category bytes are unchanged (4.154704ms)
+build	Check version and source	2026-11-05T05:18:02.9469560Z ✔ session checks use no GitHub requests and content reads independently load current data (12.909389ms)
+build	Check version and source	2026-11-05T05:18:02.9471104Z ✔ direct file lookup preserves rejection of symlink and executable category files (4.18519ms)
+build	Check version and source	2026-11-05T05:18:02.9472712Z ✔ category reads fetch file data once without a HEAD request, including with a stale connection (2.721546ms)
+build	Check version and source	2026-11-05T05:18:02.9505322Z ✔ category query rejects upstream errors, unsafe files and incomplete text without disclosing details (7.029284ms)
+build	Check version and source	2026-11-05T05:18:02.9507750Z ✔ immutable management reads share concurrent work and reuse completed data (40.464798ms)
+build	Check version and source	2026-11-05T05:18:02.9509255Z ✔ mutable permissions and branch refs are never cached; writes always execute (4.651618ms)
+build	Check version and source	2026-11-05T05:18:02.9510805Z ✔ management cache isolates tokens, configurations, fetchers and immutable revisions (1.833072ms)
+build	Check version and source	2026-11-05T05:18:02.9512168Z ✔ failed immutable reads are not retained and can recover (2.803067ms)
+build	Check version and source	2026-11-05T05:18:02.9513411Z ✔ entry, byte and configuration limits evict cached management data (162.628906ms)
+build	Check version and source	2026-11-05T05:18:02.9514884Z ✔ Vercel configuration routes nested API requests and disables automatic Git deployment (6.785551ms)
+build	Check version and source	2026-11-05T05:18:02.9516413Z ✔ Vite serves management requests with their method, body and separate cookies (679.003828ms)
+build	Check version and source	2026-11-05T05:18:02.9518193Z ✔ deployment includes the server catalog without static content preparation (8.066835ms)
+build	Check version and source	2026-11-05T05:18:02.9519797Z ✔ normal content preparation emits only a server catalog and preserves existing assets (259.431196ms)
+build	Check version and source	2026-11-05T05:18:05.1297172Z ✔ public index reads canonical GitHub content without login or a token (92.582987ms)
+build	Check version and source	2026-11-05T05:18:05.1298800Z ✔ public reads exclude editor source without fetching its private editing payload (10.869411ms)
+build	Check version and source	2026-11-05T05:18:05.1300735Z ✔ public Markdown cannot publish editor source as an attachment (2270.515032ms)
+build	Check version and source	2026-11-05T05:18:05.1302122Z ✔ encoded aliases of the reserved editor filename fail public tree validation (752.87118ms)
+build	Check version and source	2026-11-05T05:18:05.1303593Z ✔ body, cover, icon and attachments remain pinned to the list commit after head advances (19.247177ms)
+build	Check version and source	2026-11-05T05:18:05.1304943Z ✔ a full SHA outside canonical history cannot expose a draft commit (7.406762ms)
+build	Check version and source	2026-11-05T05:18:05.1306229Z ✔ an uncached canonical ancestor can be read after ancestry verification (21.904844ms)
+build	Check version and source	2026-11-05T05:18:05.1317232Z ✔ after bypasses an old head cache and selects the new commit publication (16.120706ms)
+build	Check version and source	2026-11-05T05:18:05.1318612Z ✔ fixed public repository reads do not fetch metadata and tokens stay server-side (5.43414ms)
+build	Check version and source	2026-11-05T05:18:05.1320062Z ✔ invalid request parameters and repository overrides are rejected before network access (6.379124ms)
+build	Check version and source	2026-11-05T05:18:05.1321561Z ✔ GitHub errors are visible and never become a successful empty index or stale snapshot (5.85742ms)
+build	Check version and source	2026-11-05T05:18:05.1322976Z ✔ runtime retains missing authored links but rejects unsafe paths and URL schemes (3035.464144ms)
+build	Check version and source	2026-11-05T05:18:05.1324517Z ✔ generation source reads are bounded in parallel and unsafe trees fail before publication (848.107739ms)
+build	Check version and source	2026-11-05T05:18:05.1325884Z ✔ a generation source failure is surfaced and request deadlines are finite (1505.547331ms)
+build	Check version and source	2026-11-05T05:18:05.1327437Z ✔ anonymous GitHub requests omit credentials and always carry an abort deadline (0.543134ms)
+build	Check version and source	2026-11-05T05:18:05.1329065Z ✔ generated summaries preserve inheritance, links and changed content; detail fetches only its public JSON (17.416902ms)
+build	Check version and source	2026-11-05T05:18:05.1330625Z ✔ content catalog records carry the exact Git blob hash of canonical source bytes (9.05116ms)
+build	Check version and source	2026-11-05T05:18:05.1331840Z ✔ a cached snapshot is denied after canonical history is replaced (13.885641ms)
+build	Check version and source	2026-11-05T05:18:05.1332966Z ✔ a cached ancestor proof is reused only for its current canonical head (11.826309ms)
+build	Check version and source	2026-11-05T05:18:05.1334301Z ✔ production-size indexes use bounded gzip without losing records or summary search text (3799.449608ms)
+build	Check version and source	2026-11-05T05:18:05.1335714Z ✔ explicit gzip rejection overrides wildcards and large identity responses stay bounded (19.420017ms)
+build	Check version and source	2026-11-05T05:18:05.1337204Z ✔ small public responses remain ordinary JSON when gzip is rejected (13.332328ms)
+build	Check version and source	2026-11-05T05:18:05.1338499Z ✔ repeated consumed index responses reuse JSON bytes and remain independently readable (11.401221ms)
+build	Check version and source	2026-11-05T05:18:06.2019526Z ✔ encoded bytes count toward the snapshot budget and trigger eviction on growth (1078.791814ms)
+build	Check version and source	2026-11-05T05:18:06.2248241Z ✔ retention never exceeds three snapshots after new commits (20.826757ms)
+build	Check version and source	2026-11-05T05:18:06.3764993Z ✔ workflow exposes a verified source only after its immutable publication is complete (73.590286ms)
+build	Check version and source	2026-11-05T05:18:06.3767734Z ✔ ready source advances by canonical ancestry and concurrent workflows preserve the newest source (25.737119ms)
+build	Check version and source	2026-11-05T05:18:06.3770053Z ✔ ready source status verifies the immutable artifact and rejects an incomplete publication (8.638779ms)
+build	Check version and source	2026-11-05T05:18:06.3771929Z ✔ failed artifact verification never advances the last ready source (15.985844ms)
+build	Check version and source	2026-11-05T05:18:06.3773491Z ✔ an older workflow cannot roll back a newer ready source (10.345165ms)
+build	Check version and source	2026-11-05T05:18:06.3775207Z ✔ lost ready-ref response recovers without generating duplicate public commits (9.518284ms)
+build	Check version and source	2026-11-05T05:18:06.3777325Z ✔ a newer workflow winning during the old PATCH response cannot be overwritten (26.315051ms)
+build	Check version and source	2026-11-05T05:18:06.3779274Z ✔ publication CLI traces every consumed response without recording credentials or bodies (237.069023ms)
+build	Check version and source	2026-11-05T05:18:06.3781362Z ✔ a pending or failed new source keeps the last ready public index readable on a cold reader (11.762995ms)
+build	Check version and source	2026-11-05T05:18:06.3783535Z ✔ generation projects safe public files and full bodies before publishing an immutable ref (11.204458ms)
+build	Check version and source	2026-11-05T05:18:06.3785286Z ✔ unsafe source fails before the ready ref is created (12.203635ms)
+build	Check version and source	2026-11-05T05:18:06.3788497Z ✔ generation rewrites pinned assets and inherited category without exposing original metadata (4.858543ms)
+build	Check version and source	2026-11-05T05:18:06.3790264Z ✔ the reader serves generated files without touching source Markdown or trees (4.627163ms)
+build	Check version and source	2026-11-05T05:18:06.3791913Z ✔ a missing publication returns 503 instead of generating content in a read (1.199322ms)
+build	Check version and source	2026-11-05T05:18:06.3793504Z ✔ CLI needs explicit publication intent and output mode makes no remote writes (15.75966ms)
+build	Check version and source	2026-11-05T05:18:06.3795231Z ✔ an incomplete existing publication is rejected instead of being reused (4.430216ms)
+build	Check version and source	2026-11-05T05:18:06.3797478Z ✔ a changed source crossing the summary boundary keeps the previous full-transform semantics (5.966656ms)
+build	Check version and source	2026-11-05T05:18:06.3799438Z ✔ large publications upload bounded trees before exposing the complete ref (324.922788ms)
+build	Check version and source	2026-11-05T05:18:06.3801406Z ✔ oversized and escaped generated files use blob upload instead of oversized inline trees (699.061387ms)
+build	Check version and source	2026-11-05T05:18:06.3803497Z ✔ writer cache compresses without changing public JSON and legacy cache still reuses bodies (10.306437ms)
+build	Check version and source	2026-11-05T05:18:06.3805261Z ✔ large JSON chooses the smaller lossless blob encoding (3255.785509ms)
+build	Check version and source	2026-11-05T05:18:06.3828306Z ✔ independent large blobs overlap with a two-upload bound before ready publication (1367.414034ms)
+build	Check version and source	2026-11-05T05:18:06.3838216Z ✔ failed concurrent blob uploads drain in-flight work and never publish a ready ref (965.975389ms)
+build	Check version and source	2026-11-05T05:18:06.3840235Z ✔ matching request-local source snapshots reuse inventory and still validate every source boundary (3.506683ms)
+build	Check version and source	2026-11-05T05:18:06.3858602Z ✔ incremental publication reads one changed source and reuses unchanged JSON blobs (7.937472ms)
+build	Check version and source	2026-11-05T05:18:06.3860033Z ✔ unchanged source push reads no Markdown and reuses every public body (3.619374ms)
+build	Check version and source	2026-11-05T05:18:06.3861447Z ✔ new and deleted link targets regenerate unresolved Markdown/Notion dependents only (19.000227ms)
+build	Check version and source	2026-11-05T05:18:06.3862569Z ✔ an ancestor category change regenerates inheriting children and leaves unrelated bodies reusable (9.28699ms)
+build	Check version and source	2026-11-05T05:18:06.3863527Z ✔ unchanged attachments keep pinned URLs; changed attachment bytes invalidate only their owner (11.574339ms)
+build	Check version and source	2026-11-05T05:18:06.3864399Z ✔ renamed aliases preserve resolved links while removed aliases invalidate dependents (11.282604ms)
+build	Check version and source	2026-11-05T05:18:06.3865328Z ✔ reused graph facts permit deleted IDs while rejecting cycles and unsafe changed content (15.249427ms)
+build	Check version and source	2026-11-05T05:18:06.3866211Z ✔ generation cache excludes arbitrary category metadata as well as document metadata (1.801402ms)
+build	Check version and source	2026-11-05T05:18:06.3868511Z ✔ a verified cache with noncanonical base64 fails before any new publication write (64.879969ms)
+build	Check version and source	2026-11-05T05:18:06.3870136Z ✔ a verified cache with malformed gzip fails before any new publication write (10.600051ms)
+build	Check version and source	2026-11-05T05:18:06.3871666Z ✔ a verified cache with invalid decoded JSON fails before any new publication write (9.905454ms)
+build	Check version and source	2026-11-05T05:18:06.3873138Z ✔ a verified compressed cache cannot decode beyond the public file limit (91.15306ms)
+build	Check version and source	2026-11-05T05:18:06.3874703Z ✔ a wrong concurrent blob SHA drains active uploads and never publishes a ready ref (1988.358051ms)
+build	Check version and source	2026-11-05T05:18:06.5789197Z ✔ validates real commit and rejects noncontent changes and wrong parent (262.53375ms)
+build	Check version and source	2026-11-05T05:18:06.5790928Z ✔ validates content when the inherited Git tree exceeds one MiB (432.086403ms)
+build	Check version and source	2026-11-05T05:18:06.5792577Z ✔ source promotion retries, preserves descendants and rejects divergence (400.834051ms)
+build	Check version and source	2026-11-05T05:18:06.5794263Z ✔ app gitlink moves forward and preserves concurrent app changes (588.243241ms)
+build	Check version and source	2026-11-05T05:18:06.5795799Z ✔ publication permits deleting a target while keeping inbound ID links (228.851956ms)
+build	Check version and source	2026-11-05T05:18:06.5798340Z ✔ rejects deleting unclassified and categories with original children or assignments (518.657865ms)
+build	Check version and source	2026-11-05T05:18:06.5800034Z ✔ deletes a post without inbound references and rejects symbolic links (330.498252ms)
+build	Check version and source	2026-11-05T05:18:06.5802070Z ✔ failed prospective app verification leaves the remote app branch unchanged (307.80112ms)
+build	Check version and source	2026-11-05T05:18:06.5803792Z ✔ source advance during verification supersedes the request before the app push (402.027609ms)
+build	Check version and source	2026-11-05T05:18:06.5805401Z ✔ a concurrent app push rebuilds and reverifies on the new app HEAD (572.026419ms)
+build	Check version and source	2026-11-05T05:18:07.0833209Z ✔ prospective verification can initialize the exact content submodule (504.942391ms)
+build	Check version and source	2026-11-05T05:18:07.0937969Z ✔ workflow installs trusted dependencies before running the publication CLI (10.596519ms)
+build	Check version and source	2026-11-05T05:18:07.1001491Z ✔ workflow prepares project settings before source promotion without downloading runtime secrets (6.373973ms)
+build	Check version and source	2026-11-05T05:18:07.1075925Z ✔ workflow uses permitted stored configuration names and preserves CLI environment names (7.284875ms)
+build	Check version and source	2026-11-05T05:18:07.1211166Z ✔ workflow initializes the runner content path at step runtime (13.330254ms)
+build	Check version and source	2026-11-05T05:18:07.3270657Z ✔ preview alias preflight accepts only the optional CMS preview namespace (169.745139ms)
+build	Check version and source	2026-11-05T05:18:07.3273555Z ✔ native network diagnostics expose only bounded error codes and HTTP status (35.73258ms)
+build	Check version and source	2026-11-05T05:18:09.5527508Z ✔ preview alias moves only after all deployed bytes pass verification (2225.953342ms)
+build	Check version and source	2026-11-05T05:18:09.5691913Z ✔ source save batches small UTF8 files and does no public generation (91.621392ms)
+build	Check version and source	2026-11-05T05:18:09.5693413Z ✔ a lost PATCH response recovers the same source without public writes (13.842301ms)
+build	Check version and source	2026-11-05T05:18:09.5694781Z ✔ a superseding canonical commit is reported without preparing public data (11.529532ms)
+build	Check version and source	2026-11-05T05:18:09.5696206Z ✔ public generation failure cannot block source save or duplicate its retry (10.026704ms)
+build	Check version and source	2026-11-05T05:18:09.5697907Z ✔ publication status stays saved until a complete immutable artifact is verified (36.49319ms)
+build	Check version and source	2026-11-05T05:18:09.5699363Z ✔ bulk receipt reuses verified candidate inventory and locally authored bytes (19.094809ms)
+build	Check version and source	2026-11-05T05:18:09.5700680Z ✔ immutable source reads are reused while canonical heads stay fresh (6.5704ms)
+build	Check version and source	2026-11-05T05:18:09.5701940Z ✔ large source upload rejects an unexpected blob identity before tree or canonical writes (41.389965ms)
+build	Check version and source	2026-11-05T05:18:09.5702737Z ✔ previous ready source cannot mark a newly saved source published (15.968448ms)
+build	Check version and source	2026-11-05T05:18:09.5703501Z ✔ candidate inventory preserves existing assets and verified sizes of new assets (6.930954ms)
+build	Check version and source	2026-11-05T05:18:09.5704427Z ✔ an earlier source receipt becomes published when verified ready advances to its descendant (18.620233ms)
+build	Check version and source	2026-11-05T05:18:09.5705938Z ✔ unchanged source can track workflow readiness without a request candidate or save-path public reads (22.05113ms)
+build	Check version and source	2026-11-05T05:18:09.5707118Z ✔ login validates grants once and session stays ready without external communication (49.25347ms)
+build	Check version and source	2026-11-05T05:18:09.5708402Z ✔ failed login grants never issue a session (7.078689ms)
+build	Check version and source	2026-11-05T05:18:09.5710003Z ✔ sessions reject legacy cookies, tampering, expiry, excessive lifetime and changed configuration locally (13.816752ms)
+build	Check version and source	2026-11-05T05:18:09.5711699Z ✔ prepare writes only CLI project settings through the project-scoped endpoint (54.439194ms)
+build	Check version and source	2026-11-05T05:18:09.5713084Z ✔ prepare refuses another project or owner before writing settings (4.343912ms)
+build	Check version and source	2026-11-05T05:18:09.5714572Z ✔ alias uses the deployment-scoped REST endpoint and refuses unsafe targets before HTTP (1.361884ms)
+build	Check version and source	2026-11-05T05:18:09.5716078Z ✔ Vercel API failures expose bounded status and code without response secrets (3.00916ms)
+build	Check version and source	2026-11-05T05:18:35.7018544Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:35.7019654Z 
+build	Check version and source	2026-11-05T05:18:35.7020361Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:35.7021686Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:35.7022667Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:35.7023673Z 
+build	Check version and source	2026-11-05T05:18:35.7024069Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:35.7024557Z 
+build	Check version and source	2026-11-05T05:18:35.7025131Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:35.7026604Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:35.7027737Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:35.7028037Z 
+build	Check version and source	2026-11-05T05:18:35.7028850Z ✔ App loads summaries then the selected body and handles an invalid index (260.949078ms)
+build	Check version and source	2026-11-05T05:18:35.7030243Z ✔ App loads distinct canonical categories sharing a display name (29.096918ms)
+build	Check version and source	2026-11-05T05:18:35.7031850Z ✔ App refreshes the public index after post update and reads the saved body after closing (365.163216ms)
+build	Check version and source	2026-11-05T05:18:35.7033603Z ✔ App refreshes the public index after post create and reads the saved body after closing (290.064791ms)
+build	Check version and source	2026-11-05T05:18:35.7035333Z ✔ App refreshes the public index after post delete and reads the saved body after closing (53.74599ms)
+build	Check version and source	2026-11-05T05:18:35.7037116Z ✔ App refreshes public category names after saving canonical categories (106.731579ms)
+build	Check version and source	2026-11-05T05:18:35.7038750Z ✔ category context menu opens a new writer with its canonical nested category selected (103.261526ms)
+build	Check version and source	2026-11-05T05:18:35.7040409Z ✔ category context menu opens a new writer with its local nested category selected (102.288174ms)
+build	Check version and source	2026-11-05T05:18:35.7041996Z ✔ new writing loads an authenticated base when the public index is unavailable (112.884467ms)
+build	Check version and source	2026-11-05T05:18:35.7443466Z ✔ fragment TOC quotes gain presentation styling without flattening nested lists (106.803414ms)
+build	Check version and source	2026-11-05T05:18:35.7445354Z ✔ a 목차 quote with nonfragment or route links keeps ordinary quote styling (42.231676ms)
+build	Check version and source	2026-11-05T05:18:35.7447340Z ✔ ordinary quote lists require the first meaningful paragraph to be 목차 (11.76443ms)
+build	Check version and source	2026-11-05T05:18:35.7448828Z ✔ a 목차 paragraph without linked list items remains an ordinary quote (10.178198ms)
+build	Check version and source	2026-11-05T05:18:35.7450224Z ✔ mixed TOC and ordinary nested quotes retain normal list presentation (13.779493ms)
+build	Check version and source	2026-11-05T05:18:35.7451694Z ✔ authored quote anchors remain reachable after applying reader styling (10.675796ms)
+build	Check version and source	2026-11-05T05:18:35.7453349Z ✔ the actual statistics TOC preserves every original fragment target (19634.02729ms)
+build	Check version and source	2026-11-05T05:18:35.7454742Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:35.7455348Z 
+build	Check version and source	2026-11-05T05:18:35.7455797Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:35.7457112Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:35.7458426Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:35.7458732Z 
+build	Check version and source	2026-11-05T05:18:35.7458960Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:35.7459259Z 
+build	Check version and source	2026-11-05T05:18:35.7459641Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:35.7460704Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:35.7461492Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:35.7461749Z 
+build	Check version and source	2026-11-05T05:18:35.7462432Z ✔ article preserves local page links and removes executable HTML (52.767232ms)
+build	Check version and source	2026-11-05T05:18:35.7463657Z ✔ loading article never renders or exports its preview body (4.249863ms)
+build	Check version and source	2026-11-05T05:18:35.7464814Z ✔ article editing requires a ready session and a loaded body (236.130351ms)
+build	Check version and source	2026-11-05T05:18:35.7465953Z ✔ home shows article sections and keeps browser drafts in records (44.314333ms)
+build	Check version and source	2026-11-05T05:18:35.7468710Z ✔ header separates records and category routes while the wordmark opens home (62.335373ms)
+build	Check version and source	2026-11-05T05:18:35.7469826Z ✔ direct article entry returns to home (10.662204ms)
+build	Check version and source	2026-11-05T05:18:35.7470858Z ✔ block and heading anchors stay on the current article route (124.737471ms)
+build	Check version and source	2026-11-05T05:18:35.7472401Z ✔ body-only Markdown keeps text between two horizontal rules (6.036168ms)
+build	Check version and source	2026-11-05T05:18:35.7473876Z ✔ page exploration controls and dialog are absent (83.650466ms)
+build	Check version and source	2026-11-05T05:18:35.7475721Z ✔ original cover has priority over the first body image (5.14852ms)
+build	Check version and source	2026-11-05T05:18:35.7476541Z ✔ reader resolves category labels by canonical ID (9.006072ms)
+build	Check version and source	2026-11-05T05:18:35.7477559Z ✔ reader classifies attachment URLs before resolving article IDs (9.197921ms)
+build	Check version and source	2026-11-05T05:18:35.7478322Z ✔ reader resolves literal percent paths before UUIDs in ancestor folder names (4.919373ms)
+build	Check version and source	2026-11-05T05:18:35.7479067Z ✔ known sources use approved groups and unknown sources stay navigable (3.309227ms)
+build	Check version and source	2026-11-05T05:18:35.7479790Z ✔ rename, parent move, order and empty categories survive reconciliation (0.348911ms)
+build	Check version and source	2026-11-05T05:18:35.7480549Z ✔ incoming source gets a valid display name without changing source: 새   초안 (0.823247ms)
+build	Check version and source	2026-11-05T05:18:35.7481913Z ✔ incoming source gets a valid display name without changing source: 가가가가가가가가가가가가가가가가가가가가 (0.448758ms)
+build	Check version and source	2026-11-05T05:18:35.7483475Z ✔ incoming source gets a valid display name without changing source: spring ( java ) (0.472181ms)
+build	Check version and source	2026-11-05T05:18:35.7484988Z ✔ an incoming source does not overwrite an existing alias or block catalog saves (0.30511ms)
+build	Check version and source	2026-11-05T05:18:35.7486376Z ✔ blank and truncated incoming names stay unique within the 100-character limit (0.66397ms)
+build	Check version and source	2026-11-05T05:18:35.7488280Z ✔ migrate legacy aliases and preserve sources and order (1.947876ms)
+build	Check version and source	2026-11-05T05:18:35.7489331Z ✔ moving a parent keeps the complete branch and rejects cycles (0.588628ms)
+build	Check version and source	2026-11-05T05:18:35.7490537Z ✔ delete lifts children and retains source ownership across reconciliation (0.722038ms)
+build	Check version and source	2026-11-05T05:18:35.7491885Z ✔ untrusted storage rejects cycles, orphans, duplicate IDs, names and sources (0.457494ms)
+build	Check version and source	2026-11-05T05:18:35.7493230Z ✔ records adapter includes descendant sources and promoted root documents (0.564974ms)
+build	Check version and source	2026-11-05T05:18:35.7494509Z ✔ drag projection can promote a deep node and nest a root without cycling (0.372355ms)
+build	Check version and source	2026-11-05T05:18:35.7495794Z ✔ legacy name collisions migrate without losing IDs, aliases or assignments (0.289821ms)
+build	Check version and source	2026-11-05T05:18:35.7497937Z ✔ canonical category validation permits shared labels but rejects broken public references (0.564674ms)
+build	Check version and source	2026-11-05T05:18:35.7498862Z ✔ moving into a same-named sibling is rejected without changing either branch (0.547973ms)
+build	Check version and source	2026-11-05T05:18:35.7499676Z ✔ approved list edits are staged until save and migrate v1 without overwriting it (136.414662ms)
+build	Check version and source	2026-11-05T05:18:35.7500490Z ✔ keyboard branch moves preserve sources and undo across category page round trips (79.558572ms)
+build	Check version and source	2026-11-05T05:18:35.7501311Z ✔ delete confirms, lifts children and retains source ownership without changing posts (64.326593ms)
+build	Check version and source	2026-11-05T05:18:35.7502317Z ✔ failed storage save keeps draft, undo history and original settings (31.81511ms)
+build	Check version and source	2026-11-05T05:18:35.7502948Z ✔ blank, duplicate and long names never alter a draft (24.755843ms)
+build	Check version and source	2026-11-05T05:18:35.7503595Z ✔ corrupt v2 settings are preserved and source reassignment is rejected (29.500589ms)
+build	Check version and source	2026-11-05T05:18:35.7504347Z ✔ pointer drag promotes a source category and clears the insertion marker on drop (24.708624ms)
+build	Check version and source	2026-11-05T05:18:35.7505095Z ✔ a saved deletion can be undone and saved even when undo empties history (31.987031ms)
+build	Check version and source	2026-11-05T05:18:35.7505977Z ✔ canonical categories initialize labels and personal v1/v2 settings overlay without ID-named nodes (18.729583ms)
+build	Check version and source	2026-11-05T05:18:35.7507239Z ✔ corrupt personal settings use canonical labels while preserving bytes and blocking save (5.852505ms)
+build	Check version and source	2026-11-05T05:18:35.7508135Z ✔ record filtering includes the complete category branch and source-bearing roots (30.484716ms)
+build	Check version and source	2026-11-05T05:18:35.7508829Z ✔ selected root follows its ID through nesting and promotion (3.667487ms)
+build	Check version and source	2026-11-05T05:18:35.7509591Z ✔ content saves outlive the generation deadline while explicit cancellation is preserved (4.113849ms)
+build	Check version and source	2026-11-05T05:18:44.3210412Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:44.3211552Z 
+build	Check version and source	2026-11-05T05:18:44.3212313Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:44.3214316Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:44.3215356Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3215908Z 
+build	Check version and source	2026-11-05T05:18:44.3216354Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:44.3217186Z 
+build	Check version and source	2026-11-05T05:18:44.3217820Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:44.3219255Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:44.3220275Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3220940Z 
+build	Check version and source	2026-11-05T05:18:44.3222166Z ✔ public articles render while authentication is pending and writing requires login (84.521899ms)
+build	Check version and source	2026-11-05T05:18:44.3224091Z ✔ category management is hidden when authentication is unavailable, including direct entry (12.514719ms)
+build	Check version and source	2026-11-05T05:18:44.3226003Z ✔ public records keep category filters and hide management links without login (35.533251ms)
+build	Check version and source	2026-11-05T05:18:44.3227912Z ✔ logging out an expired session restores public controls and login (34.956888ms)
+build	Check version and source	2026-11-05T05:18:44.3229651Z ✔ direct publication succeeds without polling and clears a stale retry error (16.345563ms)
+build	Check version and source	2026-11-05T05:18:44.3231307Z ✔ legacy publication checks resolve without an Actions run and stop after publication (9.89081ms)
+build	Check version and source	2026-11-05T05:18:44.3233277Z ✔ background source completion keeps the existing saved label without duplicate publication polling (9.309198ms)
+build	Check version and source	2026-11-05T05:18:44.3235060Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:44.3236047Z 
+build	Check version and source	2026-11-05T05:18:44.3236697Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:44.3238412Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:44.3239569Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3240082Z 
+build	Check version and source	2026-11-05T05:18:44.3240463Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:44.3241019Z 
+build	Check version and source	2026-11-05T05:18:44.3241564Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:44.3242776Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:44.3243637Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3244021Z 
+build	Check version and source	2026-11-05T05:18:44.3244639Z ✔ canonical title edits preserve Markdown and CSRF then refresh the published commit (364.662499ms)
+build	Check version and source	2026-11-05T05:18:44.3245535Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:44.3245988Z 
+build	Check version and source	2026-11-05T05:18:44.3246354Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:44.3278070Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:44.3307775Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3308580Z 
+build	Check version and source	2026-11-05T05:18:44.3337654Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:44.3348672Z 
+build	Check version and source	2026-11-05T05:18:44.3349390Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:44.3350897Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:44.3351724Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3351974Z 
+build	Check version and source	2026-11-05T05:18:44.3352709Z ✔ a failed canonical save retains the edited source for reauthentication (189.165387ms)
+build	Check version and source	2026-11-05T05:18:44.3353924Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:44.3354432Z 
+build	Check version and source	2026-11-05T05:18:44.3354818Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:44.3355803Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:44.3356508Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3360210Z 
+build	Check version and source	2026-11-05T05:18:44.3360477Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:44.3360868Z 
+build	Check version and source	2026-11-05T05:18:44.3361265Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:44.3362922Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:44.3363716Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3363947Z 
+build	Check version and source	2026-11-05T05:18:44.3364789Z ✔ new-post retries after reopening retain their original identity and request (5187.370132ms)
+build	Check version and source	2026-11-05T05:18:44.3366144Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:44.3366753Z 
+build	Check version and source	2026-11-05T05:18:44.3368809Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:44.3370008Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:44.3370888Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3371227Z 
+build	Check version and source	2026-11-05T05:18:44.3371451Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:44.3371808Z 
+build	Check version and source	2026-11-05T05:18:44.3372249Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:44.3373261Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:44.3374011Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3374279Z 
+build	Check version and source	2026-11-05T05:18:44.3375194Z ✔ existing-post retries after reopening retain their original identity and request (5143.857037ms)
+build	Check version and source	2026-11-05T05:18:44.3376555Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:44.3377444Z 
+build	Check version and source	2026-11-05T05:18:44.3377882Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:44.3378968Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:44.3379749Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3380063Z 
+build	Check version and source	2026-11-05T05:18:44.3380274Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:44.3380625Z 
+build	Check version and source	2026-11-05T05:18:44.3381034Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:44.3382089Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:44.3382887Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3383137Z 
+build	Check version and source	2026-11-05T05:18:44.3384024Z ✔ canonical category retries retain edits, original sources and request identity (91.731248ms)
+build	Check version and source	2026-11-05T05:18:44.3385510Z ✔ a lost deletion response can be retried after the source has disappeared (10.339233ms)
+build	Check version and source	2026-11-05T05:18:44.3387052Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:44.3387742Z 
+build	Check version and source	2026-11-05T05:18:44.3388269Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:44.3389687Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:44.3390912Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3391205Z 
+build	Check version and source	2026-11-05T05:18:44.3391468Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:44.3391822Z 
+build	Check version and source	2026-11-05T05:18:44.3392240Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:44.3393344Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:44.3394139Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3394381Z 
+build	Check version and source	2026-11-05T05:18:44.3394693Z Error: Not implemented: window.scrollBy
+build	Check version and source	2026-11-05T05:18:44.3395930Z     at module.exports (/home/runner/work/subdev-blog/subdev-blog/node_modules/jsdom/lib/jsdom/browser/not-implemented.js:9:17)
+build	Check version and source	2026-11-05T05:18:44.3397995Z     at Window.scrollBy (/home/runner/work/subdev-blog/subdev-blog/node_modules/jsdom/lib/jsdom/browser/Window.js:960:7)
+build	Check version and source	2026-11-05T05:18:44.3399857Z     at scrollRectIntoView (file:///home/runner/work/subdev-blog/subdev-blog/node_modules/prosemirror-view/dist/index.js:242:33)
+build	Check version and source	2026-11-05T05:18:44.3401765Z     at EditorView.scrollToSelection (file:///home/runner/work/subdev-blog/subdev-blog/node_modules/prosemirror-view/dist/index.js:5705:13)
+build	Check version and source	2026-11-05T05:18:44.3403716Z     at EditorView.updateStateInner (file:///home/runner/work/subdev-blog/subdev-blog/node_modules/prosemirror-view/dist/index.js:5686:18)
+build	Check version and source	2026-11-05T05:18:44.3405605Z     at EditorView.updateState (file:///home/runner/work/subdev-blog/subdev-blog/node_modules/prosemirror-view/dist/index.js:5606:14)
+build	Check version and source	2026-11-05T05:18:44.3407967Z     at Editor.dispatchTransaction (file:///home/runner/work/subdev-blog/subdev-blog/node_modules/@tiptap/core/dist/index.js:6940:13)
+build	Check version and source	2026-11-05T05:18:44.3409810Z     at EditorView.dispatch (file:///home/runner/work/subdev-blog/subdev-blog/node_modules/prosemirror-view/dist/index.js:5982:29)
+build	Check version and source	2026-11-05T05:18:44.3411722Z     at Plugin.handleTextInput (file:///home/runner/work/subdev-blog/subdev-blog/node_modules/@blocknote/core/dist/blocks-COYcDVg7.js:3687:55)
+build	Check version and source	2026-11-05T05:18:44.3413478Z     at file:///home/runner/work/subdev-blog/subdev-blog/tests/web/content-management.test.mjs:466:64 undefined
+build	Check version and source	2026-11-05T05:18:44.3415179Z ✔ attachment names with parentheses produce an intact Markdown destination (629.674106ms)
+build	Check version and source	2026-11-05T05:18:44.3416616Z ✔ writing opens an empty local draft without fetching a GitHub source (136.656824ms)
+build	Check version and source	2026-11-05T05:18:44.3418532Z ✔ a new records category reaches the writer and is created only when its post is published (153.919186ms)
+build	Check version and source	2026-11-05T05:18:44.3764717Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:44.3765412Z 
+build	Check version and source	2026-11-05T05:18:44.3765886Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:44.3768030Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:44.3768972Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3769317Z 
+build	Check version and source	2026-11-05T05:18:44.3769562Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:44.3769980Z 
+build	Check version and source	2026-11-05T05:18:44.3770427Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:44.3771583Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:44.3772375Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3772672Z 
+build	Check version and source	2026-11-05T05:18:44.3773341Z ✔ content workspace is reachable only after authorization (89.497385ms)
+build	Check version and source	2026-11-05T05:18:44.3774856Z ✔ workspace keeps public content separate from recovery drafts and filters local edits (25.112186ms)
+build	Check version and source	2026-11-05T05:18:44.3776511Z ✔ workspace migrates legacy draft status labels and preserves malformed recovery bytes (12.944168ms)
+build	Check version and source	2026-11-05T05:18:44.3778461Z ✔ confirmed newly published recovery resolves to one public row without removing its backup (11.356705ms)
+build	Check version and source	2026-11-05T05:18:44.3780108Z ✔ a published draft keeps its canonical identity and recovery key after further edits (12.085504ms)
+build	Check version and source	2026-11-05T05:18:44.3781654Z ✔ workspace pages contain at most fifteen rows and filters restart from page one (131.781609ms)
+build	Check version and source	2026-11-05T05:18:44.3783491Z ✔ category filters include descendants and preserve the empty state (41.87529ms)
+build	Check version and source	2026-11-05T05:18:44.3784760Z ✔ workspace reuses category dialog and keeps category before search (28.881079ms)
+build	Check version and source	2026-11-05T05:18:44.3786108Z ✔ unrecognized legacy categories agree with the unclassified count and filter (19.217264ms)
+build	Check version and source	2026-11-05T05:18:44.3787825Z ✔ category dialog stays open in StrictMode and Escape preserves the filter (19.598937ms)
+build	Check version and source	2026-11-05T05:18:44.3789290Z ✔ double-click confirms the clicked category immediately while expanders stay open (38.833373ms)
+build	Check version and source	2026-11-05T05:18:44.3790760Z ✔ post deletion waits for modal confirmation and removes canonical source plus recovery (23.861321ms)
+build	Check version and source	2026-11-05T05:18:44.3792154Z ✔ failed deletion preserves content and retries identical request after reopening (21.99056ms)
+build	Check version and source	2026-11-05T05:18:44.3793460Z ✔ local-only draft deletion clears stored draft without a canonical request (13.474306ms)
+build	Check version and source	2026-11-05T05:18:44.3794878Z ✔ a newly published recovery deletes its canonical identity before the index catches up (12.739426ms)
+build	Check version and source	2026-11-05T05:18:44.3796711Z ✔ delete confirmation closes and hides the row before the background response (11.984666ms)
+build	Check version and source	2026-11-05T05:18:44.3799089Z ✔ background deletion failure restores the row and its recovery and announces the error (17.32321ms)
+build	Check version and source	2026-11-05T05:18:44.3800399Z ✔ saving preserves other drafts and updates an existing draft once (1.095866ms)
+build	Check version and source	2026-11-05T05:18:44.3801887Z ✔ corrupt existing storage is never overwritten (0.350714ms)
+build	Check version and source	2026-11-05T05:18:44.3802755Z ✔ storage quota error reaches the caller (0.345054ms)
+build	Check version and source	2026-11-05T05:18:44.3804011Z ✔ batch source deletion clears only matching canonical recovery aliases and legacy drafts (4.943736ms)
+build	Check version and source	2026-11-05T05:18:44.3805383Z ▶ real React editor mounts, saves, imports, exports, and opens the slash menu
+build	Check version and source	2026-11-05T05:18:44.3806539Z   ✔ Markdown import updates real blocks and autosaved title/category (900.221295ms)
+build	Check version and source	2026-11-05T05:18:44.3808114Z   ✔ JSON backup imports nested blocks and code settings without flattening (781.338993ms)
+build	Check version and source	2026-11-05T05:18:44.3809346Z   ✔ MD and JSON download buttons export the current live document (19.829336ms)
+build	Check version and source	2026-11-05T05:18:44.3810587Z   ✔ slash menu inserts a notebook whose text and formatting survive save and reopen (1302.321338ms)
+build	Check version and source	2026-11-05T05:18:44.3811942Z ✔ real React editor mounts, saves, imports, exports, and opens the slash menu (3892.403584ms)
+build	Check version and source	2026-11-05T05:18:44.3813264Z ✔ home shows four newest published articles without mutating archive order (96.279338ms)
+build	Check version and source	2026-11-05T05:18:44.3814635Z ✔ home keeps small archives usable and places undated articles last (18.300986ms)
+build	Check version and source	2026-11-05T05:18:44.3815860Z ✔ home explains an empty published archive and links to records (8.243607ms)
+build	Check version and source	2026-11-05T05:18:44.3817538Z ✔ exported Markdown restores title, category, IDs and body without a duplicate H1 (8.697334ms)
+build	Check version and source	2026-11-05T05:18:44.3818820Z ✔ an unrelated first heading remains in the body (0.785035ms)
+build	Check version and source	2026-11-05T05:18:44.3819974Z ✔ plain Markdown imports its first heading as the document title (0.212687ms)
+build	Check version and source	2026-11-05T05:18:44.3821549Z ✔ invalid backup metadata fails before the document can be replaced (1.461337ms)
+build	Check version and source	2026-11-05T05:18:44.3822761Z ✔ horizontal rules do not discard the enclosed body (0.725414ms)
+build	Check version and source	2026-11-05T05:18:44.3824004Z ✔ tag-only patches round-trip and preserve untouched content metadata (6.772401ms)
+build	Check version and source	2026-11-05T05:18:44.3825218Z ✔ canonical metadata survives a Markdown round trip (5.045778ms)
+build	Check version and source	2026-11-05T05:18:44.3826806Z ✔ full documents default optional metadata while preserving their first H1 (0.698624ms)
+build	Check version and source	2026-11-05T05:18:44.3829203Z ✔ valid unknown-only YAML mappings are metadata and leave body bytes intact (0.742817ms)
+build	Check version and source	2026-11-05T05:18:44.3830602Z ✔ invalid metadata fails before callers replace existing text (4.522882ms)
+build	Check version and source	2026-11-05T05:18:44.3831968Z ✔ known canonical fields reject invalid values and missing required fields (7.410441ms)
+build	Check version and source	2026-11-05T05:18:44.3833186Z ✔ non-mapping frontmatter remains ordinary Markdown (0.475778ms)
+build	Check version and source	2026-11-05T05:18:44.3834582Z ✔ legacy source_id wins over a draft alias while schema 1 rejects conflicting IDs (1.101797ms)
+build	Check version and source	2026-11-05T05:18:44.3836024Z ✔ legacy ID fallback ignores an invalid source alias and normalizes valid UUIDs (0.338902ms)
+build	Check version and source	2026-11-05T05:18:44.3837621Z ✔ full edit exports carry base_revision outside canonical metadata (3.330827ms)
+build	Check version and source	2026-11-05T05:18:44.3839297Z ✔ patch round trips require only editable fields and add no full metadata defaults (1.17296ms)
+build	Check version and source	2026-11-05T05:18:44.3840842Z ✔ patch merge checks revision and identity then preserves hidden and unedited fields (0.543956ms)
+build	Check version and source	2026-11-05T05:18:44.3842210Z ✔ canonical filenames are portable NFC names bounded by UTF-8 bytes (0.883759ms)
+build	Check version and source	2026-11-05T05:18:44.3843332Z ✔ a no-op patch preserves the existing modification date (0.184845ms)
+build	Check version and source	2026-11-05T05:18:44.3844514Z ✔ serialization rejects non-JSON extension values and protected nested keys (0.239577ms)
+build	Check version and source	2026-11-05T05:18:44.3845961Z ✔ canonical IDs and references normalize hex case while accepting corpus UUID versions (1.516711ms)
+build	Check version and source	2026-11-05T05:18:44.3847697Z ✔ legacy invalid ID aliases do not become canonical document identities (0.386912ms)
+build	Check version and source	2026-11-05T05:18:44.3848979Z ✔ shared extension objects serialize as JSON values without YAML aliases (2.588101ms)
+build	Check version and source	2026-11-05T05:18:44.3850405Z ✔ patch headers validate supplied known metadata before discarding non-editable fields (0.358469ms)
+build	Check version and source	2026-11-05T05:18:44.3851719Z ✔ truncated whitespace suffixes cannot expose a Windows device name (0.298708ms)
+build	Check version and source	2026-11-05T05:18:44.3852895Z ✔ truncated whitespace-only prefixes use the empty-title fallback (0.216234ms)
+build	Check version and source	2026-11-05T05:18:44.3854135Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:44.3854719Z 
+build	Check version and source	2026-11-05T05:18:44.3855182Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:44.3856278Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:44.3857300Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3857634Z 
+build	Check version and source	2026-11-05T05:18:44.3857872Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:44.3858210Z 
+build	Check version and source	2026-11-05T05:18:44.3858633Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:44.3859696Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:44.3860428Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:44.3860698Z 
+build	Check version and source	2026-11-05T05:18:44.3861563Z ✔ approved editor keeps draft save local and renders the two-state writing controls (255.504037ms)
+build	Check version and source	2026-11-05T05:18:44.3862975Z ✔ category action precedes preview and shows the assigned name or empty label (150.265204ms)
+build	Check version and source	2026-11-05T05:18:44.3864484Z ✔ new GitHub posts use the notebook editor and save one paired Markdown/block snapshot (129.938765ms)
+build	Check version and source	2026-11-05T05:18:44.3866044Z ✔ GitHub editor JSON restores toggle children and code settings without browser drafts (460.066378ms)
+build	Check version and source	2026-11-05T05:18:44.3867998Z ✔ existing Markdown uses the approved block editor and title-only saves preserve its exact bytes (123.955857ms)
+build	Check version and source	2026-11-05T05:18:44.3869826Z ✔ malformed block recovery data stays intact and cannot silently become a new document (6.724732ms)
+build	Check version and source	2026-11-05T05:18:44.3871418Z ✔ Markdown articles edit blocks directly and save a paired snapshot without a conversion prompt (99.268865ms)
+build	Check version and source	2026-11-05T05:18:44.3873047Z ✔ image uploads preview locally while the saved block and Markdown use a stable relative path (590.259887ms)
+build	Check version and source	2026-11-05T05:18:44.3874604Z ✔ source image previews resolve against the content commit without changing stored URLs (73.772158ms)
+build	Check version and source	2026-11-05T05:18:44.3875938Z ✔ closing editor shortcuts never submits an enclosing save form (9.421666ms)
+build	Check version and source	2026-11-05T05:18:44.3877656Z ✔ bare sibling image names resolve to the pinned source asset without rewriting the stored URL (69.754248ms)
+build	Check version and source	2026-11-05T05:18:44.3879068Z ✔ simultaneous sibling uploads preserve every pending attachment (156.688793ms)
+build	Check version and source	2026-11-05T05:18:44.3880327Z ✔ staggered sibling uploads preserve every pending attachment (157.968514ms)
+build	Check version and source	2026-11-05T05:18:44.3881727Z ✔ invalid GitHub editor JSON permits exact original exports and blocks all fallback saves (11.258745ms)
+build	Check version and source	2026-11-05T05:18:44.3883377Z ✔ recovery import restores metadata and pending/source attachments into the fresh target identity (229.701545ms)
+build	Check version and source	2026-11-05T05:18:44.3884775Z ✔ recovery import rejects unsafe attachment ../outside.png 5 (55.674418ms)
+build	Check version and source	2026-11-05T05:18:44.3886143Z ✔ recovery import rejects unsafe attachment %2565ditor.json 5 (55.263561ms)
+build	Check version and source	2026-11-05T05:18:44.3887493Z ✔ recovery import rejects unsafe attachment good.png 5 (47.171167ms)
+build	Check version and source	2026-11-05T05:18:44.3888741Z ✔ recovery import rejects unsafe attachment good.png 6291456 (53.850754ms)
+build	Check version and source	2026-11-05T05:18:44.3890197Z ✔ Cmd/Ctrl+S saves recovery data and prevents browser Save Page without posting to GitHub (44.038549ms)
+build	Check version and source	2026-11-05T05:18:44.3891817Z ✔ cached recovery opens without downloading a damaged remote editor or rewriting its backup (29.841059ms)
+build	Check version and source	2026-11-05T05:18:44.3893301Z ✔ tags, category cancellation and reader controls preserve local-only drafts (97.534601ms)
+build	Check version and source	2026-11-05T05:18:44.3894654Z ✔ invalid imported tags preserve the current blocks and recovery bytes (51.612807ms)
+build	Check version and source	2026-11-05T05:18:44.3895992Z ✔ a published local draft resumes with canonical identity and sends update (148.326036ms)
+build	Check version and source	2026-11-05T05:18:44.3897763Z ✔ editor confirms a category double-click through the shared dialog without publishing (59.180141ms)
+build	Check version and source	2026-11-05T05:18:46.6903352Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:46.6904315Z 
+build	Check version and source	2026-11-05T05:18:46.6907969Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:46.6909788Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:46.6911076Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:46.6911675Z 
+build	Check version and source	2026-11-05T05:18:46.6912155Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:46.6912764Z 
+build	Check version and source	2026-11-05T05:18:46.6913401Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:46.6915009Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:46.6916122Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:46.6916648Z 
+build	Check version and source	2026-11-05T05:18:46.6918242Z ✔ prior category tree UI renames canonical records and retries identical request after 401 (10364.705896ms)
+build	Check version and source	2026-11-05T05:18:46.7530796Z ✔ canonical deletion confirms then saves the original immediately, preserving protected records (64.40629ms)
+build	Check version and source	2026-11-05T05:18:46.8100488Z ✔ failed category deletion retains the row and retries the same request (57.456905ms)
+build	Check version and source	2026-11-05T05:18:46.8118706Z ✔ signed out management renders nothing and never requests canonical content (1.622027ms)
+build	Check version and source	2026-11-05T05:18:51.9463103Z ✔ existing keyboard tree movement serializes canonical parent and sibling order (5133.749015ms)
+build	Check version and source	2026-11-05T05:18:51.9690729Z ✔ malformed saved canonical records keep their bytes and fall back to safe source nodes (23.010849ms)
+build	Check version and source	2026-11-05T05:18:51.9806533Z ✔ canonical counts include stable category IDs and aliases once without changing sources (11.59961ms)
+build	Check version and source	2026-11-05T05:18:52.0034136Z ✔ local drafts neither count nor block deletion of canonical categories (22.637502ms)
+build	Check version and source	2026-11-05T05:18:52.0341790Z ✔ a rejected category deletion releases its request so a refreshed source can be retried (30.522569ms)
+build	Check version and source	2026-11-05T05:18:52.0608803Z ✔ assigned category deletion selects move then requires a separate final confirmation (26.658477ms)
+build	Check version and source	2026-11-05T05:18:52.0943592Z ✔ assigned category deletion selects delete then requires a separate final confirmation (32.204769ms)
+build	Check version and source	2026-11-05T05:18:52.1154575Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:52.1155409Z 
+build	Check version and source	2026-11-05T05:18:52.1155970Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:52.1157678Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:52.1158819Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1159271Z 
+build	Check version and source	2026-11-05T05:18:52.1159590Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:52.1160065Z 
+build	Check version and source	2026-11-05T05:18:52.1160620Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:52.1162134Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:52.1163401Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1163663Z 
+build	Check version and source	2026-11-05T05:18:52.1164467Z ✔ session reads share an in-flight request in StrictMode and manual refresh (38.593576ms)
+build	Check version and source	2026-11-05T05:18:52.1165939Z ✔ temporary network loss recovers once; permission failures are not retried (356.181593ms)
+build	Check version and source	2026-11-05T05:18:52.1168942Z ✔ online and focus recover blocked sessions with event throttling and cleanup (4.211762ms)
+build	Check version and source	2026-11-05T05:18:52.1170147Z ✔ logout invalidates a delayed ready response (3.436164ms)
+build	Check version and source	2026-11-05T05:18:52.1171322Z ✔ HTML and null access denials keep their status and never retry (1409.741333ms)
+build	Check version and source	2026-11-05T05:18:52.1172774Z ✔ deadline during retry backoff leaves checking and cleanup aborts owned requests (3.665101ms)
+build	Check version and source	2026-11-05T05:18:52.1174219Z ✔ toggle summaries preserve nested semantic formatting and safe links (84.696859ms)
+build	Check version and source	2026-11-05T05:18:52.1175618Z ✔ inline Markdown formulas render accessible math beside surrounding text (36.699601ms)
+build	Check version and source	2026-11-05T05:18:52.1177181Z ✔ block Markdown formulas render display math outside code blocks (16.99941ms)
+build	Check version and source	2026-11-05T05:18:52.1178438Z ✔ formulas exported inside an HTML summary render inline (11.734653ms)
+build	Check version and source	2026-11-05T05:18:52.1179701Z ✔ table inline code preserves explicit line breaks and literal punctuation (16.797833ms)
+build	Check version and source	2026-11-05T05:18:52.1180955Z ✔ untrusted HTML and URLs remain sanitized while safe content survives (16.957693ms)
+build	Check version and source	2026-11-05T05:18:52.1182061Z ✔ math rendering does not trust URL or HTML macros (21.331476ms)
+build	Check version and source	2026-11-05T05:18:52.1183321Z ✔ published code captions and wrapping use only explicitly allowed attributes (11.604811ms)
+build	Check version and source	2026-11-05T05:18:52.1184876Z ✔ reader color attributes admit only the installed palette and supported alignment (9.569712ms)
+build	Check version and source	2026-11-05T05:18:52.1186422Z ✔ notebook slash insertion keeps editing and saved formatting inside its frame (261.343739ms)
+build	Check version and source	2026-11-05T05:18:52.1188647Z ✔ Markdown preserves notebook content, nested lists, inline formatting and code line breaks (150.592996ms)
+build	Check version and source	2026-11-05T05:18:52.1190249Z ✔ ordinary documents retain native Markdown and notebook HTML remains sanitized (25.348885ms)
+build	Check version and source	2026-11-05T05:18:52.1191825Z ✔ a notebook nested in an ordered list preserves numbering and its parent on import (34.958622ms)
+build	Check version and source	2026-11-05T05:18:52.1193280Z ✔ notebook headings have distinct reader anchors and matching TOC entries (27.363224ms)
+build	Check version and source	2026-11-05T05:18:52.1194683Z ✔ a toggle keeps its notebook and preceding text after Markdown import (16.37312ms)
+build	Check version and source	2026-11-05T05:18:52.1196174Z ✔ ordinary toggles and code settings survive Markdown publication without a notebook (24.167709ms)
+build	Check version and source	2026-11-05T05:18:52.1197994Z ✔ adjacent toggles remain independent expandable sections (19.804356ms)
+build	Check version and source	2026-11-05T05:18:52.1199776Z ✔ published formatting retains the editor palette, alignment and semantic underline (30.400122ms)
+build	Check version and source	2026-11-05T05:18:52.1201277Z ✔ toggle headings publish as expandable headings with their nested body (23.01052ms)
+build	Check version and source	2026-11-05T05:18:52.1202674Z ▶ Notion input rules change real BlockNote blocks and preserve the native rules
+build	Check version and source	2026-11-05T05:18:52.1203566Z   ✔ "> " (131.85916ms)
+build	Check version and source	2026-11-05T05:18:52.1204057Z   ✔ "\" " (27.874281ms)
+build	Check version and source	2026-11-05T05:18:52.1204542Z   ✔ "[] " (21.989221ms)
+build	Check version and source	2026-11-05T05:18:52.1205051Z   ✔ "a. " (26.852411ms)
+build	Check version and source	2026-11-05T05:18:52.1205551Z   ✔ "i. " (23.775077ms)
+build	Check version and source	2026-11-05T05:18:52.1206067Z   ✔ "## " (26.233105ms)
+build	Check version and source	2026-11-05T05:18:52.1206577Z   ✔ "- " (15.873932ms)
+build	Check version and source	2026-11-05T05:18:52.1207342Z   ✔ "1. " (17.747285ms)
+build	Check version and source	2026-11-05T05:18:52.1207835Z   ✔ "```js " (23.406239ms)
+build	Check version and source	2026-11-05T05:18:52.1208952Z ✔ Notion input rules change real BlockNote blocks and preserve the native rules (318.406549ms)
+build	Check version and source	2026-11-05T05:18:52.1210417Z ▶ Notion block shortcuts use Cmd+Option and Ctrl+Shift with the same digit contract
+build	Check version and source	2026-11-05T05:18:52.1211515Z   ✔ {"metaKey":true,"altKey":true} 0 (29.408963ms)
+build	Check version and source	2026-11-05T05:18:52.1212324Z   ✔ {"metaKey":true,"altKey":true} 1 (24.259331ms)
+build	Check version and source	2026-11-05T05:18:52.1213093Z   ✔ {"metaKey":true,"altKey":true} 2 (15.487037ms)
+build	Check version and source	2026-11-05T05:18:52.1213890Z   ✔ {"metaKey":true,"altKey":true} 3 (11.959673ms)
+build	Check version and source	2026-11-05T05:18:52.1215375Z   ✔ {"metaKey":true,"altKey":true} 4 (12.086771ms)
+build	Check version and source	2026-11-05T05:18:52.1215807Z   ✔ {"metaKey":true,"altKey":true} 5 (10.659796ms)
+build	Check version and source	2026-11-05T05:18:52.1216195Z   ✔ {"metaKey":true,"altKey":true} 6 (15.17753ms)
+build	Check version and source	2026-11-05T05:18:52.1216593Z   ✔ {"metaKey":true,"altKey":true} 7 (12.806734ms)
+build	Check version and source	2026-11-05T05:18:52.1217471Z   ✔ {"metaKey":true,"altKey":true} 8 (11.618095ms)
+build	Check version and source	2026-11-05T05:18:52.1218162Z   ✔ {"ctrlKey":true,"shiftKey":true} 0 (9.743907ms)
+build	Check version and source	2026-11-05T05:18:52.1218863Z   ✔ {"ctrlKey":true,"shiftKey":true} 1 (10.531949ms)
+build	Check version and source	2026-11-05T05:18:52.1219750Z   ✔ {"ctrlKey":true,"shiftKey":true} 2 (16.303251ms)
+build	Check version and source	2026-11-05T05:18:52.1220474Z   ✔ {"ctrlKey":true,"shiftKey":true} 3 (10.93447ms)
+build	Check version and source	2026-11-05T05:18:52.1221172Z   ✔ {"ctrlKey":true,"shiftKey":true} 4 (12.347176ms)
+build	Check version and source	2026-11-05T05:18:52.1221848Z   ✔ {"ctrlKey":true,"shiftKey":true} 5 (10.239753ms)
+build	Check version and source	2026-11-05T05:18:52.1222518Z   ✔ {"ctrlKey":true,"shiftKey":true} 6 (11.375743ms)
+build	Check version and source	2026-11-05T05:18:52.1223183Z   ✔ {"ctrlKey":true,"shiftKey":true} 7 (16.050107ms)
+build	Check version and source	2026-11-05T05:18:52.1223868Z   ✔ {"ctrlKey":true,"shiftKey":true} 8 (12.923803ms)
+build	Check version and source	2026-11-05T05:18:52.1224963Z ✔ Notion block shortcuts use Cmd+Option and Ctrl+Shift with the same digit contract (256.772534ms)
+build	Check version and source	2026-11-05T05:18:52.1226186Z ✔ Cmd/Ctrl+E applies inline code and preserves text (14.857783ms)
+build	Check version and source	2026-11-05T05:18:52.1227539Z ✔ composition key events do not convert the current block (9.020747ms)
+build	Check version and source	2026-11-05T05:18:52.1228596Z ✔ native code blocks keep Markdown markers as code text (9.4558ms)
+build	Check version and source	2026-11-05T05:18:52.1229568Z ✔ native undo reverses a Notion input conversion (19.035891ms)
+build	Check version and source	2026-11-05T05:18:52.1230758Z ✔ Cmd/Ctrl+D duplicates a block and nested children with fresh IDs (14.640417ms)
+build	Check version and source	2026-11-05T05:18:52.1231907Z ✔ Cmd/Ctrl+D duplicates all selected blocks once (11.495958ms)
+build	Check version and source	2026-11-05T05:18:52.1232931Z ✔ native Cmd/Ctrl+Shift+Arrow moves the current block (12.829146ms)
+build	Check version and source	2026-11-05T05:18:52.1234138Z ✔ custom code blocks retain language, caption and wrapping in JSON (91.748321ms)
+build	Check version and source	2026-11-05T05:18:52.1235580Z ✔ Cmd+Option+0 turns code back into a paragraph without losing code text (11.804614ms)
+build	Check version and source	2026-11-05T05:18:52.1236676Z ✔ block conversion leaves image blocks intact (15.577356ms)
+build	Check version and source	2026-11-05T05:18:52.1238077Z ✔ Mac Option digit symbols still use the Notion shortcut mapping (10.787014ms)
+build	Check version and source	2026-11-05T05:18:52.1239508Z ✔ typing a code caption updates saved props before blur and keeps the focused input (60.334125ms)
+build	Check version and source	2026-11-05T05:18:52.1240757Z ✔ the same wrap button toggles code wrapping on and off (20.729523ms)
+build	Check version and source	2026-11-05T05:18:52.1241988Z ✔ undo synchronizes the native language picker with persisted code props (20.612701ms)
+build	Check version and source	2026-11-05T05:18:52.1243714Z ✔ TOC labels show semantic HTML heading text without literal tags (98.884822ms)
+build	Check version and source	2026-11-05T05:18:52.1245023Z ✔ TOC labels decode exported punctuation after removing formatting (17.739411ms)
+build	Check version and source	2026-11-05T05:18:52.1246156Z ✔ TOC labels keep existing Markdown emphasis behavior (13.686196ms)
+build	Check version and source	2026-11-05T05:18:52.1247602Z ✔ TOC labels leave malformed or invalid entities readable without throwing (9.662645ms)
+build	Check version and source	2026-11-05T05:18:52.1248986Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:52.1249568Z 
+build	Check version and source	2026-11-05T05:18:52.1250010Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:52.1251103Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:52.1251940Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1252243Z 
+build	Check version and source	2026-11-05T05:18:52.1252496Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:52.1252850Z 
+build	Check version and source	2026-11-05T05:18:52.1253268Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:52.1254435Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:52.1255161Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1255395Z 
+build	Check version and source	2026-11-05T05:18:52.1256402Z ✔ a remounted public view renders stored data without waiting for or repeating the index download (55.250486ms)
+build	Check version and source	2026-11-05T05:18:52.1258412Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:52.1259132Z 
+build	Check version and source	2026-11-05T05:18:52.1259558Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:52.1260692Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:52.1261494Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1261791Z 
+build	Check version and source	2026-11-05T05:18:52.1262004Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:52.1262352Z 
+build	Check version and source	2026-11-05T05:18:52.1262757Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:52.1263777Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:52.1264538Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1264694Z 
+build	Check version and source	2026-11-05T05:18:52.1265093Z Warning: KaTeX doesn't work in quirks mode. Make sure your website has a suitable doctype.
+build	Check version and source	2026-11-05T05:18:52.1265874Z ✔ records filters and visible count survive article and home roundtrips (485.08169ms)
+build	Check version and source	2026-11-05T05:18:52.1266720Z ✔ overview adds retain dialog, scroll and disclosures; blank menu is scoped; selection closes (149.898821ms)
+build	Check version and source	2026-11-05T05:18:52.1267953Z ✔ ordinary edits are direct; undo/redo are confirmed and native input undo stays native (51.957971ms)
+build	Check version and source	2026-11-05T05:18:52.1268734Z ✔ global category has no menu and writer receives the category from overview (24.522258ms)
+build	Check version and source	2026-11-05T05:18:52.1269507Z ✔ tag gaps retain projected child DOM, cache valid targets and reject gap drops (1644.778402ms)
+build	Check version and source	2026-11-05T05:18:52.1270321Z ✔ outside/descendant cancels projection and Escape cleans sidebar floating feedback (660.666203ms)
+build	Check version and source	2026-11-05T05:18:52.1271226Z ✔ same names in different parents are valid; duplicate siblings and failed storage saves are atomic (63.598719ms)
+build	Check version and source	2026-11-05T05:18:52.1272070Z ✔ a released long hold stays armed for the next drag and blank clicks cancel it (1265.390099ms)
+build	Check version and source	2026-11-05T05:18:52.1272780Z ✔ sidebar browsing preserves category filters and visible count (217.036124ms)
+build	Check version and source	2026-11-05T05:18:52.1273488Z ✔ sidebar group selection and pagination include every matching record once (92.017803ms)
+build	Check version and source	2026-11-05T05:18:52.1274247Z ✔ removed selections fall back to all records and an empty catalog offers writing (44.784722ms)
+build	Check version and source	2026-11-05T05:18:52.1275043Z ✔ record cards use canonical ID labels while source filters include new and moved posts (15.559002ms)
+build	Check version and source	2026-11-05T05:18:52.1275947Z ✔ sidebar preserves managed hierarchy without duplicate roots or synthetic whole-category controls (43.259816ms)
+build	Check version and source	2026-11-05T05:18:52.1277062Z ✔ durable saves schedule immediate dispatch and coalesce only before transmission (13.752489ms)
+build	Check version and source	2026-11-05T05:18:52.1278155Z ✔ restored pending saves ignore a legacy future debounce without bypassing retry waits (1.841989ms)
+build	Check version and source	2026-11-05T05:18:52.1279043Z ✔ another coordinator cannot duplicate an in-flight batch, and later edits survive old response (2.335119ms)
+build	Check version and source	2026-11-05T05:18:52.1279943Z ✔ a lost response retains the same payload and resumes after reload without duplicate identity (2.403065ms)
+build	Check version and source	2026-11-05T05:18:52.1280812Z ✔ daily cleanup verifies receipts and never deletes failed, pending or mismatched data (3.424682ms)
+build	Check version and source	2026-11-05T05:18:52.1281634Z ✔ daily cleanup preserves a record whose receipt commit differs from its saved result (1.978583ms)
+build	Check version and source	2026-11-05T05:18:52.1282460Z ✔ discarding one conflict retains other documents as blocked recoverable saves (1.472489ms)
+build	Check version and source	2026-11-05T05:18:52.1283310Z ✔ cleanup preserves remotely confirmed payloads until their local recovery state is applied (3.549545ms)
+build	Check version and source	2026-11-05T05:18:52.1284303Z ✔ repeated saves coalesce without growing callback or pending queues; capacity rejects only the new request (33.454474ms)
+build	Check version and source	2026-11-05T05:18:52.1285246Z ✔ transient retry schedule is5,15,60 seconds and then stops; manual retry reuses the frozen batch (3.065712ms)
+build	Check version and source	2026-11-05T05:18:52.1286111Z ✔ a superseded lost-response retry cannot attach the latest revision to an older operation (1.238522ms)
+build	Check version and source	2026-11-05T05:18:52.1287432Z ✔ oversized saves and a full retained history stop new work without deleting older requests (24.843321ms)
+build	Check version and source	2026-11-05T05:18:52.1288344Z ✔ a verified source save confirms the queue before public generation and retains its overlay (2.908739ms)
+build	Check version and source	2026-11-05T05:18:52.1289168Z ✔ a source save with a mismatched receipt stays recoverable rather than confirming (0.807347ms)
+build	Check version and source	2026-11-05T05:18:52.1289988Z ✔ authorization and conflict failures never automatically resend a source batch (1.664918ms)
+build	Check version and source	2026-11-05T05:18:52.1290818Z ✔ cleanup retains unchanged source receipts only while their flagged publication is pending (2.455853ms)
+build	Check version and source	2026-11-05T05:18:52.1291637Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:52.1291949Z 
+build	Check version and source	2026-11-05T05:18:52.1292216Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:52.1292833Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:52.1293298Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1293540Z 
+build	Check version and source	2026-11-05T05:18:52.1293735Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:52.1293929Z 
+build	Check version and source	2026-11-05T05:18:52.1294150Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:52.1294727Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:52.1295124Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1295261Z 
+build	Check version and source	2026-11-05T05:18:52.1295778Z ✔ restart applies confirmed recovery data, and late older receipts cannot overwrite a newer baseline (22.12086ms)
+build	Check version and source	2026-11-05T05:18:52.1296555Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:52.1297136Z 
+build	Check version and source	2026-11-05T05:18:52.1297375Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:52.1297977Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:52.1298402Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1298579Z 
+build	Check version and source	2026-11-05T05:18:52.1298714Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:52.1298899Z 
+build	Check version and source	2026-11-05T05:18:52.1299117Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:52.1299688Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:52.1300076Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1300209Z 
+build	Check version and source	2026-11-05T05:18:52.1300632Z ✔ a delayed peer failure cannot announce an archived failed batch as confirmed (18.071033ms)
+build	Check version and source	2026-11-05T05:18:52.1301330Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:52.1301827Z 
+build	Check version and source	2026-11-05T05:18:52.1302057Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:52.1302641Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:52.1303074Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1303242Z 
+build	Check version and source	2026-11-05T05:18:52.1303384Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:52.1303572Z 
+build	Check version and source	2026-11-05T05:18:52.1303793Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:52.1304361Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:52.1304762Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1304899Z 
+build	Check version and source	2026-11-05T05:18:52.1305488Z ✔ source confirmation preserves the public snapshot identity and overlays an older public index after restart (28.196666ms)
+build	Check version and source	2026-11-05T05:18:52.1306308Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:52.1306638Z 
+build	Check version and source	2026-11-05T05:18:52.1307211Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:52.1308219Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:52.1308955Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1309190Z 
+build	Check version and source	2026-11-05T05:18:52.1309333Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:52.1309692Z 
+build	Check version and source	2026-11-05T05:18:52.1309917Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:52.1310499Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:52.1310898Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1311034Z 
+build	Check version and source	2026-11-05T05:18:52.1311605Z ✔ background publication checks survive navigation and retire overlays only at the verified public commit (1540.634507ms)
+build	Check version and source	2026-11-05T05:18:52.1312409Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:52.1312723Z 
+build	Check version and source	2026-11-05T05:18:52.1312962Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:52.1313534Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:52.1313955Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1314117Z 
+build	Check version and source	2026-11-05T05:18:52.1314245Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:52.1314438Z 
+build	Check version and source	2026-11-05T05:18:52.1314654Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:52.1315209Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:52.1315600Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1315733Z 
+build	Check version and source	2026-11-05T05:18:52.1316162Z ✔ retained published receipts cannot replace a fresher public source baseline (19.435516ms)
+build	Check version and source	2026-11-05T05:18:52.1317134Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:52.1317467Z 
+build	Check version and source	2026-11-05T05:18:52.1317705Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:52.1318314Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:52.1318738Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1318898Z 
+build	Check version and source	2026-11-05T05:18:52.1319024Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:52.1319207Z 
+build	Check version and source	2026-11-05T05:18:52.1319422Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:52.1319997Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:52.1320390Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1320522Z 
+build	Check version and source	2026-11-05T05:18:52.1320943Z ✔ retained unchanged receipts cannot replace a fresher public source baseline (16.863819ms)
+build	Check version and source	2026-11-05T05:18:52.1321653Z ▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+build	Check version and source	2026-11-05T05:18:52.1321964Z 
+build	Check version and source	2026-11-05T05:18:52.1322188Z     app/web/src/features/content-management/background-sync.mjs:36:17:
+build	Check version and source	2026-11-05T05:18:52.1322883Z       36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+build	Check version and source	2026-11-05T05:18:52.1323930Z          ╵                  ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1324199Z 
+build	Check version and source	2026-11-05T05:18:52.1324343Z   The original key "updatedAt" is here:
+build	Check version and source	2026-11-05T05:18:52.1324532Z 
+build	Check version and source	2026-11-05T05:18:52.1324755Z     app/web/src/features/content-management/background-sync.mjs:35:4:
+build	Check version and source	2026-11-05T05:18:52.1325341Z       35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+build	Check version and source	2026-11-05T05:18:52.1325739Z          ╵     ~~~~~~~~~
+build	Check version and source	2026-11-05T05:18:52.1325872Z 
+build	Check version and source	2026-11-05T05:18:52.1326443Z ✔ an unchanged source awaiting publication survives recovery and retires at the verified public snapshot (1518.079243ms)
+build	Check version and source	2026-11-05T05:18:52.1327847Z ✔ theme preferences reject unknown or corrupt storage and tolerate blocked storage (18.632627ms)
+build	Check version and source	2026-11-05T05:18:52.1329215Z ✔ palette and accent persist independently and leave layout tokens untouched (57.735121ms)
+build	Check version and source	2026-11-05T05:18:52.1330598Z ✔ all offered palette/accent combinations retain readable text and buttons (20.563618ms)
+build	Check version and source	2026-11-05T05:18:52.1332515Z ✔ shared trigger opens a native dialog, applies colors, reopens and resets without rerendering its parent (139.636711ms)
+build	Check version and source	2026-11-05T05:18:52.1334163Z ✔ settings icon follows logout in the shared site header (44.201458ms)
+build	Check version and source	2026-11-05T05:18:52.1335530Z ✔ first-post category creation preserves a lost-response request but refreshes a definite conflict (3.647638ms)
+build	Check version and source	2026-11-05T05:18:52.1337045Z ℹ tests 624
+build	Check version and source	2026-11-05T05:18:52.1337587Z ℹ suites 0
+build	Check version and source	2026-11-05T05:18:52.1338059Z ℹ pass 623
+build	Check version and source	2026-11-05T05:18:52.1338716Z ℹ fail 1
+build	Check version and source	2026-11-05T05:18:52.1339222Z ℹ cancelled 0
+build	Check version and source	2026-11-05T05:18:52.1339852Z ℹ skipped 0
+build	Check version and source	2026-11-05T05:18:52.1340316Z ℹ todo 0
+build	Check version and source	2026-11-05T05:18:52.1340811Z ℹ duration_ms 76726.730245
+build	Check version and source	2026-11-05T05:18:52.1341280Z 
+build	Check version and source	2026-11-05T05:18:52.1341518Z ✖ failing tests:
+build	Check version and source	2026-11-05T05:18:52.1341817Z 
+build	Check version and source	2026-11-05T05:18:52.1342183Z test at tests/native/native-preview.test.mjs:5:1
+build	Check version and source	2026-11-05T05:18:52.1354923Z ✖ native preview serves built files, its own health token and the existing API (2241.831558ms)
+build	Check version and source	2026-11-05T05:18:52.1355933Z   SyntaxError [Error]: Unexpected end of JSON input
+build	Check version and source	2026-11-05T05:18:52.1356554Z       at JSON.parse (<anonymous>)
+build	Check version and source	2026-11-05T05:18:52.1357477Z       at parseJSONFromBytes (node:internal/deps/undici/undici:4432:19)
+build	Check version and source	2026-11-05T05:18:52.1358335Z       at successSteps (node:internal/deps/undici/undici:7087:27)
+build	Check version and source	2026-11-05T05:18:52.1359148Z       at readAllBytes (node:internal/deps/undici/undici:6004:13)
+build	Check version and source	2026-11-05T05:18:52.1360097Z       at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+build	Check version and source	2026-11-05T05:18:52.1403887Z ##[error]Process completed with exit code 1.

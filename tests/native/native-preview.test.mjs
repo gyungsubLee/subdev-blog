@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { createServer, preview } from "vite";
 
 test("native preview serves built files, its own health token and the existing API", { timeout: 60000 }, async () => {
+  const { version } = JSON.parse(await readFile(new URL("../../package.json", import.meta.url), "utf8"));
   const previousToken = process.env.SECOND_BRAIN_NATIVE_TOKEN;
   process.env.SECOND_BRAIN_NATIVE_TOKEN = "native-preview-check";
   let development;
@@ -16,7 +18,8 @@ test("native preview serves built files, its own health token and the existing A
     assert.deepEqual(await health.json(), { token: "native-preview-check" });
     assert.equal(health.headers.get("cache-control"), "no-store");
     const info = await fetch(origin + "/build-info.json", { signal: AbortSignal.timeout(5000) });
-    assert.equal((await info.json()).version, "0.1.0");
+    assert.equal(info.status, 200, "Build the web app before checking native preview");
+    assert.equal((await info.json()).version, version);
     const home = await fetch(origin, { signal: AbortSignal.timeout(5000) });
     assert.equal(home.status, 200);
     assert.ok((await home.text()).includes("/assets/"), "Preview must serve the compiled page");

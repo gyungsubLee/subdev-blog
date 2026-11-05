@@ -1,0 +1,23 @@
+{
+  "dateKST": "2026-11-05",
+  "version": "0.2.1",
+  "authorization": "User requested release and all optimization measurements, then explicitly approved v0.2.1 after deterministic v0.2.0 CI failure.",
+  "implementationCommit": "4755119a0ff006eafc6f793223c801e6a14e6624",
+  "branch": "codex/block-editor-storage",
+  "remote": "gyungsubLee/subdev-blog",
+  "excluded": [
+    "content/.github untracked nested-repo work",
+    "app/server/src/public-files.mjs trailing blank line"
+  ],
+  "historicalEvidence": "docs/releases/v0.2.0-performance.md",
+  "publication": "pending corrected tag build",
+  "failedCandidate": {
+    "tag": "v0.2.0",
+    "source": "8f9f8ea6310ea8521cebddcf0144a44efceb027a",
+    "run": 41973043765,
+    "pass": 623,
+    "fail": 1,
+    "reason": "native preview accesses build output before build; fixed version 0.1.0"
+  },
+  "candidateRef": "refs/tags/v0.2.1"
+}
