@@ -1,12 +1,31 @@
 {
-  "version": "0.2.0",
-  "tag": "v0.2.0",
-  "sourceCommit": "8f9f8ea6310ea8521cebddcf0144a44efceb027a",
-  "tagObject": "d6393652f500f401218759b6117da2fe9beb8a0c",
-  "runId": 41973043765,
-  "runNumber": 4,
+  "version": "0.2.1",
+  "tag": "v0.2.1",
+  "tagObject": "19e40eb6696557e5c22f431befca73f9b5069f05",
+  "sourceCommit": "0fdfc77111014ecc733577a9f25b8d2ff501b10f",
+  "runId": 41973933692,
+  "runNumber": 5,
   "runAttempt": 1,
-  "runUrl": "https://github.com/gyungsubLee/subdev-blog/actions/runs/41973043765",
-  "state": "building",
-  "notes": "Full historical measurement tables are included in release body; source tag remains immutable."
+  "runUrl": "https://github.com/gyungsubLee/subdev-blog/actions/runs/41973933692",
+  "state": "success",
+  "failedCandidate": {
+    "version": "0.2.0",
+    "runId": 41973043765,
+    "conclusion": "failure",
+    "passed": 623,
+    "failed": 1
+  },
+  "artifactId": 13390833598,
+  "zipSha256": "fc15494ae1ec700044860f5e892faa26e218d4d5fd6d760cb25ac650b4af31d1",
+  "zipBytes": 7584017,
+  "tests": {
+    "pass": 624,
+    "fail": 0
+  },
+  "content": {
+    "posts": 3032,
+    "categories": 48,
+    "errors": 0
+  },
+  "artifactEvidence": "artifact-021.json"
 }

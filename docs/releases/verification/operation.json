@@ -10,7 +10,7 @@
     "app/server/src/public-files.mjs trailing blank line"
   ],
   "historicalEvidence": "docs/releases/v0.2.0-performance.md",
-  "publication": "pending corrected tag build",
+  "publication": "published and all three downloaded asset byte hashes verified",
   "failedCandidate": {
     "tag": "v0.2.0",
     "source": "8f9f8ea6310ea8521cebddcf0144a44efceb027a",
@@ -19,5 +19,11 @@
     "fail": 1,
     "reason": "native preview accesses build output before build; fixed version 0.1.0"
   },
-  "candidateRef": "refs/tags/v0.2.1"
+  "candidateRef": "refs/tags/v0.2.1",
+  "sourceCommit": "0fdfc77111014ecc733577a9f25b8d2ff501b10f",
+  "tagObject": "19e40eb6696557e5c22f431befca73f9b5069f05",
+  "release": "https://github.com/gyungsubLee/subdev-blog/releases/tag/v0.2.1",
+  "run": "https://github.com/gyungsubLee/subdev-blog/actions/runs/41973933692",
+  "artifactId": 13390833598,
+  "zipSha256": "fc15494ae1ec700044860f5e892faa26e218d4d5fd6d760cb25ac650b4af31d1"
 }

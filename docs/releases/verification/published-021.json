@@ -1,0 +1,37 @@
+{
+  "id": 434816727,
+  "html_url": "https://github.com/gyungsubLee/subdev-blog/releases/tag/v0.2.1",
+  "name": "v0.2.1",
+  "tag_name": "v0.2.1",
+  "target_commitish": "0fdfc77111014ecc733577a9f25b8d2ff501b10f",
+  "draft": false,
+  "prerelease": false,
+  "published_at": "2026-11-05T05:29:28Z",
+  "bodySha256": "7efaab1c253d8d7a2313327551cda6648294a82774b5824df02d0d549ed5978d",
+  "sourceCommit": "0fdfc77111014ecc733577a9f25b8d2ff501b10f",
+  "tagObject": "19e40eb6696557e5c22f431befca73f9b5069f05",
+  "downloadedAssetBytesMatch": true,
+  "assets": [
+    {
+      "id": 712198796,
+      "name": "subdev-blog-v0.2.1-0fdfc77111014ecc733577a9f25b8d2ff501b10f-run41973933692-attempt1.zip",
+      "size": 7584017,
+      "digest": "sha256:fc15494ae1ec700044860f5e892faa26e218d4d5fd6d760cb25ac650b4af31d1",
+      "browser_download_url": "https://github.com/gyungsubLee/subdev-blog/releases/download/v0.2.1/subdev-blog-v0.2.1-0fdfc77111014ecc733577a9f25b8d2ff501b10f-run41973933692-attempt1.zip"
+    },
+    {
+      "id": 712198795,
+      "name": "subdev-blog-v0.2.1-build-info.json",
+      "size": 244,
+      "digest": "sha256:943172765dfb8317104b997187217ca28ba215a521c80f0e05583af650e46cf2",
+      "browser_download_url": "https://github.com/gyungsubLee/subdev-blog/releases/download/v0.2.1/subdev-blog-v0.2.1-build-info.json"
+    },
+    {
+      "id": 712198797,
+      "name": "subdev-blog-v0.2.1-SHA256SUMS.txt",
+      "size": 255,
+      "digest": "sha256:cd71d3bfc7155a42cc95cda5cb373cd3aac6f28a1ea84b4ff74a11dab2d5739e",
+      "browser_download_url": "https://github.com/gyungsubLee/subdev-blog/releases/download/v0.2.1/subdev-blog-v0.2.1-SHA256SUMS.txt"
+    }
+  ]
+}

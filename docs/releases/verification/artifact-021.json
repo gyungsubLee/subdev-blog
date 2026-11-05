@@ -1,0 +1,189 @@
+{
+  "version": "0.2.1",
+  "tag": "v0.2.1",
+  "sourceCommit": "0fdfc77111014ecc733577a9f25b8d2ff501b10f",
+  "run": {
+    "attempt": 1,
+    "conclusion": "success",
+    "databaseId": 41973933692,
+    "event": "push",
+    "headSha": "0fdfc77111014ecc733577a9f25b8d2ff501b10f",
+    "jobs": [
+      {
+        "completedAt": "2026-11-05T05:28:02Z",
+        "conclusion": "success",
+        "databaseId": 127068291300,
+        "name": "build",
+        "startedAt": "2026-11-05T05:25:37Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-11-05T05:25:39Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-11-05T05:25:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-05T05:25:47Z",
+            "conclusion": "success",
+            "name": "Check out selected commit",
+            "number": 2,
+            "startedAt": "2026-11-05T05:25:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-05T05:25:49Z",
+            "conclusion": "success",
+            "name": "Set up Node.js",
+            "number": 3,
+            "startedAt": "2026-11-05T05:25:47Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-05T05:25:55Z",
+            "conclusion": "success",
+            "name": "Install dependencies",
+            "number": 4,
+            "startedAt": "2026-11-05T05:25:49Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-05T05:25:55Z",
+            "conclusion": "success",
+            "name": "Read package version",
+            "number": 5,
+            "startedAt": "2026-11-05T05:25:55Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-05T05:26:31Z",
+            "conclusion": "success",
+            "name": "Build site",
+            "number": 6,
+            "startedAt": "2026-11-05T05:25:55Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-05T05:27:58Z",
+            "conclusion": "success",
+            "name": "Check version and source",
+            "number": 7,
+            "startedAt": "2026-11-05T05:26:31Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-05T05:27:58Z",
+            "conclusion": "success",
+            "name": "Verify build identity",
+            "number": 8,
+            "startedAt": "2026-11-05T05:27:58Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-05T05:27:59Z",
+            "conclusion": "success",
+            "name": "Upload versioned site",
+            "number": 9,
+            "startedAt": "2026-11-05T05:27:58Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-05T05:27:59Z",
+            "conclusion": "success",
+            "name": "Write build summary",
+            "number": 10,
+            "startedAt": "2026-11-05T05:27:59Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-05T05:28:00Z",
+            "conclusion": "success",
+            "name": "Post Set up Node.js",
+            "number": 19,
+            "startedAt": "2026-11-05T05:27:59Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-05T05:28:01Z",
+            "conclusion": "success",
+            "name": "Post Check out selected commit",
+            "number": 20,
+            "startedAt": "2026-11-05T05:28:00Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-05T05:28:01Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 21,
+            "startedAt": "2026-11-05T05:28:01Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/gyungsubLee/subdev-blog/actions/runs/41973933692/job/127068291300"
+      }
+    ],
+    "number": 5,
+    "status": "completed",
+    "url": "https://github.com/gyungsubLee/subdev-blog/actions/runs/41973933692"
+  },
+  "artifact": {
+    "id": 13390833598,
+    "node_id": "MDg6QXJ0aWZhY3QxMzM5MDgzMzU5OA==",
+    "name": "second-brain-v0.2.1-0fdfc77111014ecc733577a9f25b8d2ff501b10f-run41973933692-attempt1",
+    "size_in_bytes": 7584017,
+    "url": "https://api.github.com/repos/gyungsubLee/subdev-blog/actions/artifacts/13390833598",
+    "archive_download_url": "https://api.github.com/repos/gyungsubLee/subdev-blog/actions/artifacts/13390833598/zip",
+    "expired": false,
+    "digest": "sha256:fc15494ae1ec700044860f5e892faa26e218d4d5fd6d760cb25ac650b4af31d1",
+    "created_at": "2026-11-05T05:27:59Z",
+    "updated_at": "2026-11-05T05:27:59Z",
+    "expires_at": "2026-11-12T05:27:58Z",
+    "workflow_run": {
+      "id": 41973933692,
+      "repository_id": 1429692733,
+      "head_repository_id": 1429692733,
+      "head_branch": "v0.2.1",
+      "head_sha": "0fdfc77111014ecc733577a9f25b8d2ff501b10f"
+    }
+  },
+  "zip": {
+    "name": "subdev-blog-v0.2.1-0fdfc77111014ecc733577a9f25b8d2ff501b10f-run41973933692-attempt1.zip",
+    "bytes": 7584017,
+    "sha256": "fc15494ae1ec700044860f5e892faa26e218d4d5fd6d760cb25ac650b4af31d1",
+    "files": 104,
+    "crc": "passed",
+    "entryAssets": [
+      "/assets/index-CNaEnZbp.js",
+      "/assets/index-Bo2Fw9DE.css"
+    ]
+  },
+  "buildInfo": {
+    "version": "0.2.1",
+    "contentCommit": "9f99941c6b650c70f363208cd97c7191ef785a46",
+    "commit": "0fdfc77111014ecc733577a9f25b8d2ff501b10f",
+    "runId": "41973933692",
+    "runNumber": "5",
+    "runAttempt": "1",
+    "workflow": "Versioned build"
+  },
+  "releaseAssets": [
+    {
+      "name": "subdev-blog-v0.2.1-0fdfc77111014ecc733577a9f25b8d2ff501b10f-run41973933692-attempt1.zip",
+      "bytes": 7584017,
+      "sha256": "fc15494ae1ec700044860f5e892faa26e218d4d5fd6d760cb25ac650b4af31d1"
+    },
+    {
+      "name": "subdev-blog-v0.2.1-build-info.json",
+      "bytes": 244,
+      "sha256": "943172765dfb8317104b997187217ca28ba215a521c80f0e05583af650e46cf2"
+    },
+    {
+      "name": "subdev-blog-v0.2.1-SHA256SUMS.txt",
+      "bytes": 255,
+      "sha256": "cd71d3bfc7155a42cc95cda5cb373cd3aac6f28a1ea84b4ff74a11dab2d5739e"
+    }
+  ]
+}

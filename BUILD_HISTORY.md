@@ -1,26 +1,67 @@
 # 빌드 이력
 
-현재 공개 버전은 [v0.1.0](https://github.com/gyungsubLee/subdev-blog/releases/tag/v0.1.0)이다.
+현재 공개 버전은 [v0.2.1](https://github.com/gyungsubLee/subdev-blog/releases/tag/v0.2.1)이다.
 Git 태그, 소스 커밋, 빌드 실행과 내려받는 파일을 아래 기록으로 연결한다.
 시각은 모두 한국 표준시(KST, UTC+09:00)다.
 
 ## v0.2.1 — 2026-11-05
 
-`v0.2.0`의 최적화와 누적 기능을 포함하며 릴리즈 검사 두 곳을 고쳤다.
-웹 빌드를 동작 검사보다 먼저 실행한다. 미리보기의 빌드 버전을 현재 패키지와 비교한다.
-기존 태그와 원본 측정 기록은 유지한다. 성능과 제품 UI는 이번 검사 수정에서 바꾸지 않았다.
+[v0.2.1](https://github.com/gyungsubLee/subdev-blog/releases/tag/v0.2.1)을 2026-11-05 14:29:28 KST에 공개했다.
+`v0.2.0` 후보의 최적화와 누적 기능을 포함한다. 릴리즈 검사 순서와 고정 버전 비교를 고쳤다.
 
 | 항목 | 값 |
 | --- | --- |
 | 버전 기준 | `package.json`의 `0.2.1`; lockfile 두 필드 일치 |
-| Git 태그 | `v0.2.1`, 새 주석 태그 |
+| Git 태그 | [v0.2.1](https://github.com/gyungsubLee/subdev-blog/tree/v0.2.1), 주석 태그 |
+| 태그 객체 SHA | `19e40eb6696557e5c22f431befca73f9b5069f05` |
+| 실제 소스 커밋 | [0fdfc77111014ecc733577a9f25b8d2ff501b10f](https://github.com/gyungsubLee/subdev-blog/commit/0fdfc77111014ecc733577a9f25b8d2ff501b10f) |
+| 구현 보존 커밋 | `4755119`, 완료된 최적화·UI·복구와 원시 근거 |
 | 콘텐츠 pin | `9f99941c6b650c70f363208cd97c7191ef785a46` |
-| 로컬 검증 | 웹 빌드·전체 624/624개·콘텐츠 오류 0개·네이티브 0.2.1 빌드·서명 검증 성공 |
-| 최적화 실측 | [모든 단계의 측정 표와 제한](docs/releases/v0.2.0-performance.md) |
-| 릴리즈 본문 | [v0.2.1 기록](docs/releases/v0.2.1-notes.md) |
+| 공개 릴리즈 | [v0.2.1](https://github.com/gyungsubLee/subdev-blog/releases/tag/v0.2.1), 제목 `v0.2.1`, draft·prerelease 아님 |
+| 워크플로 | `Versioned build`, `.github/workflows/build.yml`, 태그 push |
+| 채택한 빌드 | #5, 실행 `41973933692`, 시도 `1` |
+| 작업 시각 | 2026-11-05 14:25:37 시작, 2026-11-05 14:28:02 완료 KST |
+| 원격 검사 | 버전 일치·TypeScript·624/624개 통과·콘텐츠 오류 0개·웹 빌드·내장 식별 7필드 일치 |
+| 콘텐츠 검사 | 글 3,032개·카테고리 48개·참조 첨부 7,255개, `git-pinned` |
+| 실행 | [#5 / 시도 1](https://github.com/gyungsubLee/subdev-blog/actions/runs/41973933692/attempts/1) |
+| Actions 산출물 | [13390833598](https://github.com/gyungsubLee/subdev-blog/actions/runs/41973933692/artifacts/13390833598) |
+| ZIP 파일 | `subdev-blog-v0.2.1-0fdfc77111014ecc733577a9f25b8d2ff501b10f-run41973933692-attempt1.zip` |
+| ZIP 크기 | 7,584,017 bytes |
+| ZIP SHA-256 | `fc15494ae1ec700044860f5e892faa26e218d4d5fd6d760cb25ac650b4af31d1` |
+| ZIP 검사 | 파일 104개, CRC 오류 0개, `index.html`과 참조 진입 자산 존재 |
+| 빌드 정보 | `subdev-blog-v0.2.1-build-info.json`, 244 bytes |
+| 체크섬 목록 | `subdev-blog-v0.2.1-SHA256SUMS.txt`, 255 bytes |
+| 로컬 검증 | 웹 빌드·624/624개·콘텐츠 오류 0개·네이티브 표시 버전 0.2.1·arm64·ad-hoc 서명 통과 |
+| 별도 HTTP E2E | 이전 후보 6/6개 통과. 검사 대상과 제품 구현이 같아 재사용하며 새 CI 검사 수에 합산하지 않음 |
+| 증거 | [후보](docs/releases/verification/candidate-021.json), [CI 로그](docs/releases/verification/ci-021.log), [산출물](docs/releases/verification/artifact-021.json), [공개 후 검증](docs/releases/verification/published-021.json) |
 
-[후보 검증](docs/releases/verification/candidate-021.json)에 실행 순서와 소스 바인딩을 기록했다.
-원격 실행과 실제 첨부 파일의 SHA-256은 검증을 마친 뒤 이 항목에 기록한다.
+### 첨부 파일과 검증
+
+- [subdev-blog-v0.2.1-0fdfc77111014ecc733577a9f25b8d2ff501b10f-run41973933692-attempt1.zip](https://github.com/gyungsubLee/subdev-blog/releases/download/v0.2.1/subdev-blog-v0.2.1-0fdfc77111014ecc733577a9f25b8d2ff501b10f-run41973933692-attempt1.zip): 7,584,017 bytes, `sha256:fc15494ae1ec700044860f5e892faa26e218d4d5fd6d760cb25ac650b4af31d1`.
+- [subdev-blog-v0.2.1-build-info.json](https://github.com/gyungsubLee/subdev-blog/releases/download/v0.2.1/subdev-blog-v0.2.1-build-info.json): 244 bytes, `sha256:943172765dfb8317104b997187217ca28ba215a521c80f0e05583af650e46cf2`.
+- [subdev-blog-v0.2.1-SHA256SUMS.txt](https://github.com/gyungsubLee/subdev-blog/releases/download/v0.2.1/subdev-blog-v0.2.1-SHA256SUMS.txt): 255 bytes, `sha256:cd71d3bfc7155a42cc95cda5cb373cd3aac6f28a1ea84b4ff74a11dab2d5739e`.
+
+Actions에서 받은 ZIP을 다시 압축하지 않고 같은 bytes로 올렸다. API digest와 로컬 SHA-256이 일치했다.
+공개 후 첨부 3개를 다시 내려받아 크기와 SHA-256을 대조했다. 제목·태그·본문·소스와 공개 상태도 확인했다.
+Actions 산출물은 7일 보관한다. 공개 릴리즈 첨부 파일에는 이 만료 기간을 적용하지 않는다.
+
+ZIP은 `dist/web` 빌드이며 공개·관리 API와 서버 설정은 별도로 필요하다.
+원본 콘텐츠와 macOS 앱을 ZIP에 넣지 않았다. 로컬 앱은 `dist/native/Second Brain.app`에 다시 만들었다.
+앱을 새로 실행하거나 운영 사이트를 배포하지 않았다. Apple 공증과 독립 배포를 검증한 앱은 아니다.
+기존 `CFBundleVersion` 카운터 1은 유지하며 제품 표시 버전은 `0.2.1`이다.
+
+### 최적화와 남은 제한
+
+[릴리즈 본문](docs/releases/v0.2.1-notes.md)에 단계별 측정 표를 모두 포함한다.
+[실측 상세](docs/releases/v0.2.0-performance.md)는 실제 GitHub·모의 HTTP·Chrome·Node 모델과 단일 표본을 구분한다.
+공개 목록 API 3.891→2.030초, 서버 POST 6.122→1.599초, 클릭→원본 확인 6.682→1.619초를 기록했다.
+이 수치는 당시 3표본 중앙값이다. 이번 릴리즈 작업에서 운영 성능을 새로 측정한 값은 아니다.
+반복 카테고리 319.22→382.90ms, 측정 화면 151.2→249.6ms 증가와 43.2MiB 큐 모델의 RSS 약 1.31GiB도 남겼다.
+전체 편집기·대용량 브라우저 큐·실제 24시간 방치는 미검증이다. 성능 동등성을 통과했다고 주장하지 않는다.
+
+기존 `v0.2.0` 실패 태그와 로그는 아래에 보존한다. 수정한 소스의 새 태그 빌드이며 같은 실패 실행의 재시도가 아니다.
+로컬 기록의 기존 INDEX 크기 초과와 `public-files.mjs` 끝 공백, 콘텐츠 서브모듈의 미추적 `.github`는 유지했다.
+성공한 태그 이후에는 릴리즈·빌드 기록만 후속 커밋으로 갱신한다. 태그와 첨부 bytes는 바꾸지 않는다.
 
 ## v0.2.0 — 2026-11-05
 
