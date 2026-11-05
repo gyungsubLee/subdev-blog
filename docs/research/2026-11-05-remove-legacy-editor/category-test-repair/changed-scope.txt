@@ -1,0 +1,4 @@
+Only tests/web/managed-block-editor.test.mjs changes in this follow-up.
+New-post category input now uses draft Post.categoryId, matching App.edit and ManagedPostEditor initialization.
+Category label, adjacency, cancellation, confirmation, no-publication and durable local save assertions preserved.
+No product source, UI, performance, dependency or config changes.

@@ -1,0 +1,5 @@
+{
+  "exit": 0,
+  "seconds": 4.062737124999785,
+  "reason": "Full suite exceeded unchanged 10s test deadline; isolate competing suite load without changing test or limits."
+}

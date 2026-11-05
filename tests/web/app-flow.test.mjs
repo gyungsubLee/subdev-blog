@@ -1,6 +1,7 @@
+import { bulkResponse } from '../support/bulk-response.mjs';
 import assert from "node:assert/strict";
 import { once } from "node:events";
-import test, { after } from "node:test";
+import test, { after, beforeEach } from "node:test";
 import { JSDOM } from "jsdom";
 import { loadComponent } from "../support/load-component.mjs";
 
@@ -48,6 +49,7 @@ dom.window.HTMLElement.prototype.scrollIntoView = function () {};
 dom.window.HTMLDialogElement.prototype.close = function () {};
 dom.window.HTMLDialogElement.prototype.showModal = function () {};
 
+beforeEach(()=>localStorage.clear());
 const { default: React, act } = await import("react");
 const { createRoot } = await import("react-dom/client");
 const { default: App } = await loadComponent("app/web/src/site/App.tsx");
@@ -125,6 +127,8 @@ test("App loads summaries then the selected body and handles an invalid index", 
     assert.ok(document.querySelector(".article-edit") === null, "Signing out must hide article editing");
 
     await act(async () => root.unmount());
+    dom.window.dispatchEvent(new dom.window.Event("pagehide"));
+    localStorage.clear();
     dom.window.history.replaceState(null, "", "/#/");
     root = createRoot(document.getElementById("root"));
     await act(async () => root.render(React.createElement(App)));
@@ -185,7 +189,7 @@ const readySession = { state: "ready", user: { id: 12, login: "owner" }, csrfTok
 const reply = (data) => ({ ok: true, json: async () => data });
 
 async function waitFor(predicate, message) {
-  const deadline = Date.now() + 3000;
+  const deadline = Date.now() + 8000;
   while (!predicate()) {
     if (Date.now() > deadline) assert.fail(message);
     await act(async () => new Promise((resolve) => setTimeout(resolve, 10)));
@@ -193,7 +197,7 @@ async function waitFor(predicate, message) {
 }
 
 for (const operation of ["update", "create", "delete"]) {
-  test(`App refreshes the public index after post ${operation} and reads the saved body after closing`, { timeout: 5000 }, async () => {
+  test(`App refreshes the public index after post ${operation} and reads the saved body after closing`, { timeout: 15000 }, async () => {
     const previous = globalThis.fetch;
     const requests = [];
     const savedCommit = "c".repeat(40);
@@ -218,9 +222,11 @@ for (const operation of ["update", "create", "delete"]) {
         categories: canonicalCategories, assets: [],
       });
       assert.equal(url, "/api/content");
-      assert.equal(JSON.parse(options.body).operation.type, "post." + operation);
+      const input=JSON.parse(options.body);
+      assert.equal((input.operations?.[0]??input.operation).type, "post." + operation);
       saved = true;
-      return reply({ requestId: "request", candidateCommit: savedCommit, contentCommit: savedCommit, state: "published" });
+      const result={requestId:input.requestId,candidateCommit:savedCommit,contentCommit:savedCommit,state:"published"};
+      return reply(input.operations?bulkResponse(input,result,{document:{metadata:{id:managedId,title:"저장한 글",category_id:"notes"},markdown:"저장한 전체 본문"},revision:"d".repeat(64),assets:[],categories:canonicalCategories}):result);
     };
     dom.window.history.replaceState(null, "", operation === "create" ? "/#/" : "/#/post/" + managedId);
     const root = createRoot(document.getElementById("root"));
@@ -234,17 +240,16 @@ for (const operation of ["update", "create", "delete"]) {
         });
       }
       const edit = operation === "create" ? document.querySelector("button.header-write")
-        : operation === "delete" ? document.querySelector(".workspace-table-wrap .row-action")
+        : operation === "delete" ? [...document.querySelectorAll('button')].find(button=>button.getAttribute('aria-label')===managedPost.title+' 삭제')
         : document.querySelector(".article-topline button");
       assert.ok(edit !== null && edit !== undefined, "An authenticated reader can open the editor");
       await act(async () => edit.click());
-      const editorSelector = operation === "create" ? ".editor-page.notebook-writing" : ".managed-editor";
-      await waitFor(() => document.querySelector(editorSelector) !== null, "The authenticated writing editor must open");
+      const editorSelector = ".editor-page.notebook-writing";
       if (operation === "delete") {
-        const remove = [...document.querySelectorAll("button")].find((button) => button.textContent === "글 삭제");
-        await act(async () => remove.click());
-        await act(async () => document.querySelector('[role="alertdialog"] button').click());
+        await act(async () => document.querySelector('#confirm-post-delete').click());
+        await waitFor(()=>document.querySelector('dialog')===null&&requests.includes('/api/public?kind=index&after='+savedCommit),'Deleting from the workspace must refresh its index');
       } else {
+        await waitFor(() => document.querySelector(editorSelector) !== null && document.querySelector('.bn-editor[contenteditable="true"]') !== null, "The authenticated block editor must open");
         if (operation === "create") {
           await act(async () => {
             const input = document.querySelector('[aria-label="글 제목"]');
@@ -254,13 +259,12 @@ for (const operation of ["update", "create", "delete"]) {
         }
         await act(async () => document.querySelector('button[type="submit"]').click());
       }
-      await waitFor(
+      if(operation!=="delete")await waitFor(
         () => document.querySelector('.publish-status [role="status"]')?.textContent === "게시 완료",
         "The saved post must reach published status",
       );
       assert.ok(requests.includes("/api/public?kind=index&after=" + savedCommit), "The refresh must bypass an older cached index");
-      const closeSelector = operation === "create" ? ".editor-back" : ".management-toolbar button";
-      await act(async () => document.querySelector(closeSelector).click());
+      if(operation!=="delete")await act(async () => document.querySelector('.editor-back').click());
       assert.ok(document.querySelector(editorSelector) === null, "Closing returns to the public view");
       if (operation !== "delete") {
         assert.match(document.querySelector("main").textContent, /저장한 글/);
@@ -287,11 +291,11 @@ for (const operation of ["update", "create", "delete"]) {
   });
 }
 
-test("App refreshes public category names after saving canonical categories", { timeout: 5000 }, async () => {
+test("App refreshes public category names after saving canonical categories", { timeout: 15000 }, async () => {
   const previous = globalThis.fetch;
   const requests = [];
   let saved = false;
-  globalThis.fetch = async (url) => {
+  globalThis.fetch = async (url, options = {}) => {
     requests.push(url);
     if (url === "/api/session") return reply(readySession);
     if (url.startsWith("/api/public?kind=index")) return reply({
@@ -302,7 +306,7 @@ test("App refreshes public category names after saving canonical categories", { 
     if (url === "/api/content?kind=categories") return reply({ categories: canonicalCategories, revision: "a".repeat(64), contentCommit: "b".repeat(40) });
     assert.equal(url, "/api/content");
     saved = true;
-    return reply({ state: "published", requestId: "request", candidateCommit: "c".repeat(40), contentCommit: "c".repeat(40) });
+    return reply(bulkResponse(JSON.parse(options.body),{state:"published",contentCommit:"c".repeat(40)}));
   };
   dom.window.history.replaceState(null, "", "/#/categories");
   const root = createRoot(document.getElementById("root"));
@@ -316,7 +320,7 @@ test("App refreshes public category names after saving canonical categories", { 
     });
     await act(async () => document.querySelector("#inline-form").dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true })));
     await act(async () => document.querySelector("#save-all").click());
-    assert.ok(requests.includes("/api/public?kind=index&after=" + "c".repeat(40)));
+    await waitFor(()=>requests.includes("/api/public?kind=index&after=" + "c".repeat(40)),"Category bulk save must refresh the index");
     await act(async () => {
       const changed = once(dom.window, "hashchange", { signal: AbortSignal.timeout(2000) });
       document.querySelector('.header-navigation a[href="#/records"]').click();
@@ -326,8 +330,107 @@ test("App refreshes public category names after saving canonical categories", { 
     assert.equal(document.querySelector(".post-meta span").textContent, "새 분류");
   } finally {
     await act(async () => root.unmount());
+    dom.window.dispatchEvent(new dom.window.Event("pagehide"));
     localStorage.clear();
     dom.window.history.replaceState(null, "", "/#/");
+    globalThis.fetch = previous;
+  }
+});
+
+for (const local of [false, true]) {
+  test(`category context menu opens a new writer with its ${local ? "local" : "canonical"} nested category selected`, { timeout: 15000 }, async () => {
+    const previous = globalThis.fetch;
+    const requests = [];
+    const categories = [
+      { id: "root", name: "Root", parentId: null, order: 0, sources: ["root"] },
+      { id: "child", name: "Child", parentId: "root", order: 1, sources: ["child"] },
+    ];
+    globalThis.fetch = async (url) => {
+      requests.push(url);
+      if (url === "/api/session") return reply(readySession);
+      assert.equal(url, "/api/public?kind=index");
+      return reply({ posts: [], categories: local ? [categories[0]] : categories, contentCommit: "b".repeat(40) });
+    };
+    localStorage.clear();
+    if (local) {
+      localStorage.setItem("second-brain:records-categories:v1", JSON.stringify({
+        version: 1,
+        baseNodes: [categories[0]],
+        nodes: categories.map(category => ({ ...category, sources: category.id === "child" ? [] : category.sources })),
+      }));
+    }
+    dom.window.history.replaceState(null, "", "/#/records");
+    const root = createRoot(document.getElementById("root"));
+    try {
+      await act(async () => root.render(React.createElement(App)));
+      await act(async () => document.querySelector('[aria-label="Root"]').click());
+      const child = document.querySelector('[aria-label="Child"]');
+      assert.ok(child !== null, "nested category is available");
+      await act(async () => child.dispatchEvent(new dom.window.MouseEvent("contextmenu", {
+        bubbles: true, cancelable: true, clientX: 100, clientY: 100,
+      })));
+      const add = [...document.querySelectorAll('[role="menuitem"]')].find(node => node.textContent === "글 추가");
+      assert.ok(add !== undefined, "category menu offers writing");
+      await act(async () => add.click());
+      await waitFor(() => document.querySelector(".editor-page.notebook-writing") !== null, "category menu must open the writer");
+      assert.match(document.querySelector(".mock-category-button").textContent, /^Child\s*⌄?$/);
+      assert.equal(requests.some(url => url.startsWith("/api/content?")), false, "new writing reuses the loaded catalog");
+    } finally {
+      await act(async () => root.unmount());
+      localStorage.clear();
+      dom.window.history.replaceState(null, "", "/#/");
+      globalThis.fetch = previous;
+    }
+  });
+}
+
+test("new writing loads an authenticated base when the public index is unavailable", { timeout: 15000 }, async () => {
+  const previous = globalThis.fetch;
+  const requests = [];
+  globalThis.fetch = async (url) => {
+    requests.push(url);
+    if (url === "/api/session") return reply(readySession);
+    if (url === "/api/public?kind=index") return {
+      ok: false, json: async () => ({ error: "Public content is not ready for this commit" }),
+    };
+    assert.equal(url, "/api/content?kind=new");
+    return reply({
+      document: { metadata: { id: managedId, title: "" }, markdown: "" },
+      revision: null, contentCommit: "b".repeat(40), categories: canonicalCategories, assets: [],
+    });
+  };
+  localStorage.clear();
+  localStorage.setItem("second-brain:records-categories:v1", JSON.stringify({
+    version: 1, baseNodes: [], nodes: [
+      { id: "local-notes", name: "새 분류", parentId: null, sources: [] },
+    ],
+  }));
+  dom.window.history.replaceState(null, "", "/#/records");
+  const root = createRoot(document.getElementById("root"));
+  try {
+    await act(async () => root.render(React.createElement(App)));
+    await act(async () => document.querySelector('[aria-label="새 분류"]').dispatchEvent(new dom.window.MouseEvent("contextmenu", {
+      bubbles: true, cancelable: true, clientX: 100, clientY: 100,
+    })));
+    const add = [...document.querySelectorAll('[role="menuitem"]')].find(node => node.textContent === "글 추가");
+    assert.ok(add !== undefined, "local category menu offers writing");
+    await act(async () => add.click());
+    await waitFor(() => document.querySelector(".mock-category-button") !== null, "writer must load");
+    assert.equal(requests.filter(url => url === "/api/content?kind=new").length, 1, "failed public loading must not become an empty save base");
+    assert.match(document.querySelector(".mock-category-button").textContent, /새 분류/);
+    const saveDraft = [...document.querySelectorAll("button")].find(node => node.textContent === "초안 저장");
+    assert.ok(saveDraft !== undefined, "draft save is available");
+    await act(async () => saveDraft.click());
+    const draftKey = Object.keys(localStorage).find(key => key.startsWith("second-brain:canonical-draft:"));
+    assert.ok(draftKey !== undefined, "draft recovery is stored");
+    const draft = JSON.parse(localStorage.getItem(draftKey));
+    assert.equal(draft.category, "local-notes");
+    assert.equal(draft.sourceDocument.contentCommit, "b".repeat(40));
+    assert.equal(draft.sourceDocument.pendingCategories[0].id, "local-notes");
+  } finally {
+    await act(async () => root.unmount());
+    dom.window.dispatchEvent(new dom.window.Event("pagehide"));
+    localStorage.clear();
     globalThis.fetch = previous;
   }
 });

@@ -1,0 +1,56 @@
+[
+  {
+    "sample": 1,
+    "mode": "before",
+    "mountMs": 163.6447909999997,
+    "editMs": 735.5243329999994,
+    "blocks": 100,
+    "sourceReads": 1,
+    "remoteWrites": 0
+  },
+  {
+    "sample": 1,
+    "mode": "after",
+    "mountMs": 149.71320800000012,
+    "editMs": 430.0617500000003,
+    "blocks": 100,
+    "sourceReads": 1,
+    "remoteWrites": 0
+  },
+  {
+    "sample": 2,
+    "mode": "after",
+    "mountMs": 156.56324999999993,
+    "editMs": 513.1770840000001,
+    "blocks": 100,
+    "sourceReads": 1,
+    "remoteWrites": 0
+  },
+  {
+    "sample": 2,
+    "mode": "before",
+    "mountMs": 196.24416599999995,
+    "editMs": 534.3287909999999,
+    "blocks": 100,
+    "sourceReads": 1,
+    "remoteWrites": 0
+  },
+  {
+    "sample": 3,
+    "mode": "before",
+    "mountMs": 135.879958,
+    "editMs": 416.9467089999998,
+    "blocks": 100,
+    "sourceReads": 1,
+    "remoteWrites": 0
+  },
+  {
+    "sample": 3,
+    "mode": "after",
+    "mountMs": 146.79558399999996,
+    "editMs": 449.9316249999997,
+    "blocks": 100,
+    "sourceReads": 1,
+    "remoteWrites": 0
+  }
+]

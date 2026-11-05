@@ -35,7 +35,7 @@ import { notionExtension } from "../post-editor/notion-extension";
 import { syntaxHighlighting } from "../post-editor/syntax-highlighting";
 import { downloadFile } from "../../shared/download-file.mjs";
 import { enqueueContentSync, retryContentSync, discardContentConflict, SYNC_EVENT, syncScope } from "./background-sync.mjs";
-import { requestApi, sendApi, uploadAttachment } from "./api";
+import { requestApi, uploadAttachment } from "./api";
 import PublishStatus from "./PublishStatus";
 import type { ManagementSession, Publication, SourceDocument } from "./types";
 import "./management.css";
@@ -57,7 +57,6 @@ type SourceDraft = {
   syncVersion?: number;
   blocks?: EditorDocument["blocks"];
   markdownHash?: string;
-  blockMode?: boolean;
 };
 
 type NotebookEditor = BlockNoteEditor<typeof editorSchema.blockSchema>;
@@ -132,6 +131,8 @@ function ManagedBlocks({
   draft,
   disabled,
   onChange,
+  onInitialize,
+  onError,
   onReady,
   upload,
   resolveFileUrl,
@@ -139,13 +140,15 @@ function ManagedBlocks({
   draft: SourceDraft;
   disabled: boolean;
   onChange: (blocks: EditorDocument["blocks"], markdown: string) => void;
+  onInitialize: (blocks: EditorDocument["blocks"]) => void;
+  onError: () => void;
   onReady: (editor: NotebookEditor | null) => void;
   upload: (file: File) => Promise<string>;
   resolveFileUrl: (url: string) => Promise<string>;
 }) {
   const ready = useRef(false);
-  const callbacks = useRef({ onChange, onReady, upload, resolveFileUrl });
-  callbacks.current = { onChange, onReady, upload, resolveFileUrl };
+  const callbacks = useRef({ onChange, onInitialize, onError, onReady, upload, resolveFileUrl });
+  callbacks.current = { onChange, onInitialize, onError, onReady, upload, resolveFileUrl };
   const editor = useCreateBlockNote({
     schema: editorSchema,
     dictionary: ko,
@@ -156,12 +159,15 @@ function ManagedBlocks({
   });
   useEffect(() => {
     if (!draft.blocks) {
-      const blocks = editor.tryParseMarkdownToBlocks(draft.markdown);
-      if (blocks.length) editor.replaceBlocks(editor.document, blocks);
-      callbacks.current.onChange(
-        storedBlocks(editor),
-        serializeEditorMarkdown(editor),
-      );
+      try {
+        const blocks = editor.tryParseMarkdownToBlocks(draft.markdown);
+        if (blocks.length) editor.replaceBlocks(editor.document, blocks);
+        // Preparing the block view must not rewrite the original Markdown.
+        callbacks.current.onInitialize(storedBlocks(editor));
+      } catch {
+        callbacks.current.onError();
+        return;
+      }
     }
     ready.current = true;
     callbacks.current.onReady(editor);
@@ -224,7 +230,6 @@ export default function ManagedPostEditor({
   const [uploadCount, setUploadCount] = useState(0);
   const reservedUploadNames = useRef(new Set<string>());
   const restoredRecovery = useRef<SourceDraft | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const [generation, setGeneration] = useState(0);
   const blockEditor = useRef<NotebookEditor | null>(null);
   const previewUrls = useRef(new Map<string, string>());
@@ -234,12 +239,7 @@ export default function ManagedPostEditor({
   const accepted =
     publication && !["failed", "unchanged"].includes(publication.state);
   const uploading = uploadCount > 0;
-  const busy = saving || uploading || Boolean(draftError) || Boolean(accepted && !publication?.background);
-  const blockMode = Boolean(
-    draft &&
-    !source?.editorError &&
-    (!isCanonical || draft.blocks || draft.blockMode),
-  );
+  const busy = saving || uploading || Boolean(draftError) || Boolean(draft && !draft.blocks) || Boolean(accepted && !publication?.background);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -560,7 +560,7 @@ export default function ManagedPostEditor({
     setPublication(undefined);
   }
 
-  async function publish(remove = false) {
+  async function publish() {
     if (!draft || !source || busy || session.state !== "ready") return;
     setSaving(true);
     setError("");
@@ -570,7 +570,7 @@ export default function ManagedPostEditor({
           "원본과 초안의 버전이 다릅니다. 초안을 내보내고 원본을 다시 여십시오.",
         );
       }
-      const operationName = remove ? "delete" : "save";
+      const operationName = "save";
       const requestId =
         draft.operation === operationName
           ? draft.requestId
@@ -579,7 +579,7 @@ export default function ManagedPostEditor({
       // Capture one immutable pair before hashing or making any network request.
       const snapshot = JSON.parse(JSON.stringify(draft)) as SourceDraft;
       const editor =
-        !remove && snapshot.blocks
+        snapshot.blocks
           ? await editorDocument(
               source.document.metadata.id,
               snapshot.markdown,
@@ -601,14 +601,7 @@ export default function ManagedPostEditor({
         baseEditorRevision: source.editorRevision ?? null,
         ...(editor ? { editor } : {}),
       };
-      const operation = remove
-        ? {
-            type: "post.delete",
-            id: source.document.metadata.id,
-            baseRevision: source.revision,
-            baseEditorRevision: source.editorRevision ?? null,
-          }
-        : isCanonical
+      const operation = isCanonical
           ? {
               type: "post.update",
               ...editorChanges,
@@ -640,16 +633,10 @@ export default function ManagedPostEditor({
               },
               assets: snapshot.assets,
             };
-      if (!remove) {
-        await enqueueContentSync({baseCommit:source.contentCommit,operation,
-          pendingCategories:source.pendingCategories},session,draftKey,requestId);
-        setPublication({state:"validating",requestId,background:true});
-        onDraftSaved?.();
-      } else {
-        const next = await sendApi<Publication>("/api/content",{requestId,baseCommit:source.contentCommit,operation},csrfToken);
-        setPublication(next);
-      }
-      setConfirmDelete(false);
+      await enqueueContentSync({baseCommit:source.contentCommit,operation,
+        pendingCategories:source.pendingCategories},session,draftKey,requestId);
+      setPublication({state:"validating",requestId,background:true});
+      onDraftSaved?.();
     } catch (reason) {
       setNeedsLogin(
         reason instanceof Error && "status" in reason && reason.status === 401,
@@ -752,7 +739,7 @@ export default function ManagedPostEditor({
     try {
       const asset = await uploadAttachment(file, csrfToken);
       const destination = attachmentPath(name);
-      if (blockMode && file.type.startsWith("image/")) {
+      if (file.type.startsWith("image/")) {
         const preview = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(String(reader.result));
@@ -777,45 +764,6 @@ export default function ManagedPostEditor({
       throw reason;
     } finally {
       setUploadCount((count) => count - 1);
-    }
-  }
-
-  async function attach(file: File | undefined) {
-    if (!file || !draft) return;
-    try {
-      const destination = await upload(file);
-      if (blockMode && blockEditor.current) {
-        const editor = blockEditor.current;
-        editor.insertBlocks(
-          [
-            file.type.startsWith("image/")
-              ? { type: "image", props: { url: destination, name: file.name } }
-              : { type: "file", props: { url: destination, name: file.name } },
-          ],
-          editor.document.at(-1)!,
-          "after",
-        );
-      } else {
-        const label = file.name.replace(/[\[\]\\]/g, "\\$&");
-        const prefix = file.type.startsWith("image/") ? "!" : "";
-        setDraft((current) =>
-          current
-            ? {
-                ...current,
-                markdown:
-                  current.markdown +
-                  `\n\n${prefix}[${label}](${destination})\n`,
-                requestId: crypto.randomUUID(),
-              }
-            : null,
-        );
-      }
-    } catch (reason) {
-      setError(
-        reason instanceof Error
-          ? reason.message
-          : "첨부를 추가하지 못했습니다.",
-      );
     }
   }
 
@@ -1047,14 +995,9 @@ export default function ManagedPostEditor({
     setTagInput("");
   }
 
-
   return (
     <div
-      className={
-        blockMode
-          ? "editor-page notebook-writing managed-writing"
-          : "managed-editor"
-      }
+      className="editor-page notebook-writing managed-writing"
     >
       <form
         onSubmit={(event) => {
@@ -1062,61 +1005,31 @@ export default function ManagedPostEditor({
           void publish();
         }}
       >
-        {blockMode && draft ? (
-          <ManagedEditorToolbar
-            title={draft.title}
-            error={error || draftError}
-            onClose={() => {
-              saveRecovery();
-              onDraftSaved?.();
-              onClose();
-            }}
-            onImport={importFile}
-            onExportMarkdown={exportMarkdown}
-            onExportBackup={exportBackup}
-            disabled={busy || session.state !== "ready"}
-          />
-        ) : (
-          <div className="management-toolbar">
-            <button className="quiet-button" type="button" onClick={onClose}>
-              ← 기록으로
-            </button>
-            <h1>{isCanonical ? "원본 수정" : "새 글 작성"}</h1>
-            <button
-              className="quiet-button"
-              type="button"
-              disabled={!draft}
-              onClick={exportMarkdown}
-            >
-              Markdown 내보내기
-            </button>
-            <button
-              className="quiet-button"
-              type="button"
-              disabled={Boolean(
-                source?.editorError && source.editorRaw === undefined,
-              )}
-              onClick={exportBackup}
-            >
-              원본 백업
-            </button>
-          </div>
-        )}
-        {!blockMode && error ? <p role="alert">{error}</p> : null}
-        {!blockMode && draftError ? <p role="alert">{draftError}</p> : null}
+        <ManagedEditorToolbar
+          title={draft?.title ?? post?.title ?? ""}
+          error={error || draftError}
+          onClose={() => {
+            saveRecovery();
+            onDraftSaved?.();
+            onClose();
+          }}
+          onImport={importFile}
+          onExportMarkdown={exportMarkdown}
+          onExportBackup={exportBackup}
+          disabled={busy || session.state !== "ready"}
+        />
+
         {needsLogin ? <a href="/api/auth/github">GitHub 다시 로그인</a> : null}
-        {blockMode && draft ? (
+        {draft && !draftError ? (
           <header className="mock-publication-header">
             <div className="mock-publication-state">
               <span
                 id="editor-status"
                 data-save-state={isCanonical ? undefined : saveState}
-                className={
-                  "status-badge status-" +
+                className={"status-badge status-" +
                   (isCanonical
                     ? PostStatus.Published
-                    : normalizePostStatus(draft.status))
-                }
+                    : normalizePostStatus(draft.status))}
               >
                 {postStatusLabel(
                   isCanonical ? PostStatus.Published : draft.status,
@@ -1174,18 +1087,14 @@ export default function ManagedPostEditor({
           </header>
         ) : null}
         <div
-          className={
-            blockMode
-              ? "mock-writing-split" +
-                (previewVisible ? "" : " mock-preview-hidden")
-              : undefined
-          }
+          className={"mock-writing-split" +
+            (previewVisible ? "" : " mock-preview-hidden")}
         >
           <main
-            className={blockMode ? "editor-main" : undefined}
+            className="editor-main"
             id="main-content"
           >
-            {!draft ? (
+            {!draft || draftError ? (
               <p>
                 {draftError
                   ? "보관한 초안을 내보낸 뒤 최신 원본을 다시 여십시오."
@@ -1197,239 +1106,113 @@ export default function ManagedPostEditor({
               <>
                 <fieldset
                   disabled={busy || session.state !== "ready"}
-                  className={blockMode ? "editor-fields" : undefined}
+                  className="editor-fields"
                 >
-                  {!blockMode ? (
-                    <label>
-                      제목
-                      <input
-                        aria-label="글 제목"
-                        value={draft.title}
-                        required
-                        onChange={(event) =>
-                          change({ title: event.target.value })
-                        }
-                      />
-                    </label>
-                  ) : null}
-                  {!blockMode ? (
-                    <label>
-                      분류
-                      <select
-                        aria-label="분류"
-                        value={draft.category}
-                        onChange={(event) =>
-                          change({ category: event.target.value })
-                        }
-                      >
-                        <option
-                          value=""
-                          disabled={Boolean(
-                            post && source?.document.metadata.category_id,
-                          )}
-                        >
-                          상위 글에서 상속
-                        </option>
-                        {source?.categories.map((category) => (
-                          <option key={category.id} value={category.id}>
-                            {category.name}
-                          </option>
+
+                  <div className="mock-editor-metadata">
+                    <div className="mock-tag-field">
+                      <div className="mock-tag-values">
+                        {(draft.tags ?? []).map((tag) => (
+                          <span className="mock-tag-chip" key={tag}>
+                            {tag}
+                            <button
+                              type="button"
+                              aria-label={tag + " 태그 삭제"}
+                              onClick={() =>
+                                change({
+                                  tags: draft.tags?.filter(
+                                    (value) => value !== tag,
+                                  ),
+                                })}
+                            >
+                              ×
+                            </button>
+                          </span>
                         ))}
-                      </select>
-                    </label>
-                  ) : null}
-                  {blockMode ? (
-                    <div className="mock-editor-metadata">
-                      <div className="mock-tag-field">
-                        <div className="mock-tag-values">
-                          {(draft.tags ?? []).map((tag) => (
-                            <span className="mock-tag-chip" key={tag}>
-                              {tag}
-                              <button
-                                type="button"
-                                aria-label={tag + " 태그 삭제"}
-                                onClick={() =>
-                                  change({
-                                    tags: draft.tags?.filter(
-                                      (value) => value !== tag,
-                                    ),
-                                  })
-                                }
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ))}
-                          <input
-                            aria-label="태그 입력"
-                            placeholder="태그를 입력하세요"
-                            value={tagInput}
-                            onChange={(event) =>
-                              setTagInput(event.target.value)
+                        <input
+                          aria-label="태그 입력"
+                          placeholder="태그를 입력하세요"
+                          value={tagInput}
+                          onChange={(event) =>
+                            setTagInput(event.target.value)}
+                          onBlur={addTags}
+                          onKeyDown={(event) => {
+                            if (
+                              !event.nativeEvent.isComposing &&
+                              (event.key === "Enter" || event.key === ",")
+                            ) {
+                              event.preventDefault();
+                              addTags();
                             }
-                            onBlur={addTags}
-                            onKeyDown={(event) => {
-                              if (
-                                !event.nativeEvent.isComposing &&
-                                (event.key === "Enter" || event.key === ",")
-                              ) {
-                                event.preventDefault();
-                                addTags();
-                              }
-                            }}
-                          />
-                        </div>
+                          }}
+                        />
                       </div>
                     </div>
-                  ) : null}
-                  {blockMode ? (
-                    <input
-                      className="editor-title"
-                      aria-label="글 제목"
-                      placeholder={editorConfig.untitledTitle}
-                      value={draft.title}
-                      required
-                      onChange={(event) =>
-                        change({ title: event.target.value })
-                      }
-                    />
-                  ) : (
-                    <>
-                      <label>
-                        본문 Markdown
-                        <textarea
-                          aria-label="본문 Markdown"
-                          value={draft.markdown}
-                          rows={22}
-                          spellCheck={false}
-                          onChange={(event) =>
-                            change({ markdown: event.target.value })
-                          }
-                        />
-                      </label>
-                      <button
-                        className="outline-button"
-                        type="button"
-                        onClick={() => {
-                          const confirmed = window.confirm(
-                            "블록 편집으로 전환하면 지원하지 않는 Markdown 표현이 바뀔 수 있습니다. 필요한 원문을 먼저 내보내십시오. 전환하시겠습니까?",
-                          );
-                          if (confirmed) change({ blockMode: true });
-                        }}
-                      >
-                        노션형 블록 편집으로 전환
-                      </button>
-                    </>
-                  )}
-                  {!blockMode ? (
-                    <button className="dark-button" type="submit">
-                      {saving ? "저장 요청 중" : "원본 저장"}
-                    </button>
-                  ) : null}
+                  </div>
+                  <input
+                    className="editor-title"
+                    aria-label="글 제목"
+                    placeholder={editorConfig.untitledTitle}
+                    value={draft.title}
+                    required
+                    onChange={(event) =>
+                      change({ title: event.target.value })}
+                  />
+
                 </fieldset>
-                {blockMode ? (
-                  <>
-                    <p className="editor-tip">
-                      빈 줄에서 / 를 입력하세요. 블록을 끌어 순서를 바꿀 수
-                      있습니다.
-                    </p>
-                    <ManagedBlocks
-                      key={generation}
-                      draft={draft}
-                      disabled={busy || session.state !== "ready"}
-                      onChange={(blocks, markdown) =>
-                        change({ blocks, markdown })
-                      }
-                      onReady={(editor) => {
-                        blockEditor.current = editor;
-                      }}
-                      upload={upload}
-                      resolveFileUrl={async (url) => resolvePreviewUrl(url)}
-                    />
-                  </>
-                ) : null}
-                <div className={blockMode ? "editor-note" : undefined}>
-                  {!blockMode ? (
-                    <label className="editor-attachment">
-                      첨부 추가
-                      <input
-                        type="file"
-                        disabled={busy || session.state !== "ready"}
-                        onChange={(event) => {
-                          void attach(event.target.files?.[0]);
-                          event.target.value = "";
-                        }}
-                      />
-                    </label>
-                  ) : null}
-                  <p>
-                    {blockMode ? (
-                      <>
-                        초안은 이 브라우저에 저장합니다. 공개 사이트에는
-                        반영하지 않습니다.
-                        <br />
-                        Markdown으로 내보내면 다른 곳에서 사용할 수 있습니다.
-                        토글과 코드 설정은 원본 백업에 보존합니다.
-                      </>
-                    ) : (
-                      "입력한 내용은 이 브라우저에 초안으로 저장합니다. 원본 저장을 누르면 GitHub에 저장합니다."
-                    )}
+                <>
+                  <p className="editor-tip">
+                    빈 줄에서 / 를 입력하세요. 블록을 끌어 순서를 바꿀 수
+                    있습니다.
                   </p>
-                  {!blockMode && isCanonical ? (
-                    <button
-                      className="quiet-button"
-                      type="button"
-                      disabled={busy}
-                      onClick={() => setConfirmDelete(true)}
-                    >
-                      글 삭제
-                    </button>
-                  ) : null}
+                  <ManagedBlocks
+                    key={generation}
+                    draft={draft}
+                    disabled={busy || session.state !== "ready"}
+                    onChange={(blocks, markdown) =>
+                      change({ blocks, markdown })}
+                    onInitialize={(blocks) => {
+                      setDraft(current => current && !current.blocks ? { ...current, blocks } : current);
+                    }}
+                    onError={() => setDraftError("편집 원본을 읽지 못했습니다. Markdown과 원본 백업을 내보내십시오.")}
+                    onReady={(editor) => {
+                      blockEditor.current = editor;
+                    }}
+                    upload={upload}
+                    resolveFileUrl={async (url) => resolvePreviewUrl(url)}
+                  />
+                </>
+                <div className="editor-note">
+
+                  <p>
+                    <>
+                      초안은 이 브라우저에 저장합니다. 공개 사이트에는
+                      반영하지 않습니다.
+                      <br />
+                      Markdown으로 내보내면 다른 곳에서 사용할 수 있습니다.
+                      토글과 코드 설정은 원본 백업에 보존합니다.
+                    </>
+                  </p>
+
                 </div>
               </>
             )}
-            {confirmDelete ? (
-              <section
-                role="alertdialog"
-                aria-label="글 삭제"
-                className="publish-status"
-              >
-                <p>
-                  「{draft?.title}」 원본과 첨부를 삭제합니다. 하위 글과 참조가
-                  있으면 삭제를 거부합니다.
-                </p>
-                <button
-                  className="outline-button"
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void publish(true)}
-                >
-                  삭제 확정
-                </button>
-                <button
-                  className="quiet-button"
-                  type="button"
-                  onClick={() => setConfirmDelete(false)}
-                >
-                  글 유지
-                </button>
-              </section>
-            ) : null}
+
             {publication ? (
               <PublishStatus
                 publication={publication}
                 csrfToken={csrfToken}
                 onChange={setPublication}
-                onRetry={()=>retryContentSync(session)}
+                onRetry={() => retryContentSync(session)}
               />
             ) : null}
             {!saving &&
-            (draftError ||
-              (draft &&
-                (error ||
-                  ["published", "superseded", "unchanged"].includes(
-                    publication?.state ?? "",
-                  )))) ? (
+              (draftError ||
+                (draft &&
+                  (error ||
+                    ["published", "superseded", "unchanged"].includes(
+                      publication?.state ?? "",
+                    )))) ? (
               <button
                 className="outline-button"
                 type="button"
@@ -1439,7 +1222,7 @@ export default function ManagedPostEditor({
               </button>
             ) : null}
           </main>
-          {blockMode && previewVisible ? (
+          {draft && previewVisible ? (
             <ReaderPreview
               id="managed-reader-preview"
               snapshot={preview}

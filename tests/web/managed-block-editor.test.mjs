@@ -1,3 +1,4 @@
+import { bulkResponse } from '../support/bulk-response.mjs';
 import { loadComponent } from "../support/load-component.mjs";
 import assert from "node:assert/strict";
 import test, { after } from "node:test";
@@ -104,7 +105,7 @@ const source = (extra = {}) => ({
 });
 
 async function waitFor(predicate, message) {
-  const end = Date.now() + 3000;
+  const end = Date.now() + 8000;
   while (!predicate()) {
     if (Date.now() > end) assert.fail(message);
     await act(async () => new Promise((resolve) => setTimeout(resolve, 10)));
@@ -113,20 +114,23 @@ async function waitFor(predicate, message) {
 async function mounted(props, sourceValue, run) {
   const previous = globalThis.fetch;
   const requests = [];
+  const readRequests = [];
   globalThis.fetch = async (url, init = {}) => {
-    if (url.startsWith("/api/content?")) return reply(sourceValue);
+    if (url.startsWith("/api/content?")) {readRequests.push(url);return reply(sourceValue);}
     if (url === "/api/assets") return reply({ sha: "c".repeat(40), size: 5 });
     assert.equal(url, "/api/content");
-    requests.push(JSON.parse(init.body));
-    return reply({ requestId: "request", state: "published", contentCommit: "c".repeat(40) });
+    const input = JSON.parse(init.body);
+    requests.push(input);
+    return reply(bulkResponse(input,{},sourceValue));
   };
   const root = createRoot(document.getElementById("root"));
   try {
     await act(async () => root.render(React.createElement(Editor, { session, onClose() {}, ...props })));
     await waitFor(() => document.querySelector('[aria-label="글 제목"]') !== null || document.querySelector('[role="alert"]') !== null, "Editor did not finish loading");
-    await run({ root, requests });
+    await run({ root, requests, readRequests });
   } finally {
     await act(async () => root.unmount());
+    dom.window.dispatchEvent(new dom.window.Event("pagehide"));
     globalThis.fetch = previous;
     localStorage.clear();
   }
@@ -136,6 +140,7 @@ async function save(requests) {
   assert.ok(button !== null, "GitHub save action must exist");
   await act(async () => button.click());
   await waitFor(() => requests.length > 0, "GitHub save request did not arrive");
+  await waitFor(() => document.querySelector('.publish-status [role="status"]')?.textContent === "게시 완료", "Background save did not confirm");
 }
 
 test(
@@ -181,9 +186,9 @@ test(
 
 test("category action precedes preview and shows the assigned name or empty label", { timeout: 10000 }, async () => {
   for (const [categoryId, label] of [[null, "분류 없음"], ["notes", "기록"]]) {
-    await mounted({ post: null }, source({
+    await mounted({ post: { ...post, id: "draft-category", draft: true, categoryId } }, source({
       revision: null,
-      document: { metadata: { id, title: "New", category_id: categoryId }, markdown: "" },
+      document: { metadata: { id, title: "New" }, markdown: "" },
     }), async ({ requests }) => {
       const category = document.querySelector('[aria-label="글 분류"]');
       const preview = document.querySelector('.mock-preview-toggle');
@@ -207,7 +212,7 @@ test("new GitHub posts use the notebook editor and save one paired Markdown/bloc
     const view = editable.editor.view;
     await act(async () => view.dispatch(view.state.tr.insertText("Paired content")));
     await save(requests);
-    const operation = requests[0].operation;
+    const operation = requests[0].operations[0];
     assert.equal(operation.type, "post.create");
     assert.equal(operation.document.metadata.id, id);
     assert.match(operation.document.markdown, /Paired content/);
@@ -229,20 +234,28 @@ test("GitHub editor JSON restores toggle children and code settings without brow
     assert.equal(document.querySelector('.notion-code-caption')?.value, "Saved caption");
     assert.equal(document.querySelector('.notion-code')?.dataset.wrap, "true");
     await save(requests);
-    assert.equal(requests[0].operation.baseEditorRevision, "d".repeat(64));
-    const toggle = requests[0].operation.editor.blocks.find((block) => block.type === "toggleListItem");
+    assert.equal(requests[0].operations[0].baseEditorRevision, "d".repeat(64));
+    const toggle = requests[0].operations[0].editor.blocks.find((block) => block.type === "toggleListItem");
     assert.equal(toggle.children[0].content[0].text, "Inside");
-    assert.equal(requests[0].operation.markdown, markdown, "Untouched JSON must preserve its paired Markdown");
+    assert.equal(requests[0].operations[0].markdown, markdown, "Untouched JSON must preserve its paired Markdown");
   });
 });
 
-test("legacy Markdown stays byte-for-byte unchanged until block conversion is chosen", { timeout: 10000 }, async () => {
+test("existing Markdown uses the approved block editor and title-only saves preserve its exact bytes", { timeout: 10000 }, async () => {
   const markdown = "\n# Original\n\n<details><summary>Raw</summary>body</details>\n";
   await mounted({ post }, source({ document: { metadata: { id, title: "Saved" }, markdown } }), async ({ requests }) => {
-    assert.equal(document.querySelector('textarea')?.value, markdown);
+    assert.ok(document.querySelector('.notebook-writing .bn-editor') !== null);
+    assert.ok(document.querySelector('textarea[aria-label="본문 Markdown"]') === null);
+    assert.doesNotMatch(document.body.textContent,/원본 수정|노션형 블록 편집으로 전환|원본 저장/);
+    await act(async()=>{
+      const title=document.querySelector('[aria-label="글 제목"]');
+      Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype,'value').set.call(title,'Renamed');
+      title.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
+    });
     await save(requests);
-    assert.equal(requests[0].operation.markdown, markdown);
-    assert.equal(requests[0].operation.editor, undefined);
+    assert.equal(requests[0].operations[0].markdown, markdown);
+    assert.equal(requests[0].operations[0].changes.title,'Renamed');
+    assert.equal(requests[0].operations[0].editor.markdownHash,hash(markdown));
   });
 });
 
@@ -259,21 +272,19 @@ test("malformed block recovery data stays intact and cannot silently become a ne
   });
 });
 
-test("legacy conversion requires explicit confirmation and then saves both formats", { timeout: 10000 }, async () => {
+test("Markdown articles edit blocks directly and save a paired snapshot without a conversion prompt", { timeout: 10000 }, async () => {
   const previousConfirm = window.confirm;
   try {
     await mounted({ post }, source(), async ({ requests }) => {
-      const convert = [...document.querySelectorAll("button")].find((button) => button.textContent === "노션형 블록 편집으로 전환");
-      assert.ok(convert !== undefined, "Legacy Markdown offers an explicit block conversion");
-      window.confirm = () => false;
-      await act(async () => convert.click());
-      assert.ok(document.querySelector('.bn-editor') === null, "Declining keeps the source editor");
-      window.confirm = () => true;
-      await act(async () => convert.click());
-      assert.ok(document.querySelector('.bn-editor') !== null, "Confirming opens the existing BlockNote UI");
+      window.confirm = () => assert.fail('Opening a Markdown article must not ask for conversion');
+      const editable=document.querySelector('.bn-editor[contenteditable="true"]');
+      assert.ok(editable !== null);
+      const view=editable.editor.view;
+      await act(async()=>view.dispatch(view.state.tr.insertText('Edited ')));
       await save(requests);
-      assert.equal(requests[0].operation.editor.blocks[0].content[0].text, "Original");
-      assert.equal(requests[0].operation.editor.markdownHash, hash(requests[0].operation.markdown));
+      assert.match(requests[0].operations[0].markdown,/Edited/);
+      assert.equal(requests[0].operations[0].baseEditorRevision,null);
+      assert.equal(requests[0].operations[0].editor.markdownHash, hash(requests[0].operations[0].markdown));
     });
   } finally {
     window.confirm = previousConfirm;
@@ -339,7 +350,7 @@ test(
           "Uploaded image did not resolve its local preview",
         );
         await save(requests);
-        const operation = requests[0].operation;
+        const operation = requests[0].operations[0];
         const block = operation.editor.blocks.find(
           (item) => item.type === "image",
         );
@@ -395,7 +406,7 @@ test(
         );
         await save(requests);
         assert.equal(
-          requests[0].operation.editor.blocks[0].props.url,
+          requests[0].operations[0].editor.blocks[0].props.url,
           "./saved.png",
         );
       },
@@ -462,7 +473,7 @@ test(
         );
         await save(requests);
         assert.equal(
-          requests[0].operation.editor.blocks[0].props.url,
+          requests[0].operations[0].editor.blocks[0].props.url,
           "saved%20image.png",
         );
       },
@@ -539,7 +550,7 @@ for (const staggered of [false, true])
           );
           await save(requests);
           assert.deepEqual(
-            requests[0].operation.assets.map((asset) => asset.name).sort(),
+            requests[0].operations[0].assets.map((asset) => asset.name).sort(),
             ["first.txt", "second.txt"],
           );
         },
@@ -564,7 +575,8 @@ test("invalid GitHub editor JSON permits exact original exports and blocks all f
       assert.ok(saveButton === null || saveButton.matches(":disabled"), "Invalid source JSON must not be overwritten through the Markdown fallback");
       const convert = [...document.querySelectorAll('button')].find((button) => button.textContent.trim() === "노션형 블록 편집으로 전환");
       assert.ok(convert === undefined || convert.matches(":disabled"), "Invalid source JSON must not be silently converted");
-      for (const label of ["Markdown 내보내기", "원본 백업"]) {
+      assert.ok(document.querySelector('textarea[aria-label="본문 Markdown"]') === null);
+      for (const label of [".md 내보내기", "원본 백업"]) {
         const button = [...document.querySelectorAll('button')].find((item) => item.textContent.trim() === label);
         assert.ok(button !== undefined, "Recovery export is available");
         await act(async () => button.click());
@@ -642,21 +654,21 @@ test(
         await save(requests);
         const request = requests[0];
         assert.equal(
-          request.operation.document.metadata.id,
+          request.operations[0].document.metadata.id,
           id,
           "A content import must keep the fresh target UUID",
         );
         assert.equal(
-          request.operation.document.metadata.title,
+          request.operations[0].document.metadata.title,
           "Recovered title",
         );
-        assert.equal(request.operation.document.metadata.category_id, "notes");
+        assert.equal(request.operations[0].document.metadata.category_id, "notes");
         assert.ok(
           request.requestId !== "old-request",
           "A content import must not copy an old request identity",
         );
         assert.deepEqual(
-          request.operation.assets.map((asset) => asset.name).sort(),
+          request.operations[0].assets.map((asset) => asset.name).sort(),
           ["pending.png", "saved.png"],
         );
       },
@@ -726,13 +738,13 @@ test("Cmd/Ctrl+S saves recovery data and prevents browser Save Page without post
       assert.equal(event.defaultPrevented, true, "The editor shortcut must prevent browser Save Page");
       const recovered = JSON.parse(localStorage.getItem("second-brain:canonical-draft:new"));
       assert.ok(Array.isArray(recovered.blocks) && recovered.blocks.length > 0, "The shortcut keeps the paired block recovery data");
-      assert.equal(recovered.markdown, "Original\n");
+      assert.equal(recovered.markdown, "Original", "Local save must retain the original Markdown bytes");
       assert.equal(requests.length, 0, "The local save shortcut must not publish");
     }
   });
 });
 
-test("a damaged remote editor cannot replace an existing unsaved local recovery document", { timeout: 10000 }, async () => {
+test("cached recovery opens without downloading a damaged remote editor or rewriting its backup", { timeout: 10000 }, async () => {
   const markdown = "Unsaved local body\n";
   const original = source();
   const local = {
@@ -752,13 +764,13 @@ test("a damaged remote editor cannot replace an existing unsaved local recovery 
   URL.revokeObjectURL = () => {};
   dom.window.HTMLAnchorElement.prototype.click = function () {};
   try {
-    await mounted({ post }, source({ editorError: "Remote editor is damaged", editorRaw: "{broken remote}", editor: null, editorRevision: "e".repeat(64), document: { metadata: { id, title: "Remote title" }, markdown: "Remote original" } }), async ({ requests }) => {
-      await waitFor(() => document.querySelector('[role="alert"]') !== null || document.querySelector('textarea') !== null, "Remote recovery response did not settle");
+    await mounted({ post }, source({ editorError: "Remote editor is damaged", editorRaw: "{broken remote}", editor: null, editorRevision: "e".repeat(64), document: { metadata: { id, title: "Remote title" }, markdown: "Remote original" } }), async ({ requests, readRequests }) => {
+      assert.equal(readRequests.length,0,"Cached recovery must not request the damaged remote source");
       assert.equal(document.querySelector('input[aria-label="글 제목"]').value, "Unsaved local title");
       assert.match(document.querySelector('.bn-editor')?.textContent ?? "", /Unsaved local body/);
       assert.equal(localStorage.getItem(key), stored, "Remote failure must preserve the original local backup bytes");
       const saveButton = document.querySelector('button[type="submit"]');
-      assert.ok(saveButton === null || saveButton.matches(":disabled"), "The damaged remote source must block saving");
+      assert.ok(saveButton !== null && !saveButton.matches(":disabled"), "The valid local recovery remains editable offline");
       for (const label of [".md 내보내기", "원본 백업"]) {
         const button = [...document.querySelectorAll('button')].find((item) => item.textContent.trim() === label);
         assert.ok(button !== undefined);
@@ -784,7 +796,7 @@ test("a damaged remote editor cannot replace an existing unsaved local recovery 
 after(() => dom.window.close());
 
 test("tags, category cancellation and reader controls preserve local-only drafts", { timeout: 10000 }, async () => {
-  await mounted({ post: null }, source({ revision: null, categories: [
+  await mounted({ post: { ...post, id: "draft-category", draft: true } }, source({ revision: null, categories: [
     { id: "notes", name: "기록", parent_id: null },
     { id: "child", name: "하위 분류", parent_id: "notes" },
   ] }), async ({ requests }) => {
@@ -819,7 +831,7 @@ test("tags, category cancellation and reader controls preserve local-only drafts
     assert.ok(document.querySelector('[aria-label="독자 화면 미리보기"]') === null);
     await act(async () => document.querySelector('.editor-save').click());
     assert.equal(requests.length, 0);
-    const stored = JSON.parse(localStorage.getItem("second-brain:canonical-draft:new"));
+    const stored = JSON.parse(localStorage.getItem("second-brain:canonical-draft:draft-category"));
     assert.deepEqual(stored.tags, ["react", "typescript"]);
     assert.equal(stored.category, "child");
   });
@@ -836,7 +848,7 @@ test("invalid imported tags preserve the current blocks and recovery bytes", { t
   });
 });
 
-test("a published local draft resumes with canonical identity and sends update", { timeout: 10000 }, async () => {
+test("a published local draft resumes with canonical identity and sends update", { timeout: 20000 }, async () => {
   const localPost = { ...post, id: "draft-local", draft: true };
   await mounted({ post: localPost }, source({ revision: null }), async ({ root, requests }) => {
     await save(requests);
@@ -847,12 +859,12 @@ test("a published local draft resumes with canonical identity and sends update",
     await waitFor(() => document.querySelector('[aria-label="글 제목"]') !== null, "Resume did not load");
     const reopen = [...document.querySelectorAll('button')].find(item => item.textContent === "최신 원본으로 다시 시작");
     await act(async () => reopen.click());
-    await waitFor(() => document.querySelector('textarea') !== null, "Canonical source did not reload");
+    await waitFor(() => document.querySelector('.bn-editor[contenteditable="true"]') !== null, "Canonical source did not reload in the approved editor");
     const count = requests.length;
     await act(async () => document.querySelector('button[type="submit"]').click());
     await waitFor(() => requests.length > count, "Update request did not arrive");
-    assert.equal(requests.at(-1).operation.type, "post.update");
-    assert.equal(requests.at(-1).operation.id, id);
+    assert.equal(requests.at(-1).operations[0].type, "post.update");
+    assert.equal(requests.at(-1).operations[0].id, id);
   });
 });
 

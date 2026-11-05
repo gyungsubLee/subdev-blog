@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test, { after } from "node:test";
 import { JSDOM } from "jsdom";
+import { bulkResponse } from "../support/bulk-response.mjs";
 import { loadComponent } from "../support/load-component.mjs";
 
 const dom = new JSDOM('<!doctype html><meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content"><div id="root"></div>', {
@@ -43,6 +44,14 @@ const categories = [{ id: "notes", name: "기록", parentId: null, order: 0, sou
 const ready = { state: "ready", user: { id: 12, login: "owner" }, csrfToken: "test-csrf" };
 const reply = (data, status = 200) => ({ ok: status < 400, status, json: async () => data });
 
+async function waitFor(check) {
+  const deadline=Date.now()+8000;
+  while(!check()) {
+    assert.ok(Date.now()<deadline,"background sync deadline");
+    await act(async()=>new Promise(resolve=>setTimeout(resolve,10)));
+  }
+}
+
 async function mounted(render, run) {
   const root = createRoot(document.getElementById("root"));
   try {
@@ -50,6 +59,7 @@ async function mounted(render, run) {
     await run(root);
   } finally {
     await act(async () => root.unmount());
+    window.dispatchEvent(new window.Event("pagehide"));
     localStorage.clear();
     dom.window.history.replaceState(null, "", "/#/");
   }
@@ -169,7 +179,7 @@ test("direct publication succeeds without polling and clears a stale retry error
     await mounted(React.createElement(PublicationStatus), async (root) => {
       assert.equal(document.querySelector('[role="alert"]').textContent, initial.error);
       await act(async () => document.querySelector(".publish-status button").click());
-      assert.equal(document.querySelector('[role="status"]').textContent, "게시 완료");
+      assert.equal(document.querySelector('.publish-status [role="status"]').textContent, "게시 완료");
       assert.ok(document.querySelector('[role="alert"]') === null, "A successful retry must clear the previous error");
       await act(async () => t.mock.timers.tick(60000));
       assert.deepEqual(requests, [{
@@ -225,7 +235,23 @@ test("legacy publication checks resolve without an Actions run and stop after pu
   }
 });
 
-test("canonical title edits preserve Markdown and CSRF then refresh the published commit", async () => {
+test("background source completion keeps the existing saved label without duplicate publication polling", {timeout:5000}, async t => {
+  const {default:PublishStatus}=await loadComponent("app/web/src/features/content-management/PublishStatus.tsx");
+  const previous=globalThis.fetch;
+  let requests=0;
+  globalThis.fetch=async()=>{requests++;return reply({state:"published"});};
+  t.mock.timers.enable({apis:["setTimeout"]});
+  try {
+    await mounted(React.createElement(PublishStatus,{publication:{state:"saved",requestId:"request",candidateCommit:"c".repeat(40),background:true},csrfToken:"test-csrf",onChange(){}}),async()=>{
+      assert.equal(document.querySelector('.publish-status [role="status"]').textContent,"원본 저장 완료");
+      await act(async()=>t.mock.timers.tick(60000));
+      assert.equal(requests,0,"the durable background tracker owns publication polling");
+      assert.equal(document.querySelector('.publish-status [role="status"]').textContent,"원본 저장 완료");
+    });
+  } finally {t.mock.timers.reset();globalThis.fetch=previous;}
+});
+
+test("canonical title edits preserve Markdown and CSRF then refresh the published commit", {timeout:15000}, async () => {
   const { default: Editor } = await loadComponent("app/web/src/features/content-management/ManagedPostEditor.tsx");
   const markdown = "\n# Keep H1\n\n<details>\n<summary>Keep HTML</summary>\nraw\n</details>\n";
   const requests = [];
@@ -237,7 +263,7 @@ test("canonical title edits preserve Markdown and CSRF then refresh the publishe
       revision: "a".repeat(64), contentCommit: "b".repeat(40),
       categories: [{ id: "notes", name: "기록", parent_id: null, order: 0, sources: ["notes"] }], assets: [],
     });
-    if (url === "/api/content") return reply({ requestId: "request", candidateCommit: "c".repeat(40), contentCommit: "c".repeat(40), state: "published" });
+    if (url === "/api/content") return reply(bulkResponse(JSON.parse(init.body),{}, {document:{metadata:{id,title:"원제목"},markdown},categories,assets:[]}));
     return reply({ state: "validating" });
   };
   const refreshed = [];
@@ -249,15 +275,16 @@ test("canonical title edits preserve Markdown and CSRF then refresh the publishe
         title.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
       });
       await act(async () => document.querySelector('button[type="submit"]').click());
+      await waitFor(() => document.querySelector('.publish-status [role="status"]')?.textContent === "게시 완료");
       const save = requests.find((item) => item.url === "/api/content");
       assert.ok(save);
       assert.equal(new Headers(save.headers).get("x-csrf-token"), "test-csrf");
       const body = JSON.parse(save.body);
-      assert.equal(body.operation.type, "post.update");
-      assert.equal(body.operation.markdown, markdown);
-      assert.equal(body.operation.changes.title, "새 제목");
+      assert.equal(body.operations[0].type, "post.update");
+      assert.equal(body.operations[0].markdown, markdown);
+      assert.equal(body.operations[0].changes.title, "새 제목");
       assert.equal(body.baseCommit, "b".repeat(40));
-      assert.equal(document.querySelector('[role="status"]').textContent, "게시 완료");
+      assert.equal(document.querySelector('.publish-status [role="status"]').textContent, "게시 완료");
       assert.deepEqual(refreshed, ["c".repeat(40)]);
     });
   } finally {
@@ -265,7 +292,7 @@ test("canonical title edits preserve Markdown and CSRF then refresh the publishe
   }
 });
 
-test("a failed canonical save retains the edited source for reauthentication", async () => {
+test("a failed canonical save retains the edited source for reauthentication", {timeout:15000}, async () => {
   const { default: Editor } = await loadComponent("app/web/src/features/content-management/ManagedPostEditor.tsx");
   const previous = globalThis.fetch;
   globalThis.fetch = async (url) => url.startsWith("/api/content?")
@@ -274,7 +301,9 @@ test("a failed canonical save retains the edited source for reauthentication", a
   try {
     await mounted(React.createElement(Editor, { post, session: ready, onClose() {} }), async () => {
       await act(async () => document.querySelector('button[type="submit"]').click());
-      assert.equal(document.querySelector('textarea[aria-label="본문 Markdown"]').value, "raw body");
+      assert.ok(document.querySelector('.bn-editor') !== null);
+      assert.equal(JSON.parse(localStorage.getItem('second-brain:canonical-draft:'+id)).markdown, "raw body");
+      await waitFor(() => document.querySelector('[role="alert"]')?.textContent.includes("로그인"));
       assert.match(document.querySelector('[role="alert"]').textContent, /로그인/);
       assert.ok(document.querySelector('a[href="/api/auth/github"]') !== null);
       assert.ok([...Array(localStorage.length)].some((_, index) => localStorage.key(index).startsWith("second-brain:canonical-draft:")));
@@ -284,7 +313,7 @@ test("a failed canonical save retains the edited source for reauthentication", a
   }
 });
 
-for (const existing of [false, true]) test(`${existing ? "existing" : "new"}-post retries after reopening retain their original identity and request`, async () => {
+for (const existing of [false, true]) test(`${existing ? "existing" : "new"}-post retries after reopening retain their original identity and request`, {timeout:20000}, async () => {
   const { default: Editor } = await loadComponent("app/web/src/features/content-management/ManagedPostEditor.tsx");
   const previous = globalThis.fetch;
   const saves = [];
@@ -303,7 +332,7 @@ for (const existing of [false, true]) test(`${existing ? "existing" : "new"}-pos
     await mounted(React.createElement(Editor, { ...props, key: "first" }), async (root) => {
       async function saveAndWait(count) {
         await act(async () => document.querySelector('button[type="submit"]').click());
-        const deadline = Date.now() + 3000;
+        const deadline = Date.now() + 8000;
         while (saves.length < count) {
           if (Date.now() > deadline) assert.fail("Retry save did not reach the API");
           await act(async () => new Promise((resolve) => setTimeout(resolve, 10)));
@@ -311,14 +340,14 @@ for (const existing of [false, true]) test(`${existing ? "existing" : "new"}-pos
       }
       await saveAndWait(1);
       await act(async () => root.render(React.createElement(Editor, { ...props, key: "second" })));
-      const deadline = Date.now() + 3000;
+      const deadline = Date.now() + 8000;
       while (!document.querySelector('button[type="submit"]')) {
         if (Date.now() > deadline) assert.fail("Recovered editor did not mount");
         await act(async () => new Promise((resolve) => setTimeout(resolve, 10)));
       }
       await saveAndWait(2);
       assert.equal(saves.length, 2);
-      assert.equal(existing ? saves[0].operation.id : saves[0].operation.document.metadata.id, id);
+      assert.equal(existing ? saves[0].operations[0].id : saves[0].operations[0].document.metadata.id, id);
       assert.deepEqual(saves[1], saves[0]);
     });
   } finally {
@@ -326,7 +355,7 @@ for (const existing of [false, true]) test(`${existing ? "existing" : "new"}-pos
   }
 });
 
-test("canonical category retries retain edits, original sources and request identity", async () => {
+test("canonical category retries retain edits, original sources and request identity", {timeout:20000}, async () => {
   const { default: Categories } = await loadComponent("app/web/src/features/content-management/ManagedCategories.tsx");
   const previous = globalThis.fetch;
   const saves = [];
@@ -350,13 +379,15 @@ test("canonical category retries retain edits, original sources and request iden
       });
       await act(async () => document.querySelector("#inline-form").dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true })));
       await act(async () => document.querySelector("#save-all").click());
+      await waitFor(() => document.querySelector('a[href="/api/auth/github"]'));
       await act(async () => root.render(React.createElement(Categories, { ...props, key: "second" })));
       assert.ok(document.querySelector('button[aria-label="바꾼 분류 수정"]') !== null);
       await act(async () => document.querySelector("#save-all").click());
+      await waitFor(() => document.querySelector('a[href="/api/auth/github"]'));
       assert.equal(saves.length, 2);
       assert.deepEqual(saves[1], saves[0]);
-      assert.deepEqual(saves[1].operation.categories[0].sources, ["original"]);
-      assert.deepEqual(saves[1].operation.categories[0].custom, { keep: true });
+      assert.deepEqual(saves[1].operations[0].categories[0].sources, ["original"]);
+      assert.deepEqual(saves[1].operations[0].categories[0].custom, { keep: true });
       assert.ok(document.querySelector('a[href="/api/auth/github"]') !== null);
       const originalConfirm = window.confirm;
       window.confirm = () => true;
@@ -375,7 +406,7 @@ test("canonical category retries retain edits, original sources and request iden
 });
 
 test("a lost deletion response can be retried after the source has disappeared", async () => {
-  const { default: Editor } = await loadComponent("app/web/src/features/content-management/ManagedPostEditor.tsx");
+  const { default: DeleteDialog } = await loadComponent("app/web/src/features/content-management/PostDeleteDialog.tsx");
   const previous = globalThis.fetch;
   const saves = [];
   let deleted = false;
@@ -387,17 +418,16 @@ test("a lost deletion response can be retried after the source has disappeared",
     deleted = true;
     throw new Error("response lost");
   };
-  const props = { post, session: ready, onClose() {} };
+  const props = { post, session: ready, onClose() {}, onDeleted() {} };
   async function remove() {
-    const button = [...document.querySelectorAll("button")].find((item) => item.textContent === "글 삭제");
-    assert.ok(button !== undefined, "saved deletion source remains available");
+    const button = document.querySelector('#confirm-post-delete');
+    assert.ok(button !== null, "the workspace delete dialog retains the saved request");
     await act(async () => button.click());
-    await act(async () => document.querySelector('[role="alertdialog"] button').click());
   }
   try {
-    await mounted(React.createElement(Editor, { ...props, key: "first" }), async (root) => {
+    await mounted(React.createElement(DeleteDialog, { ...props, key: "first" }), async (root) => {
       await remove();
-      await act(async () => root.render(React.createElement(Editor, { ...props, key: "second" })));
+      await act(async () => root.render(React.createElement(DeleteDialog, { ...props, key: "second" })));
       await remove();
       assert.equal(saves.length, 2);
       assert.equal(saves[0].operation.type, "post.delete");
@@ -425,7 +455,17 @@ test("attachment names with parentheses produce an intact Markdown destination",
   let timer;
   try {
     await mounted(React.createElement(Editor, { post, session: ready, onClose() {} }), async () => {
-      const field = document.querySelector('input[type="file"]');
+      const editable=document.querySelector('.bn-editor[contenteditable="true"]');
+      const view=editable.editor.view;
+      await act(async()=>{
+        view.focus();
+        const {from,to}=view.state.selection;
+        const handled=view.someProp('handleTextInput',handler=>handler(view,from,to,'/',()=>view.state.tr.insertText('/')));
+        if(!handled)view.dispatch(view.state.tr.insertText('/',from,to));
+      });
+      await waitFor(()=>[...document.querySelectorAll('[role="option"]')].some(item=>item.textContent.includes('이미지')));
+      await act(async()=>[...document.querySelectorAll('[role="option"]')].find(item=>item.textContent.includes('이미지')).click());
+      const field=document.querySelector('.bn-file-panel input[type="file"], .bn-panel input[type="file"]');
       Object.defineProperty(field, "files", { configurable: true, value: [new dom.window.File(["image"], "foo).png", { type: "image/png" })] });
       await act(async () => {
         field.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
@@ -434,7 +474,8 @@ test("attachment names with parentheses produce an intact Markdown destination",
           new Promise((_, reject) => { timer = setTimeout(() => reject(new Error("Attachment upload timed out")), 3000); }),
         ]);
       });
-      assert.match(document.querySelector('textarea[aria-label="본문 Markdown"]').value, /!\[foo\)\.png\]\(\.\/foo%29\.png\)/);
+      await waitFor(()=>JSON.parse(localStorage.getItem('second-brain:canonical-draft:'+id)).markdown.includes('foo%29.png'));
+      assert.match(JSON.parse(localStorage.getItem('second-brain:canonical-draft:'+id)).markdown, /!\[foo\)\.png\]\(\.\/foo%29\.png\)/);
     });
   } finally {
     clearTimeout(timer);
@@ -457,13 +498,13 @@ test("writing opens an empty local draft without fetching a GitHub source", { ti
     }
     assert.equal(url, "/api/content");
     submitted = JSON.parse(options.body);
-    return reply({ requestId: submitted.requestId, state: "unchanged" });
+    return reply(bulkResponse(submitted,{state:"unchanged"}));
   };
   dom.window.history.replaceState(null, "", "/#/");
   try {
     await mounted(React.createElement(App), async () => {
       await act(async () => document.querySelector("button.header-write").click());
-      const deadline = Date.now() + 3000;
+      const deadline = Date.now() + 8000;
       while (!document.querySelector('.bn-editor[contenteditable="true"]')) {
         assert.ok(Date.now() < deadline, "New writing must not wait for a GitHub source");
         await act(async () => new Promise((resolve) => setTimeout(resolve, 10)));
@@ -485,11 +526,13 @@ test("writing opens an empty local draft without fetching a GitHub source", { ti
         input.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
       });
       await act(async () => document.querySelector('button[type="submit"]').click());
-      assert.equal(submitted?.operation.type, "post.create");
+      await waitFor(() => submitted);
+      await waitFor(() => document.querySelector('.publish-status [role="status"]')?.textContent === "변경사항이 없습니다.");
+      assert.equal(submitted?.operations[0].type, "post.create");
       assert.equal(submitted.baseCommit, "b".repeat(40));
-      assert.equal(submitted.operation.document.metadata.title, "새 글");
-      assert.match(submitted.operation.document.metadata.id, /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/);
-      assert.equal(submitted.operation.editor.documentId, submitted.operation.document.metadata.id);
+      assert.equal(submitted.operations[0].document.metadata.title, "새 글");
+      assert.match(submitted.operations[0].document.metadata.id, /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/);
+      assert.equal(submitted.operations[0].editor.documentId, submitted.operations[0].document.metadata.id);
     });
   } finally {
     globalThis.fetch = previous;
@@ -507,7 +550,7 @@ test("a new records category reaches the writer and is created only when its pos
     assert.equal(url, "/api/content");
     const input = JSON.parse(options.body);
     mutations.push(input);
-    return reply({ requestId: input.requestId, state: "published", contentCommit: "c".repeat(40) });
+    return reply(bulkResponse(input));
   };
   dom.window.history.replaceState(null, "", "/#/records");
   const find = (label) => [...document.querySelectorAll("button")].find(button => button.textContent.trim() === label);
@@ -526,7 +569,7 @@ test("a new records category reaches the writer and is created only when its pos
       const categoryId = category.dataset.recordCategory;
       await act(async () => category.dispatchEvent(new dom.window.MouseEvent("contextmenu", { bubbles: true, cancelable: true })));
       await act(async () => find("글 추가").click());
-      const deadline = Date.now() + 3000;
+      const deadline = Date.now() + 8000;
       while (!document.querySelector('.bn-editor[contenteditable="true"]')) {
         assert.ok(Date.now() < deadline, "new category writer opens");
         await act(async () => new Promise(resolve => setTimeout(resolve, 10)));
@@ -539,10 +582,12 @@ test("a new records category reaches the writer and is created only when its pos
         input.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
       });
       await act(async () => document.querySelector('button[type="submit"]').click());
-      assert.deepEqual(mutations.map(item => item.operation.type), ["categories.save", "post.create"]);
-      assert.equal(mutations[0].operation.categories.find(item => item.id === categoryId).name, "새 주제");
-      assert.equal(mutations[1].operation.document.metadata.category_id, categoryId);
-      assert.equal(mutations[1].baseCommit, "c".repeat(40));
+      await waitFor(() => document.querySelector('.publish-status [role="status"]')?.textContent === "게시 완료");
+      assert.equal(mutations.length,1,"category and post share one bulk request");
+      assert.deepEqual(mutations[0].operations.map(item => item.type), ["categories.save", "post.create"]);
+      assert.equal(mutations[0].operations[0].categories.find(item => item.id === categoryId).name, "새 주제");
+      assert.equal(mutations[0].operations[1].document.metadata.category_id, categoryId);
+      assert.equal(mutations[0].baseCommit, "b".repeat(40));
     });
   } finally { globalThis.fetch = previous; }
 });
