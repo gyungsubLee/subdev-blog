@@ -1,0 +1,72 @@
+[
+  {
+    "target": "check",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "exitCode": 0,
+    "seconds": 54.138
+  },
+  {
+    "target": "content",
+    "command": [
+      "npm",
+      "run",
+      "check:content"
+    ],
+    "exitCode": 0,
+    "seconds": 19.148
+  },
+  {
+    "target": "native",
+    "command": [
+      "npm",
+      "run",
+      "check:native"
+    ],
+    "exitCode": 0,
+    "seconds": 8.983
+  },
+  {
+    "target": "version",
+    "command": [
+      "npm",
+      "run",
+      "check:version"
+    ],
+    "exitCode": 0,
+    "seconds": 0.345
+  },
+  {
+    "target": "build",
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "exitCode": 0,
+    "seconds": 33.865
+  },
+  {
+    "target": "e2e",
+    "command": [
+      "npm",
+      "run",
+      "check:e2e"
+    ],
+    "exitCode": 0,
+    "seconds": 6.44
+  },
+  {
+    "target": "native-build",
+    "command": [
+      "python3",
+      "app/native/build.py",
+      "--skip-web-build"
+    ],
+    "exitCode": 0,
+    "seconds": 7.885
+  }
+]

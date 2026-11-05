@@ -1,0 +1,108 @@
+{
+  "version": "0.2.0",
+  "webBuildInfo": {
+    "version": "0.2.0",
+    "contentCommit": "9f99941c6b650c70f363208cd97c7191ef785a46",
+    "commit": null,
+    "runId": null,
+    "runNumber": null,
+    "runAttempt": null,
+    "workflow": null
+  },
+  "native": {
+    "version": "0.2.0",
+    "bundleVersion": "1",
+    "architecture": "arm64",
+    "signature": "ad-hoc verified",
+    "launched": false
+  },
+  "checks": [
+    {
+      "target": "check",
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "exitCode": 0,
+      "seconds": 54.138
+    },
+    {
+      "target": "content",
+      "command": [
+        "npm",
+        "run",
+        "check:content"
+      ],
+      "exitCode": 0,
+      "seconds": 19.148
+    },
+    {
+      "target": "native",
+      "command": [
+        "npm",
+        "run",
+        "check:native"
+      ],
+      "exitCode": 0,
+      "seconds": 8.983
+    },
+    {
+      "target": "version",
+      "command": [
+        "npm",
+        "run",
+        "check:version"
+      ],
+      "exitCode": 0,
+      "seconds": 0.345
+    },
+    {
+      "target": "build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "seconds": 33.865
+    },
+    {
+      "target": "e2e",
+      "command": [
+        "npm",
+        "run",
+        "check:e2e"
+      ],
+      "exitCode": 0,
+      "seconds": 6.44
+    },
+    {
+      "target": "native-build",
+      "command": [
+        "python3",
+        "app/native/build.py",
+        "--skip-web-build"
+      ],
+      "exitCode": 0,
+      "seconds": 7.885
+    }
+  ],
+  "sourceBindings": "source-bindings.json",
+  "fullSuite": {
+    "passed": 624,
+    "failed": 0
+  },
+  "httpE2E": {
+    "passed": 6,
+    "failed": 0
+  },
+  "limits": [
+    "Local full suite ran before version-only bump; final version and build checked afterwards.",
+    "Local web build has no CI commit/run identity; tag Actions build must supply it.",
+    "Prior UI/browser measurements are historical evidence; no new UI parity claim.",
+    "Existing public-files.mjs EOF whitespace left unstaged.",
+    "Content submodule untracked .github is excluded.",
+    "Initial whole-changelog link probe found pre-existing docs/notion-writing-ux.md missing; new release links pass; historical text preserved."
+  ]
+}

@@ -1,0 +1,5 @@
+
+> second-brain@0.1.0 check:content
+> node app/content/scripts/check-content.mjs --check
+
+{"posts":3032,"categories":48,"referencedAttachments":7255,"errors":0,"contentCommit":"9f99941c6b650c70f363208cd97c7191ef785a46","contentState":"git-local-dirty"}

@@ -1,0 +1,18 @@
+
+> second-brain@0.2.0 check:e2e
+> node --test tests/e2e/*.test.mjs
+
+✔ atomic HTTP save uses one GitHub mutation and recovers a lost browser reply read-only (287.308625ms)
+✔ HTTP E2E: a category and two posts use one atomic commit instead of three serial saves (5647.356541ms)
+✔ GitHub fixture preserves source trees, blobs, parents and non-force refs across publication (27.407ms)
+✔ HTTP E2E: authentication, generated reads, CRUD, retry, category save and push generation (1399.000667ms)
+✔ HTTP E2E serves exact pinned asset bytes and excludes editor sources (62.3475ms)
+✔ diagnostic trace measures consumed bytes and sequential stages without persisting bodies or credentials (18.739875ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5855.152958
