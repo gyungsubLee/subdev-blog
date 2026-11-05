@@ -1,3 +1,4 @@
+import { authorizedSession } from '../support/authorized-session.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { loadConfig, authenticate } from '../../app/server/src/auth.mjs';
@@ -9,17 +10,17 @@ test('missing and forged sessions are rejected', async () => {
 });
 
 import { seal, setCookie } from '../../app/server/src/auth.mjs';
-const config = { origin: 'https://blog.test', sessionKey: 'x'.repeat(32), adminUserId: 42 };
+const config = { origin: 'https://blog.test', sessionKey: 'x'.repeat(32), adminUserId: 42, content: { owner: 'owner', repo: 'content', branch: 'main' } };
 const fetchUser = async () => Response.json({ id: 42, login: 'owner' });
 function sessionRequest(value, headers = {}) {
  return new Request('https://blog.test/api/content', { headers: { cookie: setCookie(seal(value, config), config).split(';')[0], ...headers } });
 }
 test('real encrypted cookies enforce expiry, owner, origin and CSRF', async () => {
- const session = { token: 'private-token', csrfToken: 'csrf', expires: Date.now() + 60000 };
+ const session = authorizedSession(config, { token: 'private-token' });
  const request = sessionRequest(session, { origin: config.origin, 'x-csrf-token': 'csrf' });
  assert.equal((await authenticate(request, config, fetchUser, {mutate:true})).user.id,42);
  await assert.rejects(authenticate(sessionRequest({...session, expires:Date.now()-1}),config,fetchUser),{status:401});
- await assert.rejects(authenticate(request,config,async()=>Response.json({id:99})),{status:403});
+ await assert.rejects(authenticate(sessionRequest({...session,user:{id:99,login:'other'}}),config,fetchUser),{status:403});
  await assert.rejects(authenticate(sessionRequest(session),config,fetchUser,{mutate:true}),{status:403});
  await assert.rejects(authenticate(sessionRequest(session,{origin:'https://evil.test','x-csrf-token':'csrf'}),config,fetchUser,{mutate:true}),{status:403});
 });
@@ -49,13 +50,28 @@ test('connection readiness checks owner repositories and installation',async()=>
   {'/repos/gyungsubLee/subdev-blog/contents/content':{type:'file'}}
  ]) await assert.rejects(checkConnection('token',connectedConfig,connectedFetcher(overrides)),{status:403});
 });
-test('revoked credentials and network errors remain safe',async()=>{
- const request=sessionRequest({token:'secret-token',csrfToken:'csrf',expires:Date.now()+60000});
- await assert.rejects(authenticate(request,config,async()=>new Response('',{status:401})),{status:401});
- await assert.rejects(authenticate(request,config,async()=>{throw Error('secret-token')}),error=>error.status===502&&!error.message.includes('secret-token'));
-});
-
 import { createGitHubClient } from '../../app/server/src/github.mjs';
+test('safe GitHub reads recover from connection loss but writes are never retried', { timeout: 5000 }, async () => {
+ for (const method of ['GET', 'POST']) {
+  let calls = 0;
+  const github = createGitHubClient('token', async () => {
+   if (++calls === 1) throw new Error('Temporary network loss');
+   return Response.json({ id: 42 });
+  });
+  if (method === 'GET') assert.equal((await github('/user', { method })).id, 42);
+  else await assert.rejects(github('/user', { method }), { status: 502 });
+  assert.equal(calls, method === 'GET' ? 2 : 1);
+ }
+});
+test('safe reads recover when the connection fails during the response body', { timeout: 3000 }, async () => {
+ let calls = 0;
+ const github = createGitHubClient('token', async () => {
+  if (++calls === 1) return new Response(new ReadableStream({ start(controller) { controller.error(new TypeError('Connection lost')); } }));
+  return Response.json({ id: 42 });
+ });
+ assert.equal((await github('/user')).id, 42);
+ assert.equal(calls, 2);
+});
 test('GitHub boundary preserves actionable status while hiding upstream details', async () => {
  for (const status of [401,403,404,409,422]) {
   await assert.rejects(createGitHubClient('token',async()=>Response.json({message:'private-token'},{status}))('/path'),error=>error.status===status&&!error.message.includes('private-token'));
@@ -133,5 +149,20 @@ test('GitHub read retries are bounded and do not retry writes or access failures
       error.status === ([401, 403, 404].includes(status) ? status : 502) &&
       !error.message.includes('private upstream detail'));
     assert.equal(calls, expectedCalls, `${method} ${status} retry count`);
+  }
+});
+
+test('explicit read-only GraphQL POST retries connection loss while mutations do not', { timeout: 5000 }, async () => {
+  for (const readOnly of [false, true]) {
+    let calls = 0;
+    const github = createGitHubClient('token', async (_url, options) => {
+      assert.equal(options.method, 'POST');
+      if (++calls === 1) throw new Error('Connection lost');
+      return Response.json({ data: { value: 1 } });
+    });
+    const operation = github('/graphql', { method: 'POST', readOnly, body: { query: readOnly ? 'query { viewer { login } }' : 'mutation { deleteThing }' } });
+    if (readOnly) assert.equal((await operation).data.value, 1);
+    else await assert.rejects(operation, { status: 502 });
+    assert.equal(calls, readOnly ? 2 : 1);
   }
 });

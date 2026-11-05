@@ -247,7 +247,7 @@ function transformsFor(snapshot) {
 }
 
 /** Validate documents and references; populate inherited category and asset projections. */
-export function validateContent(snapshot) {
+export function validateContent(snapshot, { validatedDocuments, transformDocuments } = {}) {
   validatedTransforms.delete(snapshot);
   if (!Array.isArray(snapshot.categories) || !(snapshot.documents instanceof Map))
     throw new Error("Content needs a category array and document map.");
@@ -275,6 +275,7 @@ export function validateContent(snapshot) {
   );
   for (const entry of entries) {
     // Reuse the document boundary validator without altering opaque extension values.
+    if (validatedDocuments?.has(entry.metadata.id)) continue;
     serializeMarkdownDocument(entry);
     if (entry.editor !== undefined && entry.editor !== null)
       validateEditorDocument(entry.editor, {
@@ -319,6 +320,8 @@ export function validateContent(snapshot) {
   const transforms = new Map();
   let transformBytes = 0;
   for (const entry of entries) {
+    if (transformDocuments && !transformDocuments.has(entry.metadata.id)) continue;
+    snapshot.linkDependencies?.set(entry.metadata.id, new Set());
     const assets = new Map();
     const resolve = linkResolver(snapshot, entry, assets, externalDependencies);
     const markdown = rewriteContentLinks(entry.markdown, resolve);
@@ -349,10 +352,12 @@ function opaqueIcon(key, value) {
 }
 
 function linkResolver(snapshot, entry, assets = new Map(), externals = new Set()) {
+  const dependencies = snapshot.linkDependencies?.get(entry.metadata.id);
   return (destination) => {
     if (!destination) return destination;
     if (destination.startsWith("#/post/")) {
       const id = destination.slice(7).split(/[?#]/)[0];
+      dependencies?.add('id:' + id);
       if (!snapshot.documents.has(id) && !snapshot.allowUnresolvedLinks)
         throw new Error("Missing linked document: " + id);
       return destination;
@@ -375,6 +380,7 @@ function linkResolver(snapshot, entry, assets = new Map(), externals = new Set()
         if (match) {
           const compact = match[1].replace(/-/g, "").toLowerCase();
           const id = compact.replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, "$1-$2-$3-$4-$5");
+          dependencies?.add('id:' + id);
           if (snapshot.documents.has(id)) return "#/post/" + id + url.hash;
         }
       }
@@ -393,6 +399,8 @@ function linkResolver(snapshot, entry, assets = new Map(), externals = new Set()
       throw new Error("Unsafe content path: " + destination);
     if (/\.md$/i.test(decoded)) {
       const relative = path.posix.normalize(path.posix.join(path.posix.dirname(entry.filename), decoded));
+      dependencies?.add('path:' + relative);
+      dependencies?.add('path:' + path.posix.normalize(decoded));
       const id = snapshot.paths.get(relative) ?? snapshot.paths.get(path.posix.normalize(decoded));
       if (!id) {
         if (snapshot.allowUnresolvedLinks) return destination;
@@ -440,11 +448,11 @@ export function toPublicCategories(snapshot) {
   return categories.sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
 }
 
-export function toPublicPosts(snapshot) {
+export function toPublicPosts(snapshot, ids = snapshot.documents.keys()) {
   const categories = new Map(snapshot.categories.map((category) => [category.id, category]));
   const transforms = transformsFor(snapshot);
-  return [...snapshot.documents.values()]
-    .map((entry) => publicPost(snapshot, entry, categories, transforms))
+  return [...ids]
+    .map((id) => publicPost(snapshot, snapshot.documents.get(id), categories, transforms))
     .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt) || a.id.localeCompare(b.id));
 }
 

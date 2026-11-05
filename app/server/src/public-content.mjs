@@ -1,34 +1,17 @@
 import { createHash } from 'node:crypto';
 import { gzipSync } from 'node:zlib';
-import { readFile as readLocalFile } from 'node:fs/promises';
 import { createGitHubClient, httpError } from './github.mjs';
-import { canonicalFilename, parseMarkdownDocument } from '../../shared/document.mjs';
-import { EDITOR_FILENAME, isEditorFilename } from '../../shared/editor-document.mjs';
-import { validateContent, getContentTransformBytes, toPublicPosts, toPublicPost, toPublicCategories } from '../../content/src/content.mjs';
+import { SHA, UUID, PUBLIC_VERSION, MAX_PUBLIC_FILE, requirePublic as requireValue, rawContentUrl, fetchPublicBytes, parsePublicJson } from './public-files.mjs';
 
 const REPOSITORY = 'gyungsubLee/subdev-blog-content';
 const REPO_PATH = '/repos/' + REPOSITORY;
-const SHA = /^[a-f0-9]{40}$/;
-const UUID = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 const HEAD_FRESH_MS = 30000;
-const MAX_FILE_BYTES = 2 * 1024 * 1024;
-const MAX_SOURCE_BYTES = 64 * 1024 * 1024;
 const MAX_BLOB_BYTES = 32 * 1024 * 1024;
 const MAX_SNAPSHOT_BYTES = 128 * 1024 * 1024;
 const COMPRESS_BYTES = 1024 * 1024;
 const MAX_RESPONSE_BYTES = 4 * 1024 * 1024;
 const caches = new WeakMap();
-let catalogFile;
 
-function readCatalog() {
-  catalogFile ??= readLocalFile(new URL('../generated/content-catalog.json', import.meta.url), 'utf8')
-    .then(JSON.parse)
-    .catch(error => {
-      if (error.code === 'ENOENT') return null;
-      throw httpError(502, 'Invalid public content catalog');
-    });
-  return catalogFile;
-}
 function acceptsGzip(header) {
   if (header === null) return true;
   let gzip;
@@ -67,10 +50,6 @@ function json(body, status = 200, acceptEncoding = null, encoded = {}) {
   return new Response(bytes, { status, headers });
 }
 
-function requireValue(condition, message, status = 502) {
-  if (!condition) throw httpError(status, message);
-}
-
 function cacheFor(fetcher, branch, token) {
   let configurations = caches.get(fetcher);
   if (!configurations) {
@@ -83,6 +62,7 @@ function cacheFor(fetcher, branch, token) {
     // ponytail: caches are per process (4 configurations, 3 snapshots/128 MiB,
     // 32 MiB blob text each). A shared cache is the upgrade for frequent cold starts.
     cache = {
+      postPending: new Map(),
       head: null,
       checkedAt: 0,
       snapshots: new Map(),
@@ -100,65 +80,21 @@ function cacheFor(fetcher, branch, token) {
 async function canonicalHead(cache, github, branch, after) {
   if (cache.head && Date.now() - cache.checkedAt < HEAD_FRESH_MS && (!after || after === cache.head)) return cache.head;
   if (!cache.headPending) {
-    cache.headPending = (async () => {
-      const repository = await github(REPO_PATH);
-      requireValue(repository.private === false, 'Public content repository required', 403);
-      const ref = await github(REPO_PATH + '/git/ref/heads/' + encodeURIComponent(branch));
-      requireValue(ref.object?.type === 'commit' && SHA.test(ref.object.sha), 'Invalid canonical content ref');
-      cache.head = ref.object.sha;
-      cache.checkedAt = Date.now();
-      return cache.head;
-    })().finally(() => { cache.headPending = null; });
+    cache.headPending = github(REPO_PATH + '/git/ref/heads/' + encodeURIComponent('public-ready/' + branch))
+      .catch(error => {
+        // Existing repositories remain readable before their first ready ref is
+        // bootstrapped. The fallback still requires a complete immutable artifact.
+        if (error.status === 404) return github(REPO_PATH + '/git/ref/heads/' + encodeURIComponent(branch));
+        throw error;
+      })
+      .then(ref => {
+        requireValue(ref.object?.type === 'commit' && SHA.test(ref.object.sha), 'Invalid content ref');
+        cache.head = ref.object.sha;
+        cache.checkedAt = Date.now();
+        return cache.head;
+      }).finally(() => { cache.headPending = null; });
   }
   return cache.headPending;
-}
-
-function rawUrl(commit, filename) {
-  return `https://raw.githubusercontent.com/${REPOSITORY}/${commit}/` + filename.split('/').map(encodeURIComponent).join('/');
-}
-
-async function readFile(entry, commit, cache, fetcher) {
-  if (cache.blobs.has(entry.sha)) return cache.blobs.get(entry.sha);
-  requireValue(Number.isSafeInteger(entry.size) && entry.size >= 0 && entry.size <= MAX_FILE_BYTES, 'Public content file is too large');
-  let response;
-  try {
-    response = await fetcher(rawUrl(commit, entry.path), { signal: AbortSignal.timeout(15000) });
-  } catch {
-    throw httpError(502, 'Public content connection failed');
-  }
-  requireValue(response.ok, 'Public content file request failed');
-  const reader = response.body?.getReader();
-  requireValue(reader, 'Invalid public content file');
-  const chunks = [];
-  let size = 0;
-  try {
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      size += value.byteLength;
-      if (size > MAX_FILE_BYTES) {
-        await reader.cancel();
-        throw httpError(502, 'Public content file is too large');
-      }
-      chunks.push(Buffer.from(value));
-    }
-  } catch (error) {
-    throw error.status ? error : httpError(502, 'Public content file read failed');
-  } finally {
-    reader.releaseLock();
-  }
-  const bytes = Buffer.concat(chunks);
-  const sha = createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
-  requireValue(sha === entry.sha, 'Public content file does not match its tree');
-  const text = bytes.toString('utf8');
-  cache.blobs.set(entry.sha, text);
-  cache.blobBytes += text.length * 2;
-  while (cache.blobBytes > MAX_BLOB_BYTES) {
-    const oldest = cache.blobs.keys().next().value;
-    cache.blobBytes -= cache.blobs.get(oldest).length * 2;
-    cache.blobs.delete(oldest);
-  }
-  return text;
 }
 
 function trimSnapshots(cache) {
@@ -169,121 +105,108 @@ function trimSnapshots(cache) {
   }
 }
 
-async function readSnapshot(commit, cache, github, fetcher, catalog) {
+function accountBytes(cache, commit, snapshot, added) {
+  snapshot.bytes += added;
+  if (cache.snapshots.get(commit) === snapshot) {
+    cache.snapshotBytes += added;
+    trimSnapshots(cache);
+  }
+}
+
+const POST_KEYS = new Set(['id', 'title', 'parentId', 'category', 'categoryId', 'createdAt', 'updatedAt', 'markdown', 'path', 'url', 'excerpt', 'cover', 'icon', 'order', 'revision', 'bodyLoaded']);
+function validatePost(post, id, summary) {
+  requireValue(post && typeof post === 'object' && !Array.isArray(post), 'Invalid public post');
+  requireValue(Object.keys(post).every(key => POST_KEYS.has(key)), 'Non-public post fields');
+  requireValue(UUID.test(post.id) && (!id || post.id === id) && post.bodyLoaded === !summary, 'Invalid public post identity');
+  for (const key of ['title', 'category', 'categoryId', 'createdAt', 'updatedAt', 'markdown', 'path', 'url', 'excerpt', 'revision']) {
+    requireValue(typeof post[key] === 'string', 'Invalid public post field');
+  }
+  requireValue(post.parentId === null || UUID.test(post.parentId), 'Invalid public parent');
+  requireValue(Number.isSafeInteger(post.order) && post.order >= 0 && /^[a-f0-9]{64}$/.test(post.revision), 'Invalid public post revision');
+  requireValue(!summary || post.markdown.length <= 1400, 'Invalid public summary');
+  for (const key of ['cover', 'icon']) requireValue(post[key] == null || typeof post[key] === 'string', 'Invalid public image');
+}
+
+function validateIndex(data, snapshot, commit) {
+  requireValue(data && Object.keys(data).every(key => ['posts', 'categories', 'contentCommit'].includes(key)) && data.contentCommit === commit && Array.isArray(data.posts) && Array.isArray(data.categories), 'Invalid public index');
+  requireValue(data.posts.length === snapshot.ids.size, 'Incomplete public index');
+  const seen = new Set();
+  for (const post of data.posts) {
+    validatePost(post, undefined, true);
+    requireValue(snapshot.ids.has(post.id) && !seen.has(post.id), 'Invalid public index identity');
+    seen.add(post.id);
+  }
+  for (const category of data.categories) {
+    requireValue(category && Object.keys(category).every(key => ['id', 'name', 'parentId', 'order', 'sources'].includes(key)), 'Non-public category fields');
+    requireValue(typeof category.id === 'string' && typeof category.name === 'string' && (category.parentId === null || typeof category.parentId === 'string') && Number.isSafeInteger(category.order) && Array.isArray(category.sources) && category.sources.every(source => typeof source === 'string'), 'Invalid public category');
+  }
+}
+
+async function readSnapshot(commit, cache, github, fetcher) {
   if (cache.snapshots.has(commit)) return cache.snapshots.get(commit);
   if (cache.pending.has(commit)) return cache.pending.get(commit);
   const loading = (async () => {
-    const record = await github(REPO_PATH + '/git/commits/' + commit);
-    requireValue(record.sha === commit && SHA.test(record.tree?.sha), 'Invalid public content commit');
-    const tree = await github(REPO_PATH + '/git/trees/' + record.tree.sha + '?recursive=1');
-    requireValue(tree.truncated === false && Array.isArray(tree.tree), 'Public content tree is incomplete');
-    const documents = new Map();
-    let categoryFile;
-    const paths = new Set();
-    for (const entry of tree.tree) {
-      requireValue(typeof entry.path === 'string' && !paths.has(entry.path), 'Invalid public content tree path');
-      paths.add(entry.path);
-      if (entry.path === 'categories.json') {
-        requireValue(entry.type === 'blob' && entry.mode === '100644' && SHA.test(entry.sha), 'Unsafe public category tree');
-        categoryFile = entry;
-        continue;
-      }
-      if (!entry.path.startsWith('posts/')) continue;
-      const parts = entry.path.split('/');
-      requireValue(UUID.test(parts[1]), 'Invalid public post folder');
-      if (parts.length === 2 && entry.type === 'tree' && entry.mode === '040000') continue;
-      const name = parts[2];
-      requireValue(parts.length === 3 && name && name !== '.' && name !== '..' && !/[\\/\u0000-\u001f\u007f]/.test(name), 'Unsafe public post path');
-      requireValue(entry.type === 'blob' && entry.mode === '100644' && SHA.test(entry.sha), 'Unsafe public post tree');
-      // Editor source belongs to authenticated editing, never the attachment inventory.
-      if (isEditorFilename(name)) {
-        requireValue(name === EDITOR_FILENAME, 'Reserved editor filename');
-        continue;
-      }
-      if (!documents.has(parts[1])) documents.set(parts[1], { files: [], assets: [] });
-      const document = documents.get(parts[1]);
-      if (/\.md$/i.test(name)) document.files.push(entry);
-      else document.assets.push({ name, path: entry.path });
+    let ref;
+    try {
+      ref = await github(REPO_PATH + '/git/ref/heads/' + encodeURIComponent('public-data/' + commit));
+    } catch (error) {
+      if (error.status === 404) throw httpError(503, 'Public content is not ready for this commit');
+      throw error;
     }
-    requireValue(categoryFile, 'Public categories are missing');
-    requireValue(catalog || documents.size <= 64, 'Public content catalog is missing');
-    if (catalog) requireValue(catalog.version === 1 && Array.isArray(catalog.documents), 'Invalid public content catalog');
-    const baseline = new Map((catalog?.documents ?? []).map(entry => [entry.filename, entry]));
-    const inputs = [categoryFile];
-    for (const document of documents.values()) {
-      requireValue(document.files.length === 1, 'Public document is missing or ambiguous');
-      const file = document.files[0];
-      const cached = baseline.get(file.path);
-      document.baseline = cached?.blobSha === file.sha ? cached : null;
-      if (!document.baseline) inputs.push(file);
-    }
-    requireValue(inputs.every(entry => Number.isSafeInteger(entry.size) && entry.size >= 0 && entry.size <= MAX_FILE_BYTES), 'Invalid public file size');
-    requireValue(inputs.reduce((size, entry) => size + entry.size, 0) <= MAX_SOURCE_BYTES, 'Public content source is too large');
-    const texts = new Map();
-    let cursor = 0;
-    let failure;
-    await Promise.all(Array.from({ length: Math.min(8, inputs.length) }, async () => {
-      while (cursor < inputs.length && !failure) {
-        const entry = inputs[cursor++];
-        try {
-          texts.set(entry.path, await readFile(entry, commit, cache, fetcher));
-        } catch (error) {
-          failure = error;
-        }
-      }
-    }));
-    if (failure) throw failure;
-    const snapshot = {
-      categories: JSON.parse(texts.get(categoryFile.path)),
-      documents: new Map(),
-      allowUnresolvedLinks: true,
-      assetUrl: asset => rawUrl(commit, asset.path),
-    };
-    for (const [id, document] of documents) {
-      const file = document.files[0];
-      const cached = document.baseline;
-      if (cached) requireValue(typeof cached.markdown === 'string' && cached.markdown.length <= 1400 && /^[a-f0-9]{64}$/.test(cached.revision), 'Invalid public catalog document');
-      const text = texts.get(file.path);
-      const parsed = cached
-        ? { documentMode: 'full', metadata: cached.metadata, markdown: cached.markdown }
-        : parseMarkdownDocument(text);
-      requireValue(parsed.documentMode === 'full' && parsed.metadata.id === id, 'Public document ID mismatch');
-      requireValue(file.path === `posts/${id}/${canonicalFilename(parsed.metadata.title)}`, 'Public document filename mismatch');
-      snapshot.documents.set(id, {
-        metadata: parsed.metadata,
-        markdown: parsed.markdown,
-        filename: file.path,
-        revision: cached?.revision ?? createHash('sha256').update(text).digest('hex'),
-        sourceFile: file,
-        fullBody: !cached,
-        assets: [],
-        allAssets: document.assets,
-      });
-    }
-    validateContent(snapshot);
-    const posts = toPublicPosts(snapshot);
-    const result = { snapshot, posts, categories: toPublicCategories(snapshot), contentCommit: commit };
-    result.bytes = JSON.stringify(result.categories).length * 2 + getContentTransformBytes(snapshot);
-    for (const post of posts) {
-      const entry = snapshot.documents.get(post.id);
-      result.bytes += 1024 + JSON.stringify(entry.metadata).length * 2 + entry.markdown.length * 2;
-      for (const value of Object.values(post)) {
-        if (typeof value === 'string') result.bytes += value.length * 2;
-      }
-      for (const asset of entry.allAssets) result.bytes += (asset.name.length + asset.path.length) * 2 + 128;
-    }
-    if (result.bytes <= MAX_SNAPSHOT_BYTES) {
-      cache.snapshots.set(commit, result);
-      cache.snapshotBytes += result.bytes;
-      trimSnapshots(cache);
-    }
-    return result;
+    requireValue(ref.object?.type === 'commit' && SHA.test(ref.object.sha), 'Invalid publication ref');
+    const artifact = ref.object.sha;
+    const bytes = await fetchPublicBytes(fetcher, rawContentUrl(REPOSITORY, artifact, 'manifest.json'), MAX_PUBLIC_FILE, 503);
+    const manifest = parsePublicJson(bytes);
+    requireValue(manifest.version === PUBLIC_VERSION && manifest.sourceCommit === commit && Array.isArray(manifest.posts), 'Publication identity mismatch');
+    requireValue(Object.keys(manifest).every(key => ['version', 'sourceCommit', 'posts', 'files'].includes(key)) && manifest.posts.every(id => UUID.test(id)), 'Invalid publication manifest');
+    const ids = new Set(manifest.posts);
+    requireValue(ids.size === manifest.posts.length, 'Duplicate publication post');
+    const snapshot = { artifact, ids, encoded: {}, bytes: bytes.length + manifest.posts.length * 128 };
+    cache.snapshots.set(commit, snapshot);
+    cache.snapshotBytes += snapshot.bytes;
+    trimSnapshots(cache);
+    return snapshot;
   })().finally(() => cache.pending.delete(commit));
   cache.pending.set(commit, loading);
   return loading;
 }
 
-export async function handlePublicRequest(request, { env = process.env, fetcher = globalThis.fetch, catalog } = {}) {
+async function indexBytes(snapshot, commit, cache, fetcher) {
+  if (snapshot.encoded.identity) return;
+  if (!snapshot.indexPending) {
+    snapshot.indexPending = (async () => {
+      const bytes = await fetchPublicBytes(fetcher, rawContentUrl(REPOSITORY, snapshot.artifact, 'index.json'), MAX_PUBLIC_FILE, 503);
+      validateIndex(parsePublicJson(bytes), snapshot, commit);
+      snapshot.encoded.identity = bytes;
+      accountBytes(cache, commit, snapshot, bytes.length);
+    })().finally(() => { snapshot.indexPending = null; });
+  }
+  await snapshot.indexPending;
+}
+
+async function postBytes(snapshot, id, cache, fetcher) {
+  requireValue(snapshot.ids.has(id), 'Post not found', 404);
+  const key = snapshot.artifact + ':' + id;
+  if (cache.blobs.has(key)) return cache.blobs.get(key);
+  if (!cache.postPending.has(key)) {
+    const pending = (async () => {
+      const bytes = await fetchPublicBytes(fetcher, rawContentUrl(REPOSITORY, snapshot.artifact, `posts/${id}.json`), MAX_PUBLIC_FILE, 503);
+      validatePost(parsePublicJson(bytes), id, false);
+      cache.blobs.set(key, bytes);
+      cache.blobBytes += bytes.length;
+      while (cache.blobBytes > MAX_BLOB_BYTES) {
+        const oldest = cache.blobs.keys().next().value;
+        cache.blobBytes -= cache.blobs.get(oldest).length;
+        cache.blobs.delete(oldest);
+      }
+      return bytes;
+    })().finally(() => cache.postPending.delete(key));
+    cache.postPending.set(key, pending);
+  }
+  return cache.postPending.get(key);
+}
+
+export async function handlePublicRequest(request, { env = process.env, fetcher = globalThis.fetch } = {}) {
   const respond = (body, status) => json(body, status, request.headers.get('Accept-Encoding'));
   if (request.method !== 'GET') return respond({ error: 'Method not allowed' }, 405);
   try {
@@ -298,7 +221,7 @@ export async function handlePublicRequest(request, { env = process.env, fetcher 
     const requestedCommit = query.get('commit');
     if (kind === 'post') requireValue(UUID.test(id ?? '') && SHA.test(requestedCommit ?? ''), 'Post ID and full content commit required', 400);
     const branch = env.GITHUB_CONTENT_BRANCH || 'main';
-    requireValue(typeof branch === 'string' && branch.length > 0 && branch.length <= 255 && !/[\u0000-\u001f\u007f]/.test(branch), 'Invalid public content branch', 500);
+    requireValue(typeof branch === 'string' && branch.length <= 255 && !/[\u0000-\u001f\u007f]/.test(branch), 'Invalid content branch', 500);
     const cache = cacheFor(fetcher, branch, env.GITHUB_PUBLIC_TOKEN);
     const github = createGitHubClient(env.GITHUB_PUBLIC_TOKEN, fetcher);
     const head = await canonicalHead(cache, github, branch, after);
@@ -307,36 +230,17 @@ export async function handlePublicRequest(request, { env = process.env, fetcher 
       const comparison = await github(REPO_PATH + '/compare/' + commit + '...' + head);
       requireValue(comparison.status === 'ahead', 'Content commit is outside public history', 404);
     }
-    const snapshot = await readSnapshot(commit, cache, github, fetcher, catalog ?? await readCatalog());
+    const snapshot = await readSnapshot(commit, cache, github, fetcher);
     snapshot.validatedHead = head;
     if (kind === 'index') {
-      snapshot.encoded ??= {};
-      const previousBytes = (snapshot.encoded.identity?.length ?? 0) + (snapshot.encoded.gzip?.length ?? 0);
-      // Construct the projection only when serialization is needed; keep bytes, never Responses.
-      const body = snapshot.encoded.identity ? null : {
-        posts: snapshot.posts.map(post => ({ ...post, markdown: post.markdown.slice(0, 1400), bodyLoaded: false })),
-        categories: snapshot.categories,
-        contentCommit: commit,
-      };
-      const response = json(body, 200, request.headers.get('Accept-Encoding'), snapshot.encoded);
-      const addedBytes = snapshot.encoded.identity.length + (snapshot.encoded.gzip?.length ?? 0) - previousBytes;
-      snapshot.bytes += addedBytes;
-      if (cache.snapshots.get(commit) === snapshot) {
-        cache.snapshotBytes += addedBytes;
-        trimSnapshots(cache);
-      }
+      await indexBytes(snapshot, commit, cache, fetcher);
+      const before = snapshot.encoded.gzip?.length ?? 0;
+      const response = json(null, 200, request.headers.get('Accept-Encoding'), snapshot.encoded);
+      accountBytes(cache, commit, snapshot, (snapshot.encoded.gzip?.length ?? 0) - before);
       return response;
     }
-    const entry = snapshot.snapshot.documents.get(id);
-    requireValue(entry, 'Post not found', 404);
-    if (entry.fullBody) return respond(toPublicPost(snapshot.snapshot, id));
-    const text = await readFile(entry.sourceFile, commit, cache, fetcher);
-    const parsed = parseMarkdownDocument(text);
-    requireValue(parsed.documentMode === 'full' && parsed.metadata.id === id, 'Public document ID mismatch');
-    // Keep full bodies in the bounded blob cache; the catalog snapshot remains summaries.
-    const detail = { ...snapshot.snapshot, documents: new Map(snapshot.snapshot.documents) };
-    detail.documents.set(id, { ...entry, metadata: parsed.metadata, markdown: parsed.markdown });
-    return respond(toPublicPost(detail, id));
+    const bytes = await postBytes(snapshot, id, cache, fetcher);
+    return json(null, 200, request.headers.get('Accept-Encoding'), { identity: bytes });
   } catch (error) {
     return respond({ error: error.status ? error.message : 'Invalid public content' }, error.status || 502);
   }

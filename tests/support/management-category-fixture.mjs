@@ -1,3 +1,4 @@
+import { authorizedSession } from './authorized-session.mjs';
 import { createHash } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { loadConfig, seal, setCookie } from '../../app/server/src/auth.mjs';
@@ -10,9 +11,7 @@ export function createManagementCategoryFixture({ latencyMs = 0, categories, rec
     GITHUB_CONTENT_REPOSITORY_ID: '14', GITHUB_APP_BRANCH: 'main', GITHUB_CONTENT_BRANCH: 'main',
   };
   const config = loadConfig(env);
-  const headers = { cookie: setCookie(seal({
-    token: 'diagnostic-only', csrfToken: 'csrf', expires: Date.now() + 60000,
-  }, config), config).split(';')[0] };
+  const headers = { cookie: setCookie(seal(authorizedSession(config, { token: 'diagnostic-only' }), config), config).split(';')[0] };
   const controls = { head: 'a'.repeat(40), userId: 42, push: true, suspended: false, mode: '100644' };
   const calls = [];
   let active = 0;
@@ -21,7 +20,7 @@ export function createManagementCategoryFixture({ latencyMs = 0, categories, rec
   const bytes = Buffer.from(JSON.stringify(source));
   const blobSha = createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
   const fetcher = async (url, options = {}) => {
-    if ((options.method ?? 'GET') !== 'GET') throw new Error('Read fixture received a mutation');
+    if ((options.method ?? 'GET') !== 'GET' && new URL(url).pathname !== '/graphql') throw new Error('Read fixture received a mutation');
     const parsed = new URL(url);
     const path = parsed.pathname;
     const call = { path: path + parsed.search, start: performance.now() };
@@ -31,7 +30,17 @@ export function createManagementCategoryFixture({ latencyMs = 0, categories, rec
       if (latencyMs) await delay(latencyMs);
       else await new Promise(resolve => setImmediate(resolve));
       let value;
-      if (path === '/user') value = { id: controls.userId, login: 'owner' };
+      if (path === '/graphql') {
+        const body = JSON.parse(options.body);
+        if (!body.query.startsWith('query ReadCategories(') || body.variables.branch !== 'refs/heads/main') throw new Error('Unexpected query');
+        value = { data: { repository: { object: {
+          oid: controls.head,
+          file: { type: 'blob', mode: parseInt(controls.mode, 8), object: {
+            text: bytes.toString(), byteSize: bytes.length, isBinary: false,
+          } },
+        } } } };
+      }
+      else if (path === '/user') value = { id: controls.userId, login: 'owner' };
       else if (path === '/user/installations') value = { installations: [{
         id: 12, app_id: 11, suspended_at: controls.suspended ? 'now' : null,
         permissions: { contents: 'write', metadata: 'read' },

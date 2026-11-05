@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { loadConfig, authenticate, checkConnection, seal, readCookie, setCookie, equalSecret } from './auth.mjs';
+import { loadConfig, authenticate, checkConnection, seal, readCookie, setCookie, equalSecret, sessionBinding } from './auth.mjs';
 import { createGitHubClient, httpError } from './github.mjs';
 
 const json = (body, status = 200) => Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
@@ -34,8 +34,13 @@ export async function handleRequest(request, { env = process.env, fetcher = glob
     }
     const config = loadConfig(env);
     if (path === '/api/auth/github') {
-      const state = randomBytes(32).toString('base64url');
-      const verifier = randomBytes(32).toString('base64url');
+      let pending;
+      try {
+        pending = readCookie(request, config, 'oauth');
+        if (typeof pending.state !== 'string' || typeof pending.verifier !== 'string') pending = undefined;
+      } catch { /* A missing or expired challenge starts a new login. */ }
+      const state = pending?.state ?? randomBytes(32).toString('base64url');
+      const verifier = pending?.verifier ?? randomBytes(32).toString('base64url');
       const target = new URL('https://github.com/login/oauth/authorize');
       target.search = new URLSearchParams({
         client_id: config.clientId,
@@ -44,13 +49,15 @@ export async function handleRequest(request, { env = process.env, fetcher = glob
         code_challenge: createHash('sha256').update(verifier).digest('base64url'),
         code_challenge_method: 'S256',
       }).toString();
-      return redirect(target.href, [setCookie(seal({ state, verifier, expires: Date.now() + 600000 }, config), config, 'oauth', 600)]);
+      return redirect(target.href, pending ? [] : [setCookie(seal({ state, verifier, expires: Date.now() + 600000 }, config), config, 'oauth', 600)]);
     }
     if (path === '/api/auth/callback') {
       const clear = setCookie('', config, 'oauth', 0);
+      let matchesPending = false;
       try {
         const pending = readCookie(request, config, 'oauth');
-        if (url.searchParams.has('error') || !equalSecret(url.searchParams.get('state'), pending.state) || !url.searchParams.get('code')) {
+        matchesPending = equalSecret(url.searchParams.get('state'), pending.state);
+        if (url.searchParams.has('error') || !matchesPending || !url.searchParams.get('code')) {
           throw httpError(401, 'GitHub login was not completed');
         }
         const exchangeStartedAt = Date.now();
@@ -58,6 +65,7 @@ export async function handleRequest(request, { env = process.env, fetcher = glob
         try {
           response = await fetcher('https://github.com/login/oauth/access_token', {
             method: 'POST',
+            signal: AbortSignal.timeout(15000),
             headers: {
               Accept: 'application/json',
               'Content-Type': 'application/json',
@@ -81,12 +89,17 @@ export async function handleRequest(request, { env = process.env, fetcher = glob
         if (user.id !== config.adminUserId) {
           throw httpError(403, 'Owner access required');
         }
+        await checkConnection(result.access_token, config, fetcher);
         const expires = exchangeStartedAt + Math.min(3600, Math.floor(result.expires_in) - 1) * 1000;
         const lifetime = Math.floor((expires - Date.now()) / 1000);
         if (lifetime <= 0) {
           throw httpError(401, 'GitHub token expired during login');
         }
         const session = seal({
+          version: 1,
+          issuedAt: exchangeStartedAt,
+          binding: sessionBinding(config),
+          user: { id: user.id, login: user.login, name: user.name },
           token: result.access_token,
           csrfToken: randomBytes(32).toString('base64url'),
           expires,
@@ -94,15 +107,15 @@ export async function handleRequest(request, { env = process.env, fetcher = glob
         return redirect(config.origin, [clear, setCookie(session, config, 'session', lifetime)]);
       } catch (error) {
         const result = json({ error: error.status ? error.message : 'GitHub login failed' }, error.status || 502);
-        result.headers.append('Set-Cookie', clear);
-        result.headers.append('Set-Cookie', setCookie('', config, 'session', 0));
+        // A stale callback must not erase a newer challenge or an existing session.
+        if (matchesPending) result.headers.append('Set-Cookie', clear);
         return result;
       }
     }
     if (path === '/api/session') {
       try {
         const auth = await authenticate(request, config, fetcher);
-        const connection = await checkConnection(auth.token, config, fetcher);
+        const connection = auth.connection;
         return json({ state: 'ready', user: auth.user, csrfToken: auth.csrfToken, connection });
       } catch (error) {
         if (error.status === 401) {
@@ -111,6 +124,7 @@ export async function handleRequest(request, { env = process.env, fetcher = glob
         return json({
           state: 'blocked',
           error: error.status ? error.message : 'GitHub connection failed',
+          retryable: !error.status || error.status >= 500,
         });
       }
     }
@@ -120,7 +134,7 @@ export async function handleRequest(request, { env = process.env, fetcher = glob
       response.headers.append('Set-Cookie', setCookie('', config, 'session', 0));
       return response;
     }
-    const connection = await checkConnection(auth.token, config, fetcher);
+    const connection = auth.connection;
     const { handleContentRequest } = await import('./content.mjs');
     const normalized = new URL(request.url);
     normalized.pathname = path;

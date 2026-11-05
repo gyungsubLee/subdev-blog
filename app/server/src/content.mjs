@@ -1,8 +1,9 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { posix } from 'node:path';
-import { createGitHubClient, httpError } from './github.mjs';
-import { createManagementGitHubClient } from './management-read-cache.mjs';
+import { httpError } from './github.mjs';
+import { createManagementGitHubClient, readCachedCategories, invalidateCategoryCache } from './management-read-cache.mjs';
+import { readReadyPublicSource } from './public-publication.mjs';
 import { parseMarkdownDocument, serializeMarkdownDocument, mergeDocumentPatch, canonicalFilename } from '../../shared/document.mjs';
 import { rewriteContentLinks } from '../../shared/content-links.mjs';
 import { EDITOR_FILENAME, isEditorFilename, validateEditorDocument } from '../../shared/editor-document.mjs';
@@ -13,6 +14,8 @@ const MAX_ASSET = 5 * 1024 * 1024;
 const MAX_WIRE = 4 * 1024 * 1024;
 // Saved source files must fit the public runtime file limit.
 const MAX_DOCUMENT = 2 * 1024 * 1024;
+const MAX_INLINE_FILE = 64 * 1024;
+const MAX_INLINE_TREE = 1024 * 1024;
 let catalogFile;
 function readCatalog() {
     catalogFile ??= readFile(new URL('../generated/content-catalog.json', import.meta.url), 'utf8')
@@ -95,18 +98,26 @@ function flatName(name) {
     return name;
 }
 
-export async function handleContentRequest(request, { token, config, fetcher, connection, catalog }) {
+export async function handleContentRequest(request, { token, config, fetcher, catalog }) {
     const categoryRead = request.method === 'GET' && new URL(request.url).pathname === '/api/content' &&
         new URL(request.url).searchParams.get('kind') === 'categories';
-    const github = categoryRead
-        ? createManagementGitHubClient(token, config, fetcher)
-        : createGitHubClient(token, fetcher);
+    const invalidatesCategories = request.method === 'POST' &&
+        ['/api/content', '/api/publish'].includes(new URL(request.url).pathname);
+    if (invalidatesCategories) invalidateCategoryCache(config, fetcher);
+    const github = createManagementGitHubClient(token, config, fetcher);
     const content = `/repos/${config.content.owner}/${config.content.repo}`;
     const call = (path, options) => github(content + path, options);
+    const blobSizes = new Map();
+    const blobBytes = new Map();
+    const inlineBlobs = new Map();
     const blob = async (sha) => {
+        if (blobBytes.has(sha)) return blobBytes.get(sha);
         const value = await call('/git/blobs/' + commitSha(sha));
         requireValue(value.encoding === 'base64' && typeof value.content === 'string', 'Invalid Git blob', 502);
-        return Buffer.from(value.content.replace(/\s/g, ''), 'base64');
+        const bytes = Buffer.from(value.content.replace(/\s/g, ''), 'base64');
+        blobSizes.set(sha, bytes.length);
+        blobBytes.set(sha, bytes);
+        return bytes;
     };
     const head = async () => commitSha((await call('/git/ref/heads/' + encodeURIComponent(config.content.branch))).object.sha);
     const snapshot = async (commit, recursive = true) => {
@@ -114,7 +125,7 @@ export async function handleContentRequest(request, { token, config, fetcher, co
         const result = await call('/git/trees/' + record.tree.sha + (recursive ? '?recursive=1' : ''));
         requireValue(!result.truncated && Array.isArray(result.tree), 'Repository tree is incomplete', 502);
         return {
-            commit, treeSha: record.tree.sha, entries: result.tree
+            commit, record, treeSha: record.tree.sha, entries: result.tree
         };
     };
     const readCategories = async (tree) => {
@@ -194,17 +205,30 @@ export async function handleContentRequest(request, { token, config, fetcher, co
             if (!['ahead', 'identical'].includes(comparison.status)) return null;
         }
         return {
-            state: current === candidate ? 'published' : 'superseded',
+            state: current === candidate ? 'saved' : 'superseded',
             requestId, candidateCommit: candidate, contentCommit: current, baseCommit: base,
             commitUrl: `https://github.com/${config.content.owner}/${config.content.repo}/commit/${candidate}`,
         };
     };
-    const applyCandidate = async (requestId, candidate, base, validated = false) => {
+    const publicationStatus = async (sourceCommit) => {
+        const ready = await readReadyPublicSource({
+            repository: config.content.owner + '/' + config.content.repo,
+            branch: config.content.branch, github: call, fetcher: fetcher ?? globalThis.fetch,
+        });
+        const result = {state: 'saved'};
+        if (!ready) return result;
+        result.publicCommit = ready.sourceCommit;
+        const comparison = ready.sourceCommit === sourceCommit ? 'identical'
+            : (await call(`/compare/${sourceCommit}...${ready.sourceCommit}`)).status;
+        if (['ahead', 'identical'].includes(comparison)) result.state = 'published';
+        return result;
+    };
+    const applyCandidate = async (requestId, candidate, base, validated = false, bulk = false) => {
         let current = await head();
         let accepted = await acceptedCandidate(requestId, candidate, base, current);
         if (accepted) return accepted;
         requireValue(current === base, 'Canonical branch conflict: reload the original and submit a new request.', 409);
-        if (!validated) await validatePendingCandidate(candidate, base);
+        if (!validated) await validatePendingCandidate(candidate, base, bulk);
 
         let updateError;
         try {
@@ -279,14 +303,10 @@ export async function handleContentRequest(request, { token, config, fetcher, co
         }));
         return documents;
     };
-    const validatePostDeletion = async (tree, id, original) => {
-        const categories = await readCategories(tree);
-        const documents = await readDocuments(tree, new Map([[id, original]]), true);
-        const corpus = {categories: categories.categories, documents};
-        validateDocument(() => validateContent(corpus));
+    const validateDeletionReferences = (corpus, deletedIds) => {
         for (const post of toPublicPosts(corpus)) {
-            if (post.id === id) continue;
-            const metadata = documents.get(post.id).metadata;
+            if (deletedIds.has(post.id)) continue;
+            const entry = corpus.documents.get(post.id);
             const links = [post.cover, post.icon];
             rewriteContentLinks(post.markdown, destination => {
                 links.push(destination);
@@ -294,12 +314,73 @@ export async function handleContentRequest(request, { token, config, fetcher, co
             });
             const linked = links.some(value => {
                 return typeof value === 'string' && value.startsWith('#/post/')
-                    && value.slice(7).split(/[?#]/)[0] === id;
+                    && deletedIds.has(value.slice(7).split(/[?#]/)[0]);
             });
-            const related = ['related_ids', 'source_ids'].some(key => metadata[key]?.includes(id))
-                || documents.get(post.id).references?.includes(id);
-            requireValue(!linked && post.parentId !== id && !related, 'Deleted post has inbound references: ' + id, 409);
+            const references = [
+                ...(entry.metadata.related_ids ?? []),
+                ...(entry.metadata.source_ids ?? []),
+                ...(entry.references ?? []),
+            ];
+            requireValue(!linked && !deletedIds.has(post.parentId)
+                && !references.some(reference => deletedIds.has(reference)),
+                'Deleted post has inbound references from: ' + post.id, 409);
         }
+    };
+    const validatePostDeletion = async (tree, id, original) => {
+        const categories = await readCategories(tree);
+        const documents = await readDocuments(tree, new Map([[id, original]]), true);
+        const corpus = {categories: categories.categories, documents};
+        validateDocument(() => validateContent(corpus));
+        validateDeletionReferences(corpus, new Set([id]));
+    };
+    const categoryDeletionPlan = async (tree, id, mode, categorySource) => {
+        requireValue(typeof id === 'string' && id !== 'group:unclassified', 'Cannot delete unclassified category', 422);
+        requireValue(['move', 'delete'].includes(mode), 'Choose category deletion mode', 422);
+        const current = categorySource ?? await readCategories(tree);
+        requireValue(current.categories.some(category => category.id === id), 'Category not found', 404);
+        requireValue(!current.categories.some(category => category.parent_id === id), 'Move child categories before deletion', 409);
+        const categories = current.categories.filter(category => category.id !== id);
+        requireValue(categories.some(category => category.id === 'group:unclassified'), 'Unclassified category is missing', 409);
+        const documents = await readDocuments(tree, new Map(), mode === 'delete');
+        const corpus = {categories: current.categories, documents};
+        validateDocument(() => validateContent(corpus));
+        const affectedPostIds = [...documents.keys()]
+            .filter(postId => corpus.effectiveCategories.get(postId) === id).sort();
+        const changes = [{
+            path: 'categories.json', mode: '100644', type: 'blob',
+            bytes: Buffer.from(JSON.stringify(categories, null, 2) + '\n'),
+        }];
+        requireValue(changes[0].bytes.length <= MAX_DOCUMENT, 'Category document exceeds 2 MiB', 413);
+        if (mode === 'delete') {
+            const deletedIds = new Set(affectedPostIds);
+            validateDeletionReferences(corpus, deletedIds);
+            for (const entry of tree.entries) {
+                if (deletedIds.has(entry.path.split('/')[1]) && entry.path.startsWith('posts/')) {
+                    changes.push({path: entry.path, mode: entry.mode, type: 'blob', sha: null});
+                }
+            }
+        } else {
+            // Updating explicit assignments also moves descendants that inherit them.
+            const explicitIds = affectedPostIds.filter(postId => documents.get(postId).metadata.category_id === id);
+            let index = 0;
+            await Promise.all(Array.from({length: Math.min(6, explicitIds.length)}, async () => {
+                while (index < explicitIds.length) {
+                    const position = index++;
+                    const postId = explicitIds[position];
+                    const entry = documents.get(postId);
+                    const original = Object.hasOwn(entry, 'editorRevision')
+                        ? entry : (await readPost(tree, postId)).document;
+                    const document = {
+                        metadata: {...original.metadata, category_id: 'group:unclassified'},
+                        markdown: original.markdown,
+                    };
+                    const bytes = Buffer.from(validateDocument(() => serializeMarkdownDocument(document)));
+                    requireValue(bytes.length <= MAX_DOCUMENT, 'Markdown document exceeds 2 MiB', 413);
+                    changes[position + 1] = {path: entry.filename, mode: '100644', type: 'blob', bytes};
+                }
+            }));
+        }
+        return {changes, affectedPostIds, deletedPostIds: mode === 'delete' ? affectedPostIds : []};
     };
     const validateCategoryDeletion = async (tree, previous, categories) => {
         const ids = new Set(categories.map(category => category.id));
@@ -357,9 +438,11 @@ export async function handleContentRequest(request, { token, config, fetcher, co
         // Project only this authored body. Discard rewritten output so saved Markdown bytes stay intact.
         validateDocument(() => toPublicPost(projection, id));
     };
-    const validatePendingCandidate = async (candidate, base) => {
-        const before = await snapshot(base);
-        const after = await snapshot(candidate);
+    const validatePendingCandidate = async (candidate, base, bulk = false, knownBefore, knownAfter) => {
+        // Only the request's validated base and successful Git tree delta enter here.
+        // Recovery requests fetch and validate persisted objects again.
+        const before = knownBefore ?? await snapshot(base);
+        const after = knownAfter ?? await snapshot(candidate);
         const previous = new Map(before.entries.filter(entry => entry.type !== 'tree').map(entry => [entry.path, entry]));
         const next = new Map(after.entries.filter(entry => entry.type !== 'tree').map(entry => [entry.path, entry]));
         const changed = [...new Set([...previous.keys(), ...next.keys()])].filter(path => {
@@ -381,22 +464,40 @@ export async function handleContentRequest(request, { token, config, fetcher, co
         }
         const categories = await readCategories(after);
         if (changed.includes('categories.json')) {
-            requireValue(ids.size === 0, 'Candidate mixes category and document operations', 409);
+            if (ids.size > 0 && !bulk) {
+                const originalCategories = (await readCategories(before)).categories;
+                const removed = originalCategories.filter(category => !categories.categories.some(next => next.id === category.id));
+                requireValue(removed.length === 1, 'Candidate must delete exactly one category', 409);
+                const hasDeletedPosts = [...ids].some(id => !after.entries.some(entry => entry.path.startsWith(`posts/${id}/`)));
+                const plan = await categoryDeletionPlan(before, removed[0].id, hasDeletedPosts ? 'delete' : 'move', {categories: originalCategories});
+                const expected = new Map(plan.changes.map(change => [change.path, change]));
+                requireValue(changed.length === expected.size, 'Category deletion changes unrelated files', 409);
+                for (const path of changed) {
+                    const change = expected.get(path);
+                    const entry = next.get(path);
+                    requireValue(change && (change.sha === null ? !entry : entry), 'Invalid category deletion path: ' + path, 409);
+                    if (change.bytes) {
+                        requireValue(digest(await blob(entry.sha)) === digest(change.bytes), 'Category deletion changes unrelated content: ' + path, 409);
+                    }
+                }
+                return after;
+            }
             requireValue(categories.categories.some(category => category.id === 'group:unclassified'), 'Cannot delete unclassified category', 422);
             validateDocument(() => validateContent({categories: categories.categories, documents: new Map()}));
-            await validateCategoryDeletion(before, (await readCategories(before)).categories, categories.categories);
-            return;
+            await validateCategoryDeletion(bulk ? after : before, (await readCategories(before)).categories, categories.categories);
+            if (!bulk) return after;
         }
-        requireValue(ids.size === 1, 'Candidate must change one post', 409);
-        const [id] = ids;
+        requireValue(bulk ? ids.size <= 20 : ids.size === 1, 'Candidate must change one post', 409);
+        for (const id of ids) {
         const prefix = `posts/${id}/`;
         const existed = before.entries.some(entry => entry.path.startsWith(prefix));
         const remains = after.entries.some(entry => entry.path.startsWith(prefix));
         const original = existed ? await readPost(before, id) : undefined;
         if (!remains) {
+            requireValue(!bulk, 'Bulk save cannot delete posts', 409);
             requireValue(original, 'Deleted candidate document missing', 409);
             await validatePostDeletion(before, id, original);
-            return;
+            continue;
         }
         const post = await readPost(after, id);
         requireValue(!original?.editor || post.editor, 'Candidate removes editor document', 409);
@@ -421,8 +522,26 @@ export async function handleContentRequest(request, { token, config, fetcher, co
         });
         requireValue(retainsAssets, 'Candidate removes canonical assets', 409);
         await validateAuthoredLinks(after, post.document, post.path, post.assets, categories.categories);
+        }
+        return after;
     };
-    const writeBlob = async (bytes) => (await call('/git/blobs', { method: 'POST', body: { content: bytes.toString('base64'), encoding: 'base64' } })).sha;
+    const writeBlob = async (bytes) => {
+        const { sha } = await call('/git/blobs', { method: 'POST', body: { content: bytes.toString('base64'), encoding: 'base64' } });
+        const expected = createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
+        requireValue(sha === expected, 'Uploaded source blob identity mismatch', 502);
+        blobSizes.set(sha, bytes.length);
+        blobBytes.set(sha, bytes);
+        return sha;
+    };
+    const writeSourceBlob = async bytes => {
+        const text = bytes.toString('utf8');
+        if (bytes.length > MAX_INLINE_FILE || !Buffer.from(text).equals(bytes)) return writeBlob(bytes);
+        const sha = createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
+        blobSizes.set(sha, bytes.length);
+        blobBytes.set(sha, bytes);
+        inlineBlobs.set(sha, text);
+        return sha;
+    };
     try {
         const url = new URL(request.url);
         if (url.pathname === '/api/assets' && request.method === 'POST') {
@@ -450,8 +569,52 @@ export async function handleContentRequest(request, { token, config, fetcher, co
         }
         if (url.pathname === '/api/content' && request.method === 'GET') {
             const kind = url.searchParams.get('kind');
-            const contentCommit = categoryRead && connection?.contentCommit
-                ? commitSha(connection.contentCommit) : await head();
+            if (categoryRead) {
+                const data = await readCachedCategories(token, config, fetcher, async () => {
+                    const result = await github('/graphql', {
+                        method: 'POST',
+                        readOnly: true,
+                        body: {
+                            query: `query ReadCategories($owner: String!, $repo: String!, $branch: String!) {
+                                repository(owner: $owner, name: $repo) {
+                                    object(expression: $branch) {
+                                        ... on Commit {
+                                            oid
+                                            file(path: "categories.json") {
+                                                mode type
+                                                object { ... on Blob { text byteSize isBinary } }
+                                            }
+                                        }
+                                    }
+                                }
+                            }`,
+                            variables: {
+                                owner: config.content.owner,
+                                repo: config.content.repo,
+                                branch: `refs/heads/${config.content.branch}`,
+                            },
+                        },
+                    });
+                    if (result.errors?.length) {
+                        const types = result.errors.map(error => error.type);
+                        const status = types.includes('UNAUTHORIZED') ? 401
+                            : types.includes('FORBIDDEN') ? 403 : types.includes('NOT_FOUND') ? 404 : 502;
+                        throw httpError(status, 'GitHub category query failed');
+                    }
+                    const record = result.data?.repository?.object;
+                    const entry = record?.file;
+                    requireValue(entry?.type === 'blob' && entry.mode === 0o100644, 'Canonical categories missing', 409);
+                    const file = entry.object;
+                    requireValue(file?.isBinary === false && typeof file.text === 'string', 'Invalid category file', 502);
+                    const bytes = Buffer.from(file.text);
+                    requireValue(bytes.length <= MAX_DOCUMENT, 'Category document exceeds 2 MiB', 413);
+                    requireValue(bytes.length === file.byteSize, 'Incomplete category file', 502);
+                    // The file and save base come from the same response; no separate HEAD read.
+                    return { categories: JSON.parse(file.text), revision: digest(bytes), contentCommit: commitSha(record.oid) };
+                }, url.searchParams.get('refresh') === '1');
+                return json(data);
+            }
+            const contentCommit = await head();
             const tree = await snapshot(contentCommit, !categoryRead);
             const categories = await readCategories(tree);
             if (kind === 'categories')
@@ -474,151 +637,244 @@ export async function handleContentRequest(request, { token, config, fetcher, co
         }
         if (url.pathname === '/api/content' && request.method === 'POST') {
             const input = await readJson(request);
-            const { requestId, baseCommit, operation } = input;
+            const { requestId, baseCommit } = input;
             uuid(requestId);
             commitSha(baseCommit);
-            requireValue(operation && typeof operation === 'object', 'Operation required');
+            const bulk = Object.hasOwn(input, 'operations');
+            requireValue(!bulk || !Object.hasOwn(input, 'operation'), 'Choose one operation contract');
+            const operations = bulk ? input.operations : [input.operation];
+            requireValue(Array.isArray(operations) && operations.length > 0 && operations.length <= 20, 'Invalid operation count');
+            const targets = new Set();
+            for (const operation of operations) {
+                requireValue(operation && typeof operation === 'object', 'Operation required');
+                if (bulk) {
+                    requireValue(['categories.save', 'post.create', 'post.update'].includes(operation.type), 'Unsupported bulk operation');
+                    const target = operation.type === 'categories.save' ? 'categories' : operation.id ?? operation.document?.metadata?.id;
+                    requireValue(typeof target === 'string' && !targets.has(target), 'Duplicate or invalid bulk target');
+                    targets.add(target);
+                }
+            }
+            let verifiedSnapshot;
+            const withReceipt = async result => {
+                if (!bulk) return result;
+                const savedTree = verifiedSnapshot?.commit === result.contentCommit ? verifiedSnapshot : await snapshot(result.contentCommit);
+                const categories = await readCategories(savedTree);
+                const sources = {};
+                for (const operation of operations) {
+                    if (operation.type === 'categories.save') continue;
+                    const id = operation.id ?? operation.document.metadata.id;
+                    const {path, ...source} = await readPost(savedTree, id, {recoverEditor:true});
+                    sources[id] = {revision:source.revision,editorRevision:source.editorRevision,
+                        filename:source.filename,updatedAt:source.document.metadata.updated,contentCommit:result.contentCommit};
+                }
+                return {...result, sources, categories: {...categories, contentCommit:result.contentCommit},
+                    receipt: {requestId, payloadHash:digest(JSON.stringify(input)), contentCommit:result.contentCommit}};
+            };
             const fingerprint = digest(JSON.stringify(input));
             const message = `cms-request:${requestId}\npayload-sha256:${fingerprint}`;
             const existing = await existingCandidate(requestId);
             if (existing) {
                 const record = await verifyCandidate(requestId, existing);
                 requireValue(record.message === message && record.parents[0].sha === baseCommit, 'Request ID already used for different content', 409);
-                return json(await applyCandidate(requestId, existing, baseCommit));
+                const result = await applyCandidate(requestId, existing, baseCommit, false, bulk);
+                const operation = operations[0];
+                if (operation.type === 'category.delete') {
+                    const plan = await categoryDeletionPlan(await snapshot(baseCommit), operation.id, operation.mode);
+                    return json({...result, affectedPostIds: plan.affectedPostIds, deletedPostIds: plan.deletedPostIds});
+                }
+                return json(await withReceipt(result));
             }
             requireValue(await head() === baseCommit, 'Canonical branch changed', 409);
-            const tree = await snapshot(baseCommit);
+            const baseTree = await snapshot(baseCommit);
+            const tree = {...baseTree,entries:[...baseTree.entries]};
             const changes = [];
-            let unchanged = false;
-            if (operation.type === 'categories.save') {
-                const current = await readCategories(tree);
-                requireValue(operation.baseRevision === current.revision, 'Categories revision changed', 409);
-                requireValue(Array.isArray(operation.categories), 'Invalid categories', 422);
-                const ids = new Set();
-                const merged = operation.categories.map(item => {
-                    requireValue(item && typeof item === 'object', 'Category object required', 422);
-                    requireValue(typeof item.id === 'string' && !ids.has(item.id), 'Invalid or duplicate category ID', 422);
-                    requireValue(typeof item.name === 'string', 'Category name must be a string', 422);
-                    const validParent = item.parent_id === null || typeof item.parent_id === 'string';
-                    requireValue(validParent, 'Invalid category parent', 422);
-                    requireValue(Number.isSafeInteger(item.order) && item.order >= 0, 'Invalid category order', 422);
-                    ids.add(item.id);
-                    const original = current.categories.find(category => category.id === item.id);
-                    const category = original ?? {id:item.id, sources:[item.id]};
-                    return {
-                        ...category,
-                        name:item.name,
-                        parent_id:item.parent_id,
-                        order:item.order,
-                    };
-                });
-                requireValue(ids.has('group:unclassified'), 'Cannot delete unclassified category', 422);
-                validateDocument(() => validateContent({categories: merged, documents: new Map()}));
-                await validateCategoryDeletion(tree, current.categories, merged);
-                unchanged = JSON.stringify(merged) === JSON.stringify(current.categories);
-                const bytes = Buffer.from(JSON.stringify(merged, null, 2) + '\n');
-                requireValue(bytes.length <= MAX_DOCUMENT, 'Category document exceeds 2 MiB', 413);
-                changes.push({
-                    path: 'categories.json', mode: '100644', type: 'blob', sha: await writeBlob(bytes)
-                });
-            }
-            else {
-                requireValue(['post.create', 'post.update', 'post.delete'].includes(operation.type), 'Unknown operation');
-                let document;
-                let original;
-                let id;
-                if (operation.type === 'post.create') {
-                    requireValue(operation.document?.metadata, 'Document required', 422);
-                    id = uuid(operation.document.metadata.id);
-                    requireValue(!tree.entries.some(entry => entry.path.startsWith(`posts/${id}/`)), 'Post already exists', 409);
-                    document = operation.document;
+            let allUnchanged = true;
+            let deletionPlan;
+            const ordered = [...operations].sort((left, right) => Number(right.type === 'categories.save') - Number(left.type === 'categories.save'));
+            for (const operation of ordered) {
+                let unchanged = false;
+                const changeStart = changes.length;
+                if (operation.type === 'category.delete') {
+                    const current = await readCategories(tree);
+                    requireValue(operation.baseRevision === current.revision, 'Categories revision changed', 409);
+                    deletionPlan = await categoryDeletionPlan(tree, operation.id, operation.mode, current);
+                    let index = 0;
+                    await Promise.all(Array.from({length: Math.min(6, deletionPlan.changes.length)}, async () => {
+                        while (index < deletionPlan.changes.length) {
+                            const position = index++;
+                            const {bytes, ...change} = deletionPlan.changes[position];
+                            changes[position] = {...change, sha: bytes ? await writeSourceBlob(bytes) : change.sha};
+                        }
+                    }));
                 }
-                else {
-                    id = uuid(operation.id);
-                    original = await readPost(tree, id);
-                    requireValue(operation.baseRevision === original.revision, 'Document revision changed', 409);
-                    if (operation.type === 'post.update')
-                        document = validateDocument(() => mergeDocumentPatch(original.document, {
-                            id, baseRevision: operation.baseRevision, changes: operation.changes ?? {}, markdown: operation.markdown ?? original.document.markdown
-                        }, original.revision));
-                }
-                if (original?.editor || operation.editor !== undefined || operation.baseEditorRevision !== undefined) {
-                    requireValue((operation.baseEditorRevision ?? null) === (original?.editorRevision ?? null), 'Editor revision changed', 409);
-                }
-                if (operation.type === 'post.delete') {
-                    await validatePostDeletion(tree, id, original);
-                    for (const entry of tree.entries.filter(entry => entry.path.startsWith(`posts/${id}/`)))
-                        changes.push({
-                            path: entry.path, mode: entry.mode, type: 'blob', sha: null
-                        });
-                }
-                else {
-                    let editor = original?.editor ?? null;
-                    if (operation.editor !== undefined) {
-                        editor = validateDocument(() => validateEditorDocument(operation.editor, {
-                            documentId: id, markdownHash: digest(document.markdown),
-                        }));
-                    } else if (editor) {
-                        requireValue(document.markdown === original.document.markdown, 'Body edits require an updated editor document', 422);
-                    }
-                    const editorBytes = editor ? Buffer.from(JSON.stringify(editor, null, 2) + '\n') : null;
-                    requireValue(!editorBytes || editorBytes.length <= MAX_DOCUMENT, 'Editor document exceeds 2 MiB', 413);
-                    requireValue(operation.assets === undefined || Array.isArray(operation.assets), 'Invalid assets');
-                    const assets = operation.assets ?? [];
-                    for (const asset of assets) {
-                        const validRecord = asset !== null && typeof asset === 'object' && !Array.isArray(asset);
-                        requireValue(validRecord, 'Asset record must be an object');
-                    }
-                    const documentUnchanged = original && JSON.stringify(original.document) === JSON.stringify(document);
-                    const assetsUnchanged = assets.every(asset => {
-                        return original?.assets.some(current => {
-                            return current.name === asset.name && current.sha === asset.sha && current.size === asset.size;
-                        });
+                else if (operation.type === 'categories.save') {
+                    const current = await readCategories(tree);
+                    requireValue(operation.baseRevision === current.revision, 'Categories revision changed', 409);
+                    requireValue(Array.isArray(operation.categories), 'Invalid categories', 422);
+                    const ids = new Set();
+                    const merged = operation.categories.map(item => {
+                        requireValue(item && typeof item === 'object', 'Category object required', 422);
+                        requireValue(typeof item.id === 'string' && !ids.has(item.id), 'Invalid or duplicate category ID', 422);
+                        requireValue(typeof item.name === 'string', 'Category name must be a string', 422);
+                        const validParent = item.parent_id === null || typeof item.parent_id === 'string';
+                        requireValue(validParent, 'Invalid category parent', 422);
+                        requireValue(Number.isSafeInteger(item.order) && item.order >= 0, 'Invalid category order', 422);
+                        ids.add(item.id);
+                        const original = current.categories.find(category => category.id === item.id);
+                        const category = original ?? {id:item.id, sources:[item.id]};
+                        return {
+                            ...category,
+                            name:item.name,
+                            parent_id:item.parent_id,
+                            order:item.order,
+                        };
                     });
-                    const editorUnchanged = JSON.stringify(original?.editor ?? null) === JSON.stringify(editor);
-                    unchanged = documentUnchanged && assetsUnchanged && editorUnchanged;
-                    const text = validateDocument(() => serializeMarkdownDocument(document));
-                    requireValue(Buffer.byteLength(text) <= MAX_DOCUMENT, 'Markdown document exceeds 2 MiB', 413);
-                    const categories = await readCategories(tree);
-                    validatePostReferences(tree, document, categories.categories, operation.type === 'post.create');
-                    const path = `posts/${id}/${canonicalFilename(document.metadata.title)}`;
-                    const names = new Set();
-                    for (const asset of assets) {
-                        const name = flatName(asset.name);
-                        const key = name.normalize('NFC').toLowerCase();
-                        requireValue(!names.has(key), 'Duplicate asset name');
-                        names.add(key);
-                        const bytes = await blob(commitSha(asset.sha));
-                        requireValue(Number.isSafeInteger(asset.size) && bytes.length === asset.size && bytes.length > 0 && bytes.length <= MAX_ASSET, 'Invalid asset size');
-                        const previous = original?.assets.find(item => item.name.normalize('NFC').toLowerCase() === key);
-                        requireValue(!previous || (previous.name === name && previous.sha === asset.sha), 'Asset filename collision', 409);
-                        changes.push({
-                            path: `posts/${id}/${name}`, mode: '100644', type: 'blob', sha: asset.sha
-                        });
-                    }
-                    await validateAuthoredLinks(tree, document, path, [...(original?.assets ?? []), ...assets], categories.categories);
-                    if (original && original.path !== path)
-                        changes.push({
-                            path: original.path, mode: '100644', type: 'blob', sha: null
-                        });
+                    requireValue(ids.has('group:unclassified'), 'Cannot delete unclassified category', 422);
+                    validateDocument(() => validateContent({categories: merged, documents: new Map()}));
+                    if (!bulk) await validateCategoryDeletion(tree, current.categories, merged);
+                    unchanged = JSON.stringify(merged) === JSON.stringify(current.categories);
+                    const bytes = Buffer.from(JSON.stringify(merged, null, 2) + '\n');
+                    requireValue(bytes.length <= MAX_DOCUMENT, 'Category document exceeds 2 MiB', 413);
                     changes.push({
-                        path, mode: '100644', type: 'blob', sha: await writeBlob(Buffer.from(text))
+                        path: 'categories.json', mode: '100644', type: 'blob', sha: await writeSourceBlob(bytes)
                     });
-                    if (editorBytes && !editorUnchanged) {
-                        changes.push({
-                            path: `posts/${id}/${EDITOR_FILENAME}`, mode: '100644', type: 'blob', sha: await writeBlob(editorBytes)
+                }
+                else {
+                    requireValue(['post.create', 'post.update', 'post.delete'].includes(operation.type), 'Unknown operation');
+                    let document;
+                    let original;
+                    let id;
+                    if (operation.type === 'post.create') {
+                        requireValue(operation.document?.metadata, 'Document required', 422);
+                        id = uuid(operation.document.metadata.id);
+                        requireValue(!tree.entries.some(entry => entry.path.startsWith(`posts/${id}/`)), 'Post already exists', 409);
+                        document = operation.document;
+                    }
+                    else {
+                        id = uuid(operation.id);
+                        original = await readPost(tree, id);
+                        requireValue(operation.baseRevision === original.revision, 'Document revision changed', 409);
+                        if (operation.type === 'post.update')
+                            document = validateDocument(() => mergeDocumentPatch(original.document, {
+                                id, baseRevision: operation.baseRevision, changes: operation.changes ?? {}, markdown: operation.markdown ?? original.document.markdown
+                            }, original.revision));
+                    }
+                    if (original?.editor || operation.editor !== undefined || operation.baseEditorRevision !== undefined) {
+                        requireValue((operation.baseEditorRevision ?? null) === (original?.editorRevision ?? null), 'Editor revision changed', 409);
+                    }
+                    if (operation.type === 'post.delete') {
+                        await validatePostDeletion(tree, id, original);
+                        for (const entry of tree.entries.filter(entry => entry.path.startsWith(`posts/${id}/`)))
+                            changes.push({
+                                path: entry.path, mode: entry.mode, type: 'blob', sha: null
+                            });
+                    }
+                    else {
+                        let editor = original?.editor ?? null;
+                        if (operation.editor !== undefined) {
+                            editor = validateDocument(() => validateEditorDocument(operation.editor, {
+                                documentId: id, markdownHash: digest(document.markdown),
+                            }));
+                        } else if (editor) {
+                            requireValue(document.markdown === original.document.markdown, 'Body edits require an updated editor document', 422);
+                        }
+                        const editorBytes = editor ? Buffer.from(JSON.stringify(editor, null, 2) + '\n') : null;
+                        requireValue(!editorBytes || editorBytes.length <= MAX_DOCUMENT, 'Editor document exceeds 2 MiB', 413);
+                        requireValue(operation.assets === undefined || Array.isArray(operation.assets), 'Invalid assets');
+                        const assets = operation.assets ?? [];
+                        for (const asset of assets) {
+                            const validRecord = asset !== null && typeof asset === 'object' && !Array.isArray(asset);
+                            requireValue(validRecord, 'Asset record must be an object');
+                        }
+                        const documentUnchanged = original && JSON.stringify(original.document) === JSON.stringify(document);
+                        const assetsUnchanged = assets.every(asset => {
+                            return original?.assets.some(current => {
+                                return current.name === asset.name && current.sha === asset.sha && current.size === asset.size;
+                            });
                         });
+                        const editorUnchanged = JSON.stringify(original?.editor ?? null) === JSON.stringify(editor);
+                        unchanged = documentUnchanged && assetsUnchanged && editorUnchanged;
+                        const text = validateDocument(() => serializeMarkdownDocument(document));
+                        requireValue(Buffer.byteLength(text) <= MAX_DOCUMENT, 'Markdown document exceeds 2 MiB', 413);
+                        const categories = await readCategories(tree);
+                        if (!bulk) validatePostReferences(tree, document, categories.categories, operation.type === 'post.create');
+                        const path = `posts/${id}/${canonicalFilename(document.metadata.title)}`;
+                        const names = new Set();
+                        for (const asset of assets) {
+                            const name = flatName(asset.name);
+                            const key = name.normalize('NFC').toLowerCase();
+                            requireValue(!names.has(key), 'Duplicate asset name');
+                            names.add(key);
+                            const bytes = await blob(commitSha(asset.sha));
+                            requireValue(Number.isSafeInteger(asset.size) && bytes.length === asset.size && bytes.length > 0 && bytes.length <= MAX_ASSET, 'Invalid asset size');
+                            const previous = original?.assets.find(item => item.name.normalize('NFC').toLowerCase() === key);
+                            requireValue(!previous || (previous.name === name && previous.sha === asset.sha), 'Asset filename collision', 409);
+                            changes.push({
+                                path: `posts/${id}/${name}`, mode: '100644', type: 'blob', sha: asset.sha
+                            });
+                        }
+                        await validateAuthoredLinks(tree, document, path, [...(original?.assets ?? []), ...assets], categories.categories);
+                        if (original && original.path !== path)
+                            changes.push({
+                                path: original.path, mode: '100644', type: 'blob', sha: null
+                            });
+                        changes.push({
+                            path, mode: '100644', type: 'blob', sha: await writeSourceBlob(Buffer.from(text))
+                        });
+                        if (editorBytes && !editorUnchanged) {
+                            changes.push({
+                                path: `posts/${id}/${EDITOR_FILENAME}`, mode: '100644', type: 'blob', sha: await writeSourceBlob(editorBytes)
+                            });
+                        }
                     }
                 }
+                allUnchanged = allUnchanged && unchanged;
+                if (bulk) {
+                    const entries = new Map(tree.entries.map(entry => [entry.path, entry]));
+                    for (const change of changes.slice(changeStart)) {
+                        if (change.sha === null) entries.delete(change.path);
+                        else entries.set(change.path, {...change});
+                    }
+                    tree.entries = [...entries.values()];
+                }
             }
-            if (unchanged)
-                return json({
-                    state: 'unchanged', requestId, contentCommit: baseCommit
-                });
-            const nextTree = await call('/git/trees', { method: 'POST', body: { base_tree: tree.treeSha, tree: changes } });
+            if (allUnchanged) {
+                verifiedSnapshot = baseTree;
+                return json(await withReceipt({state:'unchanged', requestId, contentCommit:baseCommit, publicationPending:true}));
+            }
+            let inlineBytes = 0;
+            const treeChanges = [];
+            for (const change of changes) {
+                const text = inlineBlobs.get(change.sha);
+                const bytes = text === undefined ? 0 : Buffer.byteLength(JSON.stringify(text));
+                if (text !== undefined && inlineBytes + bytes <= MAX_INLINE_TREE) {
+                    const {sha, ...entry} = change;
+                    treeChanges.push({...entry,content:text});
+                    inlineBytes += bytes;
+                } else {
+                    if (text !== undefined) await writeBlob(blobBytes.get(change.sha));
+                    treeChanges.push(change);
+                }
+            }
+            const nextTree = await call('/git/trees', { method: 'POST', body: { base_tree: tree.treeSha, tree: treeChanges } });
             const candidate = await call('/git/commits', { method: 'POST', body: {
                     message, tree: nextTree.sha, parents: [baseCommit]
                 } });
+            // GitHub has applied this exact delta to the complete base tree.
+            // Reuse its known file inventory for validation and the source receipt.
+            const candidateEntries = new Map(tree.entries.map(entry => [entry.path, entry]));
+            for (const change of changes) {
+                if (change.sha === null) candidateEntries.delete(change.path);
+                else candidateEntries.set(change.path, { ...change, size: blobSizes.get(change.sha) });
+            }
+            const sourceSnapshot = {
+                commit: candidate.sha,
+                record: { sha: candidate.sha, tree: { sha: nextTree.sha }, parents: [{ sha: baseCommit }] },
+                treeSha: nextTree.sha,
+                entries: [...candidateEntries.values()],
+            };
+            if (bulk) await validatePendingCandidate(candidate.sha, baseCommit, true, baseTree, sourceSnapshot);
+            verifiedSnapshot = sourceSnapshot;
             try {
                 await call('/git/refs', { method: 'POST', body: { ref: 'refs/' + requestBranch(requestId), sha: candidate.sha } });
             }
@@ -628,20 +884,42 @@ export async function handleContentRequest(request, { token, config, fetcher, co
                 const concurrent = await existingCandidate(requestId);
                 const record = await verifyCandidate(requestId, concurrent);
                 requireValue(record.message === message && record.parents[0].sha === baseCommit, 'Request ID conflict', 409);
-                return json(await applyCandidate(requestId, concurrent, baseCommit));
+                const result = await applyCandidate(requestId, concurrent, baseCommit, false, bulk);
+                return json(await withReceipt(deletionPlan ? {...result, affectedPostIds: deletionPlan.affectedPostIds, deletedPostIds: deletionPlan.deletedPostIds} : result));
             }
-            return json(await applyCandidate(requestId, candidate.sha, baseCommit, true));
+            const result = await applyCandidate(requestId, candidate.sha, baseCommit, true, bulk);
+            return json(await withReceipt(deletionPlan ? {...result, affectedPostIds: deletionPlan.affectedPostIds, deletedPostIds: deletionPlan.deletedPostIds} : result));
         }
         if (url.pathname === '/api/publish') {
             requireValue(['GET', 'POST'].includes(request.method), 'Method not allowed', 405);
             const input = request.method === 'POST' ? await readJson(request) : Object.fromEntries(url.searchParams);
+            if (request.method === 'GET' && Object.hasOwn(input, 'sourceCommit')) {
+                requireValue(!Object.hasOwn(input, 'requestId') && !Object.hasOwn(input, 'candidateCommit'), 'Choose one publication contract');
+                const sourceCommit = commitSha(input.sourceCommit);
+                const current = await head();
+                if (sourceCommit !== current) {
+                    let comparison;
+                    try { comparison = await call(`/compare/${sourceCommit}...${current}`); }
+                    catch (error) {
+                        if (error.status === 404) throw httpError(409, 'Source commit is outside the canonical branch');
+                        throw error;
+                    }
+                    requireValue(['ahead', 'identical'].includes(comparison.status), 'Source commit is outside the canonical branch', 409);
+                }
+                return json({sourceCommit, contentCommit:sourceCommit, ...await publicationStatus(sourceCommit)});
+            }
             const { requestId, candidateCommit } = input;
             const candidate = await verifyCandidate(requestId, candidateCommit);
             const baseCommit = candidate.parents[0].sha;
             if (request.method === 'POST') return json(await applyCandidate(requestId, candidateCommit, baseCommit));
             const current = await head();
             const accepted = await acceptedCandidate(requestId, candidateCommit, baseCommit, current);
-            if (accepted) return json(accepted);
+            if (accepted) {
+                const publication = await publicationStatus(candidateCommit);
+                if (publication.publicCommit) accepted.publicCommit = publication.publicCommit;
+                if (publication.state === 'published') accepted.state = 'published';
+                return json(accepted);
+            }
             requireValue(current === baseCommit, 'Canonical branch conflict: this candidate was not saved.', 409);
             return json({state: 'pending', requestId, candidateCommit, baseCommit});
         }
@@ -651,5 +929,8 @@ export async function handleContentRequest(request, { token, config, fetcher, co
         if (error.status)
             return json({ error: error.message, ...(error.details ? { details: error.details } : {}) }, error.status);
         throw error;
+    }
+    finally {
+        if (invalidatesCategories) invalidateCategoryCache(config, fetcher);
     }
 }

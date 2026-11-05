@@ -3,11 +3,14 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { handleContentRequest } from '../../app/server/src/content.mjs';
+import { ensurePublicPublication } from '../../app/server/src/public-publication.mjs';
+import { createGitHubClient } from '../../app/server/src/github.mjs';
 import { handlePublicRequest } from '../../app/server/src/public-content.mjs';
 import { serializeMarkdownDocument, parseMarkdownDocument } from '../../app/shared/document.mjs';
 const id = '12345678-1234-1234-1234-123456789abc';
 const requestId = 'abcdefab-1234-1234-1234-123456789abc';
 const sha = value => createHash('sha1').update(value).digest('hex');
+const isWrite = call => call.method !== 'GET' && call.path !== '/graphql';
 const revision = value => createHash('sha256').update(value).digest('hex');
 const document = { metadata: {
         schema_version: 1, id, title: 'Old', parent_id: null, created: '2026-01-01', updated: '2026-01-01', opaque: { value: 7 }
@@ -54,6 +57,7 @@ function setup(options = {}) {
             path, method, body, repository, host:parsedUrl.host, recursive:parsedUrl.searchParams.get('recursive') === '1'
         });
         if (parsedUrl.host === 'raw.githubusercontent.com') {
+            if (controls.failPublication) return new Response('Unavailable',{status:503});
             const [, , , commit, ...parts] = parsedUrl.pathname.split('/');
             const filename = parts.map(decodeURIComponent).join('/');
             const record = commits.get(commit);
@@ -61,9 +65,21 @@ function setup(options = {}) {
             return entry ? new Response(blobs.get(entry.sha)) : new Response('Not found', {status:404});
         }
         let result;
-        if (path === '') result = {private:false,full_name:'gyungsubLee/subdev-blog-content'};
+        if (path === '/graphql') {
+            assert.ok(body.query.startsWith('query ReadCategories('));
+            assert.equal(body.variables.branch, 'refs/heads/main');
+            const current = refs.get('heads/main');
+            const entry = trees.get(commits.get(current).tree.sha).find(entry => entry.path === 'categories.json');
+            const bytes = entry && blobs.get(entry.sha);
+            result = { data: { repository: { object: { oid: current, file: entry ? {
+                type: entry.type, mode: parseInt(entry.mode, 8), object: {
+                    text: bytes.toString(), byteSize: bytes.length, isBinary: false,
+                },
+            } : null } } } };
+        }
+        else if (path === '') result = {private:false,full_name:'gyungsubLee/subdev-blog-content'};
         else if (path.startsWith('/git/ref/')) {
-            const key = path.slice(9);
+            const key = decodeURIComponent(path.slice(9));
             if (!refs.has(key))
                 return Response.json({ message: 'Not Found' }, { status: 404 });
             result = {ref:'refs/' + key,object:{type:'commit',sha:refs.get(key)}};
@@ -103,7 +119,7 @@ function setup(options = {}) {
             const merged = new Map((trees.get(body.base_tree) ?? []).map(entry => [entry.path, entry]));
             for (const entry of body.tree) {
                 if (entry.sha === null) merged.delete(entry.path);
-                else merged.set(entry.path, entry);
+                else merged.set(entry.path, entry.content === undefined ? entry : {...entry,sha:put(entry.content),content:undefined});
             }
             trees.set(key, [...merged.values()]);
             result = { sha: key };
@@ -144,7 +160,11 @@ function setup(options = {}) {
         return { status: response.status, cacheControl: response.headers.get('cache-control'), ...await response.json() };
     };
     return {
-        call, refs, blobs, commits, trees, calls, base, controls, fetcher
+        call, refs, blobs, commits, trees, calls, base, controls, fetcher,
+        prepare: commit => {
+            const client=createGitHubClient('token',fetcher);
+            return ensurePublicPublication({commit,repository:config.content.owner+'/'+config.content.repo,github:(path,options)=>client('/repos/'+config.content.owner+'/'+config.content.repo+path,options),fetcher});
+        }
     };
 }
 test('reads canonical original, preserving exact markdown and revision', async () => {
@@ -169,7 +189,7 @@ test('explicit publication persists tag edits without replacing body or hidden m
         }
     });
     assert.equal(result.status, 200);
-    assert.equal(result.state, 'published');
+    assert.equal(result.state, 'saved');
     const commit = f.commits.get(result.contentCommit);
     const entry = f.trees.get(commit.tree.sha).find(item => item.path.endsWith('/Old.md'));
     const updated = parseMarkdownDocument(f.blobs.get(entry.sha).toString());
@@ -186,7 +206,7 @@ test('direct save preserves body, opaque metadata and attachments; retry is idem
     };
     const result = await f.call('content', payload);
     assert.equal(result.status, 200);
-    assert.equal(result.state, 'published');
+    assert.equal(result.state, 'saved');
     assert.equal(result.requestId, requestId);
     assert.equal(result.baseCommit, f.base);
     assert.equal(result.contentCommit, result.candidateCommit);
@@ -194,7 +214,7 @@ test('direct save preserves body, opaque metadata and attachments; retry is idem
     assert.equal(result.commitUrl, `https://github.com/owner/content/commit/${result.contentCommit}`);
     assert.equal(result.runId, undefined);
     assert.equal(result.runUrl, undefined);
-    assert.ok(f.calls.every(call => call.repository === '/repos/owner/content'));
+    assert.ok(f.calls.every(call => call.host === 'api.github.com' ? call.repository === '/repos/owner/content' : call.host === 'raw.githubusercontent.com' && call.path.startsWith('/owner/content/')));
     const commit = f.commits.get(result.candidateCommit);
     const tree = f.trees.get(commit.tree.sha);
     const md = tree.find(e => e.path.endsWith('/New.md'));
@@ -279,7 +299,10 @@ test('no-op updates never create candidate commits', async () => {
     });
     assert.equal(result.status, 200);
     assert.equal(result.state, 'unchanged');
-    assert.equal(f.refs.size, 1);
+    assert.equal(f.refs.has('heads/cms/requests/'+requestId),false);
+    assert.equal(f.refs.get('heads/main'),f.base);
+    assert.equal(f.refs.has('heads/public-data/'+f.base),false);
+    assert.equal(f.calls.filter(isWrite).length,0);
 });
 test('document schema failures return actionable 422 while malformed transport stays 400', async () => {
     for (const metadata of [
@@ -376,11 +399,11 @@ test('lost canonical PATCH response recovers accepted candidate without duplicat
     f.controls.dropPatchResponse = true;
     const saved = await f.call('content', deletePayload(f.base));
     assert.equal(saved.status, 200);
-    assert.equal(saved.state, 'published');
+    assert.equal(saved.state, 'saved');
     assert.equal(f.refs.get('heads/main'), saved.candidateCommit);
     const retry = await f.call('content', deletePayload(f.base));
     assert.equal(retry.candidateCommit, saved.candidateCommit);
-    assert.equal(f.commits.size, 2);
+    assert.equal([...f.commits.values()].filter(record=>!record.message?.startsWith('public-data:')).length, 2);
     assert.equal(f.calls.filter(call => call.method === 'PATCH').length, 1);
 });
 
@@ -392,7 +415,7 @@ test('publish GET only reports pending status and authenticated POST alone resum
     const candidateCommit = f.refs.get('heads/cms/requests/' + requestId);
     assert.equal(typeof candidateCommit, 'string');
     f.controls.rejectPatch = false;
-    const mutationCount = f.calls.filter(call => call.method !== 'GET').length;
+    const mutationCount = f.calls.filter(isWrite).length;
     const status = await f.call(`publish?requestId=${requestId}&candidateCommit=${candidateCommit}`);
     assert.equal(status.status, 200);
     assert.equal(status.state, 'pending');
@@ -401,12 +424,12 @@ test('publish GET only reports pending status and authenticated POST alone resum
     assert.equal(status.baseCommit, f.base);
     assert.equal(status.contentCommit, undefined);
     assert.equal(f.refs.get('heads/main'), f.base);
-    assert.equal(f.calls.filter(call => call.method !== 'GET').length, mutationCount);
+    assert.equal(f.calls.filter(isWrite).length, mutationCount);
     const applied = await f.call('publish', {requestId,candidateCommit});
     assert.equal(applied.status, 200);
-    assert.equal(applied.state, 'published');
+    assert.equal(applied.state, 'saved');
     assert.equal(applied.contentCommit, candidateCommit);
-    assert.equal(f.commits.size, 2);
+    assert.equal([...f.commits.values()].filter(record=>!record.message?.startsWith('public-data:')).length, 2);
     assert.ok(f.calls.every(call => !call.path.includes('/actions/')));
 });
 
@@ -446,7 +469,8 @@ test('a canonical descendant accepts a saved candidate without moving HEAD backw
     const f = setup();
     const saved = await f.call('content', deletePayload(f.base));
     const descendant = 'c'.repeat(40);
-    f.commits.set(descendant, {sha:descendant,parents:[{sha:saved.candidateCommit}]});
+    f.commits.set(descendant, {sha:descendant,tree:f.commits.get(saved.candidateCommit).tree,parents:[{sha:saved.candidateCommit}]});
+    await f.prepare(descendant);
     f.refs.set('heads/main', descendant);
     const result = await f.call(`publish?requestId=${requestId}&candidateCommit=${saved.candidateCommit}`);
     assert.equal(result.status, 200);
@@ -478,7 +502,7 @@ test('post deletion rejects incoming document relations and canonical, Notion, r
         const result = await f.call('content', deletePayload(f.base));
         assert.equal(result.status, 409);
         assert.equal(f.refs.get('heads/main'), f.base);
-        assert.equal(f.calls.filter(call => call.method !== 'GET').length, 0);
+        assert.equal(f.calls.filter(isWrite).length, 0);
     }
 });
 
@@ -491,7 +515,7 @@ test('post deletion resolves legacy Markdown aliases and permits code examples w
     const result = await f.call('content', {requestId,baseCommit:f.base,operation:{type:'post.delete',id,baseRevision:original.revision}});
     assert.equal(result.status, 409);
     const safe = setup({documents:[otherDocument({}, '`[example](#/post/' + id + ')`')]});
-    assert.equal((await safe.call('content', deletePayload(safe.base))).state, 'published');
+    assert.equal((await safe.call('content', deletePayload(safe.base))).state, 'saved');
 });
 
 test('category deletion rejects assigned categories and original child relationships', async () => {
@@ -508,7 +532,7 @@ test('category deletion rejects assigned categories and original child relations
             categories:current.categories.filter(category => category.id !== 'group:used').map(category => ({...category,parent_id:null})),
         }});
         assert.equal(result.status, 409);
-        assert.equal(f.calls.filter(call => call.method !== 'GET').length, 0);
+        assert.equal(f.calls.filter(isWrite).length, 0);
     }
 });
 
@@ -524,7 +548,7 @@ test('post create and category assignment reject missing references before side 
         const f = setup();
         const result = await f.call('content', {requestId,baseCommit:f.base,operation});
         assert.equal(result.status, 422);
-        assert.equal(f.calls.filter(call => call.method !== 'GET').length, 0);
+        assert.equal(f.calls.filter(isWrite).length, 0);
     }
 });
 
@@ -534,7 +558,7 @@ test('body edits read only the target document and category catalog', async () =
     const result = await f.call('content', {requestId,baseCommit:f.base,operation:{
         type:'post.update',id,baseRevision:revision(raw),markdown:'# Updated body',
     }});
-    assert.equal(result.state, 'published');
+    assert.equal(result.state, 'saved');
     assert.equal(f.calls.filter(call => call.path === '/git/blobs/' + siblingSha).length, 0);
 });
 
@@ -661,7 +685,7 @@ test('category deletion reuses complete catalog metadata across a large unchange
     const result = await f.call('content', {requestId,baseCommit:f.base,operation:{
         type:'categories.save',baseRevision:current.revision,categories:categories.slice(0,1),
     }});
-    assert.equal(result.state, 'published');
+    assert.equal(result.state, 'saved');
     const documentBlobs = new Set(f.controls.catalog.documents.map(entry => '/git/blobs/' + entry.blobSha));
     assert.equal(f.calls.filter(call => documentBlobs.has(call.path)).length, 0);
 });
@@ -682,7 +706,7 @@ test('changed documents bypass stale catalog references and resolve against comp
     }
 });
 
-test('a direct save refreshes the public index and full body from the accepted commit through the same repository', async () => {
+test('a source save becomes public after the workflow publishes the accepted commit', async () => {
     const f = setup({publicRepository:true});
     const publicCall = async query => {
         const response = await handlePublicRequest(new Request('https://site.test/api/public?' + query), {env:{},fetcher:f.fetcher,catalog:fixtureCatalog(f)});
@@ -690,6 +714,8 @@ test('a direct save refreshes the public index and full body from the accepted c
         assert.equal(response.status, 200, result.error);
         return result;
     };
+    const client=createGitHubClient('token',f.fetcher);
+    await ensurePublicPublication({commit:f.base,repository:'gyungsubLee/subdev-blog-content',github:(path,options)=>client('/repos/gyungsubLee/subdev-blog-content'+path,options),fetcher:f.fetcher});
     const original = await publicCall('kind=index');
     assert.equal(original.contentCommit, f.base);
     assert.equal(original.posts[0].title, 'Old');
@@ -697,7 +723,8 @@ test('a direct save refreshes the public index and full body from the accepted c
     const saved = await f.call('content', {requestId,baseCommit:f.base,operation:{
         type:'post.update',id,baseRevision:revision(raw),changes:{title:'Saved'},markdown:'# Immediately visible',
     }});
-    assert.equal(saved.state, 'published');
+    assert.equal(saved.state, 'saved');
+    await f.prepare(saved.contentCommit);
     const current = await publicCall('kind=index&after=' + saved.contentCommit);
     assert.equal(current.contentCommit, saved.contentCommit);
     assert.equal(current.posts[0].title, 'Saved');
@@ -706,9 +733,9 @@ test('a direct save refreshes the public index and full body from the accepted c
     assert.equal(detail.title, 'Saved');
     assert.equal(detail.markdown, '# Immediately visible');
     assert.equal(detail.bodyLoaded, true);
-    assert.ok(f.calls.filter(call => call.path === '/git/ref/heads/main').length >= readsBeforeSave + 4);
+    assert.ok(f.calls.filter(call => call.path === '/git/ref/heads/main').length >= readsBeforeSave + 3);
     assert.ok(f.calls.every(call => !call.path.includes('/actions/') && !call.path.includes('deploy')));
-    assert.ok(f.calls.filter(call => call.method !== 'GET').every(call => call.repository === '/repos/gyungsubLee/subdev-blog-content'));
+    assert.ok(f.calls.filter(isWrite).every(call => call.repository === '/repos/gyungsubLee/subdev-blog-content'));
 });
 
 
@@ -726,7 +753,7 @@ test('authored unsafe URLs and encoded paths fail before any candidate writes wi
         }});
         assert.equal(result.status, 422, markdown);
         assert.equal(f.refs.get('heads/main'), f.base);
-        assert.equal(f.calls.filter(call => call.method !== 'GET').length, 0);
+        assert.equal(f.calls.filter(isWrite).length, 0);
         assert.equal(f.calls.filter(call => call.path === '/git/blobs/' + siblingSha).length, 0);
     }
     for (const metadata of [{cover:'file:///tmp/x'},{icon:'javascript:alert'}]) {
@@ -735,7 +762,7 @@ test('authored unsafe URLs and encoded paths fail before any candidate writes wi
             type:'post.create',document:otherDocument(metadata),
         }});
         assert.equal(result.status, 422);
-        assert.equal(f.calls.filter(call => call.method !== 'GET').length, 0);
+        assert.equal(f.calls.filter(isWrite).length, 0);
     }
 });
 
@@ -765,7 +792,7 @@ test('target URL validation preserves authored bytes, allows missing links and s
     const result = await f.call('content', {requestId,baseCommit:f.base,operation:{
         type:'post.update',id,baseRevision:revision(raw),markdown,
     }});
-    assert.equal(result.state, 'published');
+    assert.equal(result.state, 'saved');
     const entry = f.trees.get(f.commits.get(result.contentCommit).tree.sha).find(entry => entry.path.endsWith('/Old.md'));
     assert.equal(parseMarkdownDocument(f.blobs.get(entry.sha).toString('utf8')).markdown, markdown);
     const siblingSha = f.controls.catalog.documents.find(entry => entry.metadata.id === otherId).blobSha;
@@ -780,7 +807,7 @@ test('serialized Markdown byte size matches the public runtime two MiB boundary'
         const doc = otherDocument({}, 'x'.repeat(limit - overhead + extraBytes));
         const result = await f.call('content', {requestId,baseCommit:f.base,operation:{type:'post.create',document:doc}});
         assert.equal(result.status, extraBytes <= 0 ? 200 : 413);
-        if (extraBytes > 0) assert.equal(f.calls.filter(call => call.method !== 'GET').length, 0);
+        if (extraBytes > 0) assert.equal(f.calls.filter(isWrite).length, 0);
     }
     const f = setup();
     const result = await f.call('content', {requestId,baseCommit:f.base,operation:{type:'post.create',document:otherDocument({}, '한'.repeat(800000))}});
@@ -803,7 +830,7 @@ test('oversized pending Markdown and fresh category JSON fail before accepting a
         categories:current.categories.map(category => ({...category,name:'x'.repeat(2 * 1024 * 1024)})),
     }});
     assert.equal(result.status, 413);
-    assert.equal(g.calls.filter(call => call.method !== 'GET').length, 0);
+    assert.equal(g.calls.filter(isWrite).length, 0);
 });
 
 const editorDocument = (markdown = document.markdown, blocks = [{type:'paragraph',content:[{type:'text',text:'Untouched',styles:{}}]}], documentId = id) => ({
@@ -830,7 +857,7 @@ test('saves reject invalid or externally desynchronized editor data', async () =
             type:'post.update',id,baseRevision:revision(raw),baseEditorRevision:revision(JSON.stringify(editor,null,2) + '\n'),editor:editorDocument(),
         }});
         assert.equal(result.status, 422);
-        assert.equal(f.calls.filter(call => call.method !== 'GET').length, 0);
+        assert.equal(f.calls.filter(isWrite).length, 0);
     }
 });
 
@@ -860,7 +887,7 @@ test('authenticated recovery returns exact Markdown and raw broken editor source
             type:'post.update',id,baseRevision:source.revision,baseEditorRevision:source.editorRevision,editor:editorDocument(),
         }});
         assert.equal(overwritten.status, bytes.length <= 2 * 1024 * 1024 ? 422 : 413);
-        assert.equal(f.calls.filter(call => call.method !== 'GET').length, 0);
+        assert.equal(f.calls.filter(isWrite).length, 0);
         assert.equal(f.refs.get('heads/main'), f.base);
     }
 });
@@ -870,14 +897,14 @@ test('a block post is created with Markdown and editor JSON in the same Git comm
     const newDocument = otherDocument({}, '# Created');
     const editor = editorDocument(newDocument.markdown, [{type:'heading',props:{level:1},content:[{type:'text',text:'Created',styles:{}}]}], otherId);
     const saved = await f.call('content', {requestId,baseCommit:f.base,operation:{type:'post.create',document:newDocument,editor,baseEditorRevision:null}});
-    assert.equal(saved.state, 'published');
+    assert.equal(saved.state, 'saved');
     const entries = f.trees.get(f.commits.get(saved.contentCommit).tree.sha);
     assert.equal(entries.some(entry => entry.path === `posts/${otherId}/Sibling.md`), true);
     assert.equal(entries.some(entry => entry.path === `posts/${otherId}/editor.json`), true);
     const restored = await f.call('content?kind=post&id=' + otherId);
     assert.equal(restored.editor?.blocks[0].props.level, 1);
     assert.equal(restored.document.markdown, '# Created');
-    assert.equal(f.calls.filter(call => call.path === '/git/commits' && call.method === 'POST').length, 1);
+    assert.equal(f.calls.filter(call => call.path === '/git/commits' && call.method === 'POST' && !call.body.message.startsWith('public-data:')).length, 1);
 });
 
 test('editor-only settings changes save repeatedly and identical paired files report unchanged', async () => {
@@ -889,7 +916,7 @@ test('editor-only settings changes save repeatedly and identical paired files re
         const result = await f.call('content', {requestId:wrap ? requestId : 'abcdefab-1234-1234-1234-123456789abd',baseCommit:current.contentCommit,operation:{
             type:'post.update',id,baseRevision:current.revision,baseEditorRevision:current.editorRevision,editor,
         }});
-        assert.equal(result.state, 'published');
+        assert.equal(result.state, 'saved');
         assert.notEqual(result.contentCommit, previousCommit);
         previousCommit = result.contentCommit;
         current = await f.call('content?kind=post&id=' + id);
@@ -899,7 +926,7 @@ test('editor-only settings changes save repeatedly and identical paired files re
         type:'post.update',id,baseRevision:current.revision,baseEditorRevision:current.editorRevision,editor:current.editor,
     }});
     assert.equal(same.state, 'unchanged');
-    assert.equal(f.calls.filter(call => call.path === '/git/commits' && call.method === 'POST').length, 2);
+    assert.equal(f.calls.filter(call => call.path === '/git/commits' && call.method === 'POST' && !call.body.message.startsWith('public-data:')).length, 2);
 });
 
 test('paired updates reject stale editor revisions and a body change without a new editor before writes', async () => {
@@ -912,7 +939,7 @@ test('paired updates reject stale editor revisions and a body change without a n
         const f = setup({editor:editorDocument()});
         const result = await f.call('content', {requestId,baseCommit:f.base,operation:{type:'post.update',id,baseRevision:revision(raw),...operation}});
         assert.ok(result.status === 409 || result.status === 422);
-        assert.equal(f.calls.filter(call => call.method !== 'GET').length, 0);
+        assert.equal(f.calls.filter(isWrite).length, 0);
         assert.equal(f.refs.get('heads/main'), f.base);
     }
 });
@@ -923,7 +950,7 @@ test('metadata-only edits can preserve existing editor bytes with a matching edi
     const result = await f.call('content', {requestId,baseCommit:f.base,operation:{
         type:'post.update',id,baseRevision:original.revision,baseEditorRevision:original.editorRevision,changes:{title:'Renamed'},
     }});
-    assert.equal(result.state, 'published');
+    assert.equal(result.state, 'saved');
     const restored = await f.call('content?kind=post&id=' + id);
     assert.equal(restored.editorRevision, original.editorRevision);
     assert.equal(restored.document.markdown, document.markdown);
@@ -933,10 +960,10 @@ test('reserved editor filenames cannot be uploaded as attachments through case o
     for (const name of ['editor.json','EDITOR.JSON','%65ditor.json','%2565ditor.json']) {
         const f = setup();
         const asset = await f.call('assets', {content:Buffer.from('overwrite').toString('base64')});
-        const writesBefore = f.calls.filter(call => call.method !== 'GET').length;
+        const writesBefore = f.calls.filter(isWrite).length;
         const result = await f.call('content', {requestId,baseCommit:f.base,operation:{type:'post.update',id,baseRevision:revision(raw),assets:[{...asset,name}]}});
         assert.equal(result.status, 400);
-        assert.equal(f.calls.filter(call => call.method !== 'GET').length, writesBefore);
+        assert.equal(f.calls.filter(isWrite).length, writesBefore);
     }
 });
 
@@ -965,7 +992,7 @@ test('publish revalidates editor pairing and allows mutable editor settings on r
     }
 });
 
-test('category reads avoid recursive trees and reuse the immutable source while checking head', { timeout: 5000 }, async () => {
+test('category reads query only the file and save base without separate HEAD or tree requests', { timeout: 5000 }, async () => {
     const f = setup();
     const first = await f.call('content?kind=categories');
     assert.equal(first.status, 200);
@@ -975,6 +1002,225 @@ test('category reads avoid recursive trees and reuse the immutable source while 
     const second = await f.call('content?kind=categories');
     assert.equal(second.revision, first.revision);
     assert.equal(second.contentCommit, first.contentCommit);
-    assert.equal(f.calls.length - before, 1, 'Repeat reads must only resolve the current head');
+    assert.equal(f.calls.length - before, 0, 'Repeat reads reuse cached category data');
     assert.equal(f.calls.filter(call => call.path.startsWith('/git/trees/') && call.recursive).length, 0);
+});
+
+test('confirmed post deletion removes Markdown, editor backup and attachments from the canonical tree only', async () => {
+    const f = setup({editor:editorDocument(),documents:[otherDocument()]});
+    const original = await f.call('content?kind=post&id=' + id);
+    const result = await f.call('content', {
+        requestId,baseCommit:f.base,
+        operation:{type:'post.delete',id,baseRevision:original.revision,baseEditorRevision:original.editorRevision},
+    });
+    assert.equal(result.status,200);
+    assert.equal(result.state,'saved');
+    const current = f.commits.get(f.refs.get('heads/main'));
+    const remaining = f.trees.get(current.tree.sha).map(entry => entry.path);
+    assert.ok(!remaining.some(path => path.startsWith(`posts/${id}/`)));
+    assert.ok(remaining.includes('categories.json'));
+    assert.ok(remaining.some(path => path.startsWith(`posts/${otherId}/`)));
+});
+
+const deletionCategories = [
+    {id:'group:unclassified',name:'Other',parent_id:null,order:0,sources:[]},
+    {id:'group:main',name:'Main',parent_id:null,order:1,sources:['Main'],opaque:{keep:true}},
+];
+const categoryDeletePayload = (f, source, mode) => ({
+    requestId,baseCommit:f.base,
+    operation:{type:'category.delete',id:'group:main',mode,baseRevision:source.revision},
+});
+
+test('category move deletes only the category and moves original documents to unclassified atomically', async () => {
+    const assigned = {...document,metadata:{...document.metadata,category_id:'group:main'}};
+    const f = setup({categories:deletionCategories,document:assigned,editor:editorDocument()});
+    const source = await f.call('content?kind=categories');
+    const saved = await f.call('content',categoryDeletePayload(f,source,'move'));
+    assert.equal(saved.status,200);
+    assert.equal(saved.state,'saved');
+    const current = await f.call('content?kind=post&id='+id);
+    assert.equal(current.document.metadata.category_id,'group:unclassified');
+    assert.equal(current.document.markdown,document.markdown);
+    assert.deepEqual(current.document.metadata.opaque,{value:7});
+    assert.deepEqual(current.editor,editorDocument());
+    assert.equal(current.assets[0].name,'image.png');
+    assert.ok(!(await f.call('content?kind=categories')).categories.some(category=>category.id==='group:main'));
+    assert.equal(f.calls.filter(call=>call.method==='PATCH').length,1);
+    assert.deepEqual(saved.deletedPostIds,[]);
+});
+
+test('category whole deletion removes assigned originals, inherited posts and assets but preserves unrelated posts', async () => {
+    const assigned = {...document,metadata:{...document.metadata,category_id:'group:main'}};
+    const f = setup({categories:deletionCategories,document:assigned,editor:editorDocument(),documents:[otherDocument({parent_id:id})]});
+    const source = await f.call('content?kind=categories');
+    const saved = await f.call('content',categoryDeletePayload(f,source,'delete'));
+    assert.equal(saved.status,200);
+    assert.deepEqual(new Set(saved.deletedPostIds),new Set([id,otherId]));
+    const current = f.commits.get(f.refs.get('heads/main'));
+    assert.deepEqual(f.trees.get(current.tree.sha).map(entry=>entry.path),['categories.json']);
+    const retried = await f.call('content',categoryDeletePayload(f,source,'delete'));
+    assert.equal(retried.candidateCommit,saved.candidateCommit);
+    assert.deepEqual(new Set(retried.deletedPostIds),new Set([id,otherId]));
+    assert.equal(f.calls.filter(call=>call.method==='PATCH').length,1);
+});
+
+test('category whole deletion refuses inbound references from surviving categories before writing', async () => {
+    const f = setup({categories:deletionCategories,document:{...document,metadata:{...document.metadata,category_id:'group:main'}},
+        documents:[otherDocument({category_id:'group:unclassified'},`[Main](#/post/${id})`)]});
+    const source = await f.call('content?kind=categories');
+    const result = await f.call('content',categoryDeletePayload(f,source,'delete'));
+    assert.equal(result.status,409);
+    assert.equal(f.refs.get('heads/main'),f.base);
+    assert.equal(f.calls.filter(isWrite).length,0);
+});
+
+test('category deletion validates mode and preserves unclassified and parent-category protection', async () => {
+    for (const [categoryId,mode] of [['group:main','unknown'],['group:unclassified','delete']]) {
+        const f = setup({categories:deletionCategories});
+        const source = await f.call('content?kind=categories');
+        const payload = categoryDeletePayload(f,source,mode);
+        payload.operation.id=categoryId;
+        assert.ok((await f.call('content',payload)).status>=400);
+        assert.equal(f.calls.filter(isWrite).length,0);
+    }
+});
+
+for (const mode of ['move','delete']) {
+    test('unaccepted category '+mode+' candidates are revalidated before publish resume', async () => {
+        const f = setup({categories:deletionCategories,document:{...document,metadata:{...document.metadata,category_id:'group:main'}}});
+        const source = await f.call('content?kind=categories');
+        f.controls.rejectPatch=true;
+        assert.equal((await f.call('content',categoryDeletePayload(f,source,mode))).status,422);
+        const candidateCommit=f.refs.get('heads/cms/requests/'+requestId);
+        f.controls.rejectPatch=false;
+        const result=await f.call('publish',{requestId,candidateCommit});
+        assert.equal(result.status,200);
+        assert.equal(result.state,'saved');
+        assert.equal(f.refs.get('heads/main'),candidateCommit);
+    });
+}
+
+test('category move candidates cannot rewrite unrelated original title or body', async () => {
+    const assigned={...document,metadata:{...document.metadata,category_id:'group:main'}};
+    const f=setup({categories:deletionCategories,document:assigned});
+    const categoryBytes=Buffer.from(JSON.stringify(deletionCategories.slice(0,1),null,2)+'\n');
+    const badBytes=Buffer.from(serializeMarkdownDocument({...assigned,metadata:{...assigned.metadata,category_id:'group:unclassified',title:'Unrequested title'}}));
+    const categorySha=sha(categoryBytes);
+    const badSha=sha(badBytes);
+    f.blobs.set(categorySha,categoryBytes);
+    f.blobs.set(badSha,badBytes);
+    const entries=f.trees.get('b'.repeat(40)).map(entry=>({...entry,
+        sha:entry.path==='categories.json'?categorySha:entry.path.endsWith('/Old.md')?badSha:entry.sha,
+    }));
+    const candidateCommit=retainedCandidate(f,entries);
+    const result=await f.call('publish',{requestId,candidateCommit});
+    assert.equal(result.status,409);
+    assert.equal(f.refs.get('heads/main'),f.base);
+    assert.equal(f.calls.filter(call=>call.method==='PATCH').length,0);
+});
+
+test('category deletion preserves parent-category protection before any Git write', async () => {
+    const f=setup({categories:[...deletionCategories,{id:'child',name:'Child',parent_id:'group:main',order:0,sources:[]}]});
+    const source=await f.call('content?kind=categories');
+    assert.equal((await f.call('content',categoryDeletePayload(f,source,'move'))).status,409);
+    assert.equal(f.calls.filter(isWrite).length,0);
+});
+
+test('moving a category reuses metadata catalog and reads only the reassigned original body', async () => {
+    const documents=Array.from({length:70},(_,index)=>otherDocument({id:`98765432-1234-1234-1234-${String(index).padStart(12,'0')}`,title:'Other '+index}));
+    const f=setup({categories:deletionCategories,document:{...document,metadata:{...document.metadata,category_id:'group:main'}},documents});
+    f.controls.catalog=fixtureCatalog(f);
+    const unrelatedBlobs=new Set(f.controls.catalog.documents.filter(entry=>entry.metadata.id!==id).map(entry=>'/git/blobs/'+entry.blobSha));
+    const source=await f.call('content?kind=categories');
+    const result=await f.call('content',categoryDeletePayload(f,source,'move'));
+    assert.equal(result.state,'saved');
+    assert.equal(f.calls.filter(call=>unrelatedBlobs.has(call.path)).length,0);
+});
+
+test('save advances only source and leaves public generation to the push workflow', async () => {
+    const f=setup();
+    const saved=await f.call('content',{requestId,baseCommit:f.base,operation:{type:'post.update',id,baseRevision:revision(raw),changes:{title:'Prepared'}}});
+    assert.equal(saved.status,200);
+    assert.equal(saved.state,'saved');
+    assert.equal(f.refs.get('heads/main'),saved.contentCommit);
+    assert.equal(f.refs.has('heads/public-data/'+saved.contentCommit),false);
+    assert.equal(f.calls.some(call=>call.body?.message?.startsWith('public-data:')),false);
+});
+
+test('generation failure leaves saved source recoverable without duplicate writes', async () => {
+    const f=setup();
+    f.controls.failPublication=true;
+    const input={requestId,baseCommit:f.base,operation:{type:'post.update',id,baseRevision:revision(raw),changes:{title:'Retry'}}};
+    const saved=await f.call('content',input);
+    assert.equal(saved.status,200);
+    assert.equal(saved.state,'saved');
+    assert.equal(f.refs.get('heads/main'),saved.contentCommit);
+    assert.ok(f.refs.has('heads/cms/requests/'+requestId));
+    const retry=await f.call('content',input);
+    assert.equal(retry.status,200);
+    assert.equal(retry.candidateCommit,saved.candidateCommit);
+    assert.equal(f.calls.filter(call=>call.method==='PATCH').length,1);
+});
+
+
+test('category data read retains save conflicts when the canonical branch advances', async () => {
+    const f = setup();
+    const source = await f.call('content?kind=categories');
+    assert.equal(source.status, 200);
+    assert.equal(source.contentCommit, f.base);
+    assert.equal(f.calls.some(call => call.path.startsWith('/git/ref/')), false);
+    f.refs.set('heads/main', 'c'.repeat(40));
+    const result = await f.call('content', {
+        requestId, baseCommit: source.contentCommit,
+        operation: { type: 'categories.save', baseRevision: source.revision, categories: source.categories },
+    });
+    assert.equal(result.status, 409);
+    assert.equal(f.refs.get('heads/main'), 'c'.repeat(40));
+    assert.equal(f.calls.filter(isWrite).length, 0);
+});
+
+test('bulk updates multiple posts with one canonical commit and idempotent retry', async () => {
+    const second = otherDocument();
+    const f = setup({documents: [second]});
+    const input = {requestId, baseCommit: f.base, operations: [
+        {type:'post.update',id,baseRevision:revision(raw),changes:{title:'Bulk one'}},
+        {type:'post.update',id:second.metadata.id,baseRevision:revision(serializeMarkdownDocument(second)),changes:{title:'Bulk two'}},
+    ]};
+    const saved = await f.call('content', input);
+    assert.equal(saved.status, 200, saved.error);
+    assert.equal((await f.call('content?kind=post&id='+id)).document.metadata.title,'Bulk one');
+    assert.equal((await f.call('content?kind=post&id='+second.metadata.id)).document.metadata.title,'Bulk two');
+    const commits = f.calls.filter(call=>call.path==='/git/commits'&&call.method==='POST'&&!call.body.message.startsWith('public-data:')).length;
+    assert.equal(commits,1);
+    const retry = await f.call('content',input);
+    assert.equal(retry.status,200,retry.error);
+    assert.equal(retry.contentCommit,saved.contentCommit);
+    assert.equal(f.calls.filter(call=>call.path==='/git/commits'&&call.method==='POST'&&!call.body.message.startsWith('public-data:')).length,1);
+});
+
+test('bulk category creation and a dependent post share one commit; an invalid operation advances nothing',async()=>{
+ const f=setup();
+ const source=await f.call('content?kind=categories');
+ const added={id:'bulk-category',name:'Bulk',parent_id:null,order:1,sources:[]};
+ const created=otherDocument({category_id:added.id});
+ const input={requestId,baseCommit:f.base,operations:[
+  {type:'post.create',document:created},
+  {type:'categories.save',baseRevision:source.revision,categories:[...source.categories,added]},
+ ]};
+ const result=await f.call('content',input);
+ assert.equal(result.status,200,result.error);
+ const remote=await f.call('content?kind=post&id='+created.metadata.id);
+ assert.equal(remote.document.metadata.category_id,added.id);
+ assert.equal(result.sources[created.metadata.id].revision,remote.revision);
+ assert.equal(Object.hasOwn(result.sources[created.metadata.id],'categories'),false);
+ assert.equal(Object.hasOwn(result.sources[created.metadata.id],'document'),false);
+ assert.equal(f.calls.filter(call=>call.path==='/git/commits'&&call.method==='POST'&&!call.body.message.startsWith('public-data:')).length,1);
+ const failed=setup({documents:[otherDocument()]});
+ const rejected=await failed.call('content',{requestId,baseCommit:failed.base,operations:[
+  {type:'post.update',id,baseRevision:revision(raw),changes:{title:'Uncommitted'}},
+  {type:'post.update',id:otherId,baseRevision:'0'.repeat(64),changes:{title:'Invalid'}},
+ ]});
+ assert.equal(rejected.status,409);
+ assert.equal(failed.refs.get('heads/main'),failed.base);
+ assert.equal(failed.calls.some(call=>call.method==='PATCH'),false);
 });

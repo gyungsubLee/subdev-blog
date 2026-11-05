@@ -2,15 +2,20 @@ import { createHash } from 'node:crypto';
 import { createGitHubClient } from './github.mjs';
 
 const caches = new WeakMap();
+const categoryCaches = new WeakMap();
 const MAX_ENTRIES = 32;
 const MAX_BYTES = 8 * 1024 * 1024;
 
-export function createManagementGitHubClient(token, config, fetcher = globalThis.fetch) {
-  const github = createGitHubClient(token, fetcher);
-  const key = createHash('sha256').update(JSON.stringify([
+function configurationKey(token, config) {
+  return createHash('sha256').update(JSON.stringify([
     token, config.origin, config.adminUserId, config.appId, config.installationId,
     config.app, config.content,
   ])).digest('hex');
+}
+
+export function createManagementGitHubClient(token, config, fetcher = globalThis.fetch) {
+  const github = createGitHubClient(token, fetcher);
+  const key = configurationKey(token, config);
   let configurations = caches.get(fetcher);
   if (!configurations) {
     configurations = new Map();
@@ -28,7 +33,7 @@ export function createManagementGitHubClient(token, config, fetcher = globalThis
   return async (path, options = {}) => {
     // Never retain identity, installation grants, repository permissions or heads.
     // Only commit-addressed files and immutable Git objects may outlive a request.
-    const immutable = /\/git\/(?:commits|trees|blobs)\/[a-f0-9]{40}$/.test(path) ||
+    const immutable = /\/git\/(?:commits|trees|blobs)\/[a-f0-9]{40}(?:\?recursive=1)?$/.test(path) ||
       /\/contents\/(?:content|\.gitmodules|categories\.json|posts|CONTENT_SCHEMA\.md)\?ref=[a-f0-9]{40}$/.test(path);
     if (!immutable || (options.method ?? 'GET') !== 'GET' || Object.keys(options).length > 0) {
       return github(path, options);
@@ -54,4 +59,41 @@ export function createManagementGitHubClient(token, config, fetcher = globalThis
     cache.pending.set(path, loading);
     return loading;
   };
+}
+
+
+export function readCachedCategories(token, config, fetcher = globalThis.fetch, load, refresh = false) {
+  let entries = categoryCaches.get(fetcher);
+  if (!entries) {
+    entries = new Map();
+    categoryCaches.set(fetcher, entries);
+  }
+  const key = configurationKey(token, config);
+  if (refresh) entries.delete(key);
+  if (entries.has(key)) return entries.get(key).promise;
+
+  const entry = { repository: JSON.stringify(config.content) };
+  entry.promise = Promise.resolve().then(load).then(value => {
+    if (Buffer.byteLength(JSON.stringify(value)) * 2 > MAX_BYTES && entries.get(key) === entry) {
+      entries.delete(key);
+    }
+    return value;
+  }, error => {
+    if (entries.get(key) === entry) entries.delete(key);
+    throw error;
+  });
+  entries.set(key, entry);
+  // ponytail: per-process, four credential/config scopes, at most8 MiB each.
+  // A persistent shared cache is the upgrade for multi-process deployments.
+  while (entries.size > 4) entries.delete(entries.keys().next().value);
+  return entry.promise;
+}
+
+export function invalidateCategoryCache(config, fetcher = globalThis.fetch) {
+  const entries = categoryCaches.get(fetcher);
+  if (!entries) return;
+  const repository = JSON.stringify(config.content);
+  for (const [key, entry] of entries) {
+    if (entry.repository === repository) entries.delete(key);
+  }
 }

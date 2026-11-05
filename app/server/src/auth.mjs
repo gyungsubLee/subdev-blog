@@ -1,5 +1,5 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes, timingSafeEqual } from 'node:crypto';
-import { createGitHubClient, httpError } from './github.mjs';
+import { httpError } from './github.mjs';
 import { createManagementGitHubClient } from './management-read-cache.mjs';
 
 export function loadConfig(env = process.env) {
@@ -71,13 +71,24 @@ export function setCookie(value, config, purpose = 'session', maxAge = 3600) {
 export function equalSecret(a, b) {
   return typeof a === 'string' && typeof b === 'string' && Buffer.byteLength(a) === Buffer.byteLength(b) && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 }
+// Bind the authorization decision to the configured owner, installation and repositories.
+export function sessionBinding(config) {
+  return createHash('sha256').update(JSON.stringify([
+    config.origin, config.clientId, config.adminUserId, config.appId, config.installationId,
+    config.app, config.content,
+  ])).digest('base64url');
+}
 export async function authenticate(request, config, fetcher, { mutate = false } = {}) {
   const session = readCookie(request, config);
-  if (!session.token || !session.csrfToken) {
+  if (session.version !== 1 || typeof session.token !== 'string' || !session.token ||
+      typeof session.csrfToken !== 'string' || !session.csrfToken ||
+      !Number.isFinite(session.issuedAt) || session.issuedAt > Date.now() ||
+      session.expires <= session.issuedAt || session.expires - session.issuedAt > 3600000 ||
+      !equalSecret(session.binding, sessionBinding(config))) {
     throw httpError(401, 'Invalid session');
   }
-  const user = await createGitHubClient(session.token, fetcher)('/user');
-  if (user.id !== config.adminUserId) {
+  const user = session.user;
+  if (user?.id !== config.adminUserId || typeof user.login !== 'string' || !user.login) {
     throw httpError(403, 'Owner access required');
   }
   const hasExpectedOrigin = request.headers.get('origin') === config.origin;
@@ -89,6 +100,8 @@ export async function authenticate(request, config, fetcher, { mutate = false } 
     token: session.token,
     user: { id: user.id, login: user.login, name: user.name },
     csrfToken: session.csrfToken,
+    // Heads are deliberately resolved by content operations, never frozen at login.
+    connection: { repository: `${config.content.owner}/${config.content.repo}`, branch: config.content.branch },
   };
 }
 

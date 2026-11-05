@@ -47,7 +47,8 @@
   "functions": {
     "api/index.js": {
       "includeFiles": "app/server/generated/content-catalog.json",
-      "excludeFiles": "{content,app/web,app/native,tests,docs}/**"
+      "excludeFiles": "{content,app/web,app/native,tests,docs}/**",
+      "maxDuration": 300
     }
   }
 }

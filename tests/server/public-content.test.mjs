@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { readContent } from '../../app/content/src/content.mjs';
 import { serializeMarkdownDocument } from '../../app/shared/document.mjs';
+import { generatePublicFiles } from '../../app/server/src/public-publication.mjs';
 import { createGitHubClient } from '../../app/server/src/github.mjs';
 
 const runtime = await import('../../app/server/src/public-content.mjs').catch(error => {
@@ -31,11 +32,15 @@ function fixture({ files = {}, nextFiles, isPrivate = false, compare = 'ahead', 
   if (nextFiles) versions.set(B, { ...versions.get(A), ...nextFiles });
   const calls = [];
   const controls = { head: A, isPrivate, compare, failPath, failStatus, rawDelay, active: 0, peak: 0 };
-  const fetcher = async (input, options = {}) => {
+  let generating = false;
+  const publications = new Map();
+  const sourceFetcher = async (input, options = {}) => {
     const url = new URL(input);
-    calls.push({ host: url.host, path: url.pathname + url.search, authorization: options.headers?.Authorization, signal: options.signal });
+    if (!generating) calls.push({ host: url.host, path: url.pathname + url.search, authorization: options.headers?.Authorization, signal: options.signal });
     if (controls.failPath && url.pathname.includes(controls.failPath)) return Response.json({ message: 'secret error' }, { status: controls.failStatus });
     if (url.host === 'api.github.com') {
+      const generated = decodeURIComponent(url.pathname).match(/\/git\/ref\/heads\/public-data\/([a-f0-9]{40})$/)?.[1];
+      if (generated && publications.has(generated)) return Response.json({object:{type:'commit',sha:publications.get(generated)}});
       if (url.pathname === REPO) return Response.json({ private: controls.isPrivate, full_name: 'gyungsubLee/subdev-blog-content' });
       if (url.pathname === `${REPO}/git/ref/heads/main`) return Response.json({ ref: 'refs/heads/main', object: { type: 'commit', sha: controls.head } });
       if (url.pathname.startsWith(`${REPO}/compare/`)) return Response.json({ status: controls.compare });
@@ -59,12 +64,32 @@ function fixture({ files = {}, nextFiles, isPrivate = false, compare = 'ahead', 
     }
     return Response.json({ message: 'not found' }, { status: 404 });
   };
+  const pending = new Map();
+  const prepare = commit => {
+    if (!pending.has(commit)) pending.set(commit, (async () => {
+      generating = true;
+      try {
+        const client = createGitHubClient(undefined,sourceFetcher);
+        const files = await generatePublicFiles({commit,catalog,repository:'gyungsubLee/subdev-blog-content',github:(path,options)=>client(REPO+path,options),fetcher:sourceFetcher});
+        const artifact = createHash('sha1').update('public:'+commit).digest('hex');
+        versions.set(artifact,Object.fromEntries([...files].map(([path,bytes])=>[path,bytes.toString('utf8')])));
+        publications.set(commit,artifact);
+      } finally { generating = false; }
+    })());
+    return pending.get(commit);
+  };
+  const fetcher = async (input, options) => {
+    await prepare(controls.head);
+    const commit = new URL(input).pathname.match(/public-data(?:%2F|\/)([a-f0-9]{40})/)?.[1];
+    if (commit && versions.has(commit)) await prepare(commit);
+    return sourceFetcher(input,options);
+  };
   const call = async (query = 'kind=index', env = {}, method = 'GET') => {
     assert.equal(typeof runtime.handlePublicRequest, 'function', 'public runtime handler must be available');
     const response = await runtime.handlePublicRequest(new Request(`https://site.test/api/public?${query}`, { method }), { env, fetcher, catalog });
     return { status: response.status, body: await response.json(), cacheControl: response.headers.get('Cache-Control') };
   };
-  return { call, calls, controls, versions, fetcher };
+  return { call, calls, controls, versions, fetcher, prepare };
 }
 
 test('public index reads canonical GitHub content without login or a token', async () => {
@@ -141,27 +166,24 @@ test('an uncached canonical ancestor can be read after ancestry verification', a
   assert.ok(f.calls.some(call => call.path === `${REPO}/compare/${A}...${B}`));
 });
 
-test('after bypasses an old head cache and unchanged blobs are reused across commits', async () => {
+test('after bypasses an old head cache and selects the new commit publication', async () => {
   const f = fixture({ nextFiles: {} });
   await f.call();
   await f.call();
-  assert.equal(f.calls.filter(call => call.path.includes('/git/ref/')).length, 1);
+  assert.equal(f.calls.filter(call => call.path === `${REPO}/git/ref/heads/main`).length, 1);
   f.controls.head = B;
   assert.equal((await f.call(`kind=index&after=${B}`)).body.contentCommit, B);
-  assert.equal(f.calls.filter(call => call.path.includes('/git/ref/')).length, 2);
-  assert.equal(f.calls.filter(call => call.host === 'raw.githubusercontent.com').length, 2);
+  assert.equal(f.calls.filter(call => call.path === `${REPO}/git/ref/heads/main`).length, 2);
+  assert.equal(f.calls.filter(call => call.host === 'raw.githubusercontent.com').length, 4);
 });
 
-test('private or ambiguous repository metadata never exposes content even with a server token', async () => {
-  for (const isPrivate of [true, undefined, null]) {
-    const f = fixture();
-    f.controls.isPrivate = isPrivate;
-    const result = await f.call('kind=index', { GITHUB_PUBLIC_TOKEN: 'server-secret' });
-    assert.equal(result.status, 403);
-    assert.equal(f.calls.length, 1);
-    assert.equal(f.calls[0].authorization, 'Bearer server-secret');
-    assert.ok(!JSON.stringify(result.body).includes('server-secret'));
-  }
+test('fixed public repository reads do not fetch metadata and tokens stay server-side', async () => {
+  const f=fixture({isPrivate:true});
+  const result=await f.call('kind=index',{GITHUB_PUBLIC_TOKEN:'server-secret'});
+  assert.equal(result.status,200);
+  assert.ok(f.calls.every(call=>call.path!==REPO));
+  assert.ok(f.calls.filter(call=>call.host==='api.github.com').every(call=>call.authorization==='Bearer server-secret'));
+  assert.ok(!JSON.stringify(result.body).includes('server-secret'));
 });
 
 test('invalid request parameters and repository overrides are rejected before network access', async () => {
@@ -197,7 +219,7 @@ test('runtime retains missing authored links but rejects unsafe paths and URL sc
   }
 });
 
-test('raw reads are bounded in parallel and unsafe canonical trees fail before exposure', async () => {
+test('generation source reads are bounded in parallel and unsafe trees fail before publication', async () => {
   const files = {};
   for (let index = 0; index < 20; index++) {
     const id = `12345678-1234-1234-1234-${String(index).padStart(12, '0')}`;
@@ -210,7 +232,7 @@ test('raw reads are bounded in parallel and unsafe canonical trees fail before e
   assert.equal((await unsafe.call()).status, 502);
 });
 
-test('a raw file fetch failure is surfaced and request deadlines are finite', async () => {
+test('a generation source failure is surfaced and request deadlines are finite', async () => {
   const f = fixture({ failPath: '/Title.md', failStatus: 404 });
   assert.equal((await f.call()).status, 502);
   let deadline;
@@ -234,7 +256,7 @@ test('anonymous GitHub requests omit credentials and always carry an abort deadl
 });
 
 
-test('bootstrap summaries skip unchanged body downloads and a detail reads only its pinned body', async () => {
+test('generated summaries preserve inheritance, links and changed content; detail fetches only its public JSON', async () => {
   const changedId = '22222222-1234-1234-1234-123456789abc';
   const root = document('Parent full body', { category_id: 'group:custom' });
   const child = document(`[parent](../${ID}/Title.md#section)\n` + 'child '.repeat(300), { parent_id: ID }, OTHER);
@@ -270,7 +292,7 @@ test('bootstrap summaries skip unchanged body downloads and a detail reads only 
   assert.ok(detail.body.markdown.includes(`#/post/${ID}#section`));
   assert.equal(detail.body.categoryId, 'group:custom');
   assert.equal(rawReads().length, 3);
-  assert.ok(rawReads()[2].path.endsWith(`/posts/${OTHER}/Title.md`));
+  assert.ok(rawReads()[2].path.endsWith(`/posts/${OTHER}.json`));
   await f.call(`kind=post&id=${OTHER}&commit=${A}`);
   assert.equal(rawReads().length, 3);
 });
@@ -311,7 +333,7 @@ test('a cached ancestor proof is reused only for its current canonical head', as
     assert.equal(result.body.markdown, 'Original body');
   }
   assert.equal(f.calls.filter(call => call.path === `${REPO}/compare/${A}...${B}`).length, 1);
-  assert.equal(f.calls.filter(call => call.host === 'raw.githubusercontent.com').length, rawCount);
+  assert.equal(f.calls.filter(call => call.host === 'raw.githubusercontent.com').length, rawCount + 1);
 });
 
 
@@ -392,6 +414,7 @@ test('small public responses remain ordinary JSON when gzip is rejected', async 
 
 test('repeated consumed index responses reuse JSON bytes and remain independently readable', async () => {
   const f = fixture();
+  await f.prepare(A);
   const stringify = JSON.stringify;
   let encodings = 0;
   JSON.stringify = function (value, ...args) {
@@ -404,7 +427,7 @@ test('repeated consumed index responses reuse JSON bytes and remain independentl
       assert.equal(result.status, 200);
       assert.equal(result.body.posts[0].markdown, 'Original body');
     }
-    assert.equal(encodings, 1, 'same snapshot should be encoded only once');
+    assert.equal(encodings, 0, 'generated index bytes must not be reserialized');
   } finally {
     JSON.stringify = stringify;
   }

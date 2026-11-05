@@ -1,6 +1,8 @@
+import { authorizedSession } from '../support/authorized-session.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { handleRequest } from '../../app/server/src/handler.mjs';
+import { createManagementCategoryFixture } from '../support/management-category-fixture.mjs';
 import { loadConfig, seal, setCookie } from '../../app/server/src/auth.mjs';
 test('missing configuration blocks management without exposing secrets', async () => {
  const response = await handleRequest(new Request('https://blog.test/api/session'), { env: {} });
@@ -16,6 +18,37 @@ const env = {
  GITHUB_CONTENT_REPOSITORY_ID:'14', GITHUB_APP_BRANCH:'main', GITHUB_CONTENT_BRANCH:'main',
 };
 function oauthCookie(response) { return response.headers.get('set-cookie').split(';')[0]; }
+test('repeated login reuses the pending challenge and stale callbacks preserve cookies', async () => {
+ const first = await handleRequest(new Request('https://blog.test/api/auth/github'), { env });
+ const again = await handleRequest(new Request('https://blog.test/api/auth/github', {
+  headers: { cookie: oauthCookie(first) },
+ }), { env });
+ assert.equal(again.headers.get('location'), first.headers.get('location'));
+ assert.equal(again.headers.getSetCookie().length, 0);
+ const stale = await handleRequest(new Request('https://blog.test/api/auth/callback?code=old&state=stale', {
+  headers: { cookie: oauthCookie(first) },
+ }), { env });
+ assert.equal(stale.status, 401);
+ assert.equal(stale.headers.getSetCookie().length, 0);
+});
+
+test('failed matching callback preserves existing session and bounds one-use code exchange', async () => {
+ const first = await handleRequest(new Request('https://blog.test/api/auth/github'), { env });
+ const state = new URL(first.headers.get('location')).searchParams.get('state');
+ let calls = 0;
+ let exchangeSignal;
+ const response = await handleRequest(new Request(`https://blog.test/api/auth/callback?code=code&state=${state}`, {
+  headers: { cookie: oauthCookie(first) },
+ }), { env, fetcher: async (_url, options) => {
+  calls++;
+  exchangeSignal = options.signal;
+  throw new Error('network');
+ } });
+ assert.equal(calls, 1);
+ assert.ok(exchangeSignal instanceof AbortSignal, 'code exchange must have a deadline');
+ assert.equal(response.status, 502);
+ assert.equal(response.headers.getSetCookie().some(value => value.startsWith('__Host-cms_session=')), false);
+});
 test('PKCE login exchanges code server-side and keeps token encrypted', async () => {
  const start = await handleRequest(new Request('https://blog.test/api/auth/github'),{env});
  const location = new URL(start.headers.get('location'));
@@ -27,7 +60,7 @@ test('PKCE login exchanges code server-side and keeps token encrypted', async ()
    assert.equal(JSON.parse(options.body).code_verifier.length,43);
    return Response.json({access_token:'highly-private-token',expires_in:7200});
   }
-  return Response.json({id:42,login:'owner'});
+  return createManagementCategoryFixture().fetcher(url, options);
  }});
  assert.equal(response.status,302);
  assert.equal(response.headers.get('location'),'https://blog.test');
@@ -57,9 +90,9 @@ test('both direct and rewritten mutations reject unauthenticated callers',async(
  }
 });
 
-test('content reads and mutations enforce owner access before repository work', async () => {
+test('content reads and mutations enforce session owner before repository work', async () => {
  const config = loadConfig(env);
- const cookie = setCookie(seal({ token: 'token', csrfToken: 'csrf', expires: Date.now() + 60000 }, config), config).split(';')[0];
+ const cookie = setCookie(seal(authorizedSession(config, { user: { id: 99, login: 'other' } }), config), config).split(';')[0];
  for (const path of ['/api/content?kind=post&id=123', '/api?path=content&kind=new', '/api/publish?requestId=123']) {
   const missing = await handleRequest(new Request('https://blog.test' + path), { env });
   assert.equal(missing.status, 401);
@@ -74,13 +107,13 @@ test('content reads and mutations enforce owner access before repository work', 
    return Response.json({ id: 99, login: 'other' });
   } });
   assert.equal(response.status, 403);
-  assert.equal(calls, 1, 'Unauthorized users must not reach repository reads or writes');
+  assert.equal(calls, 0, 'Unauthorized users must not reach repository reads or writes');
  }
 });
 
 test('owner mutations require both matching origin and CSRF before repository work', async () => {
  const config = loadConfig(env);
- const cookie = setCookie(seal({ token: 'token', csrfToken: 'csrf', expires: Date.now() + 60000 }, config), config).split(';')[0];
+ const cookie = setCookie(seal(authorizedSession(config), config), config).split(';')[0];
  for (const path of ['/api/content', '/api?path=content', '/api/assets', '/api/publish']) {
   for (const headers of [{}, { origin: 'https://evil.test', 'x-csrf-token': 'csrf' }, { origin: env.CMS_ORIGIN, 'x-csrf-token': 'wrong' }]) {
    let calls = 0;
@@ -92,7 +125,7 @@ test('owner mutations require both matching origin and CSRF before repository wo
     return Response.json({ id: 42, login: 'owner' });
    } });
    assert.equal(response.status, 403);
-   assert.equal(calls, 1, 'Rejected mutation must not reach repository writes');
+   assert.equal(calls, 0, 'Rejected mutation must not reach repository writes');
   }
  }
 });
@@ -108,8 +141,8 @@ test('slow identity checks cannot extend session past the token expiry', async (
    headers: { cookie: oauthCookie(start) },
   }), { env, fetcher: async url => {
    if (url.endsWith('/access_token')) return Response.json({ access_token: 'token', expires_in: 10 });
-   now += 3000;
-   return Response.json({ id: 42 });
+   if (new URL(url).pathname === '/user') { now += 3000; return Response.json({ id: 42, login: 'owner' }); }
+   return createManagementCategoryFixture().fetcher(url);
   } });
   assert.equal(response.status, 302);
   assert.match(response.headers.get('set-cookie'), /cms_session=[^;]+;[^,]+Max-Age=6(?:;|$)/);

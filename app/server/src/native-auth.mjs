@@ -26,7 +26,9 @@ export function createNativeAuth({ token, origin, handleRequest, now = Date.now 
       }
       if (url.pathname === '/__native/auth/start') {
         if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
-        flow = { id: randomBytes(32).toString('base64url'), expires: now() + 600000, state: 'waiting' };
+        if (!flow || flow.state === 'failed' || request.headers.get('X-Second-Brain-Restart') === '1') {
+          flow = { id: randomBytes(32).toString('base64url'), expires: now() + 600000, state: 'waiting' };
+        }
         return json({ flow: flow.id, url: `${origin}/__native/auth/login?flow=${flow.id}` });
       }
       if (!flow || !equalSecret(url.searchParams.get('flow'), flow.id)) {
@@ -36,7 +38,13 @@ export function createNativeAuth({ token, origin, handleRequest, now = Date.now 
         if (request.method !== 'GET') return json({ error: 'Method not allowed' }, 405);
         if (flow.oauthState) return json({ error: 'Login already started' }, 410);
         const active = flow;
-        const result = await handleRequest(new Request(`${origin}/api/auth/github`, { headers: request.headers }));
+        // A new native flow owns a new challenge; an abandoned browser cookie
+        // must not let its late callback complete the replacement flow.
+        const headers = new Headers(request.headers);
+        const oauthName = cookieName({ origin }, 'oauth');
+        headers.set('cookie', (headers.get('cookie') || '').split(';')
+          .map(part => part.trim()).filter(part => !part.startsWith(`${oauthName}=`)).join('; '));
+        const result = await handleRequest(new Request(`${origin}/api/auth/github`, { headers }));
         const destination = result.headers.get('location');
         if (flow === active && result.status === 302 && destination) {
           active.oauthState = new URL(destination).searchParams.get('state');
@@ -51,10 +59,16 @@ export function createNativeAuth({ token, origin, handleRequest, now = Date.now 
           flow = undefined;
           return new Response(null, { status: 204, headers: { 'Cache-Control': 'no-store' } });
         }
+        if (request.method === 'POST') {
+          if (flow.state !== 'complete') return json({ error: 'Login is not complete' }, 409);
+          flow = undefined;
+          return new Response(null, { status: 204, headers: { 'Cache-Control': 'no-store' } });
+        }
         if (request.method !== 'GET') return json({ error: 'Method not allowed' }, 405);
         const result = json({ state: flow.state }, flow.state === 'waiting' ? 202 : 200);
         if (flow.state === 'complete') result.headers.append('Set-Cookie', flow.cookie);
-        if (flow.state !== 'waiting') flow = undefined;
+        // Keep completed cookies until acknowledgement; a lost response may be retried.
+        if (flow.state === 'failed') flow = undefined;
         return result;
       }
       return json({ error: 'Not found' }, 404);

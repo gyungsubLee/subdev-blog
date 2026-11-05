@@ -1,3 +1,4 @@
+import { authorizedSession } from '../support/authorized-session.mjs';
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
@@ -51,7 +52,7 @@ test("Vite serves management requests with their method, body and separate cooki
       result = { type: "file" };
     } else if (path.endsWith("/git/blobs") && options.method === "POST") {
       uploadedBlob = JSON.parse(options.body);
-      result = { sha: "c".repeat(40) };
+      result = { sha: "f2ba8f84ab5c1bce84a7b441cb1959cfc7093b7f" };
     } else if (path === "/repos/gyungsubLee/subdev-blog" || path === "/repos/gyungsubLee/subdev-blog-content") {
       result = { id: path.endsWith("-content") ? 14 : 13, default_branch: "main", permissions: { push: true } };
     } else {
@@ -74,11 +75,10 @@ test("Vite serves management requests with their method, body and separate cooki
 
     const callback = await nativeFetch(`${origin}/api/auth/callback?error=access_denied`);
     assert.equal(callback.status, 401);
-    assert.equal(callback.headers.getSetCookie().length, 2);
-    assert.ok(callback.headers.getSetCookie().every(cookie => /Max-Age=0/.test(cookie)));
+    assert.equal(callback.headers.getSetCookie().length, 0, 'unmatched callbacks must preserve current cookies');
 
     const config = loadConfig(env);
-    const cookie = setCookie(seal({ token: "private", csrfToken: "csrf", expires: Date.now() + 60000 }, config), config).split(";")[0];
+    const cookie = setCookie(seal(authorizedSession(config, { token: "private" }), config), config).split(";")[0];
     const headers = { cookie, origin: env.CMS_ORIGIN, "x-csrf-token": "csrf", "content-type": "application/json" };
     const upload = await nativeFetch(`${origin}/api/assets`, {
       method: "POST",
@@ -87,7 +87,7 @@ test("Vite serves management requests with their method, body and separate cooki
     });
     const uploaded = await upload.json();
     assert.equal(upload.status, 200, uploaded.error);
-    assert.deepEqual(uploaded, { sha: "c".repeat(40), size: 3 });
+    assert.deepEqual(uploaded, { sha: "f2ba8f84ab5c1bce84a7b441cb1959cfc7093b7f", size: 3 });
     assert.deepEqual(uploadedBlob, { content: "YWJj", encoding: "base64" });
 
     const tooLarge = await nativeFetch(`${origin}/api/assets`, {
