@@ -1,0 +1,37 @@
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ prior category tree UI renames canonical records and retries identical request after 401 (10305.681709ms)
+✔ a conflicting category save reports failure while preserving the editable draft (5141.99825ms)
+✔ a confirmed category save adopts canonical aliases and remains clean after reopening (5148.621ms)
+✔ an older category confirmation preserves edits made while the save is pending (5252.629ms)
+✔ a category confirmation received after navigation restores a clean canonical draft (5240.688917ms)
+✔ canonical deletion confirms then saves the original immediately, preserving protected records (32.970917ms)
+✔ failed category deletion retains the row and retries the same request (32.511958ms)
+✔ saving another category after deletion uses the confirmed source revision without restoring the deleted row (5137.487ms)
+✔ a failed category refresh preserves the exact completed deletion request for retry (28.6575ms)
+✔ signed out management renders nothing and never requests canonical content (0.827708ms)
+✔ existing keyboard tree movement serializes canonical parent and sibling order (5125.215916ms)
+✔ malformed saved canonical records keep their bytes and fall back to safe source nodes (14.860541ms)
+✔ canonical counts include stable category IDs and aliases once without changing sources (8.228625ms)
+✔ local drafts neither count nor block deletion of canonical categories (21.882416ms)
+✔ a rejected category deletion releases its request so a refreshed source can be retried (22.744667ms)
+✔ assigned category deletion selects move then requires a separate final confirmation (23.350917ms)
+✔ assigned category deletion selects delete then requires a separate final confirmation (25.610542ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 42281.625583

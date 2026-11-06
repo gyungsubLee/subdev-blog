@@ -1,0 +1,80 @@
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ approved editor keeps draft save local and renders the two-state writing controls (165.219542ms)
+✔ category action precedes preview and shows the assigned name or empty label (110.530708ms)
+✔ new GitHub posts use the notebook editor and save one paired Markdown/block snapshot (95.84525ms)
+✔ a confirmed publication keeps attachment uploads available for the next edit (82.090208ms)
+✔ an attachment added during background publication survives the earlier snapshot confirmation (135.140375ms)
+✔ GitHub editor JSON restores toggle children and code settings without browser drafts (338.279417ms)
+✔ existing Markdown uses the approved block editor and title-only saves preserve its exact bytes (119.298042ms)
+✔ background failure replaces the matching editor publication status (44.198208ms)
+✔ background failure preserves a later editor publication (39.616459ms)
+✔ a failed editor save restores reset after reopening and preserves recovery until confirmed (104.817458ms)
+✔ Markdown-only image width edits stay recoverable and undo returns to a clean workspace (188.704958ms)
+✔ malformed block recovery data stays intact and cannot silently become a new document (5.40725ms)
+✔ Markdown articles edit blocks directly and save a paired snapshot without a conversion prompt (78.544375ms)
+✔ image uploads preview locally while the saved block and Markdown use a stable relative path (394.848ms)
+✔ source image previews resolve against the content commit without changing stored URLs (63.491584ms)
+✔ closing editor shortcuts never submits an enclosing save form (12.430208ms)
+✔ bare sibling image names resolve to the pinned source asset without rewriting the stored URL (64.385917ms)
+✔ simultaneous sibling uploads preserve every pending attachment (142.985583ms)
+✔ staggered sibling uploads preserve every pending attachment (159.754333ms)
+✔ invalid GitHub editor JSON permits exact original exports and blocks all fallback saves (8.815542ms)
+✔ recovery import restores metadata and pending/source attachments into the fresh target identity (190.7535ms)
+✔ recovery import rejects unsafe attachment ../outside.png 5 (47.822625ms)
+✔ recovery import rejects unsafe attachment %2565ditor.json 5 (38.088458ms)
+✔ recovery import rejects unsafe attachment good.png 5 (41.044583ms)
+✔ recovery import rejects unsafe attachment good.png 6291456 (41.249375ms)
+✔ Cmd/Ctrl+S saves recovery data and prevents browser Save Page without posting to GitHub (46.351583ms)
+✔ cached recovery opens without downloading a damaged remote editor or rewriting its backup (24.86875ms)
+✔ tags, category cancellation and reader controls preserve local-only drafts (90.554291ms)
+✔ invalid imported tags preserve the current blocks and recovery bytes (26.5655ms)
+✔ a published local draft resumes with canonical identity and sends update (120.56775ms)
+✔ editor confirms a category double-click through the shared dialog without publishing (61.362375ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ prior category tree UI renames canonical records and retries identical request after 401 (10334.999125ms)
+✔ a failed category save restores reset after reopening and preserves edits until confirmed (5188.680958ms)
+✔ a confirmed category save adopts canonical aliases and remains clean after reopening (5164.68475ms)
+✔ an older category confirmation preserves edits made while the save is pending (5251.018375ms)
+✔ a category confirmation received after navigation restores a clean canonical draft (5246.01925ms)
+✔ canonical deletion confirms then saves the original immediately, preserving protected records (33.635ms)
+✔ failed category deletion retains the row and retries the same request (46.849834ms)
+✔ saving another category after deletion uses the confirmed source revision without restoring the deleted row (5144.089083ms)
+✔ a failed category refresh preserves the exact completed deletion request for retry (31.39175ms)
+✔ signed out management renders nothing and never requests canonical content (1.248167ms)
+✔ existing keyboard tree movement serializes canonical parent and sibling order (5131.4015ms)
+✔ malformed saved canonical records keep their bytes and fall back to safe source nodes (21.853833ms)
+✔ canonical counts include stable category IDs and aliases once without changing sources (7.936458ms)
+✔ local drafts neither count nor block deletion of canonical categories (23.586667ms)
+✔ a rejected category deletion releases its request so a refreshed source can be retried (33.899791ms)
+✔ assigned category deletion selects move then requires a separate final confirmation (30.7745ms)
+✔ assigned category deletion selects delete then requires a separate final confirmation (31.058833ms)
+ℹ tests 48
+ℹ suites 0
+ℹ pass 48
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 42692.606667

@@ -1,0 +1,62 @@
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ saving another category after deletion uses the confirmed source revision without restoring the deleted row (82.154084ms)
+✖ a failed category refresh preserves the exact completed deletion request for retry (20.855583ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2368.338875
+
+✖ failing tests:
+
+test at tests/web/managed-categories.test.mjs:152:1
+✖ saving another category after deletion uses the confirmed source revision without restoring the deleted row (82.154084ms)
+  AssertionError [ERR_ASSERTION]: source acceptance must remain distinct from public publication
+  + actual - expected
+  
+  + undefined
+  - '원본 저장 완료'
+  
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:157:12
+      at async mount (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:68:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:153:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: '원본 저장 완료',
+    operator: 'strictEqual'
+  }
+
+test at tests/web/managed-categories.test.mjs:171:1
+✖ a failed category refresh preserves the exact completed deletion request for retry (20.855583ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /refresh offline/. Input:
+  
+  '삭제 결과를 확인하지 못했습니다. 같은 삭제 요청을 다시 확인하십시오.'
+  
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:184:14
+      at async mount (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:68:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:172:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '삭제 결과를 확인하지 못했습니다. 같은 삭제 요청을 다시 확인하십시오.',
+    expected: /refresh offline/,
+    operator: 'match'
+  }

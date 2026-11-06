@@ -9,6 +9,7 @@ import {
 import CategorySelectionDialog from "../post-category/CategorySelectionDialog";
 import PostDeleteDialog from "./PostDeleteDialog";
 import type { ManagementSession } from "./types";
+import { isSourcePending } from "./sync-core.mjs";
 import "./workspace.css";
 
 const PAGE_SIZE = 15;
@@ -70,6 +71,30 @@ function workspaceRows(posts: Post[]): { rows: WorkspaceRow[]; error: string } {
         const canonicalId = value.canonicalId === metadata.id || publishedRecovery
           ? metadata.id
           : null;
+        const sourceBlocks = value.sourceDocument.editor?.blocks;
+        const changedBlocks = value.blocks !== undefined && (
+          sourceBlocks !== undefined
+            ? JSON.stringify(value.blocks) !== JSON.stringify(sourceBlocks)
+            : value.blocksChanged === true ||
+              (value.blocksChanged === undefined && typeof value.updatedAt === "string" && !value.publication)
+        );
+        const changed =
+          value.title !== metadata.title ||
+          value.markdown !== document.markdown ||
+          value.category !== (metadata.category_id ?? "") ||
+          JSON.stringify(value.tags ?? metadata.tags ?? []) !==
+            JSON.stringify(metadata.tags ?? []) ||
+          changedBlocks ||
+          (Array.isArray(value.assets) && value.assets.some((asset: { name: string; sha: string }) =>
+            !value.sourceDocument.assets?.some((saved: { name: string; sha: string }) =>
+              saved.name === asset.name && saved.sha === asset.sha)));
+        const awaitingPublication =
+          ["validating", "pending"].includes(value.publication?.state) ||
+          isSourcePending(value.publication);
+        if (canonicalId && !publicIds.has(canonicalId) && !changed && !awaitingPublication) {
+          if (rows.get(id)?.post.draft) rows.delete(id);
+          continue;
+        }
         const rowId = canonicalId ?? id;
         const existing = rows.get(rowId);
         const associatedPost =
@@ -94,13 +119,7 @@ function workspaceRows(posts: Post[]): { rows: WorkspaceRow[]; error: string } {
           url: "",
         };
         const published = !post.draft;
-        const dirty =
-          published &&
-          (value.title !== metadata.title ||
-            value.markdown !== document.markdown ||
-            value.category !== (metadata.category_id ?? "") ||
-            JSON.stringify(value.tags ?? metadata.tags ?? []) !==
-              JSON.stringify(metadata.tags ?? []));
+        const dirty = published && changed;
         if (rowId !== id && rows.get(id)?.post.draft) rows.delete(id);
         rows.set(rowId, {
           post,

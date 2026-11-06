@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { readDrafts } from "../shared/drafts.mjs";
 import { validatePublicCategories } from "../features/post-category/hierarchy";
 import { SYNC_EVENT, overlayContent } from "../features/content-management/background-sync.mjs";
 import { readPublicCache, writePublicCache } from "./public-cache";
 import type { Post, PublicCategory } from "../shared/post";
+
+let checkedIndex = false;
 
 export function usePosts(postId: string | undefined) {
   const [{ posts, categories, contentCommit, sourceCommit }, setContent] = useState<{
@@ -16,6 +18,7 @@ export function usePosts(postId: string | undefined) {
   const [drafts, setDrafts] = useState<Post[]>([]);
   const [error, setError] = useState("");
   const [loaded, setLoaded] = useState(false);
+  const refreshingIndex = useRef<{ contentCommit: string; signal: AbortSignal } | null>(null);
   const reload = useCallback((afterCommit?: string) => {
     setRequest((current) => ({
       generation: current.generation + 1,
@@ -35,11 +38,14 @@ export function usePosts(postId: string | undefined) {
       if (cached && Array.isArray(cached.posts) && cached.posts.every(post => post && typeof post.id === "string" && typeof post.markdown === "string") &&
           typeof cached.contentCommit === "string" && /^[a-f0-9]{40}$/.test(cached.contentCommit) && validatePublicCategories(cached.categories)) {
         if (active) {
-          setContent(await overlayContent(cached) as { posts: Post[]; categories: PublicCategory[]; contentCommit: string });
+          const content = await overlayContent(cached) as { posts: Post[]; categories: PublicCategory[]; contentCommit: string };
+          if (!active) return null;
+          setContent(content);
           setLoaded(true);
         }
-        if (request.generation === 0 && !request.afterCommit) return null;
+        if (checkedIndex && request.generation === 0 && !request.afterCommit) return null;
       }
+      if (!active) return null;
       return fetch("/api/public?" + params, { signal: controller.signal });
     };
     load().then(async (response) => {
@@ -68,9 +74,18 @@ export function usePosts(postId: string | undefined) {
           throw new Error("분류 파일 형식을 확인하십시오.");
         }
         if (active) {
-          setContent(await overlayContent(data));
-          setLoaded(true);
-          await writePublicCache(cachePath, data);
+          const pending = { contentCommit: data.contentCommit, signal: controller.signal };
+          refreshingIndex.current = pending;
+          try {
+            const content = await overlayContent(data, { revalidate: true, signal: controller.signal });
+            if (!active) return;
+            checkedIndex = true;
+            setContent(content);
+            setLoaded(true);
+            await writePublicCache(cachePath, data);
+          } finally {
+            if (refreshingIndex.current === pending) refreshingIndex.current = null;
+          }
         }
       })
       .catch((reason) => {
@@ -82,6 +97,7 @@ export function usePosts(postId: string | undefined) {
     return () => {
       active = false;
       controller.abort();
+      if (refreshingIndex.current?.signal === controller.signal) refreshingIndex.current = null;
     };
   }, [request]);
 
@@ -98,12 +114,16 @@ export function usePosts(postId: string | undefined) {
     async function localChange(event: Event) {
       const detail = (event as CustomEvent).detail;
       if(detail?.state==='publication'&&detail.result?.state==='published') {
+        if (refreshingIndex.current?.contentCommit &&
+            refreshingIndex.current.contentCommit === detail.result.publicCommit) return;
         reload(detail.result.publicCommit);
         return;
       }
       const cached = await readPublicCache("/api/public?kind=index") as {posts:Post[];categories:PublicCategory[];contentCommit:string} | null;
       if (active && cached && Array.isArray(cached.posts) && validatePublicCategories(cached.categories)) {
-        setContent(await overlayContent(cached));
+        const content = await overlayContent(cached);
+        if (!active) return;
+        setContent(content);
         setLoaded(true);
       }
       if (active && detail?.error) setError(detail.error.message);

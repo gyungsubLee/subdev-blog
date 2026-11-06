@@ -1,0 +1,84 @@
+Command: ['node', '--max-old-space-size=1536', '--test', '--test-timeout=20000', '--test-name-pattern=fresh index proof notifies', 'tests/web/app-flow.test.mjs']
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ fresh index proof notifies the mounted post editor once without repeating its index request (223.46475ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ fresh index proof notifies the mounted categories editor once without repeating its index request (143.115125ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4699.47975
+
+✖ failing tests:
+
+test at tests/web/app-flow.test.mjs:201:43
+✖ fresh index proof notifies the mounted post editor once without repeating its index request (223.46475ms)
+  AssertionError [ERR_ASSERTION]: a proof for the index already being applied must not download that index again
+  
+  2 !== 1
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/app-flow.test.mjs:251:12)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 2,
+    expected: 1,
+    operator: 'strictEqual'
+  }
+
+test at tests/web/app-flow.test.mjs:201:43
+✖ fresh index proof notifies the mounted categories editor once without repeating its index request (143.115125ms)
+  AssertionError [ERR_ASSERTION]: a proof for the index already being applied must not download that index again
+  
+  2 !== 1
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/app-flow.test.mjs:251:12)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 2,
+    expected: 1,
+    operator: 'strictEqual'
+  }
+
+Exit: 1
+Elapsed: 4.90s

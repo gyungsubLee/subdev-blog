@@ -1,0 +1,46 @@
+Command: ['node', '--max-old-space-size=1536', '--test', '--test-timeout=15000', '--test-name-pattern=background failure', 'tests/web/managed-block-editor.test.mjs']
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ background failure replaces the matching editor publication status (119.041166ms)
+✔ background failure preserves a later editor publication (43.9735ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2108.252083
+
+✖ failing tests:
+
+test at tests/web/managed-block-editor.test.mjs:318:33
+✖ background failure replaces the matching editor publication status (119.041166ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  '저장 확인 중' !== '저장 실패'
+  
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:332:12
+      at async mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:134:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:325:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '저장 확인 중',
+    expected: '저장 실패',
+    operator: 'strictEqual'
+  }
+
+Exit: 1
+Elapsed: 2.22s

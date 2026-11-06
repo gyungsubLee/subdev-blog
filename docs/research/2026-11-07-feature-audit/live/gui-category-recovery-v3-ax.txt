@@ -1,0 +1,229 @@
+Browser tab: 1490591926, Title: "카테고리 관리 — Second Brain", URL: "http://127.0.0.1:55173/#/categories".
+0 AXWebArea 카테고리 관리 — Second Brain, URL: 127.0.0.1:55173/#/categories
+	1 container root
+		2 link Description: 본문으로 이동, Value: 127.0.0.1:55173/#main-content
+		3 container
+			4 link Description: Second Brain 홈, Value: 127.0.0.1:55173/#/
+			5 container 주 메뉴
+				6 link Description: 기록 관리, Value: 127.0.0.1:55173/#/records
+				7 link Description: 콘텐츠 관리, Value: 127.0.0.1:55173/#/content
+				8 link Description: 카테고리 관리, Value: 127.0.0.1:55173/#/categories
+			9 button 글 쓰기
+			10 button 로그아웃
+			11 pop up button (collapsed) Description: 설정, Secondary Actions: Expand
+		12 container main-content
+			13 text 기록 관리
+			14 heading 카테고리 관리, Value: 1
+				15 text 카테고리 관리
+			16 text 원본 카테고리를 수정합니다. 저장하면 공개 화면에 적용합니다.
+			17 container 카테고리 목록 관리
+				18 text 카테고리 순서와 계층을 정리합니다.
+				19 text 끌어서 순서와 깊이를 바꾸고, 행 안에서 분류를 편집합니다.
+				20 text 49  / 500
+				21 button 전체 펼치기
+				22 button 전체 접기
+				23 text 분류 전체보기
+				24 container 분류 계층
+					25 container
+						26 button (disabled) Audit-20261107-live-v3 펼치기
+						27 button Description: Audit-20261107-live-v3 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						28 checkbox Audit-20261107-live-v3(0), Value: 0
+							29 text Audit-20261107-live-v3
+							30 text (
+							31 text 0
+							32 text )
+						33 button Audit-20261107-live-v3 하위 추가
+						34 button Audit-20261107-live-v3 수정
+						35 button (disabled) Description: Audit-20261107-live-v3 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+					36 container
+						37 button (expanded) Description: CS 접기, Secondary Actions: Collapse
+						38 button Description: CS 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						39 checkbox CS(278), Value: 0
+							40 text CS
+							41 text (
+							42 text 278
+							43 text )
+						44 button CS 하위 추가
+						45 button CS 수정
+						46 button (disabled) Description: CS 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+					47 container
+						48 button (disabled) 수학 펼치기
+						49 button Description: 수학 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						50 checkbox 수학(35), Value: 0
+							51 text 수학
+							52 text (
+							53 text 35
+							54 text )
+						55 button 수학 하위 추가
+						56 button 수학 수정
+						57 button (disabled) Description: 수학 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+					58 container
+						59 button (disabled) 구조적인 문제 해결을 위한 컴퓨터공학 펼치기
+						60 button Description: 구조적인 문제 해결을 위한 컴퓨터공학 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						61 checkbox 구조적인 문제 해결을 위한 컴퓨터공학(25), Value: 0
+							62 text 구조적인 문제 해결을 위한 컴퓨터공학
+							63 text (
+							64 text 25
+							65 text )
+						66 button 구조적인 문제 해결을 위한 컴퓨터공학 하위 추가
+						67 button 구조적인 문제 해결을 위한 컴퓨터공학 수정
+						68 button (disabled) Description: 구조적인 문제 해결을 위한 컴퓨터공학 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+					69 container
+						70 button (disabled) 논리적 문제 해결을 위한 컴퓨터과학 펼치기
+						71 button Description: 논리적 문제 해결을 위한 컴퓨터과학 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						72 checkbox 논리적 문제 해결을 위한 컴퓨터과학(19), Value: 0
+							73 text 논리적 문제 해결을 위한 컴퓨터과학
+							74 text (
+							75 text 19
+							76 text )
+						77 button 논리적 문제 해결을 위한 컴퓨터과학 하위 추가
+						78 button 논리적 문제 해결을 위한 컴퓨터과학 수정
+						79 button (disabled) Description: 논리적 문제 해결을 위한 컴퓨터과학 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+					80 container
+						81 button (disabled) 네트워크(입문) 펼치기
+						82 button Description: 네트워크(입문) 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						83 checkbox 네트워크(입문)(6), Value: 0
+							84 text 네트워크(입문)
+							85 text (
+							86 text 6
+							87 text )
+						88 button 네트워크(입문) 하위 추가
+						89 button 네트워크(입문) 수정
+						90 button (disabled) Description: 네트워크(입문) 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+					91 container
+						92 button (disabled) 디자인패턴 펼치기
+						93 button Description: 디자인패턴 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						94 checkbox 디자인패턴(59), Value: 0
+							95 text 디자인패턴
+							96 text (
+							97 text 59
+							98 text )
+						99 button 디자인패턴 하위 추가
+						100 button 디자인패턴 수정
+						101 button (disabled) Description: 디자인패턴 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+					102 container
+						103 button (disabled) 알고리즘 펼치기
+						104 button Description: 알고리즘 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						105 checkbox 알고리즘(127), Value: 0
+							106 text 알고리즘
+							107 text (
+							108 text 127
+							109 text )
+						110 button 알고리즘 하위 추가
+						111 button 알고리즘 수정
+						112 button (disabled) Description: 알고리즘 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+					113 container
+						114 button (disabled) 자료구조 펼치기
+						115 button Description: 자료구조 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						116 checkbox 자료구조(5), Value: 0
+							117 text 자료구조
+							118 text (
+							119 text 5
+							120 text )
+						121 button 자료구조 하위 추가
+						122 button 자료구조 수정
+						123 button (disabled) Description: 자료구조 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+					124 container
+						125 button (disabled) 기술 면접 준비 펼치기
+						126 button Description: 기술 면접 준비 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						127 checkbox 기술 면접 준비(2), Value: 1
+							128 text 기술 면접 준비
+							129 text (
+							130 text 2
+							131 text )
+						132 button 기술 면접 준비 하위 추가
+						133 button 기술 면접 준비 수정
+						134 button (disabled) Description: 기술 면접 준비 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+					135 container
+						136 button (disabled) 테스트용 카테고리 추가 펼치기
+						137 button Description: 테스트용 카테고리 추가 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						138 checkbox 테스트용 카테고리 추가(0), Value: 0
+							139 text 테스트용 카테고리 추가
+							140 text (
+							141 text 0
+							142 text )
+						143 button 테스트용 카테고리 추가 하위 추가
+						144 button 테스트용 카테고리 추가 수정
+						145 button (disabled) Description: 테스트용 카테고리 추가 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+					146 container
+						147 button (collapsed) Description: 백엔드 펼치기, Secondary Actions: Expand
+						148 button Description: 백엔드 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						149 checkbox 백엔드(981), Value: 0
+							150 text 백엔드
+							151 text (
+							152 text 981
+							153 text )
+						154 button 백엔드 하위 추가
+						155 button 백엔드 수정
+						156 button (disabled) Description: 백엔드 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+					157 container
+						158 button (collapsed) Description: 프론트엔드 펼치기, Secondary Actions: Expand
+						159 button Description: 프론트엔드 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						160 checkbox 프론트엔드(188), Value: 0
+							161 text 프론트엔드
+							162 text (
+							163 text 188
+							164 text )
+						165 button 프론트엔드 하위 추가
+						166 button 프론트엔드 수정
+						167 button (disabled) Description: 프론트엔드 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+					168 container
+						169 button (collapsed) Description: 인프라 펼치기, Secondary Actions: Expand
+						170 button Description: 인프라 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						171 checkbox 인프라(260), Value: 0
+							172 text 인프라
+							173 text (
+							174 text 260
+							175 text )
+						176 button 인프라 하위 추가
+						177 button 인프라 수정
+						178 button (disabled) Description: 인프라 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+					179 container
+						180 button (collapsed) Description: AI·데이터 펼치기, Secondary Actions: Expand
+						181 button Description: AI·데이터 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						182 checkbox AI·데이터(444), Value: 0
+							183 text AI·데이터
+							184 text (
+							185 text 444
+							186 text )
+						187 button AI·데이터 하위 추가
+						188 button AI·데이터 수정
+						189 button (disabled) Description: AI·데이터 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+					190 container
+						191 button (collapsed) Description: 학습·도구 펼치기, Secondary Actions: Expand
+						192 button Description: 학습·도구 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						193 checkbox 학습·도구(880), Value: 0
+							194 text 학습·도구
+							195 text (
+							196 text 880
+							197 text )
+						198 button 학습·도구 하위 추가
+						199 button 학습·도구 수정
+						200 button (disabled) Description: 학습·도구 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+					201 container
+						202 button (collapsed) Description: 미분류 펼치기, Secondary Actions: Expand
+						203 button Description: 미분류 끌어서 이동, Help: 끌어서 이동 · 방향키로 순서와 깊이 변경
+						204 checkbox 미분류(2), Value: 0
+							205 text 미분류
+							206 text (
+							207 text 2
+							208 text )
+						209 button 미분류 하위 추가
+						210 button 미분류 수정
+						211 button (disabled) Description: 미분류 삭제, Help: 편집 중인 변경사항을 먼저 저장하십시오.
+				212 button ＋　카테고리 추가 49 / 500, ID: add-bottom
+					213 text ＋　카테고리 추가
+					214 text 49
+					215 text  / 500
+				216 text 저장하지 않은 변경사항이 있습니다.
+				217 button (disabled) 실행 취소, ID: undo
+				218 button 변경사항 저장, ID: save-all
+			219 button JSON 내보내기
+			220 container 게시 상태
+				221 text 저장 확인 중
+		222 container
+			223 link Description: Second Brain., Value: 127.0.0.1:55173/#/
+			224 text 배운 것을 기록하고, 기록한 것을 연결합니다.
+			225 button 맨 위로 ↑
+
+The focused UI element is 0 AXWebArea 카테고리 관리 — Second Brain, URL: 127.0.0.1:55173/#/categories

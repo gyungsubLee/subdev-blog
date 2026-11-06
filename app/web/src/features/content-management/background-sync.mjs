@@ -14,12 +14,16 @@ let started = false;
 let channel;
 let cacheWork = Promise.resolve();
 let publicationTimer;
-let checkingPublications;
 let publicationController;
+let syncSessionController;
+const publicationRequests = new Map();
 const serializeCache = work => { const next=cacheWork.then(work);cacheWork=next.catch(()=>{});return next; };
 
 function emit(detail) {
   if (typeof window !== 'undefined') window.dispatchEvent(new window.CustomEvent(SYNC_EVENT,{detail}));
+}
+function isCurrentSync(scope,controller) {
+  return started&&controller===syncSessionController&&!controller.signal.aborted&&context&&syncScope(context)===scope;
 }
 function postFromOperation(operation, previous, categories, posts) {
   const document = operation.document;
@@ -55,18 +59,39 @@ function applyOperations(index, operations) {
   }
   return {...index,posts:[...posts.values()],categories};
 }
-export async function overlayContent(index) {
-  if (!context) return index;
+/** @param {{ revalidate?: boolean, signal?: AbortSignal }} [options] */
+export async function overlayContent(index, options = {}) {
+  const { revalidate = false, signal } = options;
+  if (!started || !context || signal?.aborted) return index;
   const scope=syncScope(context);
-  const state=await syncStore.read(scope);
+  const sessionController=syncSessionController;
+  let state=await syncStore.read(scope);
+  if(!isCurrentSync(scope,sessionController)||signal?.aborted)return index;
+  if (revalidate) {
+    const waiting=state.history.filter(batch=>batch.state==='confirmed'&&batch.applied&&isSourcePending(batch.result)&&
+      !batch.publicApplied&&!batch.publicationBlocked&&batch.publication?.state!=='failed'&&
+      batch.publication?.publicCommit!==index.contentCommit);
+    const deadline=AbortSignal.timeout(30000);
+    const verificationSignal=AbortSignal.any([sessionController.signal,deadline,...(signal?[signal]:[])]);
+    for(const batch of waiting) {
+      if(verificationSignal.aborted||!isCurrentSync(scope,sessionController))break;
+      try { await refreshPublication(scope,batch,verificationSignal); }
+      catch(error) { if(!verificationSignal.aborted)emit({scope,error}); }
+    }
+    if(!isCurrentSync(scope,sessionController)||signal?.aborted)return index;
+    state=await syncStore.read(scope);
+  }
+  if(!isCurrentSync(scope,sessionController)||signal?.aborted)return index;
   const reflected=state.history.filter(batch=>batch.state==='confirmed'&&isSourcePending(batch.result)&&
     !batch.publicApplied&&batch.publication?.state==='published'&&batch.publication.publicCommit===index.contentCommit);
   if(reflected.length)await syncStore.update(scope,current=>{
+    if(!isCurrentSync(scope,sessionController))return;
     for(const batch of current.history) {
       if(reflected.some(value=>value.payload.requestId===batch.payload.requestId)&&
         batch.publication?.state==='published'&&batch.publication.publicCommit===index.contentCommit)batch.publicApplied=true;
     }
   });
+  if(!isCurrentSync(scope,sessionController)||signal?.aborted)return index;
   const saved=state.history.filter(batch=>batch.state==='confirmed'&&isSourcePending(batch.result)&&
     !batch.publicApplied&&!reflected.includes(batch));
   const latest=new Map();
@@ -124,6 +149,7 @@ async function recordReceipt(event) {
     localStorage.setItem(item.draftKey,JSON.stringify({
       ...draft, syncVersion:item.version, revision:baseline.revision,contentCommit:baseline.contentCommit,
       ...(source ? {sourceDocument:source,canonicalId:source.document.metadata.id} : {}),
+      ...(same && item.operation.type==='categories.save' ? {categories:baseline.categories} : {}),
       publication:same?{state:result.state,requestId:result.requestId,candidateCommit:result.candidateCommit,contentCommit:result.contentCommit,commitUrl:result.commitUrl,sourceOnly:result.sourceOnly,publicationPending:result.publicationPending,background:true}:undefined,
     }));
   }
@@ -166,14 +192,66 @@ async function recoverConfirmations(scope) {
   }
 }
 function schedulePublications(scope,delay=1500,explicit=false) {
+  if(!started||!context||syncScope(context)!==scope)return;
   clearTimeout(publicationTimer);
-  if(!started)return;
   publicationTimer=setTimeout(()=>{publicationTimer=undefined;void checkPublications(scope,explicit).catch(error=>emit({scope,error}));},delay);
   publicationTimer?.unref?.();
 }
+function waitForPublication(request,signal) {
+  if(!signal)return request;
+  if(signal.aborted)return Promise.reject(signal.reason);
+  return new Promise((resolve,reject)=>{
+    const abort=()=>reject(signal.reason);
+    signal.addEventListener('abort',abort,{once:true});
+    request.then(result=>{
+      signal.removeEventListener('abort',abort);
+      resolve(result);
+    },error=>{
+      signal.removeEventListener('abort',abort);
+      reject(error);
+    });
+  });
+}
+function refreshPublication(scope,batch,signal) {
+  const sessionController=syncSessionController;
+  if(!isCurrentSync(scope,sessionController))return Promise.reject(new DOMException('Aborted','AbortError'));
+  const key=scope+':'+batch.payload.requestId+':'+batch.hash;
+  if(publicationRequests.has(key))return waitForPublication(publicationRequests.get(key),signal);
+  const request=(async()=>{
+    const sourceOnly=batch.result.sourceOnly===true||batch.result.state==='unchanged';
+    const params=new URLSearchParams(sourceOnly?{sourceCommit:batch.result.contentCommit}:
+      {requestId:batch.payload.requestId,candidateCommit:batch.result.candidateCommit??batch.result.contentCommit});
+    const deadline=AbortSignal.timeout(30000);
+    // The sync session owns shared IO; one reader may cancel only its own wait.
+    const result=await requestApi('/api/publish?'+params,{signal:AbortSignal.any([sessionController.signal,deadline])});
+    if(!isCurrentSync(scope,sessionController))throw new DOMException('Aborted','AbortError');
+    const matchesSource=sourceOnly?result.sourceCommit===batch.result.contentCommit:
+      result.requestId===batch.payload.requestId&&result.candidateCommit===(batch.result.candidateCommit??batch.result.contentCommit);
+    if(!matchesSource||
+      !['saved','published','failed','superseded'].includes(result.state)||
+      (result.state==='published'&&!/^[a-f0-9]{40}$/.test(result.publicCommit??'')))throw new Error('공개 반영을 확인하지 못했습니다.');
+    if(result.state==='published')result.publicationPending=false;
+    await syncStore.update(scope,current=>{
+      if(!isCurrentSync(scope,sessionController))return;
+      const saved=current.history.find(item=>item.payload.requestId===batch.payload.requestId&&item.hash===batch.hash);
+      if(saved){saved.publication=result;saved.publicationBlocked=false;}
+    });
+    if(!isCurrentSync(scope,sessionController))throw new DOMException('Aborted','AbortError');
+    for(const item of batch.items) {
+      const draft=JSON.parse(localStorage.getItem(item.draftKey)??'null');
+      if(draft?.requestId===item.clientRequestId)localStorage.setItem(item.draftKey,JSON.stringify({...draft,publication:{...batch.result,...result,background:true}}));
+    }
+    emit({scope,state:'publication',batch,result:{...batch.result,...result,background:true}});
+    return result;
+  })();
+  publicationRequests.set(key,request);
+  const clear=()=>{if(publicationRequests.get(key)===request)publicationRequests.delete(key);};
+  request.then(clear,clear);
+  return waitForPublication(request,signal);
+}
 async function checkPublications(scope,explicit) {
-  if(checkingPublications)return;
-  checkingPublications=true;
+  if(publicationController&&!publicationController.signal.aborted)return;
+  const sessionController=syncSessionController;
   const controller=new AbortController();
   publicationController=controller;
   try {
@@ -181,40 +259,25 @@ async function checkPublications(scope,explicit) {
     const waiting=state.history.filter(batch=>batch.state==='confirmed'&&batch.applied&&isSourcePending(batch.result)&&!batch.publicApplied&&
       (explicit||(!batch.publicationBlocked&&batch.publication?.state!=='failed')));
     for(const batch of waiting) {
-      if(!started||controller.signal.aborted||!context||syncScope(context)!==scope)break;
+      if(controller.signal.aborted||!isCurrentSync(scope,sessionController))break;
       try {
-        const sourceOnly=batch.result.sourceOnly===true||batch.result.state==='unchanged';
-        const params=new URLSearchParams(sourceOnly?{sourceCommit:batch.result.contentCommit}:
-          {requestId:batch.payload.requestId,candidateCommit:batch.result.candidateCommit??batch.result.contentCommit});
-        const result=await requestApi('/api/publish?'+params,{signal:AbortSignal.any([controller.signal,AbortSignal.timeout(30000)])});
-        const matchesSource=sourceOnly?result.sourceCommit===batch.result.contentCommit:
-          result.requestId===batch.payload.requestId&&result.candidateCommit===(batch.result.candidateCommit??batch.result.contentCommit);
-        if(!matchesSource||
-          !['saved','published','failed','superseded'].includes(result.state)||
-          (result.state==='published'&&!/^[a-f0-9]{40}$/.test(result.publicCommit??'')))throw new Error('공개 반영을 확인하지 못했습니다.');
-        await syncStore.update(scope,current=>{
-          const saved=current.history.find(item=>item.payload.requestId===batch.payload.requestId&&item.hash===batch.hash);
-          if(saved){saved.publication=result;saved.publicationBlocked=false;}
-        });
-        for(const item of batch.items) {
-          const draft=JSON.parse(localStorage.getItem(item.draftKey)??'null');
-          if(draft?.requestId===item.clientRequestId)localStorage.setItem(item.draftKey,JSON.stringify({...draft,publication:{...batch.result,...result,background:true}}));
-        }
-        emit({scope,state:'publication',batch,result:{...batch.result,...result,background:true}});
+        await refreshPublication(scope,batch,controller.signal);
       } catch(error) {
-        if(controller.signal.aborted)break;
+        if(controller.signal.aborted||!isCurrentSync(scope,sessionController))break;
         const blocked=[401,403,409].includes(Number(error.status));
         await syncStore.update(scope,current=>{
+          if(!isCurrentSync(scope,sessionController))return;
           const saved=current.history.find(item=>item.payload.requestId===batch.payload.requestId&&item.hash===batch.hash);
           if(saved){saved.publicationBlocked=blocked;saved.publicationError=error.message;}
         });
+        if(controller.signal.aborted||!isCurrentSync(scope,sessionController))break;
         emit({scope,state:'publication',batch,result:{...batch.result,background:true,error:error.message}});
       }
     }
     const current=await syncStore.read(scope);
+    if(controller.signal.aborted||!isCurrentSync(scope,sessionController))return;
     if(current.history.some(batch=>batch.state==='confirmed'&&isSourcePending(batch.result)&&!batch.publicApplied&&!batch.publicationBlocked&&batch.publication?.state!=='failed'))schedulePublications(scope,30000);
   } finally {
-    checkingPublications=false;
     if(publicationController===controller)publicationController=undefined;
   }
 }
@@ -296,8 +359,11 @@ function runCleanup() {
 function online() {if(context)void engine.resume(syncScope(context)).catch(error=>emit({error}));}
 export function startContentSync(session) {
   const changedLogin = context && context.csrfToken !== session.csrfToken;
+  const changedScope = context && syncScope(context) !== syncScope(session);
+  if(started&&(changedLogin||changedScope))stopContentSync();
   context = session;
   if (!started) {
+    syncSessionController=new AbortController();
     started = true;
     window.addEventListener('online',online);
     window.addEventListener('pagehide',stopContentSync);
@@ -311,11 +377,20 @@ export function startContentSync(session) {
       channel.unref?.();
     }
   }
-  void recoverConfirmations(syncScope(session)).then(()=>engine.resume(syncScope(session),Boolean(changedLogin)))
-    .then(()=>{emit({scope:syncScope(session),state:'restored'});schedulePublications(syncScope(session),1500,Boolean(changedLogin));if(!worker&&!cleanupTimer)runCleanup();}).catch(error=>emit({error}));
+  const scope=syncScope(session);
+  const sessionController=syncSessionController;
+  void recoverConfirmations(scope).then(()=>{
+    if(isCurrentSync(scope,sessionController))return engine.resume(scope,Boolean(changedLogin));
+  }).then(()=>{
+    if(!isCurrentSync(scope,sessionController))return;
+    emit({scope,state:'restored'});schedulePublications(scope,1500,Boolean(changedLogin));
+    if(!worker&&!cleanupTimer)runCleanup();
+  }).catch(error=>{if(isCurrentSync(scope,sessionController))emit({error});});
 }
 export function stopContentSync() {
   started = false;
+  syncSessionController?.abort();
+  publicationRequests.clear();
   engine.stop();
   clearTimeout(publicationTimer);publicationTimer=undefined;
   publicationController?.abort();

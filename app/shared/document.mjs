@@ -127,7 +127,9 @@ function validateKnownFields(metadata) {
       (
         typeof metadata[key] !== "string" ||
         !/^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2}))?$/.test(metadata[key]) ||
-        !Number.isFinite(Date.parse(metadata[key]))
+        !Number.isFinite(Date.parse(metadata[key])) ||
+        // Date.parse rolls invalid days into the next month; check the authored date before timezone conversion.
+        new Date(metadata[key].slice(0, 10)).getUTCDate() !== Number(metadata[key].slice(8, 10))
       )
     )
       throw new Error(key + "은 ISO 날짜·시간이어야 합니다.");

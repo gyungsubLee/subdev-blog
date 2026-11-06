@@ -1,0 +1,37 @@
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ a confirmed publication keeps attachment uploads available for the next edit (193.96525ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2308.628375
+
+✖ failing tests:
+
+test at tests/web/managed-block-editor.test.mjs:226:1
+✖ a confirmed publication keeps attachment uploads available for the next edit (193.96525ms)
+  Error: 첨부를 저장할 수 없습니다.
+      at Object.upload (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/.tmp/ManagedPostEditor.tsx-93736-9900a694-99d0-41c2-a6cd-29e42152d352.mjs:3271:13)
+      at uploadFile (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/.tmp/ManagedPostEditor.tsx-93736-9900a694-99d0-41c2-a6cd-29e42152d352.mjs:2806:45)
+      at e.uploadFile (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/@blocknote/core/dist/src-BmLsLZfE.js:3102:19)
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:232:27
+      at process.env.NODE_ENV.exports.act (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/react/cjs/react.development.js:890:22)
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:231:11
+      at async mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:130:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:227:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3)

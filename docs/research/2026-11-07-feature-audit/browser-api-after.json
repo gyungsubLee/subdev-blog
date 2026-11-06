@@ -1,0 +1,23 @@
+{
+  "apiRows": [
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 12.562040999997407,
+      "bytes": 22,
+      "githubFixtureCalls": 0,
+      "githubFixtureWrites": 0
+    },
+    {
+      "path": "/api/public?kind=index",
+      "method": "GET",
+      "status": 200,
+      "ms": 25.57370800001081,
+      "bytes": 614,
+      "githubFixtureCalls": 4,
+      "githubFixtureWrites": 0
+    }
+  ],
+  "sourceCommits": 0
+}

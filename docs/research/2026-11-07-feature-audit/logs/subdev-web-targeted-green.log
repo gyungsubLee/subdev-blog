@@ -1,0 +1,71 @@
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ approved editor keeps draft save local and renders the two-state writing controls (180.647625ms)
+✔ category action precedes preview and shows the assigned name or empty label (131.513083ms)
+✔ new GitHub posts use the notebook editor and save one paired Markdown/block snapshot (97.576666ms)
+✔ a confirmed publication keeps attachment uploads available for the next edit (94.063584ms)
+✔ an attachment added during background publication survives the earlier snapshot confirmation (122.105208ms)
+✔ GitHub editor JSON restores toggle children and code settings without browser drafts (533.26025ms)
+✔ existing Markdown uses the approved block editor and title-only saves preserve its exact bytes (98.325416ms)
+✔ malformed block recovery data stays intact and cannot silently become a new document (6.878416ms)
+✔ Markdown articles edit blocks directly and save a paired snapshot without a conversion prompt (80.327208ms)
+✔ image uploads preview locally while the saved block and Markdown use a stable relative path (525.469208ms)
+✔ source image previews resolve against the content commit without changing stored URLs (60.627791ms)
+✔ closing editor shortcuts never submits an enclosing save form (11.682542ms)
+✔ bare sibling image names resolve to the pinned source asset without rewriting the stored URL (60.577417ms)
+✔ simultaneous sibling uploads preserve every pending attachment (136.416708ms)
+✔ staggered sibling uploads preserve every pending attachment (136.923667ms)
+✔ invalid GitHub editor JSON permits exact original exports and blocks all fallback saves (12.119292ms)
+✔ recovery import restores metadata and pending/source attachments into the fresh target identity (170.424209ms)
+✔ recovery import rejects unsafe attachment ../outside.png 5 (37.7545ms)
+✔ recovery import rejects unsafe attachment %2565ditor.json 5 (53.632458ms)
+✔ recovery import rejects unsafe attachment good.png 5 (47.530833ms)
+✔ recovery import rejects unsafe attachment good.png 6291456 (48.969834ms)
+✔ Cmd/Ctrl+S saves recovery data and prevents browser Save Page without posting to GitHub (38.95675ms)
+✔ cached recovery opens without downloading a damaged remote editor or rewriting its backup (26.80225ms)
+✔ tags, category cancellation and reader controls preserve local-only drafts (89.167834ms)
+✔ invalid imported tags preserve the current blocks and recovery bytes (49.11175ms)
+✔ a published local draft resumes with canonical identity and sends update (128.700125ms)
+✔ editor confirms a category double-click through the shared dialog without publishing (37.465125ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ prior category tree UI renames canonical records and retries identical request after 401 (10323.859292ms)
+✔ canonical deletion confirms then saves the original immediately, preserving protected records (42.482125ms)
+✔ failed category deletion retains the row and retries the same request (38.652292ms)
+✔ saving another category after deletion uses the confirmed source revision without restoring the deleted row (5141.106833ms)
+✔ signed out management renders nothing and never requests canonical content (1.534208ms)
+✔ existing keyboard tree movement serializes canonical parent and sibling order (5128.19175ms)
+✔ malformed saved canonical records keep their bytes and fall back to safe source nodes (15.4605ms)
+✔ canonical counts include stable category IDs and aliases once without changing sources (15.265959ms)
+✔ local drafts neither count nor block deletion of canonical categories (22.244417ms)
+✔ a rejected category deletion releases its request so a refreshed source can be retried (26.409042ms)
+✔ assigned category deletion selects move then requires a separate final confirmation (24.959167ms)
+✔ assigned category deletion selects delete then requires a separate final confirmation (29.357208ms)
+ℹ tests 39
+ℹ suites 0
+ℹ pass 39
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22236.653167

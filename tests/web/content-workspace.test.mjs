@@ -152,6 +152,123 @@ test("a published draft keeps its canonical identity and recovery key after furt
   });
 });
 
+for (const publication of [{ state: 'published' }, { state: 'published', sourceOnly:true, publicationPending:true }, undefined]) {
+  test('workspace does not recreate an absent public post from a clean '+(publication?'published':'canonical')+' recovery', {timeout:5000}, async()=>{
+    const key='second-brain:canonical-draft:draft-removed';
+    const bytes=JSON.stringify({
+      canonicalId:base.id,title:base.title,markdown:base.markdown,category:'notes',assets:[],publication,
+      sourceDocument:{document:{metadata:{id:base.id,title:base.title,category_id:'notes',tags:[]},markdown:base.markdown}},
+    });
+    localStorage.setItem(key,bytes);
+    await mounted({state:'ready'},async()=>{
+      assert.equal(document.querySelectorAll('tbody tr').length,0,'an old backup cannot create a public row');
+      assert.equal(localStorage.getItem(key),bytes,'the backup keeps its original bytes');
+    },{posts:[]});
+  });
+}
+
+test('blocks initialized from Markdown without edits do not recreate an absent public post', {timeout:5000}, async()=>{
+  const key='second-brain:canonical-draft:markdown-only';
+  const bytes=JSON.stringify({
+    canonicalId:base.id,title:base.title,markdown:base.markdown,category:'notes',assets:[],
+    blocks:[{id:'initialized',type:'paragraph',content:[{type:'text',text:base.markdown,styles:{}}],props:{},children:[]}],
+    sourceDocument:{document:{metadata:{id:base.id,title:base.title,category_id:'notes',tags:[]},markdown:base.markdown},assets:[]},
+  });
+  localStorage.setItem(key,bytes);
+  await mounted({state:'ready'},async()=>{
+    assert.equal(document.querySelectorAll('tbody tr').length,0,'initializing a block view is not an edit');
+    assert.equal(localStorage.getItem(key),bytes);
+  },{posts:[]});
+});
+
+test('undoing block-only edits back to the saved editor does not recreate an absent public post', {timeout:5000}, async()=>{
+  const key='second-brain:canonical-draft:undo';
+  const blocks=[{id:'saved',type:'paragraph',content:[{type:'text',text:base.markdown,styles:{}}],props:{},children:[]}];
+  const bytes=JSON.stringify({
+    canonicalId:base.id,title:base.title,markdown:base.markdown,category:'notes',assets:[],blocks,
+    sourceDocument:{document:{metadata:{id:base.id,title:base.title,category_id:'notes',tags:[]},markdown:base.markdown},editor:{blocks},assets:[]},
+  });
+  localStorage.setItem(key,bytes);
+  await mounted({state:'ready'},async()=>{
+    assert.equal(document.querySelectorAll('tbody tr').length,0);
+    assert.equal(localStorage.getItem(key),bytes);
+  },{posts:[]});
+});
+
+for(const marker of [undefined,true,false])test('Markdown-only recovery '+(marker===undefined?'keeps legacy edits':marker?'keeps marked block edits':'recognizes marked undo')+' without copying a block baseline',{timeout:5000},async()=>{
+  const key='second-brain:canonical-draft:markdown-blocks';
+  const bytes=JSON.stringify({
+    canonicalId:base.id,title:base.title,markdown:base.markdown,category:'notes',assets:[],
+    updatedAt:'2026-11-07T00:00:00Z',blocksChanged:marker,
+    blocks:[{id:'image',type:'image',props:{url:'https://example.test/image.png',previewWidth:200},children:[]}],
+    sourceDocument:{document:{metadata:{id:base.id,title:base.title,category_id:'notes',tags:[]},markdown:base.markdown},assets:[]},
+  });
+  localStorage.setItem(key,bytes);
+  await mounted({state:'ready'},async()=>{
+    assert.equal(document.querySelectorAll('tbody tr').length,marker===false?0:1);
+    assert.equal(localStorage.getItem(key),bytes);
+  },{posts:[]});
+});
+
+test('a clean canonical recovery does not leave its legacy draft row behind', {timeout:5000}, async()=>{
+  const key='second-brain:canonical-draft:draft-removed';
+  const bytes=JSON.stringify({
+    canonicalId:base.id,title:base.title,markdown:base.markdown,category:'notes',assets:[],
+    sourceDocument:{document:{metadata:{id:base.id,title:base.title,category_id:'notes',tags:[]},markdown:base.markdown}},
+  });
+  const draft={...base,id:'draft-removed',draft:true,blocks:[]};
+  localStorage.setItem(key,bytes);
+  localStorage.setItem('second-brain:drafts:v1',JSON.stringify([draft]));
+  const legacyBytes=localStorage.getItem('second-brain:drafts:v1');
+  await mounted({state:'ready'},async()=>{
+    assert.equal(document.querySelectorAll('tbody tr').length,0,'the canonical backup cannot retain a second legacy row');
+    assert.equal(localStorage.getItem(key),bytes);
+    assert.equal(localStorage.getItem('second-brain:drafts:v1'),legacyBytes);
+  },{posts:[draft]});
+});
+
+for (const pending of [false,true]) {
+  test('an absent public post keeps '+(pending?'its unpublished saved source':'later unsaved recovery edits')+' available for editing', {timeout:5000}, async()=>{
+    const key='second-brain:canonical-draft:draft-recoverable';
+    const bytes=JSON.stringify({
+      canonicalId:base.id,title:pending?base.title:'다음 편집',markdown:base.markdown,category:'notes',assets:[],
+      publication:{state:pending?'saved':'published',background:true},
+      sourceDocument:{document:{metadata:{id:base.id,title:base.title,category_id:'notes',tags:[]},markdown:base.markdown}},
+    });
+    localStorage.setItem(key,bytes);
+    const edited=[];
+    await mounted({state:'ready'},async()=>{
+      assert.equal(document.querySelectorAll('tbody tr').length,1,'recoverable edits must remain reachable');
+      await act(async()=>document.querySelector('.row-title').click());
+      assert.equal(edited[0].id,base.id);
+      assert.equal(edited[0].draft,false,'the existing canonical editor contract stays intact');
+      assert.equal(edited[0].recoveryKey,'draft-recoverable');
+      assert.equal(localStorage.getItem(key),bytes);
+    },{posts:[],onEdit(post){edited.push(post);}});
+  });
+}
+
+for (const change of ['blocks','assets']) {
+  test('an absent public post keeps recovery changes to '+change, {timeout:5000}, async()=>{
+    const key='second-brain:canonical-draft:draft-extra';
+    const bytes=JSON.stringify({
+      canonicalId:base.id,title:base.title,markdown:base.markdown,category:'notes',
+      assets:change==='assets'?[{name:'new.png',sha:'b'.repeat(40)}]:[],
+      ...(change==='blocks'?{blocks:[{id:'block',type:'paragraph',content:'new formatting'}]}:{}),
+      sourceDocument:{
+        document:{metadata:{id:base.id,title:base.title,category_id:'notes',tags:[]},markdown:base.markdown},
+        assets:[],...(change==='blocks'?{editor:{blocks:[{id:'block',type:'paragraph',content:'old formatting'}]}}:{}),
+      },
+    });
+    localStorage.setItem(key,bytes);
+    await mounted({state:'ready'},async()=>{
+      assert.equal(document.querySelectorAll('tbody tr').length,1,'non-Markdown edits must remain reachable');
+      assert.match(document.querySelector('tbody').textContent,/공개되지 않은 수정 사항/);
+      assert.equal(localStorage.getItem(key),bytes);
+    },{posts:[]});
+  });
+}
+
 
 test("workspace pages contain at most fifteen rows and filters restart from page one", { timeout: 5000 }, async () => {
   const posts = Array.from({ length: 47 }, (_, index) => ({

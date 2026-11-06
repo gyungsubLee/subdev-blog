@@ -1,0 +1,226 @@
+{
+  "at": "2026-11-06T18:09:35.835Z",
+  "repository": "gyungsubLee/subdev-blog-content",
+  "branch": "main",
+  "source": "actual GitHub REST GET; no fixtures",
+  "owner": "live_github_prepare",
+  "testPostId": "da515d90-ccd2-4644-81d1-75c282c71a20",
+  "commits": {
+    "before": "8df22ff2f3c4fcb809ce81151bbafcf60ef27bff",
+    "create": "73a89cc0abe10bc6cf4f31f8439f7f5e621b1cd1",
+    "update": "68532068361b2127cbf17cf7459c1509b6dc9307"
+  },
+  "treesComplete": true,
+  "beforePosts": 3032,
+  "create": {
+    "parentMatches": true,
+    "tree": "696c448a852ab51aebe0c3edef89bfde9cfe77cd",
+    "comparison": {
+      "status": "ahead",
+      "aheadBy": 1,
+      "behindBy": 0,
+      "totalCommits": 1
+    },
+    "delta": [
+      {
+        "path": ".cms/requests/atomic-50c61bfe-3eab-4e86-9789-327a378f299e.json",
+        "before": null,
+        "after": {
+          "mode": "100644",
+          "type": "blob",
+          "sha": "4db1ef312c82aeb5859f87bc3b96a869b1649a33"
+        }
+      },
+      {
+        "path": "posts/da515d90-ccd2-4644-81d1-75c282c71a20/editor.json",
+        "before": null,
+        "after": {
+          "mode": "100644",
+          "type": "blob",
+          "sha": "05ae83e9bdfed0075ddee0ce7e987c7e83454262"
+        }
+      },
+      {
+        "path": "posts/da515d90-ccd2-4644-81d1-75c282c71a20/검증 전용 20261107-native-crud.md",
+        "before": null,
+        "after": {
+          "mode": "100644",
+          "type": "blob",
+          "sha": "4eff0983d9bf4059a81a6360d58cfcf1f155438c"
+        }
+      }
+    ],
+    "onlyTestPathsAndOwnReceipt": true
+  },
+  "update": {
+    "parentMatches": true,
+    "tree": "2f9f8e33a64d65eb1ddcf271df6c175173aac8de",
+    "comparison": {
+      "status": "ahead",
+      "aheadBy": 1,
+      "behindBy": 0,
+      "totalCommits": 1
+    },
+    "delta": [
+      {
+        "path": "posts/da515d90-ccd2-4644-81d1-75c282c71a20/editor.json",
+        "before": {
+          "mode": "100644",
+          "type": "blob",
+          "sha": "05ae83e9bdfed0075ddee0ce7e987c7e83454262"
+        },
+        "after": {
+          "mode": "100644",
+          "type": "blob",
+          "sha": "b6514bedb31f94d64e28e9ed33116a2fdc856ca0"
+        }
+      },
+      {
+        "path": "posts/da515d90-ccd2-4644-81d1-75c282c71a20/검증 전용 20261107-native-crud.md",
+        "before": {
+          "mode": "100644",
+          "type": "blob",
+          "sha": "4eff0983d9bf4059a81a6360d58cfcf1f155438c"
+        },
+        "after": null
+      },
+      {
+        "path": ".cms/requests/atomic-e1ed2794-ada4-47f7-99b3-be56bad074c7.json",
+        "before": null,
+        "after": {
+          "mode": "100644",
+          "type": "blob",
+          "sha": "fe1984005beaf3eb2ac36c19708c9982bcf0f234"
+        }
+      },
+      {
+        "path": "posts/da515d90-ccd2-4644-81d1-75c282c71a20/검증 전용 20261107-native-crud-v2.md",
+        "before": null,
+        "after": {
+          "mode": "100644",
+          "type": "blob",
+          "sha": "54f5869fd6d51893702ae169a7b6d49ef1d554eb"
+        }
+      }
+    ],
+    "onlyTestPathsAndOwnReceipt": true
+  },
+  "currentTestSource": {
+    "filename": "posts/da515d90-ccd2-4644-81d1-75c282c71a20/검증 전용 20261107-native-crud-v2.md",
+    "sha": "54f5869fd6d51893702ae169a7b6d49ef1d554eb",
+    "bytes": 360,
+    "shaVerified": true,
+    "metadata": {
+      "order": 0,
+      "kind": "article",
+      "summary": "",
+      "tags": [],
+      "aliases": [],
+      "related_ids": [],
+      "source_ids": [],
+      "review_status": "needs_review",
+      "schema_version": 1,
+      "id": "da515d90-ccd2-4644-81d1-75c282c71a20",
+      "title": "검증 전용 20261107-native-crud-v2",
+      "parent_id": null,
+      "created": "2026-11-06T17:57:02.896Z",
+      "updated": "2026-11-06T18:02:01.870Z"
+    },
+    "testBody": "Live GitHub CRUD audit. Updated body version v2.\n",
+    "editorPath": "posts/da515d90-ccd2-4644-81d1-75c282c71a20/editor.json",
+    "editorSha": "b6514bedb31f94d64e28e9ed33116a2fdc856ca0",
+    "editorShaVerified": true,
+    "editorDocumentId": "da515d90-ccd2-4644-81d1-75c282c71a20",
+    "editorKeys": [
+      "schemaVersion",
+      "documentId",
+      "markdownHash",
+      "blocks"
+    ]
+  },
+  "receipts": [
+    {
+      "path": ".cms/requests/atomic-50c61bfe-3eab-4e86-9789-327a378f299e.json",
+      "version": 1,
+      "requestId": "atomic-50c61bfe-3eab-4e86-9789-327a378f299e",
+      "baseCommit": "8df22ff2f3c4fcb809ce81151bbafcf60ef27bff",
+      "payloadHash": "568457e8f7b85e3dcf8a7d430494bf1154252307a36eed11c4ee671bb87a36a5"
+    },
+    {
+      "path": ".cms/requests/atomic-e1ed2794-ada4-47f7-99b3-be56bad074c7.json",
+      "version": 1,
+      "requestId": "atomic-e1ed2794-ada4-47f7-99b3-be56bad074c7",
+      "baseCommit": "73a89cc0abe10bc6cf4f31f8439f7f5e621b1cd1",
+      "payloadHash": "d81a6c5dd2e72a0ffbfa57458a1672e8ea123f36346d628df54e0527d6fe1583"
+    }
+  ],
+  "originalFiles": 10302,
+  "originalDifferences": [],
+  "allExistingFilesUnchangedAtUpdate": true,
+  "cleanup": "Post deletion and public removal verified at observation snapshot; category cleanup pending root.",
+  "executionNote": "Initial sandbox read failed connecting to api.github.com; process exit and absence of remaining gh children checked before retry with network permission.",
+  "observations": [
+    {
+      "at": "2026-11-06T18:20:51.256Z",
+      "purpose": "Distinguish completed remote deletion/publication from stale native WebKit display",
+      "source": {
+        "head": "4cc628a0e8ae81e80415e550a71155f8291b64af",
+        "requestId": "52573207-b52c-464a-9932-e4c2ce4482b8",
+        "parent": "8f3d7d0129d07ad9b16bf97d603dc51c233c9d63",
+        "recursiveTreeTruncated": false,
+        "testPaths": [],
+        "postCount": 3032
+      },
+      "publication": {
+        "readySourceCommit": "4cc628a0e8ae81e80415e550a71155f8291b64af",
+        "artifactCommit": "d3cb291079b1b7bd92fe839781373a223ee688da",
+        "index": {
+          "path": "index.json",
+          "sha": "adeb5c87aad0cf01a3ea019c5ef92a831ce99df0",
+          "bytes": 5559972,
+          "mode": "100644",
+          "type": "blob",
+          "contentCommit": "4cc628a0e8ae81e80415e550a71155f8291b64af",
+          "postCount": 3032,
+          "testPresent": false,
+          "categoryCount": 49
+        }
+      },
+      "conclusion": "The test post is absent from current canonical source and ready public index. Deletion and publication completed for this snapshot.",
+      "nativeDisplay": "Root reports native WebKit still shows3033 and the test row after refresh. The source cache, confirmed overlay and draft cache remain candidate causes; this read-only remote check does not select among them.",
+      "finalPreservationComparison": "Not run; category cleanup remains with root.",
+      "remoteMutationByThisWorker": false,
+      "reads": [
+        "GET git/ref/heads/main",
+        "GET git/ref/heads/public-ready/main",
+        "GET git/trees/4cc628a0e8ae81e80415e550a71155f8291b64af?recursive=1",
+        "GET git/ref/heads/public-data/4cc628a0e8ae81e80415e550a71155f8291b64af",
+        "GET git/trees/d3cb291079b1b7bd92fe839781373a223ee688da",
+        "GET git/commits/4cc628a0e8ae81e80415e550a71155f8291b64af",
+        "GET git/blobs/adeb5c87aad0cf01a3ea019c5ef92a831ce99df0"
+      ]
+    },
+    {
+      "at": "2026-11-06T18:50:44.964Z",
+      "purpose": "Check whether native v3 rename was committed after Atomic source save rejected",
+      "sourceHead": "4cc628a0e8ae81e80415e550a71155f8291b64af",
+      "categoryBlobSha": "0824b2e2a494da18d746a2f603fe0abbae2e271f",
+      "categoryBlobShaVerified": true,
+      "categoryRevision": "ea0f5daba5e4940417fb39c9937480f05a1e3bab6e0ba85181afbfa59a64075a",
+      "categoryCount": 49,
+      "categories": [
+        {
+          "id": "21922bad-aeec-438e-be2a-038212bed07c",
+          "name": "Audit-20261107-live-v2",
+          "parent_id": null,
+          "order": 0
+        }
+      ],
+      "v3Applied": false,
+      "initialReadFailure": "sandbox api.github.com connection failed; root interrupted pending escalation; no user denial inferred",
+      "retry": "Direct gh api --jq with existing gh api prefix and require_escalated completed; no residual prior process",
+      "remoteMutationByThisWorker": false,
+      "finalPreservationComparison": "Not run; cleanup pending root"
+    }
+  ]
+}

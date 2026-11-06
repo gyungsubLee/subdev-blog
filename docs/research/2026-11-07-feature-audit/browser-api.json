@@ -1,0 +1,32 @@
+{
+  "apiRows": [
+    {
+      "path": "/api/session",
+      "method": "GET",
+      "status": 200,
+      "ms": 8.848124999996799,
+      "bytes": 22,
+      "githubFixtureCalls": 0,
+      "githubFixtureWrites": 0
+    },
+    {
+      "path": "/api/public?kind=index",
+      "method": "GET",
+      "status": 200,
+      "ms": 8.586042000002635,
+      "bytes": 614,
+      "githubFixtureCalls": 4,
+      "githubFixtureWrites": 0
+    },
+    {
+      "path": "/api/public?kind=post&id=12345678-1234-1234-1234-123456789abc&commit=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "method": "GET",
+      "status": 200,
+      "ms": 7.6375000000116415,
+      "bytes": 413,
+      "githubFixtureCalls": 2,
+      "githubFixtureWrites": 0
+    }
+  ],
+  "sourceCommits": 0
+}

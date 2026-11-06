@@ -1,0 +1,161 @@
+Window: "Second Brain", App: Second Brain.
+0 standard window Second Brain, Secondary Actions: Raise
+	1 scroll area
+		2 HTML content Description: 콘텐츠 관리 — Second Brain, URL: 127.0.0.1:55173/#/content
+			3 link 본문으로 이동, Value: 127.0.0.1:55173/#main-content
+			4 container
+				5 link Second Brain 홈, Value: 127.0.0.1:55173/#/
+				6 container 주 메뉴
+					7 link 기록 관리, Value: 127.0.0.1:55173/#/records
+					8 link 콘텐츠 관리, Value: 127.0.0.1:55173/#/content
+					9 link 카테고리 관리, Value: 127.0.0.1:55173/#/categories
+				10 button 글 쓰기
+				11 button 로그아웃
+				12 pop up button 설정
+			13 container
+				14 heading 콘텐츠 관리, Value: 1
+					15 text 콘텐츠 관리
+				16 container 글 목록
+					17 tab group (selectable) 게시 상태
+						18 tab (selected) 전체 3032
+						19 tab (selectable) 초안 0
+						20 tab (selectable) 공개 3032
+					21 text 카테고리
+					22 pop up button 카테고리 필터
+					23 search text field (settable) 콘텐츠 검색, Placeholder: 제목이나 본문으로 찾기
+						24 text 제목이나 본문으로 찾기
+					25 table
+						26 row (selectable) 제목
+상태
+분류
+수정일
+작업
+						27 row (selectable)
+							28 cell (selectable) 현대 운영체제 가상 메모리 시스템의 아키텍처 및 메커니즘 분석
+							29 cell (selectable) 공개됨
+							30 cell (selectable) Model
+							31 cell (selectable) 2026-10-09
+							32 cell (selectable) Description: 현대 운영체제 가상 메모리 시스템의 아키텍처 및 메커니즘 분석 삭제, 편집 ↗
+현대 운영체제 가상 메모리 시스템의 아키텍처 및 메커니즘 분석 삭제
+						33 row (selectable)
+							34 cell (selectable) 논문 리뷰: MemGPT (OS 가상 메모리) - 정리 중
+							35 cell (selectable) 공개됨
+							36 cell (selectable) Model
+							37 cell (selectable) 2026-10-09
+							38 cell (selectable) Description: 논문 리뷰: MemGPT (OS 가상 메모리) - 정리 중 삭제, 편집 ↗
+논문 리뷰: MemGPT (OS 가상 메모리) - 정리 중 삭제
+						39 row (selectable)
+							40 cell (selectable) Model
+							41 cell (selectable) 공개됨
+							42 cell (selectable) Model
+							43 cell (selectable) 2026-10-08
+							44 cell (selectable) Description: Model 삭제, 편집 ↗
+Model 삭제
+						45 row (selectable)
+							46 cell (selectable) 이산형 확률분포 와 연속형 확률분포
+							47 cell (selectable) 공개됨
+							48 cell (selectable) 수학
+							49 cell (selectable) 2026-10-07
+							50 cell (selectable) Description: 이산형 확률분포 와 연속형 확률분포 삭제, 편집 ↗
+이산형 확률분포 와 연속형 확률분포 삭제
+						51 row (selectable)
+							52 cell (selectable) 평균, 분산, 표준편차
+							53 cell (selectable) 공개됨
+							54 cell (selectable) 수학
+							55 cell (selectable) 2026-10-07
+							56 cell (selectable) Description: 평균, 분산, 표준편차 삭제, 편집 ↗
+평균, 분산, 표준편차 삭제
+						57 row (selectable)
+							58 cell (selectable) 데이터 분석을 위한 기초 통계 완전 정복
+							59 cell (selectable) 공개됨
+							60 cell (selectable) 수학
+							61 cell (selectable) 2026-10-07
+							62 cell (selectable) Description: 데이터 분석을 위한 기초 통계 완전 정복 삭제, 편집 ↗
+데이터 분석을 위한 기초 통계 완전 정복 삭제
+						63 row (selectable)
+							64 cell (selectable) 변량, 도수, 상대도수, 도수분포표, 히스토그램
+							65 cell (selectable) 공개됨
+							66 cell (selectable) 수학
+							67 cell (selectable) 2026-10-07
+							68 cell (selectable) Description: 변량, 도수, 상대도수, 도수분포표, 히스토그램 삭제, 편집 ↗
+변량, 도수, 상대도수, 도수분포표, 히스토그램 삭제
+						69 row (selectable)
+							70 cell (selectable) 데이터 탐색(EDA) - 차트
+							71 cell (selectable) 공개됨
+							72 cell (selectable) 수학
+							73 cell (selectable) 2026-10-07
+							74 cell (selectable) Description: 데이터 탐색(EDA) - 차트 삭제, 편집 ↗
+데이터 탐색(EDA) - 차트 삭제
+						75 row (selectable)
+							76 cell (selectable) 데이터 탐색(EDA) 사례
+							77 cell (selectable) 공개됨
+							78 cell (selectable) 수학
+							79 cell (selectable) 2026-10-07
+							80 cell (selectable) Description: 데이터 탐색(EDA) 사례 삭제, 편집 ↗
+데이터 탐색(EDA) 사례 삭제
+						81 row (selectable)
+							82 cell (selectable) 상관계수
+							83 cell (selectable) 공개됨
+							84 cell (selectable) 수학
+							85 cell (selectable) 2026-10-07
+							86 cell (selectable) Description: 상관계수 삭제, 편집 ↗
+상관계수 삭제
+						87 row (selectable)
+							88 cell (selectable) 공분산
+							89 cell (selectable) 공개됨
+							90 cell (selectable) 수학
+							91 cell (selectable) 2026-10-07
+							92 cell (selectable) Description: 공분산 삭제, 편집 ↗
+공분산 삭제
+						93 row (selectable)
+							94 cell (selectable) 회귀분석
+							95 cell (selectable) 공개됨
+							96 cell (selectable) 수학
+							97 cell (selectable) 2026-10-07
+							98 cell (selectable) Description: 회귀분석 삭제, 편집 ↗
+회귀분석 삭제
+						99 row (selectable)
+							100 cell (selectable) 기초통계량3 - 왜도, 첨도
+							101 cell (selectable) 공개됨
+							102 cell (selectable) 수학
+							103 cell (selectable) 2026-10-07
+							104 cell (selectable) Description: 기초통계량3 - 왜도, 첨도 삭제, 편집 ↗
+기초통계량3 - 왜도, 첨도 삭제
+						105 row (selectable)
+							106 cell (selectable) 기초통계량2 - 퍼짐정도
+							107 cell (selectable) 공개됨
+							108 cell (selectable) 수학
+							109 cell (selectable) 2026-10-07
+							110 cell (selectable) Description: 기초통계량2 - 퍼짐정도 삭제, 편집 ↗
+기초통계량2 - 퍼짐정도 삭제
+						111 row (selectable)
+							112 cell (selectable) 기초통계량1 - 중심경향성
+							113 cell (selectable) 공개됨
+							114 cell (selectable) 수학
+							115 cell (selectable) 2026-10-07
+							116 cell (selectable) Description: 기초통계량1 - 중심경향성 삭제, 편집 ↗
+기초통계량1 - 중심경향성 삭제
+					117 container 콘텐츠 페이지
+						118 button (disabled) 이전 페이지
+						119 text 3,032개 · 1 / 203 페이지
+						120 button 다음 페이지
+			121 container
+				122 link Second Brain., Value: 127.0.0.1:55173/#/
+				123 text 배운 것을 기록하고, 기록한 것을 연결합니다.
+				124 button 맨 위로 ↑
+		125 scroll bar (settable, float) 0
+	126 toolbar
+		127 button Description: 뒤로, Secondary Actions: Move next, Remove from toolbar
+		128 button (disabled) Description: 앞으로, Secondary Actions: Move previous, Move next, Remove from toolbar
+		129 button Description: 홈, Secondary Actions: Move previous, Move next, Remove from toolbar
+		130 button Description: 새로고침, Secondary Actions: Move previous, Remove from toolbar
+	131 text Second Brain
+	132 menu button Window sharing
+133 menu bar
+	134 Second Brain
+	135 파일
+	136 편집
+	137 보기
+	138 윈도우
+
+The focused UI element is 2 HTML content Description: 콘텐츠 관리 — Second Brain, URL: 127.0.0.1:55173/#/content

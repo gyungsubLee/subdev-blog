@@ -1,0 +1,60 @@
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ prior category tree UI renames canonical records and retries identical request after 401 (5208.87075ms)
+✖ a conflicting category save reports failure while preserving the editable draft (5138.220333ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11440.040042
+
+✖ failing tests:
+
+test at tests/web/managed-categories.test.mjs:88:1
+✖ prior category tree UI renames canonical records and retries identical request after 401 (5208.87075ms)
+  AssertionError [ERR_ASSERTION]: a rejected save must stop displaying validation
+  
+  '저장 확인 중' !== '저장 실패'
+  
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:96:12
+      at async mount (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:79:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:89:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '저장 확인 중',
+    expected: '저장 실패',
+    operator: 'strictEqual'
+  }
+
+test at tests/web/managed-categories.test.mjs:122:1
+✖ a conflicting category save reports failure while preserving the editable draft (5138.220333ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  '저장 확인 중' !== '저장 실패'
+  
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:126:12
+      at async mount (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:79:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:123:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '저장 확인 중',
+    expected: '저장 실패',
+    operator: 'strictEqual'
+  }

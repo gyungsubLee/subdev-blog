@@ -1,0 +1,88 @@
+Command: ['node', '--max-old-space-size=1536', '--test', '--test-timeout=15000', '--test-name-pattern=Markdown-only image width|old checker finishing', 'tests/web/managed-block-editor.test.mjs', 'tests/web/sync-recovery.test.mjs']
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ Markdown-only image width edits stay recoverable and undo returns to a clean workspace (241.045875ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ an old checker finishing its last read cannot replace the new session publication timer (3677.160375ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4522.640417
+
+✖ failing tests:
+
+test at tests/web/managed-block-editor.test.mjs:337:1
+✖ Markdown-only image width edits stay recoverable and undo returns to a clean workspace (241.045875ms)
+  AssertionError [ERR_ASSERTION]: image width changes only the stored block properties
+  + actual - expected
+  
+  + '![sample](https://example.test/image.png)\n'
+  - '![sample](https://example.test/image.png)\n\n'
+  
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:351:12
+      at async mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:135:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:340:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '![sample](https://example.test/image.png)\n',
+    expected: '![sample](https://example.test/image.png)\n\n',
+    operator: 'strictEqual'
+  }
+
+test at tests/web/sync-recovery.test.mjs:410:1
+✖ an old checker finishing its last read cannot replace the new session publication timer (3677.160375ms)
+  AssertionError [ERR_ASSERTION]: an old read cannot postpone the new 1.5-second publication check to 30 seconds
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/sync-recovery.test.mjs:451:12)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual'
+  }
+
+Exit: 1
+Elapsed: 4.77s

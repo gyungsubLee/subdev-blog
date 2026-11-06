@@ -1,0 +1,20 @@
+Browser tab: 1490591926, Title: "카테고리 관리 — Second Brain", URL: "http://127.0.0.1:55173/#/categories".
+1 AXWebArea 카테고리 관리 — Second Brain, URL: 127.0.0.1:55173/#/categories
+	2 container root
+		3 link Description: 본문으로 이동, Value: 127.0.0.1:55173/#main-content
+		4 container
+			5 link Description: Second Brain 홈, Value: 127.0.0.1:55173/#/
+			6 container 주 메뉴
+				7 link Description: 기록 관리, Value: 127.0.0.1:55173/#/records
+			217 link Description: 로그인, Value: 127.0.0.1:55173/api/auth/github
+			12 pop up button (collapsed) Description: 설정, Secondary Actions: Expand
+		218 container main-content
+			219 heading 로그인이 필요합니다, Value: 1
+				220 text 로그인이 필요합니다
+			221 text 카테고리 관리는 GitHub 로그인 후 이용할 수 있습니다.
+		213 container
+			214 link Description: Second Brain., Value: 127.0.0.1:55173/#/
+			215 text 배운 것을 기록하고, 기록한 것을 연결합니다.
+			216 button 맨 위로 ↑
+
+The focused UI element is 1 AXWebArea 카테고리 관리 — Second Brain, URL: 127.0.0.1:55173/#/categories

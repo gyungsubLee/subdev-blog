@@ -1,0 +1,35 @@
+Observed RED execution excerpts from this task. These are bounded excerpts,
+not full raw transcripts. Follow-up RED output is in ghost-followup-red.log.
+
+Command: node --test --test-name-pattern='a new page revalidates' tests/web/public-client-cache.test.mjs
+Exit: 1
+Failure: a new page checks the public index once
+Actual: 0
+Expected: 1
+
+Command: node --test --test-name-pattern='a fresh index' tests/web/sync-recovery.test.mjs
+Exit: 1
+Failure: only an exact verified public snapshot can retire the saved operation
+Actual: 1
+Expected: 0
+Failure: the fresh index verifies only its unresolved source batch
+Actual: 0
+Expected: 1
+
+Command: node --test --test-name-pattern='workspace does not recreate|an absent public post' tests/web/content-workspace.test.mjs
+Exit: 1
+Failure: an old backup cannot create a public row
+Actual: 1
+Expected: 0
+Cases: published recovery; canonical recovery
+The two preservation cases passed before the fix.
+
+Command: node --test --test-name-pattern='recovery changes to' tests/web/content-workspace.test.mjs
+Exit: 1
+Failure: non-Markdown edits must remain reachable
+Actual: 0
+Expected: 1
+Cases: blocks; assets
+
+All listed commands completed. Assertions compared primitive counts.
+No worker failure, timeout, hang, or memory failure occurred in these runs.

@@ -1,0 +1,14 @@
+Command: ['node', '--max-old-space-size=768', '.tmp/ghost-block-performance.mjs']
+{
+  "inputBlocks": 101,
+  "iterationsPerRound": 100,
+  "measuredRounds": 6,
+  "beforeMedianMsPerSnapshot": 11.095378330000003,
+  "afterMedianMsPerSnapshot": 15.025033749999993,
+  "addedSerializedBytes": 21,
+  "changed": true,
+  "markdownBytesUnchanged": true
+}
+
+Exit: 0
+Elapsed: 19.16s

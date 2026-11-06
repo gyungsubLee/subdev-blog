@@ -1,0 +1,4 @@
+Command: ['./node_modules/.bin/tsc', '-b']
+
+Exit: 0
+Elapsed: 6.07s

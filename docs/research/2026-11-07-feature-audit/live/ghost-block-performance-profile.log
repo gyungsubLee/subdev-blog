@@ -1,0 +1,13 @@
+Command: ['node', '--max-old-space-size=768', '.tmp/ghost-block-performance.mjs', '--profile']
+{
+  "directEqMs": 0.000912345849999997,
+  "transactionEqMs": 0.0013704312500000015,
+  "blocksSnapshotMs": 0.19657458000000133,
+  "markdownMs": 11.890629579999995,
+  "beforeFinalJsonMs": 0.06363170799999988,
+  "afterFinalJsonMs": 0.06364516699999967,
+  "firstParagraphShared": true
+}
+
+Exit: 0
+Elapsed: 5.44s

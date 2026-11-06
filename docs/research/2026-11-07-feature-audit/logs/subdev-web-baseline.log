@@ -1,0 +1,567 @@
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ App loads summaries then the selected body and handles an invalid index (119.403417ms)
+✔ App loads distinct canonical categories sharing a display name (12.922ms)
+✔ App refreshes the public index after post update and reads the saved body after closing (203.255625ms)
+✔ App refreshes the public index after post create and reads the saved body after closing (140.965916ms)
+✔ App refreshes the public index after post delete and reads the saved body after closing (29.204959ms)
+✔ App refreshes public category names after saving canonical categories (57.136958ms)
+✔ category context menu opens a new writer with its canonical nested category selected (55.398833ms)
+✔ category context menu opens a new writer with its local nested category selected (48.449166ms)
+✔ new writing loads an authenticated base when the public index is unavailable (60.008375ms)
+✔ fragment TOC quotes gain presentation styling without flattening nested lists (70.900084ms)
+✔ a 목차 quote with nonfragment or route links keeps ordinary quote styling (21.194291ms)
+✔ ordinary quote lists require the first meaningful paragraph to be 목차 (6.954875ms)
+✔ a 목차 paragraph without linked list items remains an ordinary quote (6.531833ms)
+✔ mixed TOC and ordinary nested quotes retain normal list presentation (6.699042ms)
+✔ authored quote anchors remain reachable after applying reader styling (6.525083ms)
+✔ the actual statistics TOC preserves every original fragment target (24448.357666ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ article preserves local page links and removes executable HTML (33.229209ms)
+✔ loading article never renders or exports its preview body (3.479ms)
+✔ article editing requires a ready session and a loaded body (146.646708ms)
+✔ home shows article sections and keeps browser drafts in records (22.670958ms)
+✔ header separates records and category routes while the wordmark opens home (47.066708ms)
+✔ direct article entry returns to home (7.933167ms)
+✔ block and heading anchors stay on the current article route (92.749792ms)
+✔ body-only Markdown keeps text between two horizontal rules (3.719792ms)
+✔ page exploration controls and dialog are absent (44.464666ms)
+✔ original cover has priority over the first body image (2.454083ms)
+✔ reader resolves category labels by canonical ID (6.186417ms)
+✔ reader classifies attachment URLs before resolving article IDs (23.132833ms)
+✔ reader resolves literal percent paths before UUIDs in ancestor folder names (9.9715ms)
+✔ known sources use approved groups and unknown sources stay navigable (1.250125ms)
+✔ rename, parent move, order and empty categories survive reconciliation (0.483125ms)
+✔ incoming source gets a valid display name without changing source: 새   초안 (0.347791ms)
+✔ incoming source gets a valid display name without changing source: 가가가가가가가가가가가가가가가가가가가가 (0.147125ms)
+✔ incoming source gets a valid display name without changing source: spring ( java ) (0.145167ms)
+✔ an incoming source does not overwrite an existing alias or block catalog saves (0.096583ms)
+✔ blank and truncated incoming names stay unique within the 100-character limit (0.211083ms)
+✔ migrate legacy aliases and preserve sources and order (1.086333ms)
+✔ moving a parent keeps the complete branch and rejects cycles (0.314458ms)
+✔ delete lifts children and retains source ownership across reconciliation (0.378ms)
+✔ untrusted storage rejects cycles, orphans, duplicate IDs, names and sources (0.195417ms)
+✔ records adapter includes descendant sources and promoted root documents (0.250125ms)
+✔ drag projection can promote a deep node and nest a root without cycling (0.158667ms)
+✔ legacy name collisions migrate without losing IDs, aliases or assignments (0.132833ms)
+✔ canonical category validation permits shared labels but rejects broken public references (0.259ms)
+✔ moving into a same-named sibling is rejected without changing either branch (0.220625ms)
+✔ approved list edits are staged until save and migrate v1 without overwriting it (76.413917ms)
+✔ keyboard branch moves preserve sources and undo across category page round trips (47.5265ms)
+✔ delete confirms, lifts children and retains source ownership without changing posts (39.14825ms)
+✔ failed storage save keeps draft, undo history and original settings (21.12875ms)
+✔ blank, duplicate and long names never alter a draft (15.700292ms)
+✔ corrupt v2 settings are preserved and source reassignment is rejected (19.745583ms)
+✔ pointer drag promotes a source category and clears the insertion marker on drop (14.874417ms)
+✔ a saved deletion can be undone and saved even when undo empties history (23.931ms)
+✔ canonical categories initialize labels and personal v1/v2 settings overlay without ID-named nodes (11.151666ms)
+✔ corrupt personal settings use canonical labels while preserving bytes and blocking save (3.925583ms)
+✔ record filtering includes the complete category branch and source-bearing roots (12.315917ms)
+✔ selected root follows its ID through nesting and promotion (2.752208ms)
+✔ content saves outlive the generation deadline while explicit cancellation is preserved (0.887375ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ public articles render while authentication is pending and writing requires login (40.620166ms)
+✔ category management is hidden when authentication is unavailable, including direct entry (8.5005ms)
+✔ public records keep category filters and hide management links without login (24.921375ms)
+✔ logging out an expired session restores public controls and login (18.704083ms)
+✔ direct publication succeeds without polling and clears a stale retry error (16.243916ms)
+✔ legacy publication checks resolve without an Actions run and stop after publication (12.1965ms)
+✔ background source completion keeps the existing saved label without duplicate publication polling (11.983583ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ canonical title edits preserve Markdown and CSRF then refresh the published commit (200.871791ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ a failed canonical save retains the edited source for reauthentication (110.191708ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ new-post retries after reopening retain their original identity and request (5108.880584ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ existing-post retries after reopening retain their original identity and request (5132.935625ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ canonical category retries retain edits, original sources and request identity (157.76675ms)
+✔ a lost deletion response can be retried after the source has disappeared (31.067625ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+Error: Not implemented: window.scrollBy
+    at module.exports (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/jsdom/lib/jsdom/browser/not-implemented.js:9:17)
+    at Window.scrollBy (/Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/jsdom/lib/jsdom/browser/Window.js:960:7)
+    at scrollRectIntoView (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/prosemirror-view/dist/index.js:242:33)
+    at EditorView.scrollToSelection (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/prosemirror-view/dist/index.js:5705:13)
+    at EditorView.updateStateInner (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/prosemirror-view/dist/index.js:5686:18)
+    at EditorView.updateState (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/prosemirror-view/dist/index.js:5606:14)
+    at Editor.dispatchTransaction (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/@tiptap/core/dist/index.js:6940:13)
+    at EditorView.dispatch (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/prosemirror-view/dist/index.js:5982:29)
+    at Plugin.handleTextInput (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/node_modules/@blocknote/core/dist/blocks-COYcDVg7.js:3687:55)
+    at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/content-management.test.mjs:466:64 undefined
+✔ attachment names with parentheses produce an intact Markdown destination (566.211375ms)
+✔ writing opens an empty local draft without fetching a GitHub source (116.659208ms)
+✔ a new records category reaches the writer and is created only when its post is published (109.440708ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ content workspace is reachable only after authorization (56.981625ms)
+✔ workspace keeps public content separate from recovery drafts and filters local edits (20.536834ms)
+✔ workspace migrates legacy draft status labels and preserves malformed recovery bytes (13.258375ms)
+✔ confirmed newly published recovery resolves to one public row without removing its backup (8.492958ms)
+✔ a published draft keeps its canonical identity and recovery key after further edits (11.643167ms)
+✔ workspace pages contain at most fifteen rows and filters restart from page one (86.560375ms)
+✔ category filters include descendants and preserve the empty state (82.180709ms)
+✔ workspace reuses category dialog and keeps category before search (50.645292ms)
+✔ unrecognized legacy categories agree with the unclassified count and filter (14.699667ms)
+✔ category dialog stays open in StrictMode and Escape preserves the filter (16.167041ms)
+✔ double-click confirms the clicked category immediately while expanders stay open (30.957583ms)
+✔ post deletion waits for modal confirmation and removes canonical source plus recovery (18.955292ms)
+✔ failed deletion preserves content and retries identical request after reopening (22.1675ms)
+✔ local-only draft deletion clears stored draft without a canonical request (15.135916ms)
+✔ a newly published recovery deletes its canonical identity before the index catches up (10.032458ms)
+✔ delete confirmation closes and hides the row before the background response (12.980958ms)
+✔ background deletion failure restores the row and its recovery and announces the error (20.869792ms)
+✔ saving preserves other drafts and updates an existing draft once (0.74325ms)
+✔ corrupt existing storage is never overwritten (0.198ms)
+✔ storage quota error reaches the caller (0.193834ms)
+✔ batch source deletion clears only matching canonical recovery aliases and legacy drafts (1.686083ms)
+▶ real React editor mounts, saves, imports, exports, and opens the slash menu
+  ✔ Markdown import updates real blocks and autosaved title/category (1301.036167ms)
+  ✔ JSON backup imports nested blocks and code settings without flattening (824.760792ms)
+  ✔ MD and JSON download buttons export the current live document (41.452292ms)
+  ✔ slash menu inserts a notebook whose text and formatting survive save and reopen (1168.361041ms)
+✔ real React editor mounts, saves, imports, exports, and opens the slash menu (4180.157209ms)
+✔ home shows four newest published articles without mutating archive order (76.920917ms)
+✔ home keeps small archives usable and places undated articles last (12.592166ms)
+✔ home explains an empty published archive and links to records (6.248917ms)
+✔ exported Markdown restores title, category, IDs and body without a duplicate H1 (7.408542ms)
+✔ an unrelated first heading remains in the body (0.567959ms)
+✔ plain Markdown imports its first heading as the document title (0.149791ms)
+✔ invalid backup metadata fails before the document can be replaced (1.165792ms)
+✔ horizontal rules do not discard the enclosed body (0.513875ms)
+✔ tag-only patches round-trip and preserve untouched content metadata (6.29825ms)
+✔ canonical metadata survives a Markdown round trip (3.705375ms)
+✔ full documents default optional metadata while preserving their first H1 (0.46375ms)
+✔ valid unknown-only YAML mappings are metadata and leave body bytes intact (0.742542ms)
+✔ invalid metadata fails before callers replace existing text (2.9645ms)
+✔ known canonical fields reject invalid values and missing required fields (4.078041ms)
+✔ non-mapping frontmatter remains ordinary Markdown (0.264583ms)
+✔ legacy source_id wins over a draft alias while schema 1 rejects conflicting IDs (0.600958ms)
+✔ legacy ID fallback ignores an invalid source alias and normalizes valid UUIDs (0.145417ms)
+✔ full edit exports carry base_revision outside canonical metadata (2.174ms)
+✔ patch round trips require only editable fields and add no full metadata defaults (0.639167ms)
+✔ patch merge checks revision and identity then preserves hidden and unedited fields (0.312125ms)
+✔ canonical filenames are portable NFC names bounded by UTF-8 bytes (0.961459ms)
+✔ a no-op patch preserves the existing modification date (0.119584ms)
+✔ serialization rejects non-JSON extension values and protected nested keys (0.185083ms)
+✔ canonical IDs and references normalize hex case while accepting corpus UUID versions (0.90225ms)
+✔ legacy invalid ID aliases do not become canonical document identities (0.156834ms)
+✔ shared extension objects serialize as JSON values without YAML aliases (0.842625ms)
+✔ patch headers validate supplied known metadata before discarding non-editable fields (0.227125ms)
+✔ truncated whitespace suffixes cannot expose a Windows device name (0.3515ms)
+✔ truncated whitespace-only prefixes use the empty-title fallback (0.2485ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ approved editor keeps draft save local and renders the two-state writing controls (165.113375ms)
+✔ category action precedes preview and shows the assigned name or empty label (124.552875ms)
+✔ new GitHub posts use the notebook editor and save one paired Markdown/block snapshot (84.440792ms)
+✔ GitHub editor JSON restores toggle children and code settings without browser drafts (307.974375ms)
+✔ existing Markdown uses the approved block editor and title-only saves preserve its exact bytes (81.435875ms)
+✔ malformed block recovery data stays intact and cannot silently become a new document (4.722209ms)
+✔ Markdown articles edit blocks directly and save a paired snapshot without a conversion prompt (70.956708ms)
+✔ image uploads preview locally while the saved block and Markdown use a stable relative path (392.012833ms)
+✔ source image previews resolve against the content commit without changing stored URLs (63.958125ms)
+✔ closing editor shortcuts never submits an enclosing save form (19.579041ms)
+✔ bare sibling image names resolve to the pinned source asset without rewriting the stored URL (61.702542ms)
+✔ simultaneous sibling uploads preserve every pending attachment (146.844ms)
+✔ staggered sibling uploads preserve every pending attachment (135.804875ms)
+✔ invalid GitHub editor JSON permits exact original exports and blocks all fallback saves (8.082041ms)
+✔ recovery import restores metadata and pending/source attachments into the fresh target identity (257.525167ms)
+✔ recovery import rejects unsafe attachment ../outside.png 5 (56.891167ms)
+✔ recovery import rejects unsafe attachment %2565ditor.json 5 (38.207334ms)
+✔ recovery import rejects unsafe attachment good.png 5 (41.0595ms)
+✔ recovery import rejects unsafe attachment good.png 6291456 (39.943ms)
+✔ Cmd/Ctrl+S saves recovery data and prevents browser Save Page without posting to GitHub (42.014417ms)
+✔ cached recovery opens without downloading a damaged remote editor or rewriting its backup (26.188375ms)
+✔ tags, category cancellation and reader controls preserve local-only drafts (91.866459ms)
+✔ invalid imported tags preserve the current blocks and recovery bytes (35.235ms)
+✔ a published local draft resumes with canonical identity and sends update (156.553209ms)
+✔ editor confirms a category double-click through the shared dialog without publishing (57.28575ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ prior category tree UI renames canonical records and retries identical request after 401 (10304.675791ms)
+✔ canonical deletion confirms then saves the original immediately, preserving protected records (31.038291ms)
+✔ failed category deletion retains the row and retries the same request (37.178625ms)
+✔ signed out management renders nothing and never requests canonical content (0.773792ms)
+✔ existing keyboard tree movement serializes canonical parent and sibling order (5125.548792ms)
+✔ malformed saved canonical records keep their bytes and fall back to safe source nodes (15.481459ms)
+✔ canonical counts include stable category IDs and aliases once without changing sources (8.520333ms)
+✔ local drafts neither count nor block deletion of canonical categories (21.70425ms)
+✔ a rejected category deletion releases its request so a refreshed source can be retried (25.185875ms)
+✔ assigned category deletion selects move then requires a separate final confirmation (24.149833ms)
+✔ assigned category deletion selects delete then requires a separate final confirmation (29.664291ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ session reads share an in-flight request in StrictMode and manual refresh (35.383875ms)
+✔ temporary network loss recovers once; permission failures are not retried (354.591958ms)
+✔ online and focus recover blocked sessions with event throttling and cleanup (2.929416ms)
+✔ logout invalidates a delayed ready response (2.255834ms)
+✔ HTML and null access denials keep their status and never retry (1408.620208ms)
+✔ deadline during retry backoff leaves checking and cleanup aborts owned requests (3.12525ms)
+✔ toggle summaries preserve nested semantic formatting and safe links (53.706458ms)
+✔ inline Markdown formulas render accessible math beside surrounding text (20.304625ms)
+✔ block Markdown formulas render display math outside code blocks (9.793625ms)
+✔ formulas exported inside an HTML summary render inline (9.347375ms)
+✔ table inline code preserves explicit line breaks and literal punctuation (9.617125ms)
+✔ untrusted HTML and URLs remain sanitized while safe content survives (7.32325ms)
+✔ math rendering does not trust URL or HTML macros (15.269417ms)
+✔ published code captions and wrapping use only explicitly allowed attributes (8.3015ms)
+✔ reader color attributes admit only the installed palette and supported alignment (5.135208ms)
+✔ notebook slash insertion keeps editing and saved formatting inside its frame (175.014666ms)
+✔ Markdown preserves notebook content, nested lists, inline formatting and code line breaks (111.397042ms)
+✔ ordinary documents retain native Markdown and notebook HTML remains sanitized (19.637916ms)
+✔ a notebook nested in an ordered list preserves numbering and its parent on import (23.366792ms)
+✔ notebook headings have distinct reader anchors and matching TOC entries (19.567875ms)
+✔ a toggle keeps its notebook and preceding text after Markdown import (11.649292ms)
+✔ ordinary toggles and code settings survive Markdown publication without a notebook (16.342042ms)
+✔ adjacent toggles remain independent expandable sections (11.13475ms)
+✔ published formatting retains the editor palette, alignment and semantic underline (18.839042ms)
+✔ toggle headings publish as expandable headings with their nested body (15.137291ms)
+▶ Notion input rules change real BlockNote blocks and preserve the native rules
+  ✔ "> " (66.426167ms)
+  ✔ "\" " (18.544916ms)
+  ✔ "[] " (12.033959ms)
+  ✔ "a. " (10.661709ms)
+  ✔ "i. " (13.103958ms)
+  ✔ "## " (15.247334ms)
+  ✔ "- " (9.501541ms)
+  ✔ "1. " (10.132833ms)
+  ✔ "```js " (11.498625ms)
+✔ Notion input rules change real BlockNote blocks and preserve the native rules (168.876458ms)
+▶ Notion block shortcuts use Cmd+Option and Ctrl+Shift with the same digit contract
+  ✔ {"metaKey":true,"altKey":true} 0 (11.842042ms)
+  ✔ {"metaKey":true,"altKey":true} 1 (11.286458ms)
+  ✔ {"metaKey":true,"altKey":true} 2 (6.989958ms)
+  ✔ {"metaKey":true,"altKey":true} 3 (7.430166ms)
+  ✔ {"metaKey":true,"altKey":true} 4 (7.995333ms)
+  ✔ {"metaKey":true,"altKey":true} 5 (7.951292ms)
+  ✔ {"metaKey":true,"altKey":true} 6 (8.626042ms)
+  ✔ {"metaKey":true,"altKey":true} 7 (8.122ms)
+  ✔ {"metaKey":true,"altKey":true} 8 (6.857292ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 0 (7.020875ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 1 (7.31175ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 2 (8.507291ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 3 (8.2145ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 4 (7.445458ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 5 (7.463917ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 6 (6.86125ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 7 (9.680958ms)
+  ✔ {"ctrlKey":true,"shiftKey":true} 8 (6.999792ms)
+✔ Notion block shortcuts use Cmd+Option and Ctrl+Shift with the same digit contract (148.373667ms)
+✔ Cmd/Ctrl+E applies inline code and preserves text (8.7945ms)
+✔ composition key events do not convert the current block (6.310375ms)
+✔ native code blocks keep Markdown markers as code text (6.532333ms)
+✔ native undo reverses a Notion input conversion (11.289916ms)
+✔ Cmd/Ctrl+D duplicates a block and nested children with fresh IDs (9.081667ms)
+✔ Cmd/Ctrl+D duplicates all selected blocks once (7.061542ms)
+✔ native Cmd/Ctrl+Shift+Arrow moves the current block (7.691083ms)
+✔ custom code blocks retain language, caption and wrapping in JSON (62.012209ms)
+✔ Cmd+Option+0 turns code back into a paragraph without losing code text (7.844666ms)
+✔ block conversion leaves image blocks intact (9.210375ms)
+✔ Mac Option digit symbols still use the Notion shortcut mapping (8.908667ms)
+✔ typing a code caption updates saved props before blur and keeps the focused input (27.904083ms)
+✔ the same wrap button toggles code wrapping on and off (22.394541ms)
+✔ undo synchronizes the native language picker with persisted code props (21.148542ms)
+✔ TOC labels show semantic HTML heading text without literal tags (64.380625ms)
+✔ TOC labels decode exported punctuation after removing formatting (9.854458ms)
+✔ TOC labels keep existing Markdown emphasis behavior (7.606208ms)
+✔ TOC labels leave malformed or invalid entities readable without throwing (5.780792ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ a remounted public view renders stored data without waiting for or repeating the index download (35.245584ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+Warning: KaTeX doesn't work in quirks mode. Make sure your website has a suitable doctype.
+✔ records filters and visible count survive article and home roundtrips (305.749708ms)
+✔ overview adds retain dialog, scroll and disclosures; blank menu is scoped; selection closes (109.457666ms)
+✔ ordinary edits are direct; undo/redo are confirmed and native input undo stays native (41.645333ms)
+✔ global category has no menu and writer receives the category from overview (19.117542ms)
+✔ tag gaps retain projected child DOM, cache valid targets and reject gap drops (1629.856417ms)
+✔ outside/descendant cancels projection and Escape cleans sidebar floating feedback (649.065375ms)
+✔ same names in different parents are valid; duplicate siblings and failed storage saves are atomic (49.527584ms)
+✔ a released long hold stays armed for the next drag and blank clicks cancel it (1264.775625ms)
+✔ sidebar browsing preserves category filters and visible count (154.361833ms)
+✔ sidebar group selection and pagination include every matching record once (69.1735ms)
+✔ removed selections fall back to all records and an empty catalog offers writing (29.1745ms)
+✔ record cards use canonical ID labels while source filters include new and moved posts (13.154291ms)
+✔ sidebar preserves managed hierarchy without duplicate roots or synthetic whole-category controls (48.771083ms)
+✔ durable saves schedule immediate dispatch and coalesce only before transmission (9.994125ms)
+✔ restored pending saves ignore a legacy future debounce without bypassing retry waits (1.081209ms)
+✔ another coordinator cannot duplicate an in-flight batch, and later edits survive old response (1.585583ms)
+✔ a lost response retains the same payload and resumes after reload without duplicate identity (1.729625ms)
+✔ daily cleanup verifies receipts and never deletes failed, pending or mismatched data (2.526708ms)
+✔ daily cleanup preserves a record whose receipt commit differs from its saved result (2.192791ms)
+✔ discarding one conflict retains other documents as blocked recoverable saves (0.997ms)
+✔ cleanup preserves remotely confirmed payloads until their local recovery state is applied (2.64725ms)
+✔ repeated saves coalesce without growing callback or pending queues; capacity rejects only the new request (27.906167ms)
+✔ transient retry schedule is5,15,60 seconds and then stops; manual retry reuses the frozen batch (2.145083ms)
+✔ a superseded lost-response retry cannot attach the latest revision to an older operation (1.031ms)
+✔ oversized saves and a full retained history stop new work without deleting older requests (15.000709ms)
+✔ a verified source save confirms the queue before public generation and retains its overlay (2.524291ms)
+✔ a source save with a mismatched receipt stays recoverable rather than confirming (0.500792ms)
+✔ authorization and conflict failures never automatically resend a source batch (0.8755ms)
+✔ cleanup retains unchanged source receipts only while their flagged publication is pending (2.049333ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ restart applies confirmed recovery data, and late older receipts cannot overwrite a newer baseline (18.117125ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ a delayed peer failure cannot announce an archived failed batch as confirmed (39.338333ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ source confirmation preserves the public snapshot identity and overlays an older public index after restart (59.72875ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ background publication checks survive navigation and retire overlays only at the verified public commit (1615.637833ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ retained published receipts cannot replace a fresher public source baseline (37.351416ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ retained unchanged receipts cannot replace a fresher public source baseline (39.062ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ an unchanged source awaiting publication survives recovery and retires at the verified public snapshot (1575.404791ms)
+✔ theme preferences reject unknown or corrupt storage and tolerate blocked storage (24.5405ms)
+✔ palette and accent persist independently and leave layout tokens untouched (43.661292ms)
+✔ all offered palette/accent combinations retain readable text and buttons (28.891667ms)
+✔ shared trigger opens a native dialog, applies colors, reopens and resets without rerendering its parent (194.514792ms)
+✔ settings icon follows logout in the shared site header (59.412ms)
+✔ first-post category creation preserves a lost-response request but refreshes a definite conflict (2.573375ms)
+ℹ tests 280
+ℹ suites 0
+ℹ pass 280
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 75639.246292

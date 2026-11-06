@@ -1,0 +1,508 @@
+{
+  "at": "2026-11-06T21:15:15.974Z",
+  "baselineSource": "8df22ff2f3c4fcb809ce81151bbafcf60ef27bff",
+  "sourceHead": "c5e949cc7c5cb6d60baa7eceebd2a1001e95aa7d",
+  "sourceTreeComplete": true,
+  "baselineFileCount": 10302,
+  "sourceFileCount": 10308,
+  "allOriginalFilesUnchanged": true,
+  "originalFileDifferences": [],
+  "postCount": 3032,
+  "testPostPaths": [],
+  "categories": {
+    "count": 48,
+    "blobSha": "0a33eeab4d849c87f5f3aed38903fd82af314e0e",
+    "baselineBlobSha": "0a33eeab4d849c87f5f3aed38903fd82af314e0e",
+    "exactBytesMatchBaseline": true,
+    "revision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+    "testCategoryA": {
+      "id": "21922bad-aeec-438e-be2a-038212bed07c",
+      "absent": true
+    },
+    "testCategoryB": {
+      "id": "ff15d3b4-e6cc-4085-8fdb-48c5272a2867",
+      "absent": true
+    }
+  },
+  "addedFiles": [
+    {
+      "mode": "100644",
+      "path": ".cms/requests/atomic-50c61bfe-3eab-4e86-9789-327a378f299e.json",
+      "sha": "4db1ef312c82aeb5859f87bc3b96a869b1649a33",
+      "type": "blob"
+    },
+    {
+      "mode": "100644",
+      "path": ".cms/requests/atomic-931806dd-a668-4375-abe7-7339588d4fc5.json",
+      "sha": "389247206aab2003a41ad59ab3a4953f194ace0c",
+      "type": "blob"
+    },
+    {
+      "mode": "100644",
+      "path": ".cms/requests/atomic-a8af7e32-1591-47bb-927f-e5f49fa6dce0.json",
+      "sha": "c271c3df3f3362d2429c550fd3f23fed789745f6",
+      "type": "blob"
+    },
+    {
+      "mode": "100644",
+      "path": ".cms/requests/atomic-ade2d7c5-1ecb-40ee-85aa-63e21b537be6.json",
+      "sha": "a43a2a5f34ce1856d74b3dbe86f2a18429db6839",
+      "type": "blob"
+    },
+    {
+      "mode": "100644",
+      "path": ".cms/requests/atomic-b4a6d32a-6cd3-4486-b947-e371db2b5f7d.json",
+      "sha": "3afc5db776d4bf2a110853a4b80d656e9fb042d3",
+      "type": "blob"
+    },
+    {
+      "mode": "100644",
+      "path": ".cms/requests/atomic-e1ed2794-ada4-47f7-99b3-be56bad074c7.json",
+      "sha": "fe1984005beaf3eb2ac36c19708c9982bcf0f234",
+      "type": "blob"
+    }
+  ],
+  "onlyAddedOwnedReceipts": true,
+  "ownedReceiptRequestIds": [
+    "atomic-50c61bfe-3eab-4e86-9789-327a378f299e",
+    "atomic-e1ed2794-ada4-47f7-99b3-be56bad074c7",
+    "atomic-b4a6d32a-6cd3-4486-b947-e371db2b5f7d",
+    "atomic-ade2d7c5-1ecb-40ee-85aa-63e21b537be6",
+    "atomic-931806dd-a668-4375-abe7-7339588d4fc5",
+    "atomic-a8af7e32-1591-47bb-927f-e5f49fa6dce0"
+  ],
+  "comparison": {
+    "commits": [
+      {
+        "message": "cms-request:atomic-50c61bfe-3eab-4e86-9789-327a378f299e\n\npayload-sha256:568457e8f7b85e3dcf8a7d430494bf1154252307a36eed11c4ee671bb87a36a5",
+        "parents": [
+          "8df22ff2f3c4fcb809ce81151bbafcf60ef27bff"
+        ],
+        "sha": "73a89cc0abe10bc6cf4f31f8439f7f5e621b1cd1"
+      },
+      {
+        "message": "cms-request:atomic-e1ed2794-ada4-47f7-99b3-be56bad074c7\n\npayload-sha256:d81a6c5dd2e72a0ffbfa57458a1672e8ea123f36346d628df54e0527d6fe1583",
+        "parents": [
+          "73a89cc0abe10bc6cf4f31f8439f7f5e621b1cd1"
+        ],
+        "sha": "68532068361b2127cbf17cf7459c1509b6dc9307"
+      },
+      {
+        "message": "cms-request:atomic-b4a6d32a-6cd3-4486-b947-e371db2b5f7d\n\npayload-sha256:7ffee649a3540ef57c7e14037a350c305f9e1f0185bf0b9af9f3a82a390d5db9",
+        "parents": [
+          "68532068361b2127cbf17cf7459c1509b6dc9307"
+        ],
+        "sha": "9d1b39fcac9f0d7ef5de1d4a4d4c014263ac8639"
+      },
+      {
+        "message": "cms-request:atomic-ade2d7c5-1ecb-40ee-85aa-63e21b537be6\n\npayload-sha256:67fd97ebe6260daa0df2e23c941ab418dd306ffaf3f3dcde87f91677250f1fb5",
+        "parents": [
+          "9d1b39fcac9f0d7ef5de1d4a4d4c014263ac8639"
+        ],
+        "sha": "8f3d7d0129d07ad9b16bf97d603dc51c233c9d63"
+      },
+      {
+        "message": "cms-request:52573207-b52c-464a-9932-e4c2ce4482b8\npayload-sha256:d6cd1929e2c00f7a1c6b39ac967fe6234ed19721456fca700dea441e7319d9b8",
+        "parents": [
+          "8f3d7d0129d07ad9b16bf97d603dc51c233c9d63"
+        ],
+        "sha": "4cc628a0e8ae81e80415e550a71155f8291b64af"
+      },
+      {
+        "message": "cms-request:atomic-931806dd-a668-4375-abe7-7339588d4fc5\n\npayload-sha256:2ece989006973c24a0bae73f1d12298df9b6102253f556413ca8d2c8fe2c7c09",
+        "parents": [
+          "4cc628a0e8ae81e80415e550a71155f8291b64af"
+        ],
+        "sha": "c30bdaf2997d182c36739fbca033a5f980fedcd0"
+      },
+      {
+        "message": "cms-request:1035986d-7a28-4420-af5d-7cc1c7c628a2\npayload-sha256:c04353a7b4f2e8b15bd3cfa706f7163c9a3344748dfc023ac498bbd40f5f52c2",
+        "parents": [
+          "c30bdaf2997d182c36739fbca033a5f980fedcd0"
+        ],
+        "sha": "ba5e4c21472d56f406c9d5ada63249699612bb73"
+      },
+      {
+        "message": "cms-request:atomic-a8af7e32-1591-47bb-927f-e5f49fa6dce0\n\npayload-sha256:f6a78d0d2b669e9be2702ea5778bcead0e93d8626258836582ca9341791075b8",
+        "parents": [
+          "ba5e4c21472d56f406c9d5ada63249699612bb73"
+        ],
+        "sha": "2b9bbfe23b3f79295ed9642df9cdaaeb30e209a7"
+      },
+      {
+        "message": "cms-request:7cd2c62c-06a1-485b-8c99-39bad42f528b\npayload-sha256:17b5eba81fcf4ad051758904db5f882146a146b9ddb108c47ce67d50637490ef",
+        "parents": [
+          "2b9bbfe23b3f79295ed9642df9cdaaeb30e209a7"
+        ],
+        "sha": "a6628433e88419b76b02822715e8836c0e80125d"
+      },
+      {
+        "message": "chore(audit): restore original category order after live CRUD",
+        "parents": [
+          "a6628433e88419b76b02822715e8836c0e80125d"
+        ],
+        "sha": "c5e949cc7c5cb6d60baa7eceebd2a1001e95aa7d"
+      }
+    ],
+    "files": [
+      {
+        "filename": ".cms/requests/atomic-50c61bfe-3eab-4e86-9789-327a378f299e.json",
+        "previous_filename": null,
+        "sha": "4db1ef312c82aeb5859f87bc3b96a869b1649a33",
+        "status": "added"
+      },
+      {
+        "filename": ".cms/requests/atomic-931806dd-a668-4375-abe7-7339588d4fc5.json",
+        "previous_filename": null,
+        "sha": "389247206aab2003a41ad59ab3a4953f194ace0c",
+        "status": "added"
+      },
+      {
+        "filename": ".cms/requests/atomic-a8af7e32-1591-47bb-927f-e5f49fa6dce0.json",
+        "previous_filename": null,
+        "sha": "c271c3df3f3362d2429c550fd3f23fed789745f6",
+        "status": "added"
+      },
+      {
+        "filename": ".cms/requests/atomic-ade2d7c5-1ecb-40ee-85aa-63e21b537be6.json",
+        "previous_filename": null,
+        "sha": "a43a2a5f34ce1856d74b3dbe86f2a18429db6839",
+        "status": "added"
+      },
+      {
+        "filename": ".cms/requests/atomic-b4a6d32a-6cd3-4486-b947-e371db2b5f7d.json",
+        "previous_filename": null,
+        "sha": "3afc5db776d4bf2a110853a4b80d656e9fb042d3",
+        "status": "added"
+      },
+      {
+        "filename": ".cms/requests/atomic-e1ed2794-ada4-47f7-99b3-be56bad074c7.json",
+        "previous_filename": null,
+        "sha": "fe1984005beaf3eb2ac36c19708c9982bcf0f234",
+        "status": "added"
+      }
+    ],
+    "status": "ahead",
+    "total_commits": 10
+  },
+  "guiCategoryCrudCommits": {
+    "renameA": "c30bdaf2997d182c36739fbca033a5f980fedcd0",
+    "deleteA": "ba5e4c21472d56f406c9d5ada63249699612bb73",
+    "createB": "2b9bbfe23b3f79295ed9642df9cdaaeb30e209a7",
+    "deleteB": "a6628433e88419b76b02822715e8836c0e80125d"
+  },
+  "apiRestoration": {
+    "commit": "c5e949cc7c5cb6d60baa7eceebd2a1001e95aa7d",
+    "parent": "a6628433e88419b76b02822715e8836c0e80125d",
+    "guardedHead": "a6628433e88419b76b02822715e8836c0e80125d",
+    "guardedBlob": "a66d7e56bf8b41df18119081c6ed2cc376add6e6",
+    "restoredBlob": "0a33eeab4d849c87f5f3aed38903fd82af314e0e",
+    "onlyFile": "categories.json",
+    "restoredOrderFieldCount": 7,
+    "method": "GitHub Contents PUT with current blob SHA",
+    "requestCount": 1,
+    "comparison": {
+      "files": [
+        {
+          "filename": "categories.json",
+          "previous_filename": null,
+          "sha": "0a33eeab4d849c87f5f3aed38903fd82af314e0e",
+          "status": "modified"
+        }
+      ],
+      "status": "ahead",
+      "total_commits": 1
+    }
+  },
+  "preRestoreObservation": {
+    "at": "2026-11-06T21:12:39.663Z",
+    "sourceHead": "a6628433e88419b76b02822715e8836c0e80125d",
+    "expectedCleanupCommit": "a6628433e88419b76b02822715e8836c0e80125d",
+    "baselineSource": "8df22ff2f3c4fcb809ce81151bbafcf60ef27bff",
+    "sourceTreeComplete": true,
+    "sourceFileCount": 10308,
+    "baselineFileCount": 10302,
+    "postCount": 3032,
+    "testPostPaths": [],
+    "rootDifferences": [
+      {
+        "path": ".cms",
+        "before": {
+          "path": ".cms",
+          "mode": "040000",
+          "type": "tree",
+          "sha": "7e95a8f339632502d52e72043e01ed75ead1e129",
+          "url": "https://api.github.com/repos/gyungsubLee/subdev-blog-content/git/trees/7e95a8f339632502d52e72043e01ed75ead1e129"
+        },
+        "after": {
+          "mode": "040000",
+          "path": ".cms",
+          "sha": "922c07baf829f371e4afb64c9df0cd16db1f6060",
+          "type": "tree"
+        }
+      },
+      {
+        "path": "categories.json",
+        "before": {
+          "path": "categories.json",
+          "mode": "100644",
+          "type": "blob",
+          "sha": "0a33eeab4d849c87f5f3aed38903fd82af314e0e",
+          "size": 7693,
+          "url": "https://api.github.com/repos/gyungsubLee/subdev-blog-content/git/blobs/0a33eeab4d849c87f5f3aed38903fd82af314e0e"
+        },
+        "after": {
+          "mode": "100644",
+          "path": "categories.json",
+          "sha": "a66d7e56bf8b41df18119081c6ed2cc376add6e6",
+          "type": "blob"
+        }
+      }
+    ],
+    "existingReceiptDifferences": [],
+    "addedFiles": [
+      {
+        "mode": "100644",
+        "path": ".cms/requests/atomic-50c61bfe-3eab-4e86-9789-327a378f299e.json",
+        "sha": "4db1ef312c82aeb5859f87bc3b96a869b1649a33",
+        "type": "blob"
+      },
+      {
+        "mode": "100644",
+        "path": ".cms/requests/atomic-931806dd-a668-4375-abe7-7339588d4fc5.json",
+        "sha": "389247206aab2003a41ad59ab3a4953f194ace0c",
+        "type": "blob"
+      },
+      {
+        "mode": "100644",
+        "path": ".cms/requests/atomic-a8af7e32-1591-47bb-927f-e5f49fa6dce0.json",
+        "sha": "c271c3df3f3362d2429c550fd3f23fed789745f6",
+        "type": "blob"
+      },
+      {
+        "mode": "100644",
+        "path": ".cms/requests/atomic-ade2d7c5-1ecb-40ee-85aa-63e21b537be6.json",
+        "sha": "a43a2a5f34ce1856d74b3dbe86f2a18429db6839",
+        "type": "blob"
+      },
+      {
+        "mode": "100644",
+        "path": ".cms/requests/atomic-b4a6d32a-6cd3-4486-b947-e371db2b5f7d.json",
+        "sha": "3afc5db776d4bf2a110853a4b80d656e9fb042d3",
+        "type": "blob"
+      },
+      {
+        "mode": "100644",
+        "path": ".cms/requests/atomic-e1ed2794-ada4-47f7-99b3-be56bad074c7.json",
+        "sha": "fe1984005beaf3eb2ac36c19708c9982bcf0f234",
+        "type": "blob"
+      }
+    ],
+    "categories": {
+      "baselineCount": 48,
+      "finalCount": 48,
+      "baselineBytes": 7693,
+      "finalBytes": 7693,
+      "baselineRevision": "21b923ad3c4e03e01d831e60db4eefebf3880ac115f646f7c5027b80e3c4d54e",
+      "finalRevision": "946cd5c01d4e6d941fedc43cbb3c5ba6bcce2758332a5c1919eb1d9ee46f5590",
+      "sameArrayOrder": true,
+      "recordDifferences": [
+        {
+          "id": "group:cs",
+          "before": {
+            "id": "group:cs",
+            "name": "CS",
+            "parent_id": null,
+            "order": 0,
+            "sources": []
+          },
+          "after": {
+            "id": "group:cs",
+            "name": "CS",
+            "parent_id": null,
+            "order": 1,
+            "sources": []
+          },
+          "changedFields": [
+            "order"
+          ]
+        },
+        {
+          "id": "group:backend",
+          "before": {
+            "id": "group:backend",
+            "name": "백엔드",
+            "parent_id": null,
+            "order": 1,
+            "sources": []
+          },
+          "after": {
+            "id": "group:backend",
+            "name": "백엔드",
+            "parent_id": null,
+            "order": 2,
+            "sources": []
+          },
+          "changedFields": [
+            "order"
+          ]
+        },
+        {
+          "id": "group:frontend",
+          "before": {
+            "id": "group:frontend",
+            "name": "프론트엔드",
+            "parent_id": null,
+            "order": 2,
+            "sources": []
+          },
+          "after": {
+            "id": "group:frontend",
+            "name": "프론트엔드",
+            "parent_id": null,
+            "order": 3,
+            "sources": []
+          },
+          "changedFields": [
+            "order"
+          ]
+        },
+        {
+          "id": "group:infra",
+          "before": {
+            "id": "group:infra",
+            "name": "인프라",
+            "parent_id": null,
+            "order": 3,
+            "sources": []
+          },
+          "after": {
+            "id": "group:infra",
+            "name": "인프라",
+            "parent_id": null,
+            "order": 4,
+            "sources": []
+          },
+          "changedFields": [
+            "order"
+          ]
+        },
+        {
+          "id": "group:ai-data",
+          "before": {
+            "id": "group:ai-data",
+            "name": "AI·데이터",
+            "parent_id": null,
+            "order": 4,
+            "sources": []
+          },
+          "after": {
+            "id": "group:ai-data",
+            "name": "AI·데이터",
+            "parent_id": null,
+            "order": 5,
+            "sources": []
+          },
+          "changedFields": [
+            "order"
+          ]
+        },
+        {
+          "id": "group:learning-tools",
+          "before": {
+            "id": "group:learning-tools",
+            "name": "학습·도구",
+            "parent_id": null,
+            "order": 5,
+            "sources": []
+          },
+          "after": {
+            "id": "group:learning-tools",
+            "name": "학습·도구",
+            "parent_id": null,
+            "order": 6,
+            "sources": []
+          },
+          "changedFields": [
+            "order"
+          ]
+        },
+        {
+          "id": "group:unclassified",
+          "before": {
+            "id": "group:unclassified",
+            "name": "미분류",
+            "parent_id": null,
+            "order": 6,
+            "sources": []
+          },
+          "after": {
+            "id": "group:unclassified",
+            "name": "미분류",
+            "parent_id": null,
+            "order": 7,
+            "sources": []
+          },
+          "changedFields": [
+            "order"
+          ]
+        }
+      ],
+      "exactBytesEqual": false,
+      "testCategoryAAbsent": true,
+      "testCategoriesWithAuditName": [],
+      "siblingGroupsChecked": 8,
+      "sameSiblingRelativeOrder": true,
+      "siblingRelativeOrderDifferences": [],
+      "propertyKeysSame": true,
+      "formattingSameAfterOnlyOrderRestoration": true,
+      "serializationConclusion": "Only the seven existing root order numbers differ; object property order, array order, indentation, whitespace and final newline are otherwise identical."
+    },
+    "allOriginalFilesUnchanged": false,
+    "publication": {
+      "checkedReadyCommit": "ba5e4c21472d56f406c9d5ada63249699612bb73",
+      "latestSourceReady": false,
+      "status": "Awaiting current workflow"
+    },
+    "comparisonMethod": "Complete recursive source response with unchanged Git subtree identities; exact mode/type/SHA comparison inside changed .cms subtree and direct category blob comparison.",
+    "remoteMutationByThisWorker": false
+  },
+  "publication": {
+    "readySourceCommit": "c5e949cc7c5cb6d60baa7eceebd2a1001e95aa7d",
+    "latestSourceReady": true,
+    "workflow": {
+      "conclusion": "success",
+      "created_at": "2026-11-06T21:13:58Z",
+      "head_sha": "c5e949cc7c5cb6d60baa7eceebd2a1001e95aa7d",
+      "html_url": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/42295005671",
+      "id": 42295005671,
+      "path": ".github/workflows/public-content.yml",
+      "status": "completed",
+      "updated_at": "2026-11-06T21:15:09Z"
+    },
+    "artifactCommit": "1d60be7edba04201b8faa8b5a88d27b833b228c1",
+    "index": {
+      "mode": "100644",
+      "path": "index.json",
+      "sha": "ea3081e9c377568b4f0ed17374fd8eaa18e1b2ae",
+      "size": 5559817,
+      "type": "blob",
+      "categoryCount": 48,
+      "contentCommit": "c5e949cc7c5cb6d60baa7eceebd2a1001e95aa7d",
+      "postCount": 3032,
+      "testCategoryAPresent": false,
+      "testCategoryBPresent": false,
+      "testPostPresent": false
+    },
+    "status": "Latest source published; actual public index verified"
+  },
+  "comparisonMethod": "Complete recursive GitHub source response; unchanged root subtree mode/type/SHA proves all contained file paths and identities; exact mode/type/SHA comparison covers the changed .cms subtree. GitHub compare additionally reports only the six owned receipt additions.",
+  "finalVerifiedAt": "2026-11-06T21:16:37.959Z",
+  "references": {
+    "main": "c5e949cc7c5cb6d60baa7eceebd2a1001e95aa7d",
+    "publicReady": "c5e949cc7c5cb6d60baa7eceebd2a1001e95aa7d",
+    "publicArtifact": "1d60be7edba04201b8faa8b5a88d27b833b228c1"
+  },
+  "completed": true,
+  "verificationScope": "Actual GitHub source/ref/tree/compare/blob/Actions GETs; one separately authorized categories.json baseline restoration PUT. No GUI, product-code, app-server, test, branch-reset or push actions by this worker."
+}

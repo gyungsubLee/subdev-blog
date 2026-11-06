@@ -1,0 +1,66 @@
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ a failed editor save restores reset after reopening and preserves recovery until confirmed (403.259292ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ a failed category save restores reset after reopening and preserves edits until confirmed (5234.506666ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6448.130125
+
+✖ failing tests:
+
+test at tests/web/managed-block-editor.test.mjs:337:1
+✖ a failed editor save restores reset after reopening and preserves recovery until confirmed (403.259292ms)
+  AssertionError [ERR_ASSERTION]: a restored failed save must keep the existing reset action available
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:361:12
+      at async mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:135:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:350:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }
+
+test at tests/web/managed-categories.test.mjs:122:1
+✖ a failed category save restores reset after reopening and preserves edits until confirmed (5234.506666ms)
+  AssertionError [ERR_ASSERTION]: a restored failed save must keep the existing reset action available
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:133:12
+      at async mount (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:79:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:123:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }

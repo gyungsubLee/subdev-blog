@@ -93,6 +93,7 @@ dom.window.document.elementFromPoint = () => dom.window.document.body;
 const { default: React, act } = await import("react");
 const { createRoot } = await import("react-dom/client");
 const { default: Editor } = await loadComponent("app/web/src/features/content-management/ManagedPostEditor.tsx");
+const { default: Workspace } = await loadComponent("app/web/src/features/content-management/ContentWorkspace.tsx");
 const id = "12345678-1234-8234-9234-123456789012";
 const session = { state: "ready", csrfToken: "csrf", connection: { repository: "owner/content", branch: "main", contentCommit: "b".repeat(40) } };
 const post = { id, title: "Saved", markdown: "Original", category: "notes", categoryId: "notes" };
@@ -115,9 +116,13 @@ async function mounted(props, sourceValue, run) {
   const previous = globalThis.fetch;
   const requests = [];
   const readRequests = [];
+  const uploadRequests = [];
   globalThis.fetch = async (url, init = {}) => {
     if (url.startsWith("/api/content?")) {readRequests.push(url);return reply(sourceValue);}
-    if (url === "/api/assets") return reply({ sha: "c".repeat(40), size: 5 });
+    if (url === "/api/assets") {
+      uploadRequests.push(JSON.parse(init.body));
+      return reply({ sha: "c".repeat(40), size: 5 });
+    }
     assert.equal(url, "/api/content");
     const input = JSON.parse(init.body);
     requests.push(input);
@@ -127,7 +132,7 @@ async function mounted(props, sourceValue, run) {
   try {
     await act(async () => root.render(React.createElement(Editor, { session, onClose() {}, ...props })));
     await waitFor(() => document.querySelector('[aria-label="글 제목"]') !== null || document.querySelector('[role="alert"]') !== null, "Editor did not finish loading");
-    await run({ root, requests, readRequests });
+    await run({ root, requests, readRequests, uploadRequests });
   } finally {
     await act(async () => root.unmount());
     dom.window.dispatchEvent(new dom.window.Event("pagehide"));
@@ -223,6 +228,58 @@ test("new GitHub posts use the notebook editor and save one paired Markdown/bloc
   });
 });
 
+test("a confirmed publication keeps attachment uploads available for the next edit", { timeout: 10000 }, async () => {
+  await mounted({ post }, source(), async ({ requests, readRequests, uploadRequests }) => {
+    await save(requests);
+    const editor = document.querySelector('.bn-editor').editor.view.state.schema.cached.blockNoteEditor;
+    let path;
+    await act(async () => {
+      path = await editor.uploadFile(new dom.window.File(["hello"], "next.txt", { type: "text/plain" }));
+    });
+    assert.equal(path, "./next.txt");
+    const recovery = JSON.parse(localStorage.getItem("second-brain:canonical-draft:" + id));
+    assert.equal(recovery.assets.at(-1).name, "next.txt");
+    assert.equal(requests.length, 1, "a new attachment must stay local until the next publication");
+    assert.equal(readRequests.length, 1, "the next upload must reuse the loaded source");
+    await act(async () => {
+      await assert.rejects(editor.uploadFile(new dom.window.File(["hello"], "next.txt")), /같은 이름의 첨부/);
+    });
+    assert.equal(uploadRequests.length, 1, "a duplicate filename must never send a second upload");
+  });
+});
+
+test("an attachment added during background publication survives the earlier snapshot confirmation", { timeout: 10000 }, async () => {
+  await mounted({ post }, source(), async ({ requests }) => {
+    const previousFetch = globalThis.fetch;
+    let release;
+    const publication = new Promise(resolve => { release = resolve; });
+    globalThis.fetch = async (url, init) => {
+      const response = await previousFetch(url, init);
+      if (url === "/api/content") await publication;
+      return response;
+    };
+    try {
+      await act(async () => document.querySelector('button[type="submit"]').click());
+      await waitFor(() => requests.length === 1, "The first publication must start");
+      const editor = document.querySelector('.bn-editor').editor.view.state.schema.cached.blockNoteEditor;
+      await act(async () => {
+        await editor.uploadFile(new dom.window.File(["hello"], "pending.txt", { type: "text/plain" }));
+      });
+      assert.equal(requests[0].operations[0].assets.length, 0, "the in-flight snapshot must remain immutable");
+    } finally {
+      await act(async () => release());
+      globalThis.fetch = previousFetch;
+    }
+    const key = "second-brain:canonical-draft:" + id;
+    await waitFor(() => JSON.parse(localStorage.getItem(key)).revision === "d".repeat(64), "The earlier snapshot must confirm");
+    assert.equal(JSON.parse(localStorage.getItem(key)).assets.at(-1).name, "pending.txt");
+    await save(requests);
+    assert.equal(requests.length, 2);
+    assert.equal(requests[1].operations[0].assets.at(-1).name, "pending.txt");
+    assert.equal(requests[1].operations[0].baseRevision, "d".repeat(64));
+  });
+});
+
 test("GitHub editor JSON restores toggle children and code settings without browser drafts", { timeout: 10000 }, async () => {
   const markdown = "Saved body";
   const blocks = [
@@ -256,6 +313,106 @@ test("existing Markdown uses the approved block editor and title-only saves pres
     assert.equal(requests[0].operations[0].markdown, markdown);
     assert.equal(requests[0].operations[0].changes.title,'Renamed');
     assert.equal(requests[0].operations[0].editor.markdownHash,hash(markdown));
+  });
+});
+
+for(const stale of [false,true])test('background failure '+(stale?'preserves a later editor publication':'replaces the matching editor publication status'),{timeout:10000},async()=>{
+  const draftKey='second-brain:canonical-draft:'+id;
+  const requestId=stale?'later-client':'failed-client';
+  localStorage.setItem(draftKey,JSON.stringify({
+    canonicalId:id,title:'Saved',markdown:'Original',category:'notes',assets:[],revision:'a'.repeat(64),
+    sourceDocument:source(),requestId,publication:{state:'validating',requestId,background:true},
+  }));
+  await mounted({post},source(),async()=>{
+    assert.equal(document.querySelector('.publish-status [role="status"]').textContent,'저장 확인 중');
+    await act(async()=>window.dispatchEvent(new window.CustomEvent('second-brain:sync',{detail:{
+      scope:'owner:owner/content:main',state:'failed',batch:{items:[{draftKey,clientRequestId:'failed-client'}]},
+      error:{message:'Canonical branch changed',status:409},
+    }})));
+    assert.match(document.querySelector('[role="alert"]').textContent,/Canonical branch changed/);
+    assert.equal(document.querySelector('.publish-status [role="status"]').textContent,stale?'저장 확인 중':'저장 실패');
+  });
+});
+
+test('a failed editor save restores reset after reopening and preserves recovery until confirmed', {timeout:10000}, async()=>{
+  const draftKey='second-brain:canonical-draft:'+id;
+  const markdown='\n```javascript\nconst local = 1;\n```\n';
+  const blocks=[{
+    id:'local-code',type:'codeBlock',props:{language:'javascript',caption:'Local caption',wrap:true},
+    content:[{type:'text',text:'const local = 1;',styles:{}}],children:[],
+  }];
+  const original=source({document:{metadata:{id,title:'Saved',category_id:'notes'},markdown:'\n# Original source\n'}});
+  localStorage.setItem(draftKey,JSON.stringify({
+    canonicalId:id,title:'Unsent local title',markdown,markdownHash:hash(markdown),blocks,blocksChanged:true,
+    category:'notes',assets:[],revision:original.revision,sourceDocument:original,requestId:'failed-client',
+    publication:{state:'validating',requestId:'failed-client',background:true},
+  }));
+  await mounted({post},original,async({root,requests,readRequests})=>{
+    await act(async()=>window.dispatchEvent(new window.CustomEvent('second-brain:sync',{detail:{
+      scope:'owner:owner/content:main',state:'failed',batch:{items:[{draftKey,clientRequestId:'failed-client'}]},
+      error:{message:'Canonical branch changed',status:409},
+    }})));
+    assert.equal(document.querySelector('.publish-status [role="status"]')?.textContent,'저장 실패');
+    await act(async()=>root.render(React.createElement(Editor,{key:'failed-recovery',post,session,onClose(){}})));
+    await waitFor(()=>document.querySelector('.notion-code-caption') !== null,'the failed recovery must restore its code block');
+    assert.equal(document.querySelector('.publish-status [role="status"]')?.textContent,'저장 실패');
+    assert.ok(document.querySelector('[role="alert"]') === null,'reopening has no transient failure alert');
+    const reset=[...document.querySelectorAll('button')].find(button=>button.textContent==='최신 원본으로 다시 시작');
+    assert.ok(reset !== undefined,'a restored failed save must keep the existing reset action available');
+    const bytes=localStorage.getItem(draftKey);
+    const previousConfirm=dom.window.confirm;
+    let confirmations=0;
+    try {
+      dom.window.confirm=()=>{confirmations++;return false;};
+      await act(async()=>reset.click());
+      assert.equal(confirmations,1);
+      assert.equal(localStorage.getItem(draftKey),bytes,'cancelling reset must preserve the exact paired recovery');
+      const recovery=JSON.parse(localStorage.getItem(draftKey));
+      assert.equal(recovery.markdown,markdown);
+      assert.equal(recovery.blocksChanged,true);
+      assert.equal(recovery.requestId,'failed-client');
+      assert.equal(document.querySelector('[aria-label="글 제목"]').value,'Unsent local title');
+      assert.equal(document.querySelector('.notion-code-caption').value,'Local caption');
+      assert.equal(document.querySelector('.notion-code').dataset.wrap,'true');
+      assert.equal(readRequests.length,0,'cancelling reset must reuse the local recovery');
+      dom.window.confirm=()=>{confirmations++;return true;};
+      await act(async()=>reset.click());
+      await waitFor(()=>document.querySelector('[aria-label="글 제목"]')?.value==='Saved','confirmed reset must restore the canonical post');
+      assert.equal(confirmations,2);
+      assert.deepEqual(readRequests,['/api/content?kind=post&id='+id]);
+      assert.equal(requests.length,0,'reset cannot publish the rejected recovery');
+      assert.equal(JSON.parse(localStorage.getItem(draftKey)).markdown,original.document.markdown);
+    } finally {
+      dom.window.confirm=previousConfirm;
+    }
+  });
+});
+
+test('Markdown-only image width edits stay recoverable and undo returns to a clean workspace',{timeout:10000},async()=>{
+  const markdown='![sample](https://example.test/image.png)\n';
+  const original=source({document:{metadata:{id,title:'Saved',category_id:'notes'},markdown}});
+  await mounted({post},original,async({root})=>{
+    await waitFor(()=>document.querySelector('.bn-editor[contenteditable="true"]')!==null,'the image editor must initialize');
+    const view=document.querySelector('.bn-editor').editor.view;
+    let position;let image;
+    view.state.doc.descendants((node,pos)=>{if(node.type.name==='image'){position=pos;image=node;}});
+    assert.equal(typeof position,'number','the Markdown image must produce an image block');
+    const {undo,closeHistory}=await import('@tiptap/pm/history');
+    await act(async()=>view.dispatch(closeHistory(view.state.tr).setNodeMarkup(position,undefined,{...image.attrs,previewWidth:200})));
+    const key='second-brain:canonical-draft:'+id;
+    const editedBytes=localStorage.getItem(key);
+    const edited=JSON.parse(editedBytes);
+    assert.equal(edited.markdown,markdown,'image width changes only the stored block properties');
+    assert.equal(edited.blocks.find(block=>block.type==='image').props.previewWidth,200);
+    await act(async()=>assert.equal(undo(view.state,view.dispatch),true,'native history must undo the width change'));
+    const undoneBytes=localStorage.getItem(key);
+    await act(async()=>root.render(React.createElement(Workspace,{posts:[],categories:[],onEdit(){}})));
+    assert.equal(document.querySelectorAll('tbody tr').length,0,'undo restores the initial unedited recovery');
+    assert.equal(localStorage.getItem(key),undoneBytes);
+    localStorage.setItem(key,editedBytes);
+    await act(async()=>root.render(React.createElement(Workspace,{posts:[],categories:[],draftVersion:1,onEdit(){}})));
+    assert.equal(document.querySelectorAll('tbody tr').length,1,'an image width edit must remain reachable after remote deletion');
+    assert.equal(localStorage.getItem(key),editedBytes);
   });
 });
 

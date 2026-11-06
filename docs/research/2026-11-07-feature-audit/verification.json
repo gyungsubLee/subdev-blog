@@ -1,0 +1,118 @@
+{
+  "dateKST": "2026-11-07",
+  "head": "fb7675bcf309ddd0747f9902c9c275958cd13aa5",
+  "contentHead": "9f99941c6b650c70f363208cd97c7191ef785a46",
+  "node": "v24.3.0",
+  "npm": "11.11.0",
+  "inputHashesRecordedAtCompletion": {
+    "app/shared/document.mjs": "b4db66238eebcdbfdef32d32319a09af4ce8a3ee7d614d056e3e50310c527606",
+    "app/web/src/features/content-management/ManagedCategories.tsx": "ec482f29e391801b47ef12879433840969bf731da39ebcf3f9221d6cbf7d4efc",
+    "app/web/src/features/content-management/ManagedPostEditor.tsx": "7d2af17bfed19e5efc12efa3a0a3a4589994620b8ef332bddfb7ca59ccca4549",
+    "tests/content/document.test.mjs": "9df94cd0475867fa79c400175db9b0ac0bf4f2e7533ae0dea63f93a08dbb47a1",
+    "tests/web/managed-categories.test.mjs": "3e5815e05caa15852f89c613282dfd36e9fa55a3ebf0f92c25234ba8cffdd4a7",
+    "tests/web/managed-block-editor.test.mjs": "2b3c680c1a6b0e1758ec78459d31f8d06bb27aa777b4b085189093a24c01b2ea",
+    "tests/e2e/category-crud-http.test.mjs": "6db2abc86626216ac0a62208744b1060b3b7281e4798d65fdc5ee1a7167b60ea",
+    "package.json": "fe7f40031a475ec762e8f60cab7613a8b758d9fd60e95a673635e052272cd8d8",
+    "package-lock.json": "8ee2d504b0b4c6e7763099ec6a81cb2f4be13d5e7f40166af20cfc51800ded35",
+    "vite.config.ts": "43e314c6411b6d47112e0e44e7bf4c5ea193c0b9dd5a838de94b0066648e6801",
+    "app/server/generated/content-catalog.json": "81a6d6645261ea5591ca99da73f8222fe65839d6afb739e4ef5b2f6774dbe106"
+  },
+  "sourceTreesRecordedAtCompletion": {
+    "app/shared": {
+      "files": 3,
+      "sha256": "000468fd46c9e5dca4bf97862ef8ad91796f702a68b3f3226d31d68058b27459"
+    },
+    "app/server/src": {
+      "files": 9,
+      "sha256": "d1802d87ae42a9fb055a89636abce4f4d80d449bc160e69cdbd59a6ac8909442"
+    },
+    "app/web/src": {
+      "files": 106,
+      "sha256": "9e8f7f25708450b8708854d6dd77e245705ec52b3c869dc1880ff4840cbe3fd6"
+    },
+    "app/content": {
+      "files": 7,
+      "sha256": "190d0a22962507805bcedd87f03535f57d047fb3e84a09d23cecea2d394bec9f"
+    },
+    "app/native": {
+      "files": 3,
+      "sha256": "e2b7cf6c2104daa4fada1949c3541b70e9202f58033a0b57d38a178bcc1dc769"
+    },
+    "tests": {
+      "files": 92,
+      "sha256": "9e48c88a8c2d6b4576c7ce4a15f9dcebeaf45c5cc1e3f7e6ef296a135de692d8"
+    }
+  },
+  "checks": [
+    {
+      "target": "tests/{web,server,content,native}/*.test.mjs",
+      "pass": 630,
+      "fail": 0,
+      "exit": 0,
+      "seconds": 135.73,
+      "concurrency": 2,
+      "binding": "before final saved-state guard and category fixture correction; final impacted category target rerun below",
+      "log": "logs/subdev-audit-full-node.log"
+    },
+    {
+      "target": "tests/web/managed-categories.test.mjs",
+      "pass": 13,
+      "fail": 0,
+      "exit": 0,
+      "seconds": 21.46,
+      "binding": "final source and actual saved fixture",
+      "log": "logs/subdev-web-saved-green.log"
+    },
+    {
+      "target": "tests/e2e/*.test.mjs",
+      "pass": 7,
+      "fail": 0,
+      "exit": 0,
+      "seconds": 7.95,
+      "log": "logs/subdev-audit-e2e-final.log"
+    },
+    {
+      "target": "check:content",
+      "posts": 3032,
+      "categories": 48,
+      "referencedAttachments": 7255,
+      "errors": 0,
+      "exit": 0,
+      "log": "logs/subdev-check-content-final.log"
+    },
+    {
+      "target": "check:native",
+      "pass": 2,
+      "exit": 0,
+      "log": "logs/subdev-check-native.log"
+    },
+    {
+      "target": "npm run build",
+      "exit": 0,
+      "seconds": 37.7,
+      "binding": "final source including saved-state correction",
+      "log": "logs/subdev-audit-build-complete.log"
+    }
+  ],
+  "ui": {
+    "viewport": [
+      1728,
+      848
+    ],
+    "after_viewport": [
+      1728,
+      848
+    ],
+    "identical": true,
+    "difference_bounds": null
+  },
+  "cssAssetsIdenticalToBaseline": true,
+  "remoteMutations": 0,
+  "limitations": [
+    "Real OAuth and remote writes not executed",
+    "Native app GUI not exercised",
+    "Chrome public screens only; management CRUD covered by JSDOM and HTTP",
+    "One fresh category read added after successful deletion",
+    "Existing user whitespace retained"
+  ]
+}

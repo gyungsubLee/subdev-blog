@@ -170,7 +170,17 @@ export default function ManagedCategories({ session, posts = [], onSaved }: {
         const fresh = restoreCategories(sourceKey).source ?? next.categories;
         if(fresh) {
           setSource(fresh);
-          setDraft(current => current ? {...current,revision:fresh.revision,contentCommit:fresh.contentCommit,syncVersion:fresh.syncVersion} : current);
+          setDraft(current => {
+            if (!current) return current;
+            const confirmed = detail.batch.items.some((item:{clientRequestId:string}) => item.clientRequestId === current.requestId);
+            return {
+              ...current,
+              ...(confirmed ? {categories:fresh.categories} : {}),
+              revision:fresh.revision,
+              contentCommit:fresh.contentCommit,
+              syncVersion:fresh.syncVersion,
+            };
+          });
         }
         const saved = JSON.parse(localStorage.getItem(draftKey) ?? "null");
         if (detail.batch.items.some((item:{clientRequestId:string}) => item.clientRequestId === saved?.requestId)) {
@@ -182,6 +192,10 @@ export default function ManagedCategories({ session, posts = [], onSaved }: {
         const saved = JSON.parse(localStorage.getItem(draftKey) ?? "null");
         if(detail.batch.items.some((item:{clientRequestId:string})=>item.clientRequestId===saved?.requestId))setPublication({...detail.result,background:true});
       } else if(detail.state === "failed") {
+        setPublication(current => {
+          if (!current || !detail.batch.items.some((item:{clientRequestId:string}) => item.clientRequestId === current.requestId)) return current;
+          return {...current,state:"failed"};
+        });
         setNeedsLogin(detail.error?.status === 401);
         setError(detail.error?.message ?? "분류를 저장하지 못했습니다. 편집 내용은 유지합니다.");
       }
@@ -234,13 +248,24 @@ export default function ManagedCategories({ session, posts = [], onSaved }: {
       const next = await sendApi<Publication>(
         "/api/content", input, session.csrfToken ?? "",
       );
-      if (!["published", "superseded", "unchanged"].includes(next.state)) {
+      if (!["saved", "published", "superseded", "unchanged"].includes(next.state)) {
         setError(next.error ?? "삭제 결과를 확인하지 못했습니다. 같은 삭제 요청을 다시 확인하십시오.");
         return false;
       }
+      // A deletion changes both the branch commit and the categories revision.
+      const fresh = await requestApi<CategorySource>("/api/content?kind=categories&refresh=1", {
+        signal: AbortSignal.timeout(30000),
+      });
+      categoryNodes(fresh.categories);
       if (mode === "delete") removePostDrafts(localStorage, next.deletedPostIds ?? []);
+      setSource(fresh);
+      try {
+        localStorage.setItem(sourceKey, JSON.stringify(fresh));
+      } catch {
+        // Keep the downloaded source usable when the cache cannot be written.
+      }
       setPublication(next);
-      setDraft({ ...nextDraft, requestId: input.requestId });
+      setDraft({ ...fresh, requestId: input.requestId });
       setHistory([]);
       localStorage.removeItem(requestKey);
       return true;
@@ -290,7 +315,7 @@ export default function ManagedCategories({ session, posts = [], onSaved }: {
         </div>
       ) : null}
       {publication ? <PublishStatus publication={publication} csrfToken={session.csrfToken ?? ""} onChange={setPublication} onRetry={() => retryContentSync(session)} /> : null}
-      {draft && !saving && (error || ["published", "superseded", "unchanged"].includes(publication?.state ?? "")) ? (
+      {draft && !saving && (error || ["failed", "published", "superseded", "unchanged"].includes(publication?.state ?? "")) ? (
         <Button className="outline-button" type="button" onClick={reopenSource}>최신 원본으로 다시 시작</Button>
       ) : null}
     </>

@@ -1,0 +1,403 @@
+Command: ['node', '--max-old-space-size=1536', '--test', '--test-concurrency=2', '--test-timeout=20000', 'tests/web/public-client-cache.test.mjs', 'tests/web/sync-recovery.test.mjs', 'tests/web/content-workspace.test.mjs', 'tests/web/app-flow.test.mjs', 'tests/web/managed-block-editor.test.mjs']
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ App loads summaries then the selected body and handles an invalid index (175.5ms)
+✔ App loads distinct canonical categories sharing a display name (31.511583ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ fresh index proof notifies the mounted post editor once without repeating its index request (305.692792ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ fresh index proof notifies the mounted categories editor once without repeating its index request (132.181542ms)
+✔ App refreshes the public index after post update and reads the saved body after closing (219.700042ms)
+✔ App refreshes the public index after post create and reads the saved body after closing (315.560709ms)
+✔ App refreshes the public index after post delete and reads the saved body after closing (65.958ms)
+✔ App refreshes public category names after saving canonical categories (125.39675ms)
+✔ category context menu opens a new writer with its canonical nested category selected (84.026667ms)
+✔ category context menu opens a new writer with its local nested category selected (83.619084ms)
+✔ new writing loads an authenticated base when the public index is unavailable (98.048375ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ content workspace is reachable only after authorization (71.264166ms)
+✔ workspace keeps public content separate from recovery drafts and filters local edits (20.191125ms)
+✔ workspace migrates legacy draft status labels and preserves malformed recovery bytes (18.105208ms)
+✔ confirmed newly published recovery resolves to one public row without removing its backup (6.320792ms)
+✔ a published draft keeps its canonical identity and recovery key after further edits (9.010458ms)
+✔ workspace does not recreate an absent public post from a clean published recovery (6.880708ms)
+✔ workspace does not recreate an absent public post from a clean published recovery (12.418917ms)
+✔ workspace does not recreate an absent public post from a clean canonical recovery (7.90275ms)
+✔ blocks initialized from Markdown without edits do not recreate an absent public post (5.266125ms)
+✔ undoing block-only edits back to the saved editor does not recreate an absent public post (6.075709ms)
+✔ Markdown-only recovery keeps legacy edits without copying a block baseline (5.607583ms)
+✔ Markdown-only recovery keeps marked block edits without copying a block baseline (5.929542ms)
+✔ Markdown-only recovery recognizes marked undo without copying a block baseline (5.1545ms)
+✔ a clean canonical recovery does not leave its legacy draft row behind (8.246042ms)
+✔ an absent public post keeps later unsaved recovery edits available for editing (6.726584ms)
+✔ an absent public post keeps its unpublished saved source available for editing (7.101625ms)
+✔ an absent public post keeps recovery changes to blocks (8.395792ms)
+✔ an absent public post keeps recovery changes to assets (4.987125ms)
+✔ workspace pages contain at most fifteen rows and filters restart from page one (88.285083ms)
+✔ category filters include descendants and preserve the empty state (35.439583ms)
+✔ workspace reuses category dialog and keeps category before search (39.501292ms)
+✔ unrecognized legacy categories agree with the unclassified count and filter (20.074ms)
+✔ category dialog stays open in StrictMode and Escape preserves the filter (21.39075ms)
+✔ double-click confirms the clicked category immediately while expanders stay open (36.735375ms)
+✔ post deletion waits for modal confirmation and removes canonical source plus recovery (22.3645ms)
+✔ failed deletion preserves content and retries identical request after reopening (29.929041ms)
+✔ local-only draft deletion clears stored draft without a canonical request (38.340375ms)
+✔ a newly published recovery deletes its canonical identity before the index catches up (16.951208ms)
+✔ delete confirmation closes and hides the row before the background response (16.20825ms)
+✔ background deletion failure restores the row and its recovery and announces the error (16.204292ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ approved editor keeps draft save local and renders the two-state writing controls (162.036ms)
+✔ category action precedes preview and shows the assigned name or empty label (109.616916ms)
+✔ new GitHub posts use the notebook editor and save one paired Markdown/block snapshot (109.152875ms)
+✔ a confirmed publication keeps attachment uploads available for the next edit (87.153584ms)
+✔ an attachment added during background publication survives the earlier snapshot confirmation (132.571625ms)
+✔ GitHub editor JSON restores toggle children and code settings without browser drafts (529.383541ms)
+✔ existing Markdown uses the approved block editor and title-only saves preserve its exact bytes (90.605375ms)
+✔ background failure replaces the matching editor publication status (39.387625ms)
+✔ background failure preserves a later editor publication (40.065208ms)
+✔ Markdown-only image width edits stay recoverable and undo returns to a clean workspace (184.54075ms)
+✔ malformed block recovery data stays intact and cannot silently become a new document (4.487375ms)
+✔ Markdown articles edit blocks directly and save a paired snapshot without a conversion prompt (77.265084ms)
+✔ image uploads preview locally while the saved block and Markdown use a stable relative path (409.959208ms)
+✔ source image previews resolve against the content commit without changing stored URLs (70.562333ms)
+✔ closing editor shortcuts never submits an enclosing save form (21.91625ms)
+✔ bare sibling image names resolve to the pinned source asset without rewriting the stored URL (66.533209ms)
+✔ simultaneous sibling uploads preserve every pending attachment (285.731125ms)
+✔ staggered sibling uploads preserve every pending attachment (174.878ms)
+✔ invalid GitHub editor JSON permits exact original exports and blocks all fallback saves (13.397083ms)
+✔ recovery import restores metadata and pending/source attachments into the fresh target identity (206.639958ms)
+✔ recovery import rejects unsafe attachment ../outside.png 5 (47.545208ms)
+✔ recovery import rejects unsafe attachment %2565ditor.json 5 (53.994667ms)
+✔ recovery import rejects unsafe attachment good.png 5 (43.89625ms)
+✔ recovery import rejects unsafe attachment good.png 6291456 (41.927ms)
+✔ Cmd/Ctrl+S saves recovery data and prevents browser Save Page without posting to GitHub (42.522875ms)
+✔ cached recovery opens without downloading a damaged remote editor or rewriting its backup (24.883ms)
+✔ tags, category cancellation and reader controls preserve local-only drafts (97.581083ms)
+✔ invalid imported tags preserve the current blocks and recovery bytes (62.196542ms)
+✔ a published local draft resumes with canonical identity and sends update (235.14375ms)
+✔ editor confirms a category double-click through the shared dialog without publishing (65.830958ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ a new page revalidates its stored index while painting cached content and keeping bodies lazy (74.750667ms)
+✔ a remounted public view renders stored data without waiting for or repeating the index download (6.470541ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ restart applies confirmed recovery data, and late older receipts cannot overwrite a newer baseline (22.2825ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ category receipt recovery preserves the confirmed category draft (34.195416ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ category receipt recovery preserves later category edits (35.627375ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ category receipt recovery preserves a newer category baseline (52.155375ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ a delayed peer failure cannot announce an archived failed batch as confirmed (23.459417ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ source confirmation preserves the public snapshot identity and overlays an older public index after restart (32.433291ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ background publication checks survive navigation and retire overlays only at the verified public commit (1554.911125ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ a fresh index retires a missed published overlay after an ancestry proof (32.980666ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ a fresh index keeps a saved overlay without a matching publication proof (36.054167ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ a source-only save clears inherited pending state when publication completes through a fresh index (38.565166ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ fresh index verification stops old work on logout (36.397417ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ fresh index verification stops old work on session replacement (27.094917ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ canceling one index reader does not cancel another reader of its shared publication request (33.569833ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ an old checker finishing its last read cannot replace the new session publication timer (3044.976292ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ fresh index publication checks preserve the sequential request limit for a backlog (52.794916ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ retained published receipts cannot replace a fresher public source baseline (24.265791ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ retained unchanged receipts cannot replace a fresher public source baseline (23.156791ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ an unchanged source awaiting publication survives recovery and retires at the verified public snapshot (1532.079834ms)
+ℹ tests 91
+ℹ suites 0
+ℹ pass 91
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 33589.680417
+
+Exit: 0
+Elapsed: 33.85s

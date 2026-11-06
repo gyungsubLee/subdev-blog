@@ -1,0 +1,45 @@
+Command: ['node', '--max-old-space-size=1536', '--test', '--test-timeout=15000', '--test-name-pattern=Markdown-only image width', 'tests/web/managed-block-editor.test.mjs']
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:40:17:
+      40 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:39:4:
+      39 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ Markdown-only image width edits stay recoverable and undo returns to a clean workspace (300.292583ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1882.41125
+
+✖ failing tests:
+
+test at tests/web/managed-block-editor.test.mjs:337:1
+✖ Markdown-only image width edits stay recoverable and undo returns to a clean workspace (300.292583ms)
+  AssertionError [ERR_ASSERTION]: an image width edit must remain reachable after remote deletion
+  
+  0 !== 1
+  
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:360:12
+      at async mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:135:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-block-editor.test.mjs:340:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual'
+  }
+
+Exit: 1
+Elapsed: 1.98s

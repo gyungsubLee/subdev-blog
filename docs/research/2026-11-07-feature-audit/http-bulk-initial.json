@@ -1,0 +1,18 @@
+[
+  {
+    "mode": "serial",
+    "operations": 3,
+    "requests": 3,
+    "sourceCommits": 3,
+    "elapsedMs": 1129.155791,
+    "apiLatencyMs": 350
+  },
+  {
+    "mode": "bulk",
+    "operations": 3,
+    "requests": 1,
+    "sourceCommits": 1,
+    "elapsedMs": 362.3039999999992,
+    "apiLatencyMs": 350
+  }
+]

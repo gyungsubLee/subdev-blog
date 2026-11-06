@@ -57,6 +57,7 @@ type SourceDraft = {
   publication?: Publication;
   syncVersion?: number;
   blocks?: EditorDocument["blocks"];
+  blocksChanged?: boolean;
   markdownHash?: string;
 };
 
@@ -140,7 +141,7 @@ function ManagedBlocks({
 }: {
   draft: SourceDraft;
   disabled: boolean;
-  onChange: (blocks: EditorDocument["blocks"], markdown: string) => void;
+  onChange: (blocks: EditorDocument["blocks"], markdown: string, blocksChanged: boolean) => void;
   onInitialize: (blocks: EditorDocument["blocks"]) => void;
   onError: () => void;
   onReady: (editor: NotebookEditor | null) => void;
@@ -148,6 +149,8 @@ function ManagedBlocks({
   resolveFileUrl: (url: string) => Promise<string>;
 }) {
   const ready = useRef(false);
+  const baseline = useRef<NotebookEditor["prosemirrorState"]["doc"] | null>(null);
+  const recoveredChanges = useRef(draft.blocksChanged ?? Boolean(draft.updatedAt && !draft.publication));
   const callbacks = useRef({ onChange, onInitialize, onError, onReady, upload, resolveFileUrl });
   callbacks.current = { onChange, onInitialize, onError, onReady, upload, resolveFileUrl };
   const editor = useCreateBlockNote({
@@ -165,15 +168,19 @@ function ManagedBlocks({
         if (blocks.length) editor.replaceBlocks(editor.document, blocks);
         // Preparing the block view must not rewrite the original Markdown.
         callbacks.current.onInitialize(storedBlocks(editor));
+        recoveredChanges.current = false;
       } catch {
         callbacks.current.onError();
         return;
       }
     }
+    // ProseMirror documents are immutable; retain the node reference without copying blocks.
+    baseline.current = editor.transact(transaction => transaction.doc);
     ready.current = true;
     callbacks.current.onReady(editor);
     return () => {
       ready.current = false;
+      baseline.current = null;
       callbacks.current.onReady(null);
     };
   }, [editor]);
@@ -186,6 +193,7 @@ function ManagedBlocks({
           callbacks.current.onChange(
             storedBlocks(editor),
             serializeEditorMarkdown(editor),
+            recoveredChanges.current || !editor.transact(transaction => baseline.current?.eq(transaction.doc)),
           );
         }
       }}
@@ -257,6 +265,7 @@ export default function ManagedPostEditor({
             typeof value.category !== "string" ||
             typeof value.requestId !== "string" ||
             !Array.isArray(value.assets) ||
+            (value.blocksChanged !== undefined && typeof value.blocksChanged !== "boolean") ||
             !original?.document?.metadata?.id ||
             typeof original.document.markdown !== "string" ||
             (isCanonical &&
@@ -673,6 +682,10 @@ export default function ManagedPostEditor({
         const saved = JSON.parse(localStorage.getItem(draftKey) ?? "null") as SourceDraft | null;
         if(detail.batch.items.some((item:{clientRequestId:string})=>item.clientRequestId===saved?.requestId))setPublication({...detail.result,background:true});
       } else if(detail.state==="failed") {
+        setPublication(current => {
+          if (!current || !detail.batch.items.some((item:{clientRequestId:string}) => item.clientRequestId === current.requestId)) return current;
+          return {...current,state:"failed"};
+        });
         setNeedsLogin(detail.error?.status===401);
         setError(detail.error?.message ?? "저장하지 못했습니다. 초안은 유지합니다.");
       }
@@ -722,7 +735,7 @@ export default function ManagedPostEditor({
   }
 
   async function upload(file: File) {
-    if (!draft || saving || accepted || draftError)
+    if (!draft || saving || (accepted && !publication?.background) || draftError)
       throw new Error("첨부를 저장할 수 없습니다.");
     const name = validateAttachmentName(file.name);
     const key = name.normalize("NFC").toLowerCase();
@@ -1170,10 +1183,10 @@ export default function ManagedPostEditor({
                     key={generation}
                     draft={draft}
                     disabled={busy || session.state !== "ready"}
-                    onChange={(blocks, markdown) =>
-                      change({ blocks, markdown })}
+                    onChange={(blocks, markdown, blocksChanged) =>
+                      change({ blocks, markdown, blocksChanged })}
                     onInitialize={(blocks) => {
-                      setDraft(current => current && !current.blocks ? { ...current, blocks } : current);
+                      setDraft(current => current && !current.blocks ? { ...current, blocks, blocksChanged: false } : current);
                     }}
                     onError={() => setDraftError("편집 원본을 읽지 못했습니다. Markdown과 원본 백업을 내보내십시오.")}
                     onReady={(editor) => {
@@ -1211,7 +1224,7 @@ export default function ManagedPostEditor({
               (draftError ||
                 (draft &&
                   (error ||
-                    ["published", "superseded", "unchanged"].includes(
+                    ["failed", "published", "superseded", "unchanged"].includes(
                       publication?.state ?? "",
                     )))) ? (
               <Button

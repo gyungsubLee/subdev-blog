@@ -1,0 +1,44 @@
+Command: node --test --test-timeout=25000 --test-name-pattern='a category confirmation received after navigation' tests/web/managed-categories.test.mjs
+Exit code: 1
+
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ a category confirmation received after navigation restores a clean canonical draft (5597.773292ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9344.6465
+
+✖ failing tests:
+
+test at tests/web/managed-categories.test.mjs:178:1
+✖ a category confirmation received after navigation restores a clean canonical draft (5597.773292ms)
+  AssertionError [ERR_ASSERTION]: a background confirmation must restore a clean category draft
+  
+  false !== true
+  
+      at file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:203:14
+      at async mount (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:79:5)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/managed-categories.test.mjs:179:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual'
+  }

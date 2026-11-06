@@ -1,0 +1,10 @@
+Command: node --test --test-timeout=25000 --test-name-pattern='a confirmed category save' tests/web/managed-categories.test.mjs
+Exit code: 1
+Duration: 8073.535209 ms
+Tests: 1, pass: 0, fail: 1
+
+AssertionError [ERR_ASSERTION]: the confirmed canonical source must clear the dirty state
+false !== true
+actual: false
+expected: true
+File: tests/web/managed-categories.test.mjs:136:12

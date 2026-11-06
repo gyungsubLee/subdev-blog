@@ -1,0 +1,57 @@
+Window: "Second Brain", App: Second Brain.
+0 standard window Second Brain, Secondary Actions: Raise
+	1 scroll area
+		2 HTML content Description: 콘텐츠 관리 — Second Brain, URL: 127.0.0.1:55173/#/content
+			3 link 본문으로 이동, Value: 127.0.0.1:55173/#main-content
+			4 container
+				5 link Second Brain 홈, Value: 127.0.0.1:55173/#/
+				6 container 주 메뉴
+					7 link 기록 관리, Value: 127.0.0.1:55173/#/records
+					8 link 콘텐츠 관리, Value: 127.0.0.1:55173/#/content
+					9 link 카테고리 관리, Value: 127.0.0.1:55173/#/categories
+				10 button 글 쓰기
+				11 button 로그아웃
+				12 pop up button 설정
+			13 container
+				14 heading 콘텐츠 관리, Value: 1
+					15 text 콘텐츠 관리
+				16 container 글 목록
+					17 tab group (selectable) 게시 상태
+						18 tab (selected) 전체 3032
+						19 tab (selectable) 초안 0
+						20 tab (selectable) 공개 3032
+					21 text 카테고리
+					22 pop up button 카테고리 필터
+					23 search text field (settable) 콘텐츠 검색, Value: 20261107-native-crud, Placeholder: 제목이나 본문으로 찾기
+						24 text (settable) 20261107-native-crud
+						25 button cancel
+					26 table
+						27 row (selectable) 제목
+상태
+분류
+수정일
+작업
+					28 text 조건에 맞는 글이 없습니다. 다른 검색어나 상태를 선택하세요.
+					29 container 콘텐츠 페이지
+						30 button (disabled) 이전 페이지
+						31 text 0개 · 1 / 1 페이지
+						32 button (disabled) 다음 페이지
+			33 container
+				34 link Second Brain., Value: 127.0.0.1:55173/#/
+				35 text 배운 것을 기록하고, 기록한 것을 연결합니다.
+				36 button 맨 위로 ↑
+	37 toolbar
+		38 button Description: 뒤로, Secondary Actions: Move next, Remove from toolbar
+		39 button (disabled) Description: 앞으로, Secondary Actions: Move previous, Move next, Remove from toolbar
+		40 button Description: 홈, Secondary Actions: Move previous, Move next, Remove from toolbar
+		41 button Description: 새로고침, Secondary Actions: Move previous, Remove from toolbar
+	42 text Second Brain
+	43 menu button Window sharing
+44 menu bar
+	45 Second Brain
+	46 파일
+	47 편집
+	48 보기
+	49 윈도우
+
+The focused UI element is 23 search text field (settable) 콘텐츠 검색, Value: 20261107-native-crud, Placeholder: 제목이나 본문으로 찾기

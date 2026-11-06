@@ -1,0 +1,261 @@
+Command: ['node', '--max-old-space-size=1536', '--test', '--test-timeout=10000', '--test-name-pattern=workspace does not recreate|blocks initialized|undoing block-only|a fresh index|source-only save clears|stops old work|canceling one index reader', 'tests/web/content-workspace.test.mjs', 'tests/web/sync-recovery.test.mjs']
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:37:17:
+      37 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:36:4:
+      36 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ workspace does not recreate an absent public post from a clean published recovery (48.252708ms)
+✖ workspace does not recreate an absent public post from a clean published recovery (7.987791ms)
+✔ workspace does not recreate an absent public post from a clean canonical recovery (5.998625ms)
+✖ blocks initialized from Markdown without edits do not recreate an absent public post (7.995416ms)
+✔ undoing block-only edits back to the saved editor does not recreate an absent public post (6.47975ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:37:17:
+      37 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:36:4:
+      36 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:37:17:
+      37 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:36:4:
+      36 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ a fresh index retires a missed published overlay after an ancestry proof (67.37675ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:37:17:
+      37 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:36:4:
+      36 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ a fresh index keeps a saved overlay without a matching publication proof (28.577834ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:37:17:
+      37 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:36:4:
+      36 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ a source-only save clears inherited pending state when publication completes through a fresh index (21.819542ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:37:17:
+      37 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:36:4:
+      36 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ fresh index verification stops old work on logout (42.962ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:37:17:
+      37 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:36:4:
+      36 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ fresh index verification stops old work on session replacement (31.144458ms)
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:37:17:
+      37 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:36:4:
+      36 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✖ canceling one index reader does not cancel another reader of its shared publication request (29.931958ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 3
+ℹ fail 8
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4663.58225
+
+✖ failing tests:
+
+test at tests/web/content-workspace.test.mjs:156:3
+✖ workspace does not recreate an absent public post from a clean published recovery (7.987791ms)
+  AssertionError [ERR_ASSERTION]: an old backup cannot create a public row
+  
+  1 !== 0
+  
+      at mounted.posts (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/content-workspace.test.mjs:164:14)
+      at mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/content-workspace.test.mjs:34:11)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/content-workspace.test.mjs:163:5)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual'
+  }
+
+test at tests/web/content-workspace.test.mjs:170:1
+✖ blocks initialized from Markdown without edits do not recreate an absent public post (7.995416ms)
+  AssertionError [ERR_ASSERTION]: initializing a block view is not an edit
+  
+  1 !== 0
+  
+      at mounted.posts (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/content-workspace.test.mjs:179:12)
+      at mounted (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/content-workspace.test.mjs:34:11)
+      at async TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/content-workspace.test.mjs:178:3)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual'
+  }
+
+test at tests/web/sync-recovery.test.mjs:264:39
+✖ a fresh index retires a missed published overlay after an ancestry proof (67.37675ms)
+  AssertionError [ERR_ASSERTION]: all callers share one completion event for open editors
+  + actual - expected
+  
+  + []
+  - [
+  -   'published'
+  - ]
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/sync-recovery.test.mjs:298:12)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'published' ],
+    operator: 'deepStrictEqual'
+  }
+
+test at tests/web/sync-recovery.test.mjs:264:39
+✖ a fresh index keeps a saved overlay without a matching publication proof (28.577834ms)
+  AssertionError [ERR_ASSERTION]: all callers share one completion event for open editors
+  + actual - expected
+  
+  + []
+  - [
+  -   'published'
+  - ]
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/sync-recovery.test.mjs:298:12)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'published' ],
+    operator: 'deepStrictEqual'
+  }
+
+test at tests/web/sync-recovery.test.mjs:306:1
+✖ a source-only save clears inherited pending state when publication completes through a fresh index (21.819542ms)
+  AssertionError [ERR_ASSERTION]: a completed public artifact is no longer awaiting publication
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/sync-recovery.test.mjs:323:12)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual'
+  }
+
+test at tests/web/sync-recovery.test.mjs:332:54
+✖ fresh index verification stops old work on logout (42.962ms)
+  AssertionError [ERR_ASSERTION]: the old session owns and cancels its network request
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/sync-recovery.test.mjs:358:12)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual'
+  }
+
+test at tests/web/sync-recovery.test.mjs:332:54
+✖ fresh index verification stops old work on session replacement (31.144458ms)
+  AssertionError [ERR_ASSERTION]: the old session owns and cancels its network request
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/sync-recovery.test.mjs:358:12)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual'
+  }
+
+test at tests/web/sync-recovery.test.mjs:371:1
+✖ canceling one index reader does not cancel another reader of its shared publication request (29.931958ms)
+  AssertionError [ERR_ASSERTION]: reader cancellation must not abort service-owned work
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///Users/igyeongseob/Develop/10_harness/subdev-blog/tests/web/sync-recovery.test.mjs:397:12)
+      at async Test.run (node:internal/test_runner/test:1069:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:752:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual'
+  }
+
+Exit: 1
+Elapsed: 4.92s

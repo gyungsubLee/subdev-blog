@@ -1,0 +1,49 @@
+Browser tab: 1490591926, Title: "콘텐츠 관리 — Second Brain", URL: "http://127.0.0.1:55173/#/content".
+1 AXWebArea 콘텐츠 관리 — Second Brain, URL: 127.0.0.1:55173/#/content
+	2 container root
+		46 text Atomic source save rejected
+		3 link Description: 본문으로 이동, Value: 127.0.0.1:55173/#main-content
+		4 container
+			5 link Description: Second Brain 홈, Value: 127.0.0.1:55173/#/
+			6 container 주 메뉴
+				7 link Description: 기록 관리, Value: 127.0.0.1:55173/#/records
+				8 link Description: 콘텐츠 관리, Value: 127.0.0.1:55173/#/content
+				9 link Description: 카테고리 관리, Value: 127.0.0.1:55173/#/categories
+			10 button 글 쓰기
+			11 button 로그아웃
+			12 pop up button (collapsed) Description: 설정, Secondary Actions: Expand
+		47 container main-content
+			48 heading 콘텐츠 관리, Value: 1
+				49 text 콘텐츠 관리
+			50 container 글 목록
+				51 tab group 게시 상태
+					52 tab (selected, settable, boolean) 전체 3032, Value: 1
+					53 tab (selectable, settable, boolean) 초안 0, Value: 0
+					54 tab (selectable, settable, boolean) 공개 3032, Value: 0
+				55 text 카테고리
+				56 pop up button (collapsed) Description: 카테고리 필터, Secondary Actions: Expand
+				57 search text field (settable) Description: 콘텐츠 검색, Value: 20261107-native-crud
+				58 table
+					59 row
+						60 cell
+							61 text 제목
+						62 cell
+							63 text 상태
+						64 cell
+							65 text 분류
+						66 cell
+							67 text 수정일
+						68 cell
+							69 text 작업
+				255 text 조건에 맞는 글이 없습니다. 다른 검색어나 상태를 선택하세요.
+				250 container 콘텐츠 페이지
+					251 button (disabled) 이전 페이지
+					252 container
+						253 text 0 개 ·  1  / 1  페이지
+					254 button (disabled) 다음 페이지
+		42 container
+			43 link Description: Second Brain., Value: 127.0.0.1:55173/#/
+			44 text 배운 것을 기록하고, 기록한 것을 연결합니다.
+			45 button 맨 위로 ↑
+
+The focused UI element is 57 search text field (settable) Description: 콘텐츠 검색, Value: 20261107-native-crud

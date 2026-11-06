@@ -1,0 +1,30 @@
+Command: node --test --test-timeout=120000 tests/web/managed-categories.test.mjs
+Exit code: 0
+
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+app/web/src/features/content-management/background-sync.mjs:36:17
+Existing duplicate; original key at line 35.
+
+✔ prior category tree UI renames canonical records and retries identical request after 401 (10345.847875ms)
+✔ a confirmed category save adopts canonical aliases and remains clean after reopening (5151.813958ms)
+✔ an older category confirmation preserves edits made while the save is pending (5325.409375ms)
+✔ canonical deletion confirms then saves the original immediately, preserving protected records (54.443958ms)
+✔ failed category deletion retains the row and retries the same request (64.470625ms)
+✔ saving another category after deletion uses the confirmed source revision without restoring the deleted row (5162.070459ms)
+✔ a failed category refresh preserves the exact completed deletion request for retry (30.349416ms)
+✔ signed out management renders nothing and never requests canonical content (1.207292ms)
+✔ existing keyboard tree movement serializes canonical parent and sibling order (5127.609292ms)
+✔ malformed saved canonical records keep their bytes and fall back to safe source nodes (15.813542ms)
+✔ canonical counts include stable category IDs and aliases once without changing sources (7.127833ms)
+✔ local drafts neither count nor block deletion of canonical categories (17.864459ms)
+✔ a rejected category deletion releases its request so a refreshed source can be retried (36.039208ms)
+✔ assigned category deletion selects move then requires a separate final confirmation (26.916084ms)
+✔ assigned category deletion selects delete then requires a separate final confirmation (28.863375ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 32727.595584

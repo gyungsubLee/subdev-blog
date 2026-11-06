@@ -4,6 +4,8 @@ import { once } from "node:events";
 import test, { after, beforeEach } from "node:test";
 import { JSDOM } from "jsdom";
 import { loadComponent } from "../support/load-component.mjs";
+import { syncStore } from "../support/memory-sync-store.mjs";
+import { payloadHash } from "../../app/web/src/features/content-management/sync-core.mjs";
 
 const dom = new JSDOM('<!doctype html><meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content"><div id="root"></div>', {
   url: "https://blog.example/#/",
@@ -195,6 +197,64 @@ async function waitFor(predicate, message) {
     await act(async () => new Promise((resolve) => setTimeout(resolve, 10)));
   }
 }
+
+for(const screen of ['post','categories'])test('fresh index proof notifies the mounted '+screen+' editor once without repeating its index request',{timeout:15000},async()=>{
+  const previous=globalThis.fetch;
+  const ui=await loadComponent('tests/support/publication-ui.mjs');
+  const scope=ui.syncScope(readySession);
+  const savedCommit='b'.repeat(40);const publicCommit='c'.repeat(40);
+  const source={document:{metadata:{id:managedId,title:managedPost.title,category_id:'notes',tags:[]},markdown:managedPost.markdown},revision:'d'.repeat(64),contentCommit:savedCommit,categories:canonicalCategories,assets:[]};
+  const draftKey=screen==='post'?'second-brain:canonical-draft:'+managedId:'second-brain:canonical-categories';
+  const operation=screen==='post'?{type:'post.update',id:managedId,changes:{title:managedPost.title},markdown:managedPost.markdown}:
+    {type:'categories.save',categories:canonicalCategories,baseRevision:'d'.repeat(64)};
+  const payload={requestId:'mounted-request',baseCommit:'a'.repeat(40),operations:[operation]};
+  const result={state:'saved',requestId:payload.requestId,contentCommit:savedCommit,sourceOnly:true,publicationPending:true};
+  const batch={state:'confirmed',applied:true,hash:await payloadHash(payload),payload,
+    items:[{version:1,target:screen==='post'?managedId:'categories',operation,draftKey,clientRequestId:'mounted-client'}],result};
+  await syncStore.update(scope,state=>{state.history=[batch];});
+  localStorage.setItem('second-brain:public:v1:/api/public?kind=index',JSON.stringify({posts:[managedPost],categories:managedCategories,contentCommit:'a'.repeat(40)}));
+  if(screen==='post')localStorage.setItem(draftKey,JSON.stringify({title:managedPost.title,markdown:managedPost.markdown,category:'notes',assets:[],revision:source.revision,sourceDocument:source,requestId:'mounted-client',publication:{...result,background:true}}));
+  else {
+    const categorySource={categories:canonicalCategories,revision:source.revision,contentCommit:savedCommit};
+    localStorage.setItem(ui.categorySourceKey(readySession),JSON.stringify(categorySource));
+    localStorage.setItem(draftKey,JSON.stringify({...categorySource,requestId:'mounted-client',publication:{...result,background:true}}));
+  }
+  let finishIndex;let indexCalls=0;let publicationCalls=0;let notifications=0;let content;
+  const index={posts:[],categories:managedCategories,contentCommit:publicCommit};
+  globalThis.fetch=async path=>{
+    if(path.startsWith('/api/public?kind=index')) {
+      indexCalls++;
+      if(indexCalls===1)return new Promise(resolve=>{finishIndex=()=>resolve(Response.json(index));});
+      return Response.json(index);
+    }
+    assert.ok(path.startsWith('/api/publish?'),'cached editor does not download another source');
+    publicationCalls++;
+    return Response.json({state:'published',sourceCommit:savedCommit,contentCommit:savedCommit,publicCommit});
+  };
+  const published=event=>{if(event.detail.state==='publication')notifications++;};
+  window.addEventListener(ui.SYNC_EVENT,published);
+  function Screen(){
+    content=ui.usePosts(undefined);
+    return React.createElement(screen==='post'?ui.ManagedPostEditor:ui.ManagedCategories,
+      screen==='post'?{post:managedPost,session:readySession,onClose(){}}:{session:readySession,categories:managedCategories,posts:[]});
+  }
+  const root=createRoot(document.getElementById('root'));
+  try {
+    ui.startContentSync(readySession);
+    await act(async()=>root.render(React.createElement(Screen)));
+    await waitFor(()=>finishIndex!==undefined&&document.querySelector('.publish-status [role="status"]')?.textContent==='원본 저장 완료','the pending editor and its first index request must mount');
+    await act(async()=>finishIndex());
+    await waitFor(()=>document.querySelector('.publish-status [role="status"]')?.textContent==='게시 완료'&&content.contentCommit===publicCommit,'the shared completion event must reach the mounted editor');
+    assert.equal(content.posts.length,0);
+    assert.equal(publicationCalls,1);
+    assert.equal(notifications,1,'the shared request emits one completion');
+    assert.equal(indexCalls,1,'a proof for the index already being applied must not download that index again');
+    assert.equal(JSON.parse(localStorage.getItem(draftKey)).publication.publicationPending,false);
+  } finally {
+    finishIndex?.();await act(async()=>root.unmount());ui.stopContentSync();
+    window.removeEventListener(ui.SYNC_EVENT,published);globalThis.fetch=previous;localStorage.clear();
+  }
+});
 
 for (const operation of ["update", "create", "delete"]) {
   test(`App refreshes the public index after post ${operation} and reads the saved body after closing`, { timeout: 15000 }, async () => {

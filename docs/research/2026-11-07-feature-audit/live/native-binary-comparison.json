@@ -1,0 +1,21 @@
+{
+  "binaries": [
+    {
+      "path": "dist/native/Second Brain.app/Contents/MacOS/SecondBrain",
+      "bytes": 240320,
+      "signatureOffset": 239568,
+      "signatureBytes": 752,
+      "prefixSha256": "fb85291f819e42a6c38710be2c89a7afde67ee5a00ce28c079a3ef8a4e67faef",
+      "rawSha256": "d438e1e819c019a3ce4a2110bfa72f667d159af6b83082c30dbe69101325eea4"
+    },
+    {
+      "path": ".tmp/live-feature-audit/Second Brain Audit.app/Contents/MacOS/SecondBrain",
+      "bytes": 240320,
+      "signatureOffset": 239568,
+      "signatureBytes": 752,
+      "prefixSha256": "fb85291f819e42a6c38710be2c89a7afde67ee5a00ce28c079a3ef8a4e67faef",
+      "rawSha256": "a831e25f4cc3b2f3832123eddaa7b33314e1ac3bf36208e0fe977c0a06c1b44f"
+    }
+  ],
+  "sameCodeAndLoadCommandsBeforeSignature": true
+}

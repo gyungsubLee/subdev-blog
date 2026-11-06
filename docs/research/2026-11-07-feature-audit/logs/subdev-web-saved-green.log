@@ -1,0 +1,33 @@
+▲ [WARNING] Duplicate key "updatedAt" in object literal [duplicate-object-key]
+
+    app/web/src/features/content-management/background-sync.mjs:36:17:
+      36 │     ...previous, updatedAt:new Date().toISOString(), id, title: ch...
+         ╵                  ~~~~~~~~~
+
+  The original key "updatedAt" is here:
+
+    app/web/src/features/content-management/background-sync.mjs:35:4:
+      35 │     updatedAt: new Date().toISOString(), path: '', url: '', excerp...
+         ╵     ~~~~~~~~~
+
+✔ prior category tree UI renames canonical records and retries identical request after 401 (10304.53675ms)
+✔ canonical deletion confirms then saves the original immediately, preserving protected records (28.739291ms)
+✔ failed category deletion retains the row and retries the same request (35.561792ms)
+✔ saving another category after deletion uses the confirmed source revision without restoring the deleted row (5139.225291ms)
+✔ a failed category refresh preserves the exact completed deletion request for retry (26.021375ms)
+✔ signed out management renders nothing and never requests canonical content (0.872375ms)
+✔ existing keyboard tree movement serializes canonical parent and sibling order (5128.661375ms)
+✔ malformed saved canonical records keep their bytes and fall back to safe source nodes (13.940792ms)
+✔ canonical counts include stable category IDs and aliases once without changing sources (7.89525ms)
+✔ local drafts neither count nor block deletion of canonical categories (17.478084ms)
+✔ a rejected category deletion releases its request so a refreshed source can be retried (23.137292ms)
+✔ assigned category deletion selects move then requires a separate final confirmation (24.709583ms)
+✔ assigned category deletion selects delete then requires a separate final confirmation (32.17925ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 21356.613

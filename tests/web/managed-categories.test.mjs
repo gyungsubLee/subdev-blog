@@ -41,17 +41,33 @@ async function mount(run,session=ready,posts=[],failureStatus=401) {
   const originalFetch=globalThis.fetch;
   const calls=[];
   let failure=true;
+  let currentSource=source;
   globalThis.fetch=async(url,options={})=>{
     calls.push({url,...options});
-    if(url.startsWith('/api/content?'))return reply(source);
+    if(url.startsWith('/api/content?'))return reply(currentSource);
     if(url==='/api/content') {
       if(failure) return reply({error:failureStatus===409?'Canonical branch changed':'로그인이 필요합니다.'},failureStatus);
       const input=JSON.parse(options.body);
-      if(input.operations)return reply(bulkResponse(input,{state:'unchanged',contentCommit:source.contentCommit},source));
+      if(input.operations) {
+        const operation=input.operations.find(operation=>operation.type==='categories.save');
+        const originals=new Map(currentSource.categories.map(category=>[category.id,category]));
+        const savedCategories=operation.categories.map(category=>({
+          ...(originals.get(category.id)??{id:category.id,sources:[category.id]}),
+          name:category.name,parent_id:category.parent_id,order:category.order,
+        }));
+        currentSource={categories:savedCategories,revision:'f'.repeat(64),contentCommit:'c'.repeat(40)};
+        return reply({...bulkResponse(input,{
+          state:'saved',candidateCommit:currentSource.contentCommit,contentCommit:currentSource.contentCommit,publicationPending:true,
+        },currentSource),categories:currentSource});
+      }
       const deletedPostIds=input.operation.mode==='delete'
         ? posts.filter(post=>(post.categoryId??post.category)===input.operation.id).map(post=>post.id)
         : [];
-      return reply({state:input.operation.type==='category.delete'?'published':'unchanged',requestId:input.requestId,contentCommit:source.contentCommit,deletedPostIds});
+      if(input.operation.type==='category.delete') currentSource={
+        categories:currentSource.categories.filter(category=>category.id!==input.operation.id),
+        revision:'d'.repeat(64),contentCommit:'c'.repeat(40),
+      };
+      return reply({state:input.operation.type==='category.delete'?'saved':'unchanged',requestId:input.requestId,candidateCommit:currentSource.contentCommit,contentCommit:currentSource.contentCommit,deletedPostIds});
     }
     throw Error('Unexpected '+url);
   };
@@ -77,6 +93,7 @@ test('prior category tree UI renames canonical records and retries identical req
     assert.ok(Boolean(row('수학 변경')));
     await click(document.querySelector('#save-all'));
     assert.ok(Boolean(document.querySelector('a[href="/api/auth/github"]')));
+    assert.equal(document.querySelector('.publish-status [role="status"]')?.textContent,'저장 실패','a rejected save must stop displaying validation');
     const first=calls.find(call=>call.url==='/api/content');
     const payload=JSON.parse(first.body);
     assert.equal(payload.baseCommit,source.contentCommit);
@@ -94,10 +111,142 @@ test('prior category tree UI renames canonical records and retries identical req
     assert.equal(persisted.contentCommit,payload.baseCommit);
     assert.equal(persisted.revision,payload.operations[0].baseRevision);
     assert.equal(localStorage.getItem('second-brain:categories:v2'),'personal-settings');
+    assert.equal(calls.filter(call=>call.url.startsWith('/api/content?')).length,1,'ordinary saves must reuse the loaded category source');
     succeed();
     await click(document.querySelector('#save-all'));
     assert.equal(calls.filter(call=>call.url==='/api/content')[1].body,first.body);
     assert.ok(Boolean(document.querySelector('.publish-status')));
+  });
+});
+
+test('a failed category save restores reset after reopening and preserves edits until confirmed', {timeout:20000}, async()=>{
+  await mount(async({calls,root})=>{
+    await rename('수학','Conflict draft');
+    await click(document.querySelector('#save-all'));
+    assert.equal(document.querySelector('.publish-status [role="status"]')?.textContent,'저장 실패');
+    assert.ok(row('Conflict draft') !== undefined,'a conflict must preserve the edited category');
+    assert.equal(document.querySelector('#save-all').disabled,false);
+    await act(async()=>root.render(React.createElement(ManagedCategories,{key:'failed-recovery',session:ready,categories:[]})));
+    assert.equal(document.querySelector('.publish-status [role="status"]')?.textContent,'저장 실패');
+    assert.ok(document.querySelector('[role="alert"]') === null,'reopening has no transient failure alert');
+    const reset=[...document.querySelectorAll('button')].find(button=>button.textContent==='최신 원본으로 다시 시작');
+    assert.ok(reset !== undefined,'a restored failed save must keep the existing reset action available');
+    const bytes=localStorage.getItem('second-brain:canonical-categories');
+    const previousConfirm=dom.window.confirm;
+    let confirmations=0;
+    try {
+      dom.window.confirm=()=>{confirmations++;return false;};
+      await click(reset);
+      assert.equal(confirmations,1);
+      assert.equal(localStorage.getItem('second-brain:canonical-categories'),bytes,'cancelling reset must preserve the exact category draft');
+      assert.ok(row('Conflict draft') !== undefined);
+      assert.equal(calls.filter(call=>call.url.includes('refresh=1')).length,0);
+      dom.window.confirm=()=>{confirmations++;return true;};
+      await click(reset);
+      assert.equal(confirmations,2);
+      assert.ok(row('수학') !== undefined,'confirming reset must restore the canonical category');
+      assert.equal(document.querySelector('#save-all').disabled,true);
+      assert.equal(calls.filter(call=>call.url==='/api/content?kind=categories&refresh=1').length,1);
+      assert.equal(calls.filter(call=>call.url==='/api/content').length,1,'reset cannot submit the rejected draft again');
+      assert.ok(JSON.parse(localStorage.getItem('test-sync:owner:content:main')).active === null,'reset must release the rejected category batch');
+    } finally {
+      dom.window.confirm=previousConfirm;
+    }
+  },ready,[],409);
+});
+
+test('a confirmed category save adopts canonical aliases and remains clean after reopening', {timeout:20000}, async()=>{
+  await mount(async({calls,succeed,root})=>{
+    await click(document.querySelector('#add-bottom'));
+    const field=document.querySelector('#inline-name');
+    await act(async()=>{
+      Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype,'value').set.call(field,'Added category');
+      field.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
+    });
+    await act(async()=>document.querySelector('#inline-form').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true})));
+    succeed();
+    await click(document.querySelector('#save-all'));
+    const payload=JSON.parse(calls.find(call=>call.url==='/api/content').body);
+    const added=payload.operations[0].categories.find(category=>category.name==='Added category');
+    assert.deepEqual(added.sources,[],'the server assigns a canonical alias to a new category');
+    assert.equal(document.querySelector('.publish-status [role="status"]')?.textContent,'원본 저장 완료');
+    assert.equal(document.querySelector('#save-all').disabled,true,'the confirmed canonical source must clear the dirty state');
+    assert.equal(row('Added category').querySelector('[data-action="delete"]').disabled,false);
+    const saved=JSON.parse(localStorage.getItem('second-brain:canonical-categories'));
+    assert.deepEqual(saved.categories.find(category=>category.id===added.id).sources,[added.id]);
+    await act(async()=>root.render(React.createElement(ManagedCategories,{key:'reopened',session:ready,categories:[]})));
+    assert.equal(document.querySelector('#save-all').disabled,true,'reopening must restore the normalized confirmed draft');
+    assert.equal(row('Added category').querySelector('[data-action="delete"]').disabled,false);
+    assert.equal(calls.filter(call=>call.url.startsWith('/api/content?')).length,1,'the save receipt must avoid another category fetch');
+  });
+});
+
+test('an older category confirmation preserves edits made while the save is pending', {timeout:20000}, async()=>{
+  await mount(async({succeed})=>{
+    succeed();
+    const previousFetch=globalThis.fetch;
+    let release;
+    globalThis.fetch=async(url,options)=>{
+      if(url==='/api/content') await new Promise(resolve=>{release=resolve;});
+      return previousFetch(url,options);
+    };
+    try {
+      await rename('수학','Saved name');
+      await click(document.querySelector('#save-all'));
+      assert.equal(typeof release,'function','the category write must be waiting for confirmation');
+      await rename('Saved name','Later name');
+      await act(async()=>{
+        release();
+        await new Promise(resolve=>setTimeout(resolve,100));
+      });
+      assert.ok(row('Later name') !== undefined,'a receipt for an older request cannot replace later category edits');
+      assert.equal(document.querySelector('#save-all').disabled,false);
+      const saved=JSON.parse(localStorage.getItem('second-brain:canonical-categories'));
+      assert.equal(saved.categories.find(category=>category.id==='leaf').name,'Later name');
+      assert.equal(saved.revision,'f'.repeat(64));
+      assert.equal(saved.contentCommit,'c'.repeat(40));
+    } finally {
+      release?.();
+      globalThis.fetch=previousFetch;
+    }
+  });
+});
+
+test('a category confirmation received after navigation restores a clean canonical draft', {timeout:20000}, async()=>{
+  await mount(async({calls,succeed,root})=>{
+    succeed();
+    const previousFetch=globalThis.fetch;
+    let release;
+    globalThis.fetch=async(url,options)=>{
+      if(url==='/api/content') await new Promise(resolve=>{release=resolve;});
+      return previousFetch(url,options);
+    };
+    try {
+      await click(document.querySelector('#add-bottom'));
+      const field=document.querySelector('#inline-name');
+      await act(async()=>{
+        Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype,'value').set.call(field,'Navigation category');
+        field.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
+      });
+      await act(async()=>document.querySelector('#inline-form').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true})));
+      await click(document.querySelector('#save-all'));
+      assert.equal(typeof release,'function','the category write must remain pending before navigation');
+      await act(async()=>root.render(React.createElement('main',null,'Other screen')));
+      await act(async()=>{
+        release();
+        await new Promise(resolve=>setTimeout(resolve,100));
+      });
+      await act(async()=>root.render(React.createElement(ManagedCategories,{key:'reopened-after-navigation',session:ready,categories:[]})));
+      assert.equal(document.querySelector('#save-all').disabled,true,'a background confirmation must restore a clean category draft');
+      assert.equal(row('Navigation category').querySelector('[data-action="delete"]').disabled,false);
+      const saved=JSON.parse(localStorage.getItem('second-brain:canonical-categories'));
+      const added=saved.categories.find(category=>category.name==='Navigation category');
+      assert.deepEqual(added.sources,[added.id]);
+      assert.equal(calls.filter(call=>call.url.startsWith('/api/content?')).length,1,'navigation must reuse the confirmed source without another fetch');
+    } finally {
+      release?.();
+      globalThis.fetch=previousFetch;
+    }
   });
 });
 
@@ -140,6 +289,58 @@ test('failed category deletion retains the row and retries the same request', {t
     await click(document.querySelector('#confirm-delete'));
     assert.equal(calls.filter(call=>call.url==='/api/content')[1].body,first);
     assert.ok(row('빈 분류') === undefined);
+  });
+});
+
+test('saving another category after deletion uses the confirmed source revision without restoring the deleted row', {timeout:20000}, async()=>{
+  await mount(async({calls,succeed})=>{
+    succeed();
+    await click(row('빈 분류').querySelector('[data-action="delete"]'));
+    await click(document.querySelector('#confirm-delete'));
+    assert.equal(document.querySelector('.publish-status [role="status"]')?.textContent,'원본 저장 완료','source acceptance must remain distinct from public publication');
+    await rename('수학','수학 변경');
+    await click(document.querySelector('#save-all'));
+    const payload=JSON.parse(calls.filter(call=>call.url==='/api/content')[1].body);
+    assert.equal(payload.baseCommit,'c'.repeat(40),'the next save must use the post-deletion commit');
+    assert.equal(payload.operations[0].baseRevision,'d'.repeat(64),'the next save must use the post-deletion categories revision');
+    assert.ok(!payload.operations[0].categories.some(category=>category.id==='free'),'the next save must keep the deleted category absent');
+    assert.deepEqual(calls.filter(call=>call.url.startsWith('/api/content?')).map(call=>call.url),[
+      '/api/content?kind=categories',
+      '/api/content?kind=categories&refresh=1',
+    ],'a confirmed deletion needs exactly one source refresh, and the next save needs none');
+  });
+});
+
+test('a failed category refresh preserves the exact completed deletion request for retry', {timeout:20000}, async()=>{
+  await mount(async({calls,succeed})=>{
+    succeed();
+    const previousFetch=globalThis.fetch;
+    let offline=true;
+    globalThis.fetch=async(url,options)=>{
+      if(url==='/api/content?kind=categories&refresh=1' && offline) throw new Error('refresh offline');
+      return previousFetch(url,options);
+    };
+    try {
+      await click(row('빈 분류').querySelector('[data-action="delete"]'));
+      await click(document.querySelector('#confirm-delete'));
+      assert.ok(row('빈 분류') !== undefined,'the unresolved source baseline must keep the row recoverable');
+      assert.match(document.querySelector('[role="alert"]').textContent,/refresh offline/);
+      const key='second-brain:category-deletion:free:move';
+      const first=localStorage.getItem(key);
+      assert.ok(typeof first === 'string','the completed remote write must retain its retry identity');
+      offline=false;
+      await click(document.querySelector('#confirm-delete'));
+      const writes=calls.filter(call=>call.url==='/api/content');
+      assert.equal(writes.length,2);
+      assert.equal(writes[1].body,first,'refresh failure must retry the same completed remote write');
+      assert.ok(row('빈 분류') === undefined);
+      assert.equal(localStorage.getItem(key),null);
+      const saved=JSON.parse(localStorage.getItem('second-brain:canonical-categories'));
+      assert.equal(saved.revision,'d'.repeat(64));
+      assert.equal(saved.contentCommit,'c'.repeat(40));
+    } finally {
+      globalThis.fetch=previousFetch;
+    }
   });
 });
 
