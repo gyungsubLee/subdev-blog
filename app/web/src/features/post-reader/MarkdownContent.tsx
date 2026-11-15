@@ -1,4 +1,5 @@
 import { COLORS_DEFAULT } from "@blocknote/core";
+import type { ComponentPropsWithoutRef } from "react";
 import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -28,6 +29,19 @@ const markdownSchema = {
   },
   protocols: { ...defaultSchema.protocols, src: ["http", "https", "data"] },
 };
+
+function IvoryNotebook({ children, ...props }: ComponentPropsWithoutRef<"section">) {
+  return (
+    <section {...props} className="ivory-notebook" data-ivory-notebook="true">
+      <span className="notebook-holes" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+      </span>
+      <div className="ivory-notebook-content">{children}</div>
+    </section>
+  );
+}
 
 export default function MarkdownContent({
   body,
@@ -61,14 +75,7 @@ export default function MarkdownContent({
       components={{
         section: ({ node, children }) =>
           node?.properties.dataIvoryNotebook === "true" ? (
-            <section className="ivory-notebook" data-ivory-notebook="true">
-              <span className="notebook-holes" aria-hidden="true">
-                <i />
-                <i />
-                <i />
-              </span>
-              <div className="ivory-notebook-content">{children}</div>
-            </section>
+            <IvoryNotebook>{children}</IvoryNotebook>
           ) : (
             <section>{children}</section>
           ),
@@ -83,6 +90,8 @@ export default function MarkdownContent({
           ): string {
             if (element.tagName === "blockquote" && element !== node)
               hasNestedQuote = true;
+            // An ordinary image is content, not the quote's icon marker.
+            if (element.tagName === "img") return "\uFFFC";
             const text = element.children
               .map((child) => {
                 if (child.type === "text") return child.value;
@@ -94,8 +103,8 @@ export default function MarkdownContent({
               })
               .join("");
 
-            if (element.tagName === "p" && !firstParagraph)
-              firstParagraph = text.trim();
+            if (node?.children.includes(element) && !firstParagraph)
+              firstParagraph = element.tagName === "p" ? text.trim() : "\uFFFC";
             if (
               inList &&
               element.tagName === "a" &&
@@ -106,6 +115,13 @@ export default function MarkdownContent({
           }
 
           if (node) readContent(node);
+          // ponytail: recognize the existing emoji and Notion icon export markers without rewriting posts.
+          const hasIcon =
+            /^(?:\p{Extended_Pictographic}|\p{Regional_Indicator}{2}|[\d#*]\uFE0F?\u20E3|\/icons\/[\w-]+\.svg(?:\s|$))/u.test(
+              firstParagraph,
+            );
+          if (hasIcon)
+            return <IvoryNotebook {...props}>{children}</IvoryNotebook>;
           // ponytail: match the existing export format; other TOC formats need explicit metadata.
           const isToc =
             firstParagraph === "목차" &&

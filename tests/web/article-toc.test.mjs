@@ -109,5 +109,6 @@ test("the actual statistics TOC preserves every original fragment target", async
       "The original TOC target must remain: " + fragment,
     );
   }
-  assert.equal(document.querySelectorAll("blockquote:not(.article-toc)").length, 7);
+  assert.equal(document.querySelectorAll("blockquote:not(.article-toc)").length, 0);
+  assert.equal(document.querySelectorAll(".ivory-notebook").length, 7);
 });
