@@ -2,6 +2,9 @@
 
 [운영 블로그 열기](https://subdev-blog-cms-gyungsublee.vercel.app/#/records)
 
+`main`에 푸시하면 같은 커밋을 검사·빌드하고 운영 블로그에 자동 배포합니다.
+오래된 실행은 운영 주소를 변경하지 않습니다. [배포 절차](docs/guides/DEPLOYMENT.md)를 따릅니다.
+
 GitHub의 Markdown 원본을 조회하고, 본인 인증 후 글과 카테고리를 관리하는 블로그다.
 웹 앱과 API는 Vercel에 배포한다. GitHub Pages는 사용하지 않는다.
 

@@ -196,10 +196,7 @@ jobs:
           assert.equal(article.revision, first.revision, 'Preview post revision mismatch');
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `Preview: ${url}\n\nApp: ${info.commit}\n\nContent: ${info.contentCommit}\n`);
           NODE
-          if [ -n "$CMS_PREVIEW_ALIAS" ]; then
-            node scripts/vercel-preview.mjs alias
-            printf 'CMS preview: https://%s\n' "$CMS_PREVIEW_ALIAS" >> "$GITHUB_STEP_SUMMARY"
-          fi
+          # Operational promotion belongs exclusively to deploy-main.yml after the gitlink push.
       - name: Write publication summary
         if: always()
         env:

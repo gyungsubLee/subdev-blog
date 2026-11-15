@@ -2,7 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-async function requestVercel({ token, orgId, projectId, fetcher = globalThis.fetch }, pathname, { method = 'GET', body } = {}) {
+export async function requestVercel({ token, orgId, projectId, fetcher = globalThis.fetch }, pathname, { method = 'GET', body } = {}) {
   if (!token || !/^team_[a-zA-Z0-9]+$/.test(orgId) || !/^prj_[a-zA-Z0-9]+$/.test(projectId)) {
     throw new Error('Invalid Vercel configuration');
   }
@@ -58,27 +58,8 @@ export async function preparePreview(options) {
   }, null, 2) + '\n', { mode: 0o600 });
 }
 
-export async function assignPreviewAlias(options) {
-  const { deploymentUrl, alias } = options;
-  if (!/^subdev-blog-cms-[a-z0-9-]+\.vercel\.app$/.test(alias)) {
-    throw new Error('Invalid CMS preview alias');
-  }
-  let deployment;
-  try {
-    deployment = new URL(deploymentUrl);
-  } catch {
-    throw new Error('Invalid preview deployment URL');
-  }
-  if (deployment.protocol !== 'https:' || !deployment.hostname.endsWith('.vercel.app') ||
-      deployment.username || deployment.password || deployment.port || deployment.pathname !== '/' ||
-      deployment.search || deployment.hash) {
-    throw new Error('Invalid preview deployment URL');
-  }
-  const result = await requestVercel(options, `/v2/deployments/${encodeURIComponent(deployment.hostname)}/aliases`, {
-    method: 'POST',
-    body: { alias },
-  });
-  if (result?.alias !== alias) throw new Error('Vercel alias response mismatch');
+export async function assignPreviewAlias() {
+  throw new Error('Operational aliases are managed only by .github/workflows/deploy-main.yml');
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {

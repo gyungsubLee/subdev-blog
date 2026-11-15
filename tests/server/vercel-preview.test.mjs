@@ -47,24 +47,13 @@ test('prepare refuses another project or owner before writing settings', async t
   await assert.rejects(readFile(path.join(root, '.vercel', 'project.json')), { code: 'ENOENT' });
 });
 
-test('alias uses the deployment-scoped REST endpoint and refuses unsafe targets before HTTP', async () => {
-  const calls = [];
-  const fetcher = async (address, options) => {
-    calls.push({ address: String(address), method: options.method, body: JSON.parse(options.body) });
-    return Response.json({ alias: 'subdev-blog-cms-owner.vercel.app' });
-  };
-  await assignPreviewAlias({ ...credentials, deploymentUrl: 'https://blog-immutable.vercel.app', alias: 'subdev-blog-cms-owner.vercel.app', fetcher });
-  assert.deepEqual(calls, [{ address: 'https://api.vercel.com/v2/deployments/blog-immutable.vercel.app/aliases?teamId=team_test', method: 'POST', body: { alias: 'subdev-blog-cms-owner.vercel.app' } }]);
-  for (const change of [
-    { deploymentUrl: 'http://blog.vercel.app' },
-    { deploymentUrl: 'https://blog.vercel.app.evil.test' },
-    { deploymentUrl: 'https://user:password@blog.vercel.app' },
-    { deploymentUrl: 'https://blog.vercel.app/path' },
-    { alias: 'blog.vercel.app' },
-  ]) {
-    await assert.rejects(assignPreviewAlias({ ...credentials, deploymentUrl: 'https://blog-immutable.vercel.app', alias: 'subdev-blog-cms-owner.vercel.app', ...change, fetcher }), /invalid/i);
-  }
-  assert.equal(calls.length, 1, 'Unsafe targets must not reach the API');
+test('legacy alias entrypoint cannot change operating addresses, including from manual scripts', async () => {
+  let calls = 0;
+  await assert.rejects(assignPreviewAlias({
+    ...credentials, deploymentUrl: 'https://blog-immutable.vercel.app', alias: 'subdev-blog-cms-owner.vercel.app',
+    fetcher: async () => { calls++; return Response.json({ alias: 'subdev-blog-cms-owner.vercel.app' }); },
+  }), /only.*deploy-main/);
+  assert.equal(calls, 0);
 });
 
 test('Vercel API failures expose bounded status and code without response secrets', async t => {

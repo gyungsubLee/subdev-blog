@@ -428,7 +428,7 @@ test('native network diagnostics expose only bounded error codes and HTTP status
   assert.deepEqual(entries[2], { event: 'undici:request:headers', status: 403 });
 });
 
-test('preview alias moves only after all deployed bytes pass verification', { timeout: 20_000 }, async t => {
+test('content previews verify all deployed bytes without changing the operational alias', { timeout: 20_000 }, async t => {
   const source = await readFile(new URL('../../.github/workflows/publish-content.yml', import.meta.url), 'utf8');
   const step = YAML.parse(source).jobs.publish.steps.find(step => step.name === 'Deploy preview');
   const root = await mkdtemp(path.join(os.tmpdir(), 'preview-alias-'));
@@ -499,13 +499,13 @@ globalThis.fetch = async (address, options) => {
   );
   const alias = 'subdev-blog-cms-gyungsublee.vercel.app';
   for (const scenario of [
-    { alias, mode: '503', success: true, aliasCalls: 1, attempts: 2, waits: [1000] },
+    { alias, mode: '503', success: true, aliasCalls: 0, attempts: 2, waits: [1000] },
     { alias, mode: '404', success: false, aliasCalls: 0, attempts: 3, waits: [1000, 2000], error: 'Preview request failed (status 404): /assets/asset.bin' },
     { alias, mode: '403', success: false, aliasCalls: 0, attempts: 1, waits: [], error: 'Preview request failed (status 403): /assets/asset.bin' },
     { alias, mode: 'mismatch', success: false, aliasCalls: 0, attempts: 1, waits: [], error: 'Preview content mismatch: /assets/asset.bin' },
     { alias, mode: 'network', success: false, aliasCalls: 0, attempts: 3, waits: [1000, 2000], error: 'Preview request failed (status network): /assets/asset.bin' },
-    { alias, mode: '429', success: true, aliasCalls: 1, attempts: 2, waits: [30000] },
-    { alias, mode: 'identity-body', success: true, aliasCalls: 1, attempts: 1, identityAttempts: 2, waits: [1000] },
+    { alias, mode: '429', success: true, aliasCalls: 0, attempts: 2, waits: [30000] },
+    { alias, mode: 'identity-body', success: true, aliasCalls: 0, attempts: 1, identityAttempts: 2, waits: [1000] },
     { alias, mode: 'api-commit', success: false, aliasCalls: 0, attempts: 1, waits: [], error: 'Preview content commit mismatch' },
     { alias, mode: 'api-post', success: false, aliasCalls: 0, attempts: 1, waits: [], error: 'Preview post revision mismatch' },
     { alias: '', mode: '', success: true, aliasCalls: 0, attempts: 1, waits: [] },
@@ -555,7 +555,7 @@ globalThis.fetch = async (address, options) => {
     assert.ok(deployment?.includes('--archive=tgz'), 'Large content trees require an archive upload');
     assert.equal(calls.filter(args => args.includes('alias')).length, 0, 'Alias assignment must avoid CLI owner lookup');
     const aliases = (await readFile(aliasRequests, 'utf8')).trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
-    assert.equal(aliases.length, scenario.aliasCalls, 'Alias must follow successful byte verification');
+    assert.equal(aliases.length, scenario.aliasCalls, 'Content publication must never move the operational alias');
     if (aliases.length) {
       assert.deepEqual(aliases[0], {
         pathname: '/v2/deployments/subdev-blog-cms-test-deployment.vercel.app/aliases',
