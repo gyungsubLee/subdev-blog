@@ -4,6 +4,27 @@
 Git 태그, 소스 커밋, 빌드 실행과 내려받는 파일을 아래 기록으로 연결한다.
 시각은 모두 한국 표준시(KST, UTC+09:00)다.
 
+## 운영 재배포와 콘텐츠 정리 — 2026-11-15
+
+운영 고정 주소는 [Second Brain](https://subdev-blog-cms-gyungsublee.vercel.app/#/records)이다.
+GitHub Pages 게시가 아니라 Vercel의 기존 고정 별칭을 사용한다.
+
+- 앱: `codex/block-editor-storage`, `dbeef2520d49099fa5e2e0b8187fe0a6adce4c69`.
+- 콘텐츠: `main`, `4f7b16770b71b89b987dd96e8b92cb97cf1c1201`.
+- 삭제: 빈 본문 1,047개, 본문 50자 이하 글 11개, 글 폴더의 첨부 5개.
+- 남은 글: 1,974개. 삭제 원본 백업과 본문을 담은 임시 파일도 제거했다.
+- [콘텐츠 공개 작업](https://github.com/gyungsubLee/subdev-blog-content/actions/runs/43675464534)은 성공했다.
+- 새 배포: `dpl_AwEejchrkvbhbSJAypGLbXgGXH62`, Vercel `Ready`.
+- 기존 고정 별칭을 새 배포에 연결하고 브라우저에서 기록 1,974개를 확인했다.
+- 10월 23일 배포와 이전 배포 15개를 합쳐 레거시 배포 총 16개를 제거했다.
+- Vercel 목록에서 현재 운영 배포 1개만 남은 것을 확인했다.
+- `notion2md-blog.vercel.app`는 `404 DEPLOYMENT_NOT_FOUND`를 반환한다.
+
+콘텐츠 검사 오류는 0개였고 웹 배포 빌드는 성공했다. 남은 원본 파일의 Git blob SHA가 삭제 전과 같았다.
+새 배포의 실제 로그인·저장과 성능 비교는 실행하지 않았다.
+`v0.2.1` 태그와 첨부 파일은 변경하지 않았다. 아래 과거 빌드 기록의 소스와 현재 운영 소스는 구분한다.
+[상세 기록](docs/reports/2026-11-15-blog-publication.json)에 커밋과 검증 범위를 보관한다.
+
 ## v0.2.1 — 2026-11-05
 
 [v0.2.1](https://github.com/gyungsubLee/subdev-blog/releases/tag/v0.2.1)을 2026-11-05 14:29:28 KST에 공개했다.

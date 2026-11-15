@@ -6,7 +6,13 @@
 글과 카테고리 조회는 공개한다. 원본 생성·수정·삭제는 본인 GitHub 인증과 저장소 연결 확인 뒤 허용한다.
 배포 대상은 Vercel이다. 사용자 승인에 따라 프로젝트의 현재·향후 모든 배포에서 인증 보호를 해제했다.
 
-[배포한 블로그](https://notion2md-blog-ehkytcr6k-gyungsublees-projects.vercel.app)는 로그인 없이 공개하도록 설정했다.
+[배포한 블로그](https://subdev-blog-cms-gyungsublee.vercel.app)는 로그인 없이 공개하도록 설정했다.
+2026-11-15에 최신 앱 코드와 남은 글 1,974개를 이 주소에 반영했다.
+빈 글 1,047개와 본문 50자 이하 글 11개를 삭제하고 원본 백업도 제거했다.
+이전 레거시 배포 16개를 제거하고 현재 운영 배포 1개만 유지한다.
+구주소 `notion2md-blog.vercel.app`는 더 이상 사용하지 않는다.
+소스 커밋·배포 ID·실행한 검사는 [운영 배포 기록](docs/reports/2026-11-15-blog-publication.json)에 있다.
+
 수집 결과와 검증 범위는 [수집·배포 기록](docs/guides/MIGRATION.md)에 있다.
 기존 글의 서식 수정과 실행한 검사는 [Markdown 표시 수정 기록](docs/research/markdown-rendering-repair.md)에 있다.
 

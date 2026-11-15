@@ -1,5 +1,9 @@
 # 콘텐츠 이전과 검증 기록
 
+현재 운영 주소는 [Second Brain](https://subdev-blog-cms-gyungsublee.vercel.app/#/records)이다.
+2026-11-15에 레거시 배포 16개를 제거하고 글 1,974개를 포함한 최신 운영 배포만 유지했다.
+아래 날짜별 배포 URL과 검사 결과는 과거 기록이다. 현재 소스와 검증 범위는 [빌드 이력](../../BUILD_HISTORY.md)에 있다.
+
 > 이 문서의 과거 경로는 당시 기록이다. 현재 경로는 [폴더 구조 기준](../architecture/project-structure.md)을 따른다.
 
 ## 2026-10-23 작업 범위
