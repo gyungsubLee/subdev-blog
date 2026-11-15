@@ -67,7 +67,7 @@ test("records filters and visible count survive article and home roundtrips", { 
       posts, onWrite() {}, onEdit() {},
     })));
     assert.ok(document.querySelector(".records-page"));
-    assert.equal(document.title, "기록 — Second Brain");
+    assert.equal(document.title, "기록 — subdev");
     assert.equal(searchShortcut(), false);
     assert.ok(
       document.activeElement === document.querySelector('input[type="search"]'),
@@ -101,7 +101,7 @@ test("records filters and visible count survive article and home roundtrips", { 
 
     await navigate(document.querySelector('.header-navigation a[href="#/categories"]'));
     assert.ok(document.querySelector(".categories-page"));
-    assert.equal(document.title, "카테고리 관리 — Second Brain");
+    assert.equal(document.title, "카테고리 관리 — subdev");
     assert.equal(searchShortcut(), true, "category manager has no list search shortcut");
     await navigate(document.querySelector(".wordmark"));
     assert.ok(document.querySelector(".blog-intro"));

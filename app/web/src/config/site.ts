@@ -1,7 +1,7 @@
 export const site = {
-  name: "Second Brain",
+  name: "subdev",
   author: "경섭의 기록",
-  homeTitle: "Second Brain — 경섭의 기록",
+  homeTitle: "subdev",
   introTitleStart: "배우고, 만들고,",
   introTitleEnd: "기록합니다.",
   introDescriptionStart: "개발하며 만난 질문과 배운 것을 씁니다.",
