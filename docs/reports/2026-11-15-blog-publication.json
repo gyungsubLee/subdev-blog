@@ -62,5 +62,10 @@
   "legacyDeploymentsRemovedTotal": 16,
   "remainingDeployments": 1,
   "legacyRemovalAuthorization": "사용자 명시 승인: 이전 배포 15개 모두 삭제 승인",
-  "releaseUpdate": "https://github.com/gyungsubLee/subdev-blog/releases/tag/v0.2.1"
+  "releaseUpdate": "https://github.com/gyungsubLee/subdev-blog/releases/tag/v0.2.1",
+  "appDefaultBranch": "main",
+  "synchronizedAppCommit": "4bfcb3ba2b4ccb2e82fed23ceab440315642155c",
+  "contentDocumentationCommit": "69b9c095e7b76a68e3177128eeda7d94d71c1f68",
+  "contentDocumentationPublicationRun": "https://github.com/gyungsubLee/subdev-blog-content/actions/runs/43681908577",
+  "releaseDescription": "현재 운영 요약으로 전체 교체. 과거 빌드·실측은 v0.2.1 태그의 원문 링크로 보존."
 }
