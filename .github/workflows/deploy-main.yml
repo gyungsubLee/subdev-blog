@@ -42,12 +42,15 @@ jobs:
       - name: Prepare project and build exact commit
         if: steps.source.outputs.current == 'true'
         env:
+          # The Node function builder runs npm install after the pinned npm ci.
+          npm_config_save: 'false'
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           node scripts/vercel-preview.mjs prepare
           npx --yes vercel@58.1.0 build --token="$VERCEL_TOKEN"
+          git diff --exit-code -- package-lock.json
       - name: Check application and content
         if: steps.source.outputs.current == 'true'
         run: |
