@@ -16,6 +16,37 @@ function fixture() {
 }
 const input=name=>({baseCommit:base,operation:{type:'post.update',id:'p',baseRevision:'original',changes:{title:name}},draftKey:'draft',clientRequestId:name});
 
+test('category-only saves preserve an already queued body, editor and title', { timeout: 3000 }, async () => {
+ const f=fixture(),engine=createSyncEngine(f.options);
+ try {
+  await engine.stage('scope', {...input('Saved title'), operation: {
+   ...input('Saved title').operation, markdown:'Saved body', editor:{blocks:[]}, assets:[{name:'kept.png'}],
+  }});
+  await engine.stage('scope', {...input('category'), categoryOnly:true,
+   operation:{type:'post.update',id:'p',baseRevision:'original',changes:{category_id:'notes'}},
+  });
+  await engine.flush('scope');
+  assert.equal(f.sent.length,1);
+  const operation=f.sent[0].operations[0];
+  assert.equal(operation.changes.title,'Saved title');
+  assert.equal(operation.changes.category_id,'notes');
+  assert.equal(operation.markdown,'Saved body');
+  assert.equal(operation.assets[0].name,'kept.png');
+  assert.equal(operation.editor.blocks.length,0);
+ } finally {engine.stop();}
+});
+
+test('category-only saves cannot replace a conflicting queued revision', { timeout: 3000 }, async () => {
+ const f=fixture(),engine=createSyncEngine(f.options);
+ try {
+  await engine.stage('scope',input('keep'));
+  await assert.rejects(engine.stage('scope', {...input('category'), categoryOnly:true,
+   baseCommit:next, operation:{type:'post.update',id:'p',baseRevision:'different',changes:{category_id:'notes'}},
+  }));
+  assert.equal((await f.store.read('scope')).pending[0].operation.changes.title,'keep');
+ } finally {engine.stop();}
+});
+
 test('durable saves schedule immediate dispatch and coalesce only before transmission', {timeout:3000}, async()=>{
  const f=fixture(),engine=createSyncEngine(f.options);
  try {

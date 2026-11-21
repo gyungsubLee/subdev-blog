@@ -1,5 +1,5 @@
 import Button from "../../components/button/Button";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Post, PublicCategory } from "../../shared/post";
 import { PostStatus, POST_STATUS_LABELS } from "../../shared/post-status";
 import {
@@ -8,6 +8,9 @@ import {
 } from "../post-category/hierarchy";
 import CategorySelectionDialog from "../post-category/CategorySelectionDialog";
 import PostDeleteDialog from "./PostDeleteDialog";
+import PostTitleDialog from "./PostTitleDialog";
+import { changePostCategory } from "./post-category";
+import { SYNC_EVENT, syncScope } from "./background-sync.mjs";
 import type { ManagementSession } from "./types";
 import { isSourcePending } from "./sync-core.mjs";
 import "./workspace.css";
@@ -17,6 +20,7 @@ const PAGE_SIZE = 15;
 type WorkspaceRow = {
   post: Post;
   title: string;
+  originalTitle: string;
   markdown: string;
   categoryId: string;
   updatedAt: string;
@@ -31,6 +35,7 @@ function workspaceRows(posts: Post[]): { rows: WorkspaceRow[]; error: string } {
     rows.set(post.id, {
       post,
       title: post.title,
+      originalTitle: post.title,
       markdown: post.markdown,
       categoryId: post.categoryId ?? post.category,
       updatedAt: post.updatedAt,
@@ -124,6 +129,7 @@ function workspaceRows(posts: Post[]): { rows: WorkspaceRow[]; error: string } {
         rows.set(rowId, {
           post,
           title: value.title,
+          originalTitle: typeof metadata.title === "string" ? metadata.title : post.title,
           markdown: value.markdown,
           categoryId: value.category,
           updatedAt:
@@ -166,6 +172,13 @@ export default function ContentWorkspace({
   onDeletePost?: (post: Post) => void;
 }) {
   const [deleting, setDeleting] = useState<Post | null>(null);
+  const [inspecting, setInspecting] = useState<WorkspaceRow | null>(null);
+  const [categorizing, setCategorizing] = useState<WorkspaceRow | null>(null);
+  const [categoryError, setCategoryError] = useState("");
+  const [categorySaving, setCategorySaving] = useState(false);
+  const [categoryVersion, setCategoryVersion] = useState(0);
+  const [categoryChanges, setCategoryChanges] = useState(new Map<string, string>());
+  const changingCategory = useRef(false);
   const [status, setStatus] = useState<"all" | PostStatus>("all");
   const [query, setQuery] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -174,11 +187,44 @@ export default function ContentWorkspace({
   const { rows, error } = useMemo(
     () => {
       const result = workspaceRows(posts);
-      if (deletedIds.size === 0) return result;
-      return { ...result, rows: result.rows.filter((row) => !deletedIds.has(row.post.id)) };
+      return { ...result, rows: result.rows
+        .filter((row) => !deletedIds.has(row.post.id))
+        .map(row => categoryChanges.has(row.post.id)
+          ? { ...row, categoryId: categoryChanges.get(row.post.id)! } : row) };
     },
-    [posts, draftVersion, deletedIds],
+    [posts, draftVersion, deletedIds, categoryVersion, categoryChanges],
   );
+  useEffect(() => {
+    function changed(event: Event) {
+      const detail = (event as CustomEvent).detail;
+      if (!session || detail?.scope !== syncScope(session)) return;
+      if (!detail.batch?.items.some((item: { categoryOnly?: boolean }) => item.categoryOnly)) return;
+      if (!["confirmed", "failed", "publication"].includes(detail.state)) return;
+      setCategoryVersion(version => version + 1);
+      if (detail.error) setCategoryError(detail.error.message);
+    }
+    window.addEventListener(SYNC_EVENT, changed);
+    return () => window.removeEventListener(SYNC_EVENT, changed);
+  }, [session]);
+
+  async function saveCategory(row: WorkspaceRow, id: string) {
+    if (!session || changingCategory.current) return;
+    setCategorizing(null);
+    if (id === row.categoryId) return;
+    changingCategory.current = true;
+    setCategorySaving(true);
+    setCategoryError("");
+    try {
+      await changePostCategory(row.post, id, session);
+      if (row.post.draft) setCategoryChanges(previous => new Map(previous).set(row.post.id, id));
+    } catch (reason) {
+      setCategoryError(reason instanceof Error ? reason.message : "분류를 저장하지 못했습니다.");
+    } finally {
+      changingCategory.current = false;
+      setCategorySaving(false);
+      setCategoryVersion(version => version + 1);
+    }
+  }
   const statusCounts = useMemo(() => {
     let drafts = 0;
     for (const row of rows) {
@@ -276,6 +322,7 @@ export default function ContentWorkspace({
           {error}
         </p>
       ) : null}
+      {categoryError ? <p role="alert" className="workspace-description">{categoryError}</p> : null}
       <div className="workspace-layout">
         <section className="work-list" aria-label="글 목록">
           <div className="status-tabs" role="tablist" aria-label="게시 상태">
@@ -350,7 +397,8 @@ export default function ContentWorkspace({
                       <Button
                         type="button"
                         className="row-title"
-                        onClick={() => onEdit(row.post)}
+                        aria-haspopup="dialog"
+                        onClick={() => setInspecting(row)}
                       >
                         {row.title || "제목 없음"}
                       </Button>
@@ -364,8 +412,13 @@ export default function ContentWorkspace({
                       </span>
                     </td>
                     <td>
-                      {categoryNames.get(row.categoryId) ??
-                        (row.categoryId || "미분류")}
+                      <Button type="button" className="row-category"
+                        disabled={categorySaving}
+                        aria-label={`${row.title || "제목 없음"} 분류 수정`}
+                        aria-haspopup="dialog"
+                        onClick={() => setCategorizing(row)}>
+                        {categoryNames.get(row.categoryId) ?? (row.categoryId || "미분류")}
+                      </Button>
                     </td>
                     <td>{row.updatedAt.slice(0, 10)}</td>
                     <td>
@@ -433,6 +486,15 @@ export default function ContentWorkspace({
           }}
         />
       ) : null}
+      {inspecting ? <PostTitleDialog title={inspecting.originalTitle}
+        onClose={() => setInspecting(null)} /> : null}
+      {categorizing ? <CategorySelectionDialog
+        id="workspace-post-category-selection" categories={pickerCategories}
+        value={categoryIdsBySource.get(categorizing.categoryId) ?? UNCLASSIFIED_CATEGORY_ID}
+        allowEmpty={false}
+        onConfirm={id => { void saveCategory(categorizing, id); }}
+        onClose={() => setCategorizing(null)}
+      /> : null}
       {categoryOpen ? (
         <CategorySelectionDialog
           id="workspace-category-selection"

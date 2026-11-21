@@ -40,7 +40,7 @@ function postFromOperation(operation, previous, categories, posts) {
     ...previous, updatedAt:new Date().toISOString(), id, title: changes.title ?? metadata.title ?? previous?.title ?? '',
     markdown: operation.markdown ?? document?.markdown ?? previous?.markdown ?? '',
     categoryId, category:compatible,
-    bodyLoaded: true,
+    bodyLoaded: operation.markdown !== undefined || document ? true : previous?.bodyLoaded ?? Boolean(previous),
   };
 }
 function applyOperations(index, operations) {

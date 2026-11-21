@@ -6,6 +6,11 @@ const categoryCaches = new WeakMap();
 const MAX_ENTRIES = 32;
 const MAX_BYTES = 8 * 1024 * 1024;
 
+function isImmutableRead(path) {
+  return /\/git\/(?:commits|trees|blobs)\/[a-f0-9]{40}(?:\?recursive=1)?$/.test(path) ||
+    /\/contents\/(?:content|\.gitmodules|categories\.json|posts|CONTENT_SCHEMA\.md)\?ref=[a-f0-9]{40}$/.test(path);
+}
+
 function configurationKey(token, config) {
   return createHash('sha256').update(JSON.stringify([
     token, config.origin, config.adminUserId, config.appId, config.installationId,
@@ -31,9 +36,7 @@ export function createManagementGitHubClient(token, config, fetcher = globalThis
   }
 
   const retain = (path, value) => {
-    const immutable = /\/git\/(?:commits|trees|blobs)\/[a-f0-9]{40}(?:\?recursive=1)?$/.test(path) ||
-      /\/contents\/(?:content|\.gitmodules|categories\.json|posts|CONTENT_SCHEMA\.md)\?ref=[a-f0-9]{40}$/.test(path);
-    if (!immutable) return;
+    if (!isImmutableRead(path)) return;
     const bytes = JSON.stringify(value).length * 2;
     if (bytes > MAX_BYTES) return;
     if (cache.entries.has(path)) cache.bytes -= cache.entries.get(path).bytes;
@@ -49,9 +52,7 @@ export function createManagementGitHubClient(token, config, fetcher = globalThis
   const client = async (path, options = {}) => {
     // Never retain identity, installation grants, repository permissions or heads.
     // Only commit-addressed files and immutable Git objects may outlive a request.
-    const immutable = /\/git\/(?:commits|trees|blobs)\/[a-f0-9]{40}(?:\?recursive=1)?$/.test(path) ||
-      /\/contents\/(?:content|\.gitmodules|categories\.json|posts|CONTENT_SCHEMA\.md)\?ref=[a-f0-9]{40}$/.test(path);
-    if (!immutable || (options.method ?? 'GET') !== 'GET' || Object.keys(options).length > 0) {
+    if (!isImmutableRead(path) || (options.method ?? 'GET') !== 'GET' || Object.keys(options).length > 0) {
       return github(path, options);
     }
     if (cache.entries.has(path)) return cache.entries.get(path).value;

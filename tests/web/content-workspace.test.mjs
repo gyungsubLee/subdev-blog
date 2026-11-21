@@ -47,6 +47,36 @@ async function chooseCategory(id, label) {
 }
 after(() => dom.window.close());
 
+test('title inspection shows the original title without opening the editor or reading the server', { timeout: 5000 }, async () => {
+  let edits = 0;
+  await mounted({ state: 'ready' }, async () => {
+    await act(async () => document.querySelector('.row-title').click());
+    const dialog = document.querySelector('dialog[aria-labelledby="post-title-heading"]');
+    assert.ok(dialog !== null, 'the title opens a read-only dialog');
+    assert.ok(dialog.textContent.includes(base.title));
+    assert.equal(edits, 0);
+    await act(async () => [...dialog.querySelectorAll('button')].find(button => button.textContent === '닫기').click());
+    await act(async () => document.querySelector('.row-action').click());
+    assert.equal(edits, 1, 'the explicit edit action still opens the editor');
+  }, { onEdit() { edits++; } });
+});
+
+test('workspace changes a local draft category without publishing or losing its text', { timeout: 5000 }, async () => {
+  const draft = { ...base, id: 'draft-category', draft: true, blocks: [] };
+  localStorage.setItem('second-brain:drafts:v1', JSON.stringify([draft]));
+  await mounted({ state: 'ready' }, async () => {
+    const trigger = document.querySelector('[aria-label="공개 제목 분류 수정"]');
+    assert.ok(trigger !== null, 'each row exposes category editing');
+    await act(async () => trigger.click());
+    await act(async () => document.querySelector('[data-id="other"] .row-name').click());
+    await act(async () => document.querySelector('dialog button[type="submit"]').click());
+    const stored = JSON.parse(localStorage.getItem('second-brain:drafts:v1'))[0];
+    assert.equal(stored.categoryId, 'other');
+    assert.equal(stored.markdown, base.markdown);
+    assert.equal(document.querySelector('[aria-label="공개 제목 분류 수정"]').textContent, '다른 분류');
+  }, { posts: [draft], categories: [...categories, { id: 'other', name: '다른 분류', parentId: null, order: 1, sources: [] }] });
+});
+
 test("content workspace is reachable only after authorization", { timeout: 5000 }, async () => {
   await mounted({ state: "ready" }, async () => {
     assert.ok(document.querySelector('.header-navigation a[href="#/content"]') !== null);
@@ -83,6 +113,11 @@ test("workspace keeps public content separate from recovery drafts and filters l
     assert.match(document.querySelector('tbody').textContent, /공개됨/);
     assert.match(document.querySelector('tbody').textContent, /공개되지 않은 수정 사항/);
     await act(async () => document.querySelector('.row-title').click());
+    const titleDialog = document.querySelector('dialog[aria-labelledby="post-title-heading"]');
+    assert.ok(titleDialog.textContent.includes('공개 제목'));
+    assert.ok(!titleDialog.textContent.includes('비공개 수정'));
+    await act(async () => titleDialog.querySelector('button').click());
+    await act(async () => document.querySelector('.row-action').click());
     assert.equal(edited[0].id, 'public');
     assert.equal(edited[0].draft, undefined);
     assert.equal(base.title, '공개 제목');
@@ -141,7 +176,7 @@ test("a published draft keeps its canonical identity and recovery key after furt
     assert.match(document.querySelector('tbody').textContent, /게시 뒤 수정한 제목/);
     assert.match(document.querySelector('tbody').textContent, /공개됨/);
     assert.match(document.querySelector('tbody').textContent, /공개되지 않은 수정 사항/);
-    await act(async () => document.querySelector('.row-title').click());
+    await act(async () => document.querySelector('.row-action').click());
     assert.equal(edited[0].id, base.id);
     assert.equal(edited[0].draft, undefined);
     assert.equal(edited[0].recoveryKey, 'draft-local');
@@ -239,7 +274,7 @@ for (const pending of [false,true]) {
     const edited=[];
     await mounted({state:'ready'},async()=>{
       assert.equal(document.querySelectorAll('tbody tr').length,1,'recoverable edits must remain reachable');
-      await act(async()=>document.querySelector('.row-title').click());
+      await act(async()=>document.querySelector('.row-action').click());
       assert.equal(edited[0].id,base.id);
       assert.equal(edited[0].draft,false,'the existing canonical editor contract stays intact');
       assert.equal(edited[0].recoveryKey,'draft-recoverable');

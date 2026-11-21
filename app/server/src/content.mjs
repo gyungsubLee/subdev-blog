@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { posix } from 'node:path';
 import { httpError } from './github.mjs';
 import { createManagementGitHubClient, readCachedCategories, invalidateCategoryCache } from './management-read-cache.mjs';
+import { readManagementSource } from './management-source.mjs';
 import { readReadyPublicSource } from './public-publication.mjs';
 import { parseMarkdownDocument, serializeMarkdownDocument, mergeDocumentPatch, canonicalFilename } from '../../shared/document.mjs';
 import { EDITOR_FILENAME, isEditorFilename, validateEditorDocument } from '../../shared/editor-document.mjs';
@@ -550,55 +551,22 @@ export async function handleContentRequest(request, { token, config, fetcher, ca
         if (url.pathname === '/api/content' && request.method === 'GET') {
             const kind = url.searchParams.get('kind');
             if (categoryRead) {
-                const data = await readCachedCategories(token, config, fetcher, async () => {
-                    const result = await github('/graphql', {
-                        method: 'POST',
-                        readOnly: true,
-                        body: {
-                            query: `query ReadCategories($owner: String!, $repo: String!, $branch: String!) {
-                                repository(owner: $owner, name: $repo) {
-                                    object(expression: $branch) {
-                                        ... on Commit {
-                                            oid
-                                            file(path: "categories.json") {
-                                                mode type
-                                                object { ... on Blob { text byteSize isBinary } }
-                                            }
-                                        }
-                                    }
-                                }
-                            }`,
-                            variables: {
-                                owner: config.content.owner,
-                                repo: config.content.repo,
-                                branch: `refs/heads/${config.content.branch}`,
-                            },
-                        },
-                    });
-                    if (result.errors?.length) {
-                        const types = result.errors.map(error => error.type);
-                        const status = types.includes('UNAUTHORIZED') ? 401
-                            : types.includes('FORBIDDEN') ? 403 : types.includes('NOT_FOUND') ? 404 : 502;
-                        throw httpError(status, 'GitHub category query failed');
-                    }
-                    const record = result.data?.repository?.object;
-                    const entry = record?.file;
-                    requireValue(entry?.type === 'blob' && entry.mode === 0o100644, 'Canonical categories missing', 409);
-                    const file = entry.object;
-                    requireValue(file?.isBinary === false && typeof file.text === 'string', 'Invalid category file', 502);
-                    const bytes = Buffer.from(file.text);
-                    requireValue(bytes.length <= MAX_DOCUMENT, 'Category document exceeds 2 MiB', 413);
-                    requireValue(bytes.length === file.byteSize, 'Incomplete category file', 502);
-                    // The file and save base come from the same response; no separate HEAD read.
-                    return { categories: JSON.parse(file.text), revision: digest(bytes), contentCommit: commitSha(record.oid) };
-                }, url.searchParams.get('refresh') === '1');
+                const data = await readCachedCategories(token, config, fetcher,
+                    () => readManagementSource(github, config.content), url.searchParams.get('refresh') === '1');
                 return json(data);
             }
+            requireValue(kind === 'post' || kind === 'new', 'Invalid content kind');
+            const id = kind === 'post' ? uuid(url.searchParams.get('id')) : undefined;
+            if (id && url.searchParams.get('scope') === 'single') {
+                const source = await readManagementSource(github, config.content, id);
+                const { path, ...post } = await readPost({ entries: source.entries }, id, {recoverEditor:true});
+                return json({...post, contentCommit: source.contentCommit, categories: source.categories});
+            }
+            // Editor reads also prepare immutable inventory for the single-mutation save.
+            // Metadata actions opt into the scoped read instead of paying that preparation cost.
             const contentCommit = await head();
-            const tree = await snapshot(contentCommit, !categoryRead);
+            const tree = await snapshot(contentCommit);
             const categories = await readCategories(tree);
-            if (kind === 'categories')
-                return json({ ...categories, contentCommit });
             if (kind === 'new') {
                 const date = new Date().toISOString();
                 const document = { metadata: {
@@ -609,7 +577,7 @@ export async function handleContentRequest(request, { token, config, fetcher, ca
                 });
             }
             requireValue(kind === 'post', 'Invalid content kind');
-            const post = await readPost(tree, url.searchParams.get('id'), {recoverEditor:true});
+            const post = await readPost(tree, id, {recoverEditor:true});
             const { path, ...result } = post;
             return json({
                 ...result, contentCommit, categories: categories.categories

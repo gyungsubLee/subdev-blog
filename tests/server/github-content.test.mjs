@@ -16,6 +16,20 @@ const document = { metadata: {
         schema_version: 1, id, title: 'Old', parent_id: null, created: '2026-01-01', updated: '2026-01-01', opaque: { value: 7 }
     }, markdown: '\r\n# Untouched\r\n![image](image.png)\r\n' };
 const raw = serializeMarkdownDocument(document);
+
+test('post reads scope the inventory to one post without downloading repository trees or HEAD', { timeout: 5000 }, async () => {
+    const f = setup();
+    const first = await f.call('content?kind=post&scope=single&id=' + id);
+    assert.equal(first.status, 200);
+    assert.equal(first.document.markdown, document.markdown);
+    assert.equal(f.calls.filter(call => call.path === '/graphql').length, 1);
+    assert.equal(f.calls.some(call => call.path.startsWith('/git/ref/') || call.path.startsWith('/git/trees/')), false);
+    assert.equal(f.calls.length, 2, 'one scoped query and one document blob');
+    f.calls.length = 0;
+    assert.equal((await f.call('content?kind=post&scope=single&id=' + id)).revision, first.revision);
+    assert.equal(f.calls.length, 1, 'only the fresh scoped lookup remains; immutable document bytes are reused');
+});
+
 function setup(options = {}) {
     const blobs = new Map();
     const put = value => {
@@ -66,7 +80,7 @@ function setup(options = {}) {
         }
         let result;
         if (path === '/graphql') {
-            assert.ok(body.query.startsWith('query ReadCategories('));
+            assert.ok(/^query Read(?:Categories|Post)\(/.test(body.query));
             assert.equal(body.variables.branch, 'refs/heads/main');
             const current = refs.get('heads/main');
             const entry = trees.get(commits.get(current).tree.sha).find(entry => entry.path === 'categories.json');
@@ -76,6 +90,16 @@ function setup(options = {}) {
                     text: bytes.toString(), byteSize: bytes.length, isBinary: false,
                 },
             } : null } } } };
+            if (body.query.startsWith('query ReadPost(')) {
+                const prefix = body.variables.path + '/';
+                result.data.repository.object.post = { type: 'tree', mode: 0o040000, object: {
+                    entries: trees.get(commits.get(current).tree.sha)
+                        .filter(item => item.path.startsWith(prefix))
+                        .map(item => ({ name: item.path.slice(prefix.length), type: item.type,
+                            mode: parseInt(item.mode, 8), oid: item.sha,
+                            object: { byteSize: blobs.get(item.sha)?.length ?? item.size } })),
+                } };
+            }
         }
         else if (path === '') result = {private:false,full_name:'gyungsubLee/subdev-blog-content'};
         else if (path.startsWith('/git/ref/')) {

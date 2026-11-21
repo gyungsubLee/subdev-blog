@@ -55,6 +55,18 @@ export function createSyncEngine({store, send, prepare = async payload => payloa
     if (!target || !['categories.save','post.create','post.update'].includes(item.operation.type)) throw new Error('지원하지 않는 동기화 요청입니다.');
     if(storageBytes({requestId:crypto.randomUUID(),baseCommit:item.baseCommit,operations:[item.operation]})>MAX_BATCH_BYTES)throw new Error('저장 요청이4MiB를 넘습니다. 편집 내용을 나누거나 백업을 내보내십시오.');
     const staged = await store.update(scope, state => {
+      if (item.categoryOnly) {
+        const previous = state.pending.find(previous => previous.target === target);
+        if (previous) {
+          if (previous.blocked || previous.baseCommit !== item.baseCommit ||
+              previous.operation.type !== 'post.update' ||
+              previous.operation.baseRevision !== item.operation.baseRevision) {
+            throw new Error('분류를 바꾸기 전에 대기 중인 글 저장을 확인하십시오.');
+          }
+          item.operation = { ...previous.operation,
+            changes: { ...previous.operation.changes, ...item.operation.changes } };
+        }
+      }
       const active = state.active?.items.find(previous => previous.target===target && previous.clientRequestId===item.clientRequestId &&
         previous.baseCommit===item.baseCommit && JSON.stringify(previous.operation)===JSON.stringify(item.operation));
       if(active) {
